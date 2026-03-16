@@ -378,15 +378,42 @@
         opacity: 0;
       }
     }
+
+    /* Standardized Return Button */
+    .return-button {
+      position: fixed;
+      top: 20px;
+      right: 20px;
+      z-index: 10002;
+      background: rgba(0, 240, 255, 0.1);
+      border: 1px solid var(--accent-cyan);
+      color: var(--accent-cyan);
+      padding: 10px 20px;
+      font-family: var(--font-header);
+      cursor: pointer;
+      -webkit-backdrop-filter: blur(10px);
+      backdrop-filter: blur(10px);
+      transition: all 0.3s ease;
+      display: flex;
+      align-items: center;
+      letter-spacing: 2px;
+      pointer-events: auto;
+      text-decoration: none;
+    }
+
+    .return-button:hover {
+      background: rgba(0, 240, 255, 0.2);
+    }
+
+    .return-button span {
+      margin-right: 8px;
+    }
   </style>
 </head>
 
 <body style="cursor: default">
-  <button onclick="parent.postMessage('HUB_RETURN_INITIATED', '*')" 
-    style="position: fixed; top: 20px; right: 20px; z-index: 10002; background: rgba(0, 240, 255, 0.1); border: 1px solid var(--accent-cyan); color: var(--accent-cyan); padding: 10px 20px; font-family: var(--font-header); cursor: pointer; backdrop-filter: blur(10px); transition: all 0.3s ease; display: flex; align-items: center; letter-spacing: 2px;" 
-    onmouseover="this.style.background='rgba(0, 240, 255, 0.2)'" 
-    onmouseout="this.style.background='rgba(0, 240, 255, 0.1)'">
-    <span style="margin-right: 8px">←</span> RETURN TO HUB
+  <button onclick="parent.postMessage('HUB_RETURN_INITIATED', '*')" class="return-button">
+    <span>←</span> RETURN TO HUB
   </button>
 
   <!-- SVG Filters -->

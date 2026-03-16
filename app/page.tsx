@@ -29,6 +29,15 @@ const hubs = [
     color: "from-cyan-600 to-blue-700",
     border: "hover:border-cyan-500/50",
     shadow: "hover:shadow-[0_0_40px_-10px_rgba(6,182,212,0.2)]"
+  },
+  {
+    title: "Executive Intelligence & Strategy",
+    description: "C-Suite analysis of systemic risks, high-level countermeasures, and strategic alignment.",
+    href: "/executive-brief",
+    icon: "📋",
+    color: "from-red-600 to-rose-700",
+    border: "hover:border-red-500/50",
+    shadow: "hover:shadow-[0_0_40px_-10px_rgba(239,68,68,0.2)]"
   }
 ];
 
@@ -54,7 +63,7 @@ export default function Portal() {
           </p>
         </header>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 max-w-7xl mx-auto">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-5xl mx-auto">
           {hubs.map((hub, idx) => (
             <a
               key={idx}

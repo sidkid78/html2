@@ -328,10 +328,43 @@
     .svg-filters {
       display: none;
     }
+
+    /* Standardized Return Button */
+    .return-button {
+      position: fixed;
+      top: 20px;
+      right: 20px;
+      z-index: 10002;
+      background: rgba(255, 42, 0, 0.1);
+      border: 1px solid var(--accent);
+      color: var(--accent);
+      padding: 10px 20px;
+      font-family: var(--ui-font);
+      cursor: pointer;
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
+      transition: all 0.3s ease;
+      display: flex;
+      align-items: center;
+      letter-spacing: 2px;
+      pointer-events: auto;
+      text-decoration: none;
+    }
+
+    .return-button:hover {
+      background: rgba(255, 42, 0, 0.2);
+    }
+
+    .return-button span {
+      margin-right: 8px;
+    }
   </style>
 </head>
 
-<body>
+<body style="cursor: default">
+  <button onclick="parent.postMessage('HUB_RETURN_INITIATED', '*')" class="return-button">
+    <span>←</span> RETURN TO HUB
+  </button>
 
   <svg class="svg-filters">
     <filter id="sat-feed">
