@@ -1,0 +1,596 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Strategic Recommendations</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600&family=Share+Tech+Mono&display=swap');
+
+        :root {
+            --bg: #020617;
+            --surface: #0f172a;
+            --surface-hover: #1e293b;
+            --accent: #22d3ee;
+            --accent-dim: rgba(34, 211, 238, 0.15);
+            --text-main: #f8fafc;
+            --text-muted: #94a3b8;
+            --font-mono: 'Share Tech Mono', monospace;
+            --font-sans: 'Inter', sans-serif;
+            --ease: cubic-bezier(0.16, 1, 0.3, 1)
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            cursor: none
+        }
+
+        body {
+            background-color: var(--bg);
+            color: var(--text-main);
+            font-family: var(--font-sans);
+            overflow: hidden;
+            line-height: 1.6
+        }
+
+        ::-webkit-scrollbar {
+            display: none
+        }
+
+        #cursor {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 24px;
+            height: 24px;
+            border: 1px solid var(--accent);
+            border-radius: 50%;
+            transform: translate(-50%, -50%);
+            pointer-events: none;
+            z-index: 9999;
+            transition: width 0.2s, height 0.2s;
+            display: flex;
+            align-items: center;
+            justify-content: center
+        }
+
+        #cursor::after {
+            content: '';
+            width: 4px;
+            height: 4px;
+            background: var(--accent);
+            border-radius: 50%
+        }
+
+        #cursor.hover {
+            width: 40px;
+            height: 40px;
+            background: var(--accent-dim)
+        }
+
+        .carousel {
+            display: flex;
+            width: 100vw;
+            height: 100vh;
+            overflow-x: scroll;
+            overflow-y: hidden;
+            scroll-snap-type: x mandatory;
+            scroll-behavior: smooth
+        }
+
+        .panel {
+            flex: 0 0 100vw;
+            width: 100vw;
+            height: 100vh;
+            scroll-snap-align: start;
+            padding: 4vw;
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            overflow-y: auto
+        }
+
+        .panel::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(0, 0, 0, 0.1) 2px, rgba(0, 0, 0, 0.1) 4px);
+            pointer-events: none;
+            z-index: 10
+        }
+
+        .hud-layer {
+            position: absolute;
+            top: 2vw;
+            left: 2vw;
+            right: 2vw;
+            bottom: 2vw;
+            border: 1px solid rgba(34, 211, 238, 0.2);
+            pointer-events: none;
+            z-index: 5
+        }
+
+        .hud-corner {
+            position: absolute;
+            width: 20px;
+            height: 20px;
+            border-color: var(--accent);
+            border-style: solid
+        }
+
+        .hud-tl {
+            top: -1px;
+            left: -1px;
+            border-width: 2px 0 0 2px
+        }
+
+        .hud-tr {
+            top: -1px;
+            right: -1px;
+            border-width: 2px 2px 0 0
+        }
+
+        .hud-bl {
+            bottom: -1px;
+            left: -1px;
+            border-width: 0 0 2px 2px
+        }
+
+        .hud-br {
+            bottom: -1px;
+            right: -1px;
+            border-width: 0 2px 2px 0
+        }
+
+        .hud-text {
+            position: absolute;
+            font-family: var(--font-mono);
+            font-size: 0.7rem;
+            color: var(--accent);
+            text-transform: uppercase;
+            letter-spacing: 0.1em
+        }
+
+        .hud-t-top {
+            top: -1.5rem;
+            left: 0
+        }
+
+        .hud-t-bot {
+            bottom: -1.5rem;
+            right: 0
+        }
+
+        .chapter-num {
+            position: absolute;
+            top: -5vh;
+            right: -2vw;
+            font-family: var(--font-mono);
+            font-size: 40vw;
+            line-height: 1;
+            color: rgba(255, 255, 255, 0.02);
+            font-weight: bold;
+            z-index: 0;
+            pointer-events: none
+        }
+
+        .content-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 4vw;
+            height: 100%;
+            position: relative;
+            z-index: 20;
+            align-items: center
+        }
+
+        .content-full {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            height: 100%;
+            position: relative;
+            z-index: 20;
+            max-width: 1200px;
+            margin: 0 auto
+        }
+
+        h1 {
+            font-family: var(--font-mono);
+            font-size: clamp(2.5rem, 5vw, 5rem);
+            text-transform: uppercase;
+            line-height: 1.1;
+            margin-bottom: 1rem;
+            color: var(--text-main);
+            letter-spacing: -0.02em
+        }
+
+        h2 {
+            font-family: var(--font-mono);
+            font-size: clamp(1.5rem, 3vw, 3rem);
+            color: var(--accent);
+            margin-bottom: 2rem;
+            text-transform: uppercase
+        }
+
+        h3 {
+            font-family: var(--font-mono);
+            font-size: 1.1rem;
+            color: var(--text-main);
+            margin-bottom: 0.5rem;
+            text-transform: uppercase;
+            letter-spacing: 0.05em
+        }
+
+        p {
+            font-size: clamp(1rem, 1.2vw, 1.25rem);
+            color: var(--text-muted);
+            margin-bottom: 1.5rem
+        }
+
+        .list-container {
+            display: flex;
+            flex-direction: column;
+            gap: 1.5rem
+        }
+
+        .list-item {
+            background: var(--surface);
+            border-left: 2px solid rgba(34, 211, 238, 0.3);
+            padding: 1.5rem;
+            transition: all 0.3s var(--ease)
+        }
+
+        .list-item:hover {
+            border-left-color: var(--accent);
+            background: var(--surface-hover);
+            transform: translateX(10px)
+        }
+
+        .list-item strong {
+            color: var(--accent);
+            font-family: var(--font-mono);
+            display: block;
+            margin-bottom: 0.5rem;
+            font-size: 1.1rem;
+            text-transform: uppercase
+        }
+
+        .img-wrapper {
+            position: relative;
+            width: 100%;
+            height: 100%;
+            min-height: 40vh;
+            overflow: hidden;
+            border: 1px solid rgba(255, 255, 255, 0.1)
+        }
+
+        .img-wrapper::after {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: rgba(2, 6, 23, 0.4);
+            transition: background 0.5s var(--ease);
+            z-index: 2
+        }
+
+        .img-wrapper:hover::after {
+            background: transparent
+        }
+
+        .img-wrapper img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            filter: grayscale(100%) contrast(1.2) sepia(100%) hue-rotate(180deg) saturate(200%);
+            transition: filter 0.5s var(--ease);
+            transform: scale(1.05)
+        }
+
+        .img-wrapper:hover img {
+            filter: grayscale(0%) contrast(1) sepia(0%);
+            transform: scale(1)
+        }
+
+        .tech-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 2rem;
+            margin-top: 2rem
+        }
+
+        .tech-card {
+            background: var(--surface);
+            padding: 1rem;
+            border: 1px solid rgba(255, 255, 255, 0.05)
+        }
+
+        .tech-card .img-wrapper {
+            height: 200px;
+            margin-bottom: 1rem;
+            min-height: unset
+        }
+
+        .stagger {
+            opacity: 0;
+            transform: translateY(30px)
+        }
+
+        .panel.is-visible .stagger {
+            animation: slideUp 0.8s var(--ease) forwards
+        }
+
+        @keyframes slideUp {
+            to {
+                opacity: 1;
+                transform: translateY(0)
+            }
+        }
+
+        .nav-dots {
+            position: fixed;
+            bottom: 2rem;
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            gap: 1rem;
+            z-index: 100
+        }
+
+        .dot {
+            width: 8px;
+            height: 8px;
+            background: var(--text-muted);
+            border-radius: 0;
+            transition: all 0.3s
+        }
+
+        .dot.active {
+            background: var(--accent);
+            transform: scale(1.5);
+            box-shadow: 0 0 10px var(--accent)
+        }
+
+        @media (max-width:768px) {
+            .content-grid {
+                grid-template-columns: 1fr;
+                gap: 2rem
+            }
+
+            .tech-grid {
+                grid-template-columns: 1fr
+            }
+
+            .panel {
+                padding: 6vw
+            }
+
+            .img-wrapper {
+                min-height: 30vh
+            }
+        }
+    </style>
+</head>
+
+<body style="cursor: default">
+    <button onclick="parent.postMessage('HUB_RETURN_INITIATED', '*')" 
+      style="position: fixed; top: 20px; right: 20px; z-index: 10001; background: rgba(34, 211, 238, 0.1); border: 1px solid #22d3ee; color: #22d3ee; padding: 10px 20px; font-family: 'Share Tech Mono', monospace; cursor: pointer; backdrop-filter: blur(10px); transition: all 0.3s ease; display: flex; align-items: center;" 
+      onmouseover="this.style.background='rgba(34, 211, 238, 0.2)'" 
+      onmouseout="this.style.background='rgba(34, 211, 238, 0.1)'">
+      <span style="margin-right: 8px">←</span> RETURN TO HUB
+    </button>
+    <div id="cursor"></div>
+    <div class="nav-dots">
+        <div class="dot active"></div>
+        <div class="dot"></div>
+        <div class="dot"></div>
+        <div class="dot"></div>
+        <div class="dot"></div>
+    </div>
+    <div class="carousel">
+        <section class="panel" id="sec-1">
+            <div class="chapter-num">01</div>
+            <div class="hud-layer">
+                <div class="hud-corner hud-tl"></div>
+                <div class="hud-corner hud-tr"></div>
+                <div class="hud-corner hud-bl"></div>
+                <div class="hud-corner hud-br"></div>
+                <div class="hud-text hud-t-top">SYS.INIT // SEQ-01</div>
+                <div class="hud-text hud-t-bot">AWAITING DIRECTIVE</div>
+            </div>
+            <div class="content-full">
+                <h3 class="stagger">Strategic Recommendations</h3>
+                <h1 class="stagger">Mitigating Risk &amp;<br>Maintaining US Maritime Presence</h1>
+                <div style="height:2rem"></div>
+                <h2 class="stagger">1. Executive Summary</h2>
+                <p class="stagger" style="max-width:800px; font-size:1.5rem">As the strategic environment becomes
+                    increasingly contested, the United States Navy and Coast Guard must balance the imperative of
+                    maintaining a robust global maritime presence with the need to mitigate the risk of unintended
+                    escalation. This document outlines a comprehensive stabilization strategy focused on adjusting Rules
+                    of Engagement (ROE), strengthening bilateral and multilateral communication channels, and rapidly
+                    integrating technology-driven surveillance alternatives to reduce the exposure of manned platforms.
+                </p>
+            </div>
+        </section>
+        <section class="panel" id="sec-2">
+            <div class="chapter-num">02</div>
+            <div class="hud-layer">
+                <div class="hud-corner hud-tl"></div>
+                <div class="hud-corner hud-tr"></div>
+                <div class="hud-corner hud-bl"></div>
+                <div class="hud-corner hud-br"></div>
+                <div class="hud-text hud-t-top">ROE_ADJ // TACTICAL</div>
+            </div>
+            <div class="content-grid">
+                <div class="col-text">
+                    <h2 class="stagger">2. Rules of Engagement (ROE) Adjustments</h2>
+                    <p class="stagger">To minimize tactical miscalculations while preserving the right to self-defense
+                        and freedom of navigation, ROE should be adapted to emphasize graduated, non-kinetic responses
+                        and strict escalation control.</p>
+                    <div class="list-container">
+                        <div class="list-item stagger"><strong>Graduated Non-Kinetic Warning Protocols:</strong>
+                            Standardize the use of directed acoustic devices (e.g., LRAD), laser warning receivers, and
+                            dazzlers as primary tools for signaling boundaries and deterring aggressive maneuvers by
+                            adversarial vessels (e.g., maritime militia or fast attack craft) before transitioning to
+                            kinetic warning shots.</div>
+                        <div class="list-item stagger"><strong>Dynamic Standoff Zones:</strong> Implement dynamically
+                            adjustable proximity triggers based on the assessed threat environment. Establish clear,
+                            pre-communicated minimum standoff distances for manned vessels, utilizing autonomous
+                            screening vessels as an outer perimeter to absorb initial probing actions.</div>
+                        <div class="list-item stagger"><strong>Pre-Delegation for Defensive Electronic Warfare
+                                (EW):</strong> Adjust ROE to pre-delegate authority for non-destructive electronic
+                            attack (EA) and jamming measures against adversarial drones and surveillance assets,
+                            allowing tactical commanders to neutralize immediate surveillance threats without crossing
+                            the threshold of lethal force.</div>
+                        <div class="list-item stagger"><strong>Behavior-Based Triggers over Platform-Based
+                                Triggers:</strong> Shift tactical ROE guidance to evaluate the behavior of an
+                            approaching vessel rather than strictly its classification (e.g., treating gray-zone
+                            maritime militia vessels exhibiting hostile intent with the same defensive protocols as
+                            conventional naval combatants).</div>
+                    </div>
+                </div>
+                <div class="col-img stagger" style="height:80vh">
+                    <div class="img-wrapper"><img src="./images/scene-11(1).jpg" alt="Laser warning device"></div>
+                </div>
+            </div>
+        </section>
+        <section class="panel" id="sec-3">
+            <div class="chapter-num">03</div>
+            <div class="hud-layer">
+                <div class="hud-corner hud-tl"></div>
+                <div class="hud-corner hud-tr"></div>
+                <div class="hud-corner hud-bl"></div>
+                <div class="hud-corner hud-br"></div>
+                <div class="hud-text hud-t-top">COMMS // DE-ESCALATION</div>
+            </div>
+            <div class="content-grid">
+                <div class="col-img stagger" style="height:80vh">
+                    <div class="img-wrapper"><img src="./images/scene-12(1).jpg" alt="Tactical communication center">
+                    </div>
+                </div>
+                <div class="col-text">
+                    <h2 class="stagger">3. Communication Channels and Crisis De-escalation</h2>
+                    <p class="stagger">Effective tactical and strategic communication is paramount to preventing "gray
+                        zone" incidents from spiraling into conventional conflict.</p>
+                    <div class="list-container">
+                        <div class="list-item stagger"><strong>Mandatory Adherence to CUES:</strong> Enforce strict
+                            adherence to the Code for Unplanned Encounters at Sea (CUES) across all manned surface and
+                            airborne assets. Proactively broadcast intentions in clear, standardized language via VHF
+                            bridge-to-bridge communications to reduce ambiguity.</div>
+                        <div class="list-item stagger"><strong>Tactical-Level Hotlines:</strong> Establish and
+                            operationalize direct, encrypted tactical data and voice links with rival maritime
+                            operational commands in high-risk zones (e.g., South China Sea, Persian Gulf) to allow
+                            immediate de-escalation by local commanders rather than relying solely on slow
+                            strategic-level channels.</div>
+                        <div class="list-item stagger"><strong>Mil-to-Mil Crisis Communication:</strong> Advocate for
+                            the maintenance and routine testing of high-level military-to-military crisis communication
+                            channels. Ensure these lines bypass political bottlenecks to allow operational commanders to
+                            quickly clarify the intent behind sudden force posture changes.</div>
+                        <div class="list-item stagger"><strong>Public Signaling and Transparency:</strong> Utilize
+                            real-time commercial satellite imagery and unclassified sensor feeds to rapidly declassify
+                            and broadcast unsafe or unprofessional behavior by adversarial actors. This "naming and
+                            shaming" strategy deters aggressive actions while maintaining the high ground in the
+                            information domain.</div>
+                    </div>
+                </div>
+            </div>
+        </section>
+        <section class="panel" id="sec-4">
+            <div class="chapter-num">04</div>
+            <div class="hud-layer">
+                <div class="hud-corner hud-tl"></div>
+                <div class="hud-corner hud-tr"></div>
+                <div class="hud-corner hud-bl"></div>
+                <div class="hud-corner hud-br"></div>
+                <div class="hud-text hud-t-top">TECH // ISR_AUTONOMY</div>
+            </div>
+            <div class="content-full" style="justify-content:flex-start; padding-top:2rem">
+                <h2 class="stagger">4. Technology-Driven Surveillance Alternatives</h2>
+                <p class="stagger">Replacing or augmenting manned patrols with unmanned systems reduces the risk to US
+                    personnel, lowers the operational footprint, and provides persistent ISR (Intelligence,
+                    Surveillance, and Reconnaissance) capabilities.</p>
+                <div class="tech-grid">
+                    <div class="tech-card stagger">
+                        <div class="img-wrapper"><img src="./images/scene-13(1).jpg" alt="Unmanned Surface Vessels">
+                        </div>
+                        <h3>Proliferation of Unmanned Surface Vessels (USVs)</h3>
+                        <p style="font-size:0.9rem">Scale initiatives similar to NAVCENT's Task Force 59. Deploy fleets
+                            of long-endurance USVs (e.g., Saildrones, Sea Hunters) equipped with radar, AIS, and optical
+                            sensors. These assets can maintain a persistent forward presence, absorb aggressive blocking
+                            maneuvers, and provide early warning without risking human lives.</p>
+                    </div>
+                    <div class="tech-card stagger">
+                        <div class="img-wrapper"><img src="./images/scene-14(1).jpg" alt="Unmanned Underwater Vehicles"></div>
+                        <h3>Unmanned Underwater Vehicles (UUVs) for Covert Presence</h3>
+                        <p style="font-size:0.9rem">Expand the use of large and extra-large UUVs (XLUUVs) for
+                            anti-submarine warfare (ASW) surveillance and chokepoint monitoring. UUVs allow the US to
+                            maintain a stealthy, persistent presence in highly contested anti-access/area-denial (A2/AD)
+                            environments where manned vessels would be highly vulnerable.</p>
+                    </div>
+                    <div class="tech-card stagger">
+                        <div class="img-wrapper"
+                            style="display:flex;align-items:center;justify-content:center;background:var(--surface-hover)">
+                            <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="var(--accent)"
+                                stroke-width="2" stroke-linecap="square">
+                                <path
+                                    d="M22 12A10 10 0 0 0 12 2v0a10 10 0 0 0-10 10v0a10 10 0 0 0 10 10v0a10 10 0 0 0 10-10z" />
+                                <path d="M12 22v-6" />
+                                <path d="M12 8V2" />
+                                <path d="M4.93 4.93l4.24 4.24" />
+                                <path d="M14.83 14.83l4.24 4.24" />
+                                <path d="M2 12h6" />
+                                <path d="M16 12h6" />
+                                <path d="M4.93 19.07l4.24-4.24" />
+                                <path d="M14.83 9.17l4.24-4.24" />
+                            </svg>
+                        </div>
+                        <h3>High-Altitude Long Endurance (HALE) Aerial Surveillance</h3>
+                        <p style="font-size:0.9rem">Leverage platforms like the MQ-4C Triton and MQ-9B SeaGuardian for
+                            broad-area maritime surveillance. These platforms provide over-the-horizon targeting and
+                            vessel tracking, reducing the need for forward-deployed Arleigh Burke-class destroyers
+                            simply for ISR purposes.</p>
+                    </div>
+                    <div class="tech-card stagger">
+                        <div class="img-wrapper"><img src="./images/scene-15(1).jpg" alt="AI and Satellite Integration"></div>
+                        <h3>Commercial Satellite Integration and AI</h3>
+                        <p style="font-size:0.9rem">Deepen integration with commercial space-based ISR providers (e.g.,
+                            Synthetic Aperture Radar (SAR) and RF mapping constellations like HawkEye 360). Utilize
+                            Artificial Intelligence and Machine Learning (AI/ML) to fuse this data with AIS tracks,
+                            automatically identifying "dark targets" (vessels turning off AIS) and anomalies in maritime
+                            traffic, queuing unmanned assets to investigate rather than dispatching a manned ship.</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+        <section class="panel" id="sec-5">
+            <div class="chapter-num">05</div>
+            <div class="hud-layer">
+                <div class="hud-corner hud-tl"></div>
+                <div class="hud-corner hud-tr"></div>
+                <div class="hud-corner hud-bl"></div>
+                <div class="hud-corner hud-br"></div>
+                <div class="hud-text hud-t-top">END // STRAT_CONCLUDE</div>
+            </div>
+            <div class="content-full" style="text-align:center">
+                <h2 class="stagger">5. Conclusion</h2>
+                <p class="stagger"
+                    style="font-size:1.8rem; color:var(--text-main); max-width:900px; margin:0 auto; line-height:1.4">By
+                    adopting graduated ROE focused on non-kinetic deterrence, enforcing robust tactical communication
+                    protocols, and aggressively transitioning routine ISR missions to an unmanned and space-based
+                    architecture, the US military can effectively maintain its global maritime presence. <br><br><span
+                        style="color:var(--accent)">This hybrid approach ensures freedom of navigation and deters malign
+                        actors while significantly minimizing the risk of strategic miscalculation and the exposure of
+                        manned forces.</span></p>
+            </div>
+        </section>
+    </div>
+    <script>const cursor = document.getElementById('cursor'); document.addEventListener('mousemove', (e) => { cursor.style.transform = `translate(${e.clientX}px, ${e.clientY}px)` }); const interactables = document.querySelectorAll('.list-item, .tech-card, img'); interactables.forEach(el => { el.addEventListener('mouseenter', () => cursor.classList.add('hover')); el.addEventListener('mouseleave', () => cursor.classList.remove('hover')) }); const panels = document.querySelectorAll('.panel'); const dots = document.querySelectorAll('.dot'); const observer = new IntersectionObserver((entries) => { entries.forEach(entry => { if (entry.isIntersecting) { entry.target.classList.add('is-visible'); const index = Array.from(panels).indexOf(entry.target); dots.forEach(d => d.classList.remove('active')); if (dots[index]) dots[index].classList.add('active'); const animates = entry.target.querySelectorAll('.stagger'); animates.forEach((el, i) => { el.style.animationDelay = `${i * 0.15}s` }) } }) }, { threshold: 0.4 }); panels.forEach(p => observer.observe(p));</script>
+</body>
+
+</html>

@@ -1,0 +1,631 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Domain Report: Military and Tactical Operations</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Rajdhani:wght@500;700&family=Share+Tech+Mono&display=swap');
+
+    :root {
+      --bg: #02040a;
+      --text-main: #e2e8f0;
+      --text-muted: #64748b;
+      --accent-red: #ff3333;
+      --accent-cyan: #00f0ff;
+      --font-header: 'Rajdhani', sans-serif;
+      --font-body: 'Share Tech Mono', monospace;
+      --grid-color: rgba(0, 240, 255, 0.05);
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      cursor: none !important;
+    }
+
+    body {
+      background-color: var(--bg);
+      color: var(--text-main);
+      font-family: var(--font-body);
+      overflow-x: hidden;
+      line-height: 1.6;
+    }
+
+    body::-webkit-scrollbar {
+      width: 6px;
+    }
+
+    body::-webkit-scrollbar-track {
+      background: var(--bg);
+    }
+
+    body::-webkit-scrollbar-thumb {
+      background: var(--text-muted);
+    }
+
+    /* Custom Cursor */
+    #reticle {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 40px;
+      height: 40px;
+      border: 1px solid var(--accent-cyan);
+      border-radius: 50%;
+      transform: translate(-50%, -50%);
+      pointer-events: none;
+      z-index: 9999;
+      transition: width 0.2s, height 0.2s, border-color 0.2s;
+      mix-blend-mode: difference;
+    }
+
+    #reticle::before,
+    #reticle::after {
+      content: '';
+      position: absolute;
+      background: var(--accent-cyan);
+    }
+
+    #reticle::before {
+      top: 50%;
+      left: -10px;
+      right: -10px;
+      height: 1px;
+    }
+
+    #reticle::after {
+      left: 50%;
+      top: -10px;
+      bottom: -10px;
+      width: 1px;
+    }
+
+    /* UI Overlays */
+    .scanlines {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
+      background: linear-gradient(to bottom, rgba(255, 255, 255, 0), rgba(255, 255, 255, 0) 50%, rgba(0, 0, 0, 0.1) 50%, rgba(0, 0, 0, 0.1));
+      background-size: 100% 4px;
+      z-index: 100;
+      pointer-events: none;
+      opacity: 0.6;
+    }
+
+    .vignette {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
+      background: radial-gradient(circle at center, transparent 40%, #000 120%);
+      z-index: 99;
+      pointer-events: none;
+    }
+
+    .grid-bg {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
+      background-image:
+        linear-gradient(var(--grid-color) 1px, transparent 1px),
+        linear-gradient(90deg, var(--grid-color) 1px, transparent 1px);
+      background-size: 50px 50px;
+      z-index: -2;
+    }
+
+    .noise-layer {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
+      pointer-events: none;
+      z-index: 101;
+      opacity: 0.15;
+      mix-blend-mode: overlay;
+    }
+
+    /* Typography */
+    h1,
+    h2,
+    h3 {
+      font-family: var(--font-header);
+      text-transform: uppercase;
+      letter-spacing: 2px;
+      margin-bottom: 1rem;
+    }
+
+    h1 {
+      font-size: clamp(2.5rem, 5vw, 5rem);
+      color: var(--text-main);
+      line-height: 1.1;
+      text-shadow: 2px 0 0 var(--accent-red), -2px 0 0 var(--accent-cyan);
+    }
+
+    h2 {
+      font-size: clamp(1.8rem, 3vw, 3rem);
+      color: var(--accent-cyan);
+      border-bottom: 1px solid var(--accent-cyan);
+      padding-bottom: 0.5rem;
+      display: inline-block;
+    }
+
+    h3 {
+      font-size: 1.5rem;
+      color: var(--text-main);
+      margin-top: 2rem;
+    }
+
+    p,
+    li {
+      font-size: 1rem;
+      color: var(--text-muted);
+      max-width: 65ch;
+      margin-bottom: 1.5rem;
+    }
+
+    strong {
+      color: var(--text-main);
+      font-weight: normal;
+    }
+
+    ul {
+      list-style: none;
+      padding-left: 1rem;
+    }
+
+    ul li {
+      position: relative;
+      padding-left: 1.5rem;
+    }
+
+    ul li::before {
+      content: '>';
+      position: absolute;
+      left: 0;
+      color: var(--accent-red);
+    }
+
+    .meta-label {
+      font-size: 0.75rem;
+      color: var(--accent-cyan);
+      text-transform: uppercase;
+      letter-spacing: 4px;
+      margin-bottom: 1rem;
+      display: block;
+    }
+
+    .warning-box {
+      border: 1px solid var(--accent-red);
+      padding: 1.5rem;
+      background: rgba(255, 51, 51, 0.05);
+      border-left: 4px solid var(--accent-red);
+    }
+
+    /* Layout */
+    .panel {
+      position: relative;
+      min-height: 100vh;
+      width: 100vw;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      padding: 10vw;
+      z-index: 10;
+      overflow: hidden;
+    }
+
+    .content-wrap {
+      position: relative;
+      z-index: 2;
+      background: rgba(2, 4, 10, 0.85);
+      padding: 3rem;
+      backdrop-filter: blur(10px);
+      border: 1px solid rgba(255, 255, 255, 0.05);
+      max-width: 900px;
+    }
+
+    /* Image Backgrounds & Filters */
+    .bg-media {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-size: cover;
+      background-position: center;
+      background-attachment: fixed;
+      z-index: -1;
+      filter: url(#tactical-feed);
+      opacity: 0.4;
+      transition: opacity 1s ease, filter 1s ease;
+    }
+
+    .panel:hover .bg-media {
+      opacity: 0.6;
+    }
+
+    .img-1 {
+      background-image: url('./images/scene-11(2).jpg');
+    }
+
+    .img-2 {
+      background-image: url('./images/scene-12(2).jpg');
+    }
+
+    .img-3 {
+      background-image: url('./images/scene-13(2).jpg');
+    }
+
+    .img-4 {
+      background-image: url('./images/scene-14(2).jpg');
+    }
+
+    .img-5 {
+      background-image: url('./images/scene-15(4).jpg');
+    }
+
+    /* Animations */
+    .reveal {
+      opacity: 0;
+      transform: translateY(30px);
+      transition: opacity 0.8s cubic-bezier(0.19, 1, 0.22, 1), transform 0.8s cubic-bezier(0.19, 1, 0.22, 1);
+    }
+
+    .reveal.active {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    .stagger-1 {
+      transition-delay: 100ms;
+    }
+
+    .stagger-2 {
+      transition-delay: 200ms;
+    }
+
+    .stagger-3 {
+      transition-delay: 300ms;
+    }
+
+    .stagger-4 {
+      transition-delay: 400ms;
+    }
+
+    @keyframes textFlicker {
+      0% {
+        opacity: 0.1;
+      }
+
+      2% {
+        opacity: 1;
+      }
+
+      8% {
+        opacity: 0.1;
+      }
+
+      9% {
+        opacity: 1;
+      }
+
+      12% {
+        opacity: 0.1;
+      }
+
+      20% {
+        opacity: 1;
+      }
+
+      25% {
+        opacity: 0.3;
+      }
+
+      30% {
+        opacity: 1;
+      }
+
+      70% {
+        opacity: 0.7;
+      }
+
+      72% {
+        opacity: 0.2;
+      }
+
+      77% {
+        opacity: 0.9;
+      }
+
+      100% {
+        opacity: 0.9;
+      }
+    }
+
+    .glitch-text.active {
+      animation: textFlicker 3s infinite alternate;
+    }
+
+    .sys-status {
+      position: fixed;
+      top: 2rem;
+      right: 2rem;
+      font-size: 0.75rem;
+      color: var(--accent-cyan);
+      z-index: 100;
+      text-align: right;
+    }
+
+    .sys-status span {
+      display: block;
+    }
+
+    .blink {
+      animation: blinker 1s linear infinite;
+    }
+
+    @keyframes blinker {
+      50% {
+        opacity: 0;
+      }
+    }
+  </style>
+</head>
+
+<body style="cursor: default">
+  <button onclick="parent.postMessage('HUB_RETURN_INITIATED', '*')" 
+    style="position: fixed; top: 20px; right: 20px; z-index: 10002; background: rgba(0, 240, 255, 0.1); border: 1px solid var(--accent-cyan); color: var(--accent-cyan); padding: 10px 20px; font-family: var(--font-header); cursor: pointer; backdrop-filter: blur(10px); transition: all 0.3s ease; display: flex; align-items: center; letter-spacing: 2px;" 
+    onmouseover="this.style.background='rgba(0, 240, 255, 0.2)'" 
+    onmouseout="this.style.background='rgba(0, 240, 255, 0.1)'">
+    <span style="margin-right: 8px">←</span> RETURN TO HUB
+  </button>
+
+  <!-- SVG Filters -->
+  <svg style="display: none;">
+    <defs>
+      <!-- Tactical Duotone/Contrast Filter -->
+      <filter id="tactical-feed">
+        <feColorMatrix type="matrix" values="
+        0.1  0.5  0.1  0  0
+        0.1  0.5  0.1  0  0
+        0.2  0.8  0.8  0  0
+        0    0    0    1  0" />
+        <feComponentTransfer>
+          <feFuncR type="linear" slope="1.5" intercept="-0.2" />
+          <feFuncG type="linear" slope="1.5" intercept="-0.2" />
+          <feFuncB type="linear" slope="1.5" intercept="-0.2" />
+        </feComponentTransfer>
+      </filter>
+
+      <!-- Animated Noise -->
+      <filter id="noise-filter">
+        <feTurbulence type="fractalNoise" baseFrequency="0.8" numOctaves="3" stitchTiles="stitch">
+          <animate attributeName="seed" from="1" to="100" dur="1s" repeatCount="indefinite" />
+        </feTurbulence>
+        <feColorMatrix type="matrix" values="1 0 0 0 0, 0 1 0 0 0, 0 0 1 0 0, 0 0 0 0.2 0" />
+      </filter>
+    </defs>
+  </svg>
+
+  <!-- System Overlays -->
+  <div id="reticle"></div>
+  <div class="grid-bg"></div>
+  <div class="scanlines"></div>
+  <div class="vignette"></div>
+  <div class="noise-layer" style="filter: url(#noise-filter);"></div>
+
+  <div class="sys-status">
+    <span>SECURE FEED_ESTABLISHED</span>
+    <span>COORD: 26°03'N 56°16'E</span>
+    <span class="blink" style="color: var(--accent-red);">THREAT_LEVEL: ELEVATED</span>
+  </div>
+
+  <main>
+    <!-- Panel 1 -->
+    <section class="panel">
+      <div class="bg-media img-1"></div>
+      <div class="content-wrap">
+        <span class="meta-label reveal">Domain Report</span>
+        <h1 class="reveal stagger-1 glitch-text">Military and Tactical Operations</h1>
+
+        <div class="reveal stagger-2"
+          style="margin-top: 2rem; border-left: 2px solid var(--accent-cyan); padding-left: 1rem;">
+          <strong style="color: var(--accent-cyan); display:block; margin-bottom:0.5rem;">Goal:</strong>
+          <p style="margin:0;">Evaluate the US-Iran military theater in the Strait of Hormuz and the Indian Ocean.
+            Assess naval deployments, tactical vulnerabilities, and escalation risks to deliver a self-contained
+            analysis of military dynamics and recommend military-specific stabilization strategies for the US.</p>
+        </div>
+
+        <h2 class="reveal stagger-3" style="margin-top: 4rem;">Strategic Assessment: US-Iran Military Dynamics in the
+          Strait of Hormuz and Indian Ocean</h2>
+
+        <h3 class="reveal stagger-3">Executive Summary</h3>
+        <p class="reveal stagger-4">As of March 2026, the maritime theater encompassing the Strait of Hormuz and the
+          broader Indian Ocean has transitioned into a high-stakes environment defined by asymmetric parity. While the
+          United States maintains a sophisticated logistical and command infrastructure centered in Bahrain, the Iranian
+          military has effectively pivoted from a vulnerable conventional navy to a lethal, IRGC-led asymmetric force.
+          This shift exploits the geographical constraints of the Strait of Hormuz to neutralize US technological
+          advantages. Escalation risks are currently high due to "dark target" activity and electronic warfare (EW)
+          interference, necessitating a strategic shift toward unmanned ISR and graduated rules of engagement (ROE).</p>
+      </div>
+    </section>
+
+    <!-- Panel 2 -->
+    <section class="panel" style="align-items: flex-end;">
+      <div class="bg-media img-2"></div>
+      <div class="content-wrap reveal" style="margin-right: 5vw;">
+        <span class="meta-label">Asset Distribution</span>
+        <h2 style="color: var(--text-main); border-color: var(--text-muted);">Naval Posture</h2>
+        <p>The US naval presence remains anchored by the Fifth Fleet at NSA Bahrain, supported by a dense network of
+          logistics hubs in Kuwait, Qatar, and the UAE. To mitigate the threat of shore-based anti-ship cruise missiles
+          (ASCMs), US Carrier Strike Groups (CSGs) have adopted a standoff posture in the Gulf of Oman. This allows for
+          persistent monitoring while remaining outside the immediate "kill zone" of Iranian coastal batteries.</p>
+        <p>In contrast, the Iranian conventional navy has been largely sidelined in favor of the Islamic Revolutionary
+          Guard Corps (IRGC) naval wing. Iranian operations are now decentralized across key coastal installations,
+          specifically at Bandar Abbas and Kharg Island. Furthermore, Iran has fortified the disputed islands of the
+          Greater and Lesser Tunbs and Abu Musa. These forward-deployed positions serve as launch pads for drones and
+          coastal defense systems, effectively turning the Strait into a gauntlet for any transiting vessel.</p>
+      </div>
+    </section>
+
+    <!-- Panel 3 -->
+    <section class="panel">
+      <div class="bg-media img-3" style="filter: url(#tactical-feed) sepia(100%) hue-rotate(315deg) saturate(300%);">
+      </div>
+      <div class="content-wrap warning-box reveal">
+        <span class="meta-label" style="color: var(--accent-red);">Critical Threat Assessment</span>
+        <h2 style="color: var(--accent-red); border-color: var(--accent-red);">Tactical Vulnerabilities and Asymmetric
+          Challenges</h2>
+        <p>The technical superiority of the US Navy faces significant challenges within the restricted maneuver space of
+          the Strait. Iranian naval doctrine utilizes a "combined-arms synergy" designed to exploit specific US
+          vulnerabilities:</p>
+        <ul>
+          <li class="reveal stagger-1"><strong>Saturation (The N+1 Rule):</strong> Iranian swarm tactics employ hundreds
+            of Fast Inshore Attack Craft (FIAC) and suicide Unmanned Surface Vessels (USVs). These are intended to
+            exceed the engagement capacity of Aegis Combat Systems and Close-In Weapon Systems (CIWS), simply by
+            providing more targets than the defensive architecture can track and intercept simultaneously.</li>
+          <li class="reveal stagger-2"><strong>Sea Denial via Mine Warfare:</strong> Sea mines remain a potent force
+            multiplier. By seeding narrow channels, Iran can force US assets into predictable paths, effectively
+            "fixing" them in place for lethal strikes from land-based ASCMs such as the Noor or Ghadir systems.</li>
+          <li class="reveal stagger-3"><strong>Economic Asymmetry:</strong> A critical vulnerability is the
+            cost-exchange ratio. US destroyers frequently utilize interceptors costing upwards of $2 million to
+            neutralize Iranian drones or small boats costing as little as $20,000. This disparity creates a significant
+            risk of "magazine depletion," where a prolonged engagement could leave high-end US assets defenseless
+            against follow-on salvos.</li>
+        </ul>
+      </div>
+    </section>
+
+    <!-- Panel 4 -->
+    <section class="panel" style="align-items: flex-end;">
+      <div class="bg-media img-4" style="filter: grayscale(100%) contrast(150%) blur(2px);"></div>
+      <div class="content-wrap reveal">
+        <span class="meta-label">Environmental Variables</span>
+        <h2>Escalation Triggers and Regional Spillover</h2>
+        <p>The risk of unintended kinetic conflict is heightened by a volatile mix of electronic warfare and navigation
+          interference. The use of AIS (Automatic Identification System) disruption and GPS spoofing creates a "fog of
+          war" that increases the probability of accidental collisions or misidentified targets.</p>
+        <p>Beyond the Strait, the conflict has shown clear signs of expanding into the deep-water Indian Ocean.
+          Submarine engagements far from coastal chokepoints suggest that the theater of operations is no longer
+          localized. Additionally, the involvement of Houthi proxies in the Red Sea and Bab el-Mandeb forces the US to
+          divert resources, creating a multi-front maritime challenge that complicates energy security and naval escort
+          duties.</p>
+      </div>
+    </section>
+
+    <!-- Panel 5 -->
+    <section class="panel">
+      <div class="bg-media img-5"></div>
+      <div class="content-wrap">
+        <span class="meta-label reveal">Actionable Intelligence</span>
+        <h2 class="reveal stagger-1">Recommended Stabilization Strategies</h2>
+        <p class="reveal stagger-2">To mitigate these risks while maintaining a credible deterrent, the US should adopt
+          the following military-specific strategies:</p>
+
+        <div style="display: flex; flex-direction: column; gap: 1.5rem; margin-top: 2rem;">
+          <div class="reveal stagger-2" style="border: 1px solid var(--grid-color); padding: 1.5rem;">
+            <h3 style="margin-top: 0; color: var(--accent-cyan); font-size: 1.2rem;">1. Adaptation of Rules of
+              Engagement (ROE)</h3>
+            <p style="margin-bottom: 0;">The US should implement graduated, non-kinetic warning protocols. By
+              establishing dynamic standoff zones and utilizing behavior-based triggers (rather than solely
+              status-based), the Fifth Fleet can de-escalate minor provocations before they reach the threshold of
+              sovereign kinetic retaliation.</p>
+          </div>
+
+          <div class="reveal stagger-3" style="border: 1px solid var(--grid-color); padding: 1.5rem;">
+            <h3 style="margin-top: 0; color: var(--accent-cyan); font-size: 1.2rem;">2. Technological Offsetting</h3>
+            <p style="margin-bottom: 0;">The operational footprint of manned platforms should be reduced by prioritizing
+              Unmanned Surface Vessels (USVs) and Unmanned Underwater Vehicles (UUVs). These assets provide persistent
+              Intelligence, Surveillance, and Reconnaissance (ISR) without risking personnel. Integrating these with
+              AI-driven analysis of commercial satellite data will allow for the tracking of "dark targets" (vessels
+              with deactivated transponders) more effectively.</p>
+          </div>
+
+          <div class="reveal stagger-4" style="border: 1px solid var(--grid-color); padding: 1.5rem;">
+            <h3 style="margin-top: 0; color: var(--accent-cyan); font-size: 1.2rem;">3. Crisis Communication Protocols
+            </h3>
+            <p style="margin-bottom: 0;">To prevent tactical miscalculations, the US must enforce strict adherence to
+              the Code for Unplanned Encounters at Sea (CUES). Establishing encrypted tactical-level hotlines between
+              regional maritime centers and Iranian counterparts—while politically sensitive—is a military necessity to
+              manage accidents in real-time.</p>
+          </div>
+        </div>
+
+        <div class="reveal"
+          style="margin-top: 4rem; padding-top: 1rem; border-top: 1px dashed var(--text-muted); font-size: 0.8rem; color: var(--text-muted);">
+          <strong style="color: var(--accent-cyan);">Note on Data Confidence:</strong> All findings synthesized in this
+          report are based on high-confidence technical assessments of current naval inventories and tactical doctrines
+          as of March 2026. No worker results were flagged as low confidence.
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <script>
+    // Custom Cursor Logic
+    const cursor = document.getElementById('reticle');
+
+    document.addEventListener('mousemove', (e) => {
+      cursor.style.left = e.clientX + 'px';
+      cursor.style.top = e.clientY + 'px';
+    });
+
+    document.addEventListener('mousedown', () => {
+      cursor.style.transform = 'translate(-50%, -50%) scale(0.8)';
+      cursor.style.borderColor = 'var(--accent-red)';
+    });
+
+    document.addEventListener('mouseup', () => {
+      cursor.style.transform = 'translate(-50%, -50%) scale(1)';
+      cursor.style.borderColor = 'var(--accent-cyan)';
+    });
+
+    // Scroll Reveal Logic (Intersection Observer)
+    const observerOptions = {
+      root: null,
+      rootMargin: '0px',
+      threshold: 0.15
+    };
+
+    const observer = new IntersectionObserver((entries, observer) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          entry.target.classList.add('active');
+          // Optional: stop observing once revealed
+          // observer.unobserve(entry.target);
+        }
+      });
+    }, observerOptions);
+
+    document.querySelectorAll('.reveal').forEach(el => {
+      observer.observe(el);
+    });
+
+    // Parallax background blur adjustment based on scroll (simulating sensor focus)
+    window.addEventListener('scroll', () => {
+      const panels = document.querySelectorAll('.panel');
+      panels.forEach(panel => {
+        const rect = panel.getBoundingClientRect();
+        const bg = panel.querySelector('.bg-media');
+        if (bg && rect.top < window.innerHeight && rect.bottom > 0) {
+          // Calculate how centered the panel is
+          const centerOffset = Math.abs(rect.top + (rect.height / 2) - (window.innerHeight / 2));
+          const maxOffset = window.innerHeight;
+          const blurVal = Math.max(0, (centerOffset / maxOffset) * 4);
+          // bg.style.filter = `url(#tactical-feed) blur(${blurVal}px)`; // Uncomment to add blur parallax over the filter
+        }
+      });
+    });
+  </script>
+</body>
+
+</html>

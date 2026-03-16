@@ -1,0 +1,654 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Strategic Executive Brief</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;700;900&family=JetBrains+Mono:wght@400;700&display=swap');
+
+    :root {
+      --bg: #030303;
+      --surface: #0a0a0c;
+      --text-main: #e2e2e2;
+      --text-muted: #8a8a8a;
+      --accent: #ff2a00;
+      --grid-line: rgba(255, 42, 0, 0.15);
+      --ui-font: 'JetBrains Mono', monospace;
+      --body-font: 'Inter', sans-serif;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      background-color: var(--bg);
+      color: var(--text-main);
+      font-family: var(--body-font);
+      overflow: hidden;
+      cursor: none;
+    }
+
+    /* Custom Cursor */
+    .cursor-dot,
+    .cursor-ring {
+      position: fixed;
+      top: 0;
+      left: 0;
+      transform: translate(-50%, -50%);
+      border-radius: 50%;
+      pointer-events: none;
+      z-index: 9999;
+    }
+
+    .cursor-dot {
+      width: 4px;
+      height: 4px;
+      background: var(--accent);
+    }
+
+    .cursor-ring {
+      width: 30px;
+      height: 30px;
+      border: 1px solid rgba(255, 42, 0, 0.5);
+      transition: width 0.2s, height 0.2s, border-color 0.2s;
+    }
+
+    /* UI Overlay Chrome */
+    .ui-layer {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
+      pointer-events: none;
+      z-index: 100;
+      border: 1px solid var(--grid-line);
+    }
+
+    .ui-layer::before,
+    .ui-layer::after {
+      content: '';
+      position: absolute;
+      width: 1px;
+      height: 100%;
+      background: var(--grid-line);
+    }
+
+    .ui-layer::before {
+      left: 50vw;
+    }
+
+    .ui-layer::after {
+      display: none;
+    }
+
+    .ui-header,
+    .ui-footer {
+      position: absolute;
+      width: 100%;
+      padding: 1.5rem 2rem;
+      display: flex;
+      justify-content: space-between;
+      font-family: var(--ui-font);
+      font-size: 0.7rem;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      color: var(--text-muted);
+    }
+
+    .ui-header {
+      top: 0;
+      border-bottom: 1px solid var(--grid-line);
+    }
+
+    .ui-footer {
+      bottom: 0;
+      border-top: 1px solid var(--grid-line);
+    }
+
+    .accent-text {
+      color: var(--accent);
+      font-weight: 700;
+    }
+
+    /* Carousel Container */
+    .carousel {
+      display: flex;
+      width: 100vw;
+      height: 100vh;
+      overflow-x: auto;
+      overflow-y: hidden;
+      scroll-snap-type: x mandatory;
+      scroll-behavior: smooth;
+      scrollbar-width: none;
+    }
+
+    .carousel::-webkit-scrollbar {
+      display: none;
+    }
+
+    /* Panel Structure */
+    .panel {
+      flex: 0 0 100vw;
+      width: 100vw;
+      height: 100vh;
+      scroll-snap-align: start;
+      display: flex;
+      position: relative;
+    }
+
+    /* Media Section (Left) */
+    .media-col {
+      width: 50vw;
+      height: 100%;
+      position: relative;
+      overflow: hidden;
+      background: #000;
+    }
+
+    .media-col img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      filter: url(#sat-feed);
+      opacity: 0.8;
+      transform: scale(1.05);
+      transition: transform 10s ease-out;
+    }
+
+    .panel.is-active .media-col img {
+      transform: scale(1);
+    }
+
+    /* Scanline Effect */
+    .scanline {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 10px;
+      background: linear-gradient(to bottom, transparent, rgba(255, 42, 0, 0.4), transparent);
+      opacity: 0.5;
+      animation: scan 6s linear infinite;
+      pointer-events: none;
+    }
+
+    @keyframes scan {
+      0% {
+        top: -10%;
+      }
+
+      100% {
+        top: 110%;
+      }
+    }
+
+    /* Content Section (Right) */
+    .data-col {
+      width: 50vw;
+      height: 100%;
+      padding: 6rem 4rem;
+      overflow-y: auto;
+      display: flex;
+      flex-direction: column;
+      background: var(--surface);
+      scrollbar-width: thin;
+      scrollbar-color: var(--accent) var(--bg);
+    }
+
+    .data-col::-webkit-scrollbar {
+      width: 4px;
+    }
+
+    .data-col::-webkit-scrollbar-thumb {
+      background: var(--accent);
+    }
+
+    /* Typography */
+    .reveal-wrap {
+      overflow: hidden;
+      margin-bottom: 1rem;
+    }
+
+    .reveal {
+      transform: translateY(100%);
+      opacity: 0;
+      transition: transform 0.8s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.8s ease;
+    }
+
+    .panel.is-active .reveal {
+      transform: translateY(0);
+      opacity: 1;
+    }
+
+    .stagger-1 {
+      transition-delay: 0.1s;
+    }
+
+    .stagger-2 {
+      transition-delay: 0.2s;
+    }
+
+    .stagger-3 {
+      transition-delay: 0.3s;
+    }
+
+    .stagger-4 {
+      transition-delay: 0.4s;
+    }
+
+    .stagger-5 {
+      transition-delay: 0.5s;
+    }
+
+    h1 {
+      font-size: clamp(2rem, 3vw, 4rem);
+      font-weight: 900;
+      text-transform: uppercase;
+      line-height: 1.1;
+      letter-spacing: -0.02em;
+      margin-bottom: 2rem;
+      color: #fff;
+    }
+
+    h1 .accent {
+      color: var(--accent);
+    }
+
+    h2 {
+      font-family: var(--ui-font);
+      font-size: 1.1rem;
+      color: var(--accent);
+      margin: 3rem 0 1.5rem 0;
+      padding-bottom: 0.5rem;
+      border-bottom: 1px solid rgba(255, 42, 0, 0.3);
+    }
+
+    h2::before {
+      content: '>';
+      margin-right: 0.5rem;
+    }
+
+    p,
+    li {
+      font-size: 1.05rem;
+      line-height: 1.6;
+      font-weight: 300;
+      color: var(--text-muted);
+      margin-bottom: 1.2rem;
+    }
+
+    strong {
+      font-weight: 700;
+      color: var(--text-main);
+    }
+
+    ul {
+      list-style: none;
+      padding-left: 1.5rem;
+    }
+
+    ul li {
+      position: relative;
+      margin-bottom: 1.5rem;
+    }
+
+    ul li::before {
+      content: '[_]';
+      position: absolute;
+      left: -1.5rem;
+      font-family: var(--ui-font);
+      font-size: 0.8rem;
+      color: var(--accent);
+      top: 0.2rem;
+    }
+
+    .step-block {
+      background: rgba(255, 255, 255, 0.02);
+      border-left: 2px solid var(--accent);
+      padding: 1.5rem;
+      margin-bottom: 1.5rem;
+    }
+
+    .step-title {
+      font-family: var(--ui-font);
+      font-weight: 700;
+      color: #fff;
+      font-size: 0.9rem;
+      margin-bottom: 0.8rem;
+      text-transform: uppercase;
+    }
+
+    /* SVG Filters */
+    .svg-filters {
+      display: none;
+    }
+  </style>
+</head>
+
+<body>
+
+  <svg class="svg-filters">
+    <filter id="sat-feed">
+      <!-- Desaturate and boost contrast -->
+      <feColorMatrix type="matrix" values="
+      0.9 0   0   0   0
+      0   0.1 0   0   0
+      0   0   0.1 0   0
+      0   0   0   1   0" result="red_tint" />
+      <feComponentTransfer in="red_tint" result="contrast">
+        <feFuncR type="linear" slope="1.5" intercept="-0.1" />
+        <feFuncG type="linear" slope="1.5" intercept="-0.1" />
+        <feFuncB type="linear" slope="1.5" intercept="-0.1" />
+      </feComponentTransfer>
+      <!-- Add noise -->
+      <feTurbulence type="fractalNoise" baseFrequency="0.6" numOctaves="2" result="noise" />
+      <feColorMatrix type="matrix" values="1 0 0 0 0  0 1 0 0 0  0 0 1 0 0  0 0 0 0.15 0" in="noise"
+        result="coloredNoise" />
+      <feBlend mode="screen" in="contrast" in2="coloredNoise" />
+    </filter>
+  </svg>
+
+  <div class="cursor-dot"></div>
+  <div class="cursor-ring"></div>
+
+  <div class="ui-layer">
+    <div class="ui-header">
+      <div>SYS.OP // STRATCOM</div>
+      <div class="accent-text">CLASSIFIED: EYES ONLY</div>
+      <div>SEQ_ID: 994-A</div>
+    </div>
+    <div class="ui-footer">
+      <div id="nav-counter">PANEL [ 01 // 05 ]</div>
+      <div>LAT/LON // TRACKING</div>
+      <div>STATUS: <span class="accent-text">CRITICAL</span></div>
+    </div>
+  </div>
+
+  <div class="carousel" id="carousel">
+
+    <!-- PANEL 1 -->
+    <section class="panel is-active">
+      <div class="media-col">
+        <img src="./images/scene-11(4).jpg" alt="Global Conflict Map">
+        <div class="scanline"></div>
+      </div>
+      <div class="data-col">
+        <div class="reveal-wrap">
+          <h1 class="reveal stagger-1">STRATEGIC EXECUTIVE BRIEF:<br><span class="accent">THE FOUR GATEWAYS CRISIS &
+              US-IRAN ESCALATION</span></h1>
+        </div>
+
+        <div class="reveal-wrap">
+          <h2 class="reveal stagger-2">1. THE "NORTH STAR" STRATEGY</h2>
+        </div>
+        <div class="reveal-wrap">
+          <p class="reveal stagger-3"><strong>Economy of Force via Asymmetric Deterrence.</strong></p>
+        </div>
+        <div class="reveal-wrap">
+          <p class="reveal stagger-4">To stabilize the global architecture, the United States must transition from a
+            reactive, resource-intensive posture in the Middle East to an unmanned, allied-led containment framework.
+          </p>
+        </div>
+        <div class="reveal-wrap">
+          <p class="reveal stagger-5">By minimizing the deployment of high-value kinetic assets and manned naval
+            platforms in the Middle East, the US can neutralize the Iranian threat while preserving the military
+            bandwidth and interceptor inventories necessary to deter primary systemic adversaries (Russia and China) in
+            the European and Indo-Pacific gateways.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- PANEL 2 -->
+    <section class="panel">
+      <div class="media-col">
+        <img src="./images/scene-12(4).jpg" alt="Strait of Hormuz Ships">
+        <div class="scanline"></div>
+      </div>
+      <div class="data-col">
+        <div class="reveal-wrap">
+          <h2 class="reveal stagger-1">2. HIGHEST-IMPACT INSIGHTS (BLUF)</h2>
+        </div>
+        <ul>
+          <li class="reveal-wrap">
+            <div class="reveal stagger-2"><strong>Systemic "Bandwidth Exhaustion" is Underway:</strong> The US-Iran
+              conflict is not an isolated regional dispute; it is functioning as a deliberate resource sink. Russia and
+              China are actively synchronizing their military aggressions (in Ukraine and Taiwan) with US Middle East
+              deployments to exploit depleted Western air defense and naval readiness.</div>
+          </li>
+          <li class="reveal-wrap">
+            <div class="reveal stagger-3"><strong>The "Missing Component" Catastrophe:</strong> A full blockade of the
+              Strait of Hormuz will trigger a structural supply chain collapse. Beyond causing $150–$200/bbl oil, the
+              stranding of 25 Bcfd of LNG and Qatari helium will paralyze Asian semiconductor fabrication within 1.5
+              weeks, crashing the global high-tech economy.</div>
+          </li>
+          <li class="reveal-wrap">
+            <div class="reveal stagger-4"><strong>The Cost-Exchange Trap:</strong> US conventional naval superiority is
+              being neutralized by the "N+1" rule in the Strait. Deploying $2M interceptors against $20K Iranian suicide
+              drones guarantees rapid magazine depletion, rendering US Carrier Strike Groups (CSGs) fatally vulnerable
+              to land-based anti-ship cruise missiles (ASCMs).</div>
+          </li>
+        </ul>
+      </div>
+    </section>
+
+    <!-- PANEL 3 -->
+    <section class="panel">
+      <div class="media-col">
+        <img src="./images/scene-13(4).jpg" alt="Naval Missile Intercept">
+        <div class="scanline"></div>
+      </div>
+      <div class="data-col">
+        <div class="reveal-wrap">
+          <h2 class="reveal stagger-1">3. CROSS-DOMAIN SYNERGIES (THE THREAT MATRIX)</h2>
+        </div>
+        <div class="reveal-wrap">
+          <p class="reveal stagger-2">Analyzing the intersections of the military, economic, and geopolitical domains
+            reveals compounding vulnerabilities:</p>
+        </div>
+        <ul>
+          <li class="reveal-wrap">
+            <div class="reveal stagger-3"><strong>Geopolitics meets Economics:</strong> Russia leverages the Middle
+              Eastern distraction for a dual benefit. Militarily, it exploits the absence of US PAC-3 systems to
+              saturate Ukraine with glide bombs. Economically, the resultant spike in global oil prices directly funds
+              Moscow's 1.5-million-man army and its war of attrition.</div>
+          </li>
+          <li class="reveal-wrap">
+            <div class="reveal stagger-4"><strong>Economics meets the Indo-Pacific Security:</strong> Taiwan's strategic
+              survival is currently threatened through a Middle Eastern backdoor. While China utilizes US naval
+              distraction to execute "creeping escalation" (Phase 3 snap drills), a Hormuz blockade would instantly cut
+              off Taiwan's critical LNG and helium supplies—achieving China's goal of neutralizing Taiwanese tech
+              dominance without firing a shot in the Pacific.</div>
+          </li>
+          <li class="reveal-wrap">
+            <div class="reveal stagger-5"><strong>Military Expansion meets Logistics:</strong> The expansion of Iranian
+              and Houthi asymmetric warfare into the deep-water Indian Ocean and Red Sea forces the rerouting of 30% of
+              global container traffic around the Cape of Good Hope. This 10–14 day delay triggers "missing component"
+              syndrome, halting global automotive and electronics assembly lines.</div>
+          </li>
+        </ul>
+      </div>
+    </section>
+
+    <!-- PANEL 4 -->
+    <section class="panel">
+      <div class="media-col">
+        <img src="./images/scene-14(4).jpg" alt="Unmanned Surface Vehicles">
+        <div class="scanline"></div>
+      </div>
+      <div class="data-col">
+        <div class="reveal-wrap">
+          <h2 class="reveal stagger-1">4. TENSIONS AND STRATEGIC CONTRADICTIONS</h2>
+        </div>
+        <div class="reveal-wrap">
+          <p class="reveal stagger-2">Current US policies exhibit critical internal contradictions that must be
+            reconciled:</p>
+        </div>
+        <ul>
+          <li class="reveal-wrap">
+            <div class="reveal stagger-3">
+              <strong>Manned Escorts vs. Stand-off Survivability:</strong><br>
+              <em>The Conflict:</em> The <strong>Economic Strategy</strong> demands expanding multinational naval
+              coalitions (heavy manned footprint) to escort vessels, lower prohibitive insurance premiums, and prevent a
+              de-facto blockade. Conversely, the <strong>Military Strategy</strong> warns against entering the coastal
+              "kill zone," recommending a standoff posture to protect high-value destroyers from asymmetric swarm/mine
+              threats.
+            </div>
+          </li>
+          <li class="reveal-wrap">
+            <div class="reveal stagger-4">
+              <strong>Interceptor Bandwidth vs. Multi-Theater Defense:</strong><br>
+              <em>The Conflict:</em> Mitigating the immediate tactical threats in the Middle East requires draining US
+              interceptor stockpiles (PAC-3, SM-2/6). This directly contradicts the <strong>Geopolitical
+                Strategy</strong>, which requires those exact stockpiles to establish a credible deterrent against
+              Chinese action in Taiwan and to protect Ukrainian airspace from Russian barrages.
+            </div>
+          </li>
+        </ul>
+      </div>
+    </section>
+
+    <!-- PANEL 5 -->
+    <section class="panel">
+      <div class="media-col">
+        <img src="./images/scene-15(4).jpg" alt="Munitions Factory">
+        <div class="scanline"></div>
+      </div>
+      <div class="data-col">
+        <div class="reveal-wrap">
+          <h2 class="reveal stagger-1">5. PRIORITIZED NEXT STEPS</h2>
+        </div>
+        <div class="reveal-wrap">
+          <p class="reveal stagger-2">To execute the "North Star" strategy and resolve cross-domain tensions, the
+            C-suite must direct the immediate implementation of the following steps:</p>
+        </div>
+
+        <div class="reveal-wrap">
+          <div class="step-block reveal stagger-3">
+            <div class="step-title">Step 1: Reconcile the Naval Contradiction via "Unmanned Overwatch"</div>
+            <p>Shift away from close manned escorts within the Strait. Deploy an AI-driven network of Unmanned
+              Surface/Underwater Vehicles (USVs/UUVs) to provide continuous ISR and track "dark targets."</p>
+            <p>Maintain CSGs in a standoff posture in the Gulf of Oman, providing long-range anti-air overwatch for
+              commercial vessels while remaining outside the Iranian ASCM kill zone.</p>
+            <p>Implement dynamic, non-kinetic Rules of Engagement (ROE) and strictly enforce CUES hotlines to
+              de-escalate gray-zone provocations.</p>
+          </div>
+        </div>
+
+        <div class="reveal-wrap">
+          <div class="step-block reveal stagger-4">
+            <div class="step-title">Step 2: Fortify the Indo-Pacific Supply Chain</div>
+            <p>Immediately coordinate with G7 partners to finance and expand strategic stockpiles of LNG and Qatari
+              helium in Taiwan and Japan, extending their reserve buffers beyond the current 1.5-week threshold.</p>
+            <p>Accelerate the near-shoring of helium recycling technology and critical semiconductor sub-component
+              manufacturing to the US and Europe to sever reliance on the Hormuz-Suez corridor.</p>
+          </div>
+        </div>
+
+        <div class="reveal-wrap">
+          <div class="step-block reveal stagger-5">
+            <div class="step-title">Step 3: Establish Middle Eastern "Economy of Force"</div>
+            <p>Transition security burdens to regional allies by formalizing a Middle East integrated air defense
+              architecture that does not rely exclusively on US interceptor inventory.</p>
+            <p>Coordinate phased, data-driven releases from the Strategic Petroleum Reserve (SPR) coupled with a
+              guaranteed price-triggered restocking mechanism to stabilize global markets and incentivize domestic US
+              production without draining reserves prematurely.</p>
+          </div>
+        </div>
+
+        <div class="reveal-wrap">
+          <div class="step-block reveal stagger-5">
+            <div class="step-title">Step 4: Execute Cross-Theater Deterrence</div>
+            <p><strong>Scale Industrial Base:</strong> Establish a Joint Defense Procurement Command with G7 and AUKUS
+              partners to rapidly mass-produce interceptors and long-range anti-ship missiles, addressing the critical
+              vulnerability of "bandwidth exhaustion."</p>
+            <p><strong>Pre-Triggered Sanctions:</strong> Implement an automatic, pre-codified multilateral sanctions
+              regime against the PRC that activates in the event of a Taiwan blockade, signaling unwavering resolve
+              despite Middle Eastern deployments.</p>
+          </div>
+        </div>
+
+      </div>
+    </section>
+
+  </div>
+
+  <script>
+    // Custom Cursor Logic
+    const cursorDot = document.querySelector('.cursor-dot');
+    const cursorRing = document.querySelector('.cursor-ring');
+
+    document.addEventListener('mousemove', (e) => {
+      cursorDot.style.transform = `translate(calc(${e.clientX}px - 50%), calc(${e.clientY}px - 50%))`;
+      // Slight delay for ring for smooth drag effect
+      setTimeout(() => {
+        cursorRing.style.transform = `translate(calc(${e.clientX}px - 50%), calc(${e.clientY}px - 50%))`;
+      }, 40);
+    });
+
+    document.addEventListener('mousedown', () => {
+      cursorRing.style.width = '20px';
+      cursorRing.style.height = '20px';
+      cursorRing.style.borderColor = 'rgba(255,42,0,1)';
+    });
+
+    document.addEventListener('mouseup', () => {
+      cursorRing.style.width = '30px';
+      cursorRing.style.height = '30px';
+      cursorRing.style.borderColor = 'rgba(255,42,0,0.5)';
+    });
+
+    // Interactive Hover on UI elements
+    const interactives = document.querySelectorAll('h2, .step-block, li');
+    interactives.forEach(el => {
+      el.addEventListener('mouseenter', () => {
+        cursorRing.style.width = '40px';
+        cursorRing.style.height = '40px';
+        cursorRing.style.borderRadius = '0%';
+      });
+      el.addEventListener('mouseleave', () => {
+        cursorRing.style.width = '30px';
+        cursorRing.style.height = '30px';
+        cursorRing.style.borderRadius = '50%';
+      });
+    });
+
+    // Scroll Tracking & Intersection Observer for Reveals
+    const carousel = document.getElementById('carousel');
+    const panels = document.querySelectorAll('.panel');
+    const counter = document.getElementById('nav-counter');
+
+    // Update UI Counter on scroll snap
+    carousel.addEventListener('scroll', () => {
+      const index = Math.round(carousel.scrollLeft / window.innerWidth) + 1;
+      counter.innerHTML = `PANEL [ 0${index} // 05 ]`;
+    });
+
+    // Reveal Animations
+    const observerOptions = {
+      root: carousel,
+      threshold: 0.5
+    };
+
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          entry.target.classList.add('is-active');
+        } else {
+          // Optional: remove class to replay animation when scrolling back
+          // entry.target.classList.remove('is-active');
+        }
+      });
+    }, observerOptions);
+
+    panels.forEach(panel => observer.observe(panel));
+
+  </script>
+</body>
+
+</html>

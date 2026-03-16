@@ -17,6 +17,27 @@ const articles = [
     href: "/escalation-risk.html",
     icon: "⚠️",
     accent: "from-red-500/20 to-orange-500/20"
+  },
+  {
+    title: "Mapping Regional Naval Assets",
+    description: "Detailed inventory of US Fifth Fleet logistics hubs and IRGC asymmetric coastal defense installations.",
+    href: "/mapping-naval-assests.html",
+    icon: "⚓",
+    accent: "from-slate-500/20 to-blue-500/20"
+  },
+  {
+    title: "Military & Tactical Operations",
+    description: "Strategic assessment of US-Iran military dynamics, naval posture, and kinetic escalation triggers.",
+    href: "/domain-report-3.html",
+    icon: "⚔️",
+    accent: "from-red-600/20 to-cyan-500/20"
+  },
+  {
+    title: "Strategic Maritime Recommendations",
+    description: "Stabilization strategies focusing on ROE adjustments, crisis comms, and autonomous ISR integration.",
+    href: "/military-speciific.html",
+    icon: "🧭",
+    accent: "from-emerald-500/20 to-sky-500/20"
   }
 ];
 
@@ -55,29 +76,47 @@ export default function AsymmetricHub() {
         </header>
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {articles.map((article, idx) => (
-            <a
-              key={idx}
-              href={article.href}
-              className="group relative block p-8 rounded-3xl bg-slate-900/40 border border-slate-800 hover:border-cyan-500/50 transition-all duration-500 hover:shadow-[0_0_40px_-10px_rgba(6,182,212,0.2)]"
-            >
-              <div className={`absolute inset-0 rounded-3xl bg-linear-to-br ${article.accent} opacity-0 group-hover:opacity-100 transition-opacity duration-500`} />
-              
-              <div className="relative z-10 h-full flex flex-col">
-                <div className="text-4xl mb-6">{article.icon}</div>
-                <h2 className="text-2xl font-bold text-white mb-3 group-hover:text-cyan-400 transition-colors">
-                  {article.title}
-                </h2>
-                <p className="text-slate-400 leading-relaxed grow">
-                  {article.description}
-                </p>
-                <div className="mt-8 flex items-center text-sm font-bold text-cyan-500/80 group-hover:text-cyan-400 transition-colors">
-                  READ REPORT
-                  <span className="ml-2 transform group-hover:translate-x-1 transition-transform">→</span>
+          {articles.map((article, idx) => {
+            const isDomainReport = article.href.includes('domain-report-3');
+            return (
+              <a
+                key={idx}
+                href={article.href}
+                className={`group relative block p-8 rounded-3xl bg-slate-900/40 border border-slate-800 transition-all duration-500 overflow-hidden shadow-2xl
+                  ${isDomainReport 
+                    ? 'lg:col-span-2 border-cyan-500/40 bg-linear-to-br from-slate-900 via-slate-900 to-cyan-950/30' 
+                    : 'hover:border-cyan-500/50 hover:shadow-[0_0_40px_-10px_rgba(6,182,212,0.2)]'
+                  }`}
+              >
+                {isDomainReport && (
+                  <div className="absolute top-4 right-4 z-20 px-3 py-1 rounded-full bg-cyan-500 text-slate-950 text-[10px] font-black tracking-tighter uppercase animate-pulse">
+                    Master Synthesis
+                  </div>
+                )}
+                
+                <div className={`absolute inset-0 rounded-3xl bg-linear-to-br ${article.accent} ${isDomainReport ? 'opacity-40' : 'opacity-0'} group-hover:opacity-100 transition-opacity duration-500`} />
+                
+                <div className="relative z-10 h-full flex flex-col">
+                  <div className="flex items-start justify-between mb-6">
+                    <div className="text-4xl">{article.icon}</div>
+                    {isDomainReport && <div className="text-cyan-500/50 font-mono text-xs">REF: DR-003</div>}
+                  </div>
+                  
+                  <h2 className={`font-bold text-white mb-3 group-hover:text-cyan-400 transition-colors ${isDomainReport ? 'text-4xl leading-tight' : 'text-2xl'}`}>
+                    {article.title}
+                  </h2>
+                  <p className={`text-slate-400 leading-relaxed grow ${isDomainReport ? 'text-lg max-w-2xl' : 'text-base'}`}>
+                    {article.description}
+                  </p>
+                  
+                  <div className="mt-8 flex items-center text-sm font-bold text-cyan-500 group-hover:text-cyan-400 transition-colors">
+                    {isDomainReport ? 'INITIALIZE FULL ANALYSIS' : 'READ REPORT'}
+                    <span className="ml-2 transform group-hover:translate-x-1 transition-transform">→</span>
+                  </div>
                 </div>
-              </div>
-            </a>
-          ))}
+              </a>
+            );
+          })}
         </div>
       </div>
     </main>

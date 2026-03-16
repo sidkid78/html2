@@ -104,7 +104,7 @@ export default function GeopoliticalHub() {
           <div className="lg:col-span-8 space-y-12">
             
             {/* Articles Grid */}
-            <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               {/* Card 1 */}
               <div className="group relative p-8 rounded-3xl bg-slate-900/40 border border-slate-800 hover:border-rose-500/50 transition-all duration-500 overflow-hidden shadow-2xl flex flex-col">
                 <div className="absolute top-0 right-0 w-32 h-32 bg-rose-500/5 blur-2xl -mr-16 -mt-16" />
@@ -162,21 +162,29 @@ export default function GeopoliticalHub() {
                 </Link>
               </div>
 
-              {/* Card 4 */}
-              <div className="group relative p-8 rounded-3xl bg-slate-900/40 border border-slate-800 hover:border-emerald-500/50 transition-all duration-500 overflow-hidden shadow-2xl flex flex-col">
-                <div className="absolute top-0 right-0 w-32 h-32 bg-emerald-500/5 blur-2xl -mr-16 -mt-16" />
-                <div className="text-4xl mb-6">🛡️</div>
-                <h3 className="text-xl font-bold text-white mb-4 group-hover:text-emerald-400 transition-colors">
+              {/* Card 4 - Elevated Master Synthesis */}
+              <div className="group relative p-8 rounded-3xl bg-linear-to-br from-slate-900 via-slate-900 to-rose-950/30 border border-rose-500/40 transition-all duration-500 overflow-hidden shadow-2xl flex flex-col md:col-span-2">
+                <div className="absolute top-4 right-4 z-20 px-3 py-1 rounded-full bg-rose-500 text-white text-[10px] font-black tracking-tighter uppercase animate-pulse">
+                  Master Synthesis
+                </div>
+                <div className="absolute top-0 left-0 w-full h-1 bg-linear-to-r from-rose-500 via-amber-500 to-rose-500 opacity-50" />
+                
+                <div className="flex items-start justify-between mb-6">
+                  <div className="text-4xl">🛡️</div>
+                  <div className="text-rose-500/50 font-mono text-xs">REF: DR-002</div>
+                </div>
+                
+                <h3 className="text-4xl font-bold text-white mb-4 group-hover:text-rose-400 transition-colors leading-tight">
                   Diplomacy & Alliance Leverage
                 </h3>
-                <p className="text-sm text-slate-400 mb-8 grow">
-                  Master report identifying systemic vulnerabilities and proposing a distributed &apos;Economy of Force&apos; strategy.
+                <p className="text-lg text-slate-300 mb-8 grow max-w-2xl leading-relaxed">
+                  Systemic master report identifying tactical vulnerabilities and proposing a distributed &apos;Economy of Force&apos; strategy across key global theaters.
                 </p>
                 <Link 
                   href="/domain-report-2.html" 
-                  className="inline-flex items-center text-emerald-400 font-bold hover:text-emerald-300 transition-colors group/link"
+                  className="inline-flex items-center text-rose-400 font-bold hover:text-rose-300 transition-colors group/link text-lg"
                 >
-                  Open Synthesis
+                  INITIALIZE FULL SYNTHESIS
                   <span className="ml-2 transform group-hover/link:translate-x-1 transition-transform">→</span>
                 </Link>
               </div>
