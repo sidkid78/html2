@@ -1,0 +1,527 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Diplomatic Countermeasures</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700;800&family=Inter:wght@300;400;500;600&display=swap');
+
+  :root {
+    --bg: #050505;
+    --surface: #111111;
+    --surface-hover: #1a1a1a;
+    --text-main: #e0e0e0;
+    --text-muted: #888888;
+    --accent: #0ea5e9; /* Electric blue from image */
+    --accent-glow: rgba(14, 165, 233, 0.2);
+    
+    --font-hero: 'JetBrains Mono', monospace;
+    --font-body: 'Inter', sans-serif;
+    
+    --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
+    --ease-in-out: cubic-bezier(0.65, 0, 0.35, 1);
+  }
+
+  * {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+  }
+
+  body, html {
+    width: 100%;
+    height: 100%;
+    background-color: var(--bg);
+    color: var(--text-main);
+    font-family: var(--font-body);
+    overflow: hidden; /* Hide body scroll, handle in container */
+  }
+
+  /* SVG Filters & Background Layer */
+  .svg-filters {
+    position: absolute;
+    width: 0;
+    height: 0;
+    pointer-events: none;
+  }
+
+  .bg-layer {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background-image: url('https://image.pollinations.ai/prompt/Cinematic%20minimalist%20global%20network%20map,%20electric%20blue%20nodes,%20deep%20black%20background,%20digital%20topography,%20diplomatic%20security%20aesthetic?width=1920&height=1080&nologo=true');
+    background-size: cover;
+    background-position: center;
+    opacity: 0.15;
+    mix-blend-mode: luminosity;
+    z-index: 0;
+    pointer-events: none;
+  }
+
+  .noise-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    pointer-events: none;
+    z-index: 1;
+    opacity: 0.4;
+    mix-blend-mode: overlay;
+  }
+
+  /* Carousel Container */
+  .carousel-container {
+    position: relative;
+    width: 100vw;
+    height: 100vh;
+    overflow-x: auto;
+    overflow-y: hidden;
+    scroll-snap-type: x mandatory;
+    display: flex;
+    z-index: 10;
+    scrollbar-width: none; /* Firefox */
+    -ms-overflow-style: none;  /* IE and Edge */
+  }
+  .carousel-container::-webkit-scrollbar {
+    display: none;
+  }
+
+  /* Progress Indicator */
+  .progress-tracker {
+    position: fixed;
+    bottom: 2rem;
+    left: 2rem;
+    z-index: 50;
+    display: flex;
+    gap: 1rem;
+    font-family: var(--font-hero);
+    font-size: 0.75rem;
+    letter-spacing: 0.1em;
+    color: var(--text-muted);
+  }
+  
+  .track-item {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    opacity: 0.3;
+    transition: opacity 0.4s var(--ease-out), color 0.4s var(--ease-out);
+  }
+
+  .track-item.active {
+    opacity: 1;
+    color: var(--accent);
+  }
+
+  .track-item::before {
+    content: '';
+    display: block;
+    width: 20px;
+    height: 1px;
+    background-color: currentColor;
+    transform: scaleX(0);
+    transform-origin: left;
+    transition: transform 0.4s var(--ease-out);
+  }
+
+  .track-item.active::before {
+    transform: scaleX(1);
+  }
+
+  /* Panel Archetype: Technical Grid */
+  .panel {
+    flex: 0 0 100vw;
+    width: 100vw;
+    height: 100vh;
+    scroll-snap-align: start;
+    padding: 6rem 4rem 4rem 4rem;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    position: relative;
+  }
+
+  /* Typography Hierarchy */
+  .meta-label {
+    font-family: var(--font-hero);
+    font-size: 0.85rem;
+    text-transform: uppercase;
+    letter-spacing: 0.15em;
+    color: var(--accent);
+    margin-bottom: 1rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+  
+  .meta-label::before {
+    content: '//';
+    opacity: 0.5;
+  }
+
+  .hero-title {
+    font-family: var(--font-hero);
+    font-size: clamp(2.5rem, 5vw, 5rem);
+    font-weight: 800;
+    line-height: 1.1;
+    margin-bottom: 2rem;
+    text-transform: uppercase;
+    max-width: 900px;
+    letter-spacing: -0.02em;
+  }
+
+  .body-text {
+    font-size: clamp(1rem, 1.2vw, 1.25rem);
+    line-height: 1.6;
+    color: var(--text-muted);
+    max-width: 700px;
+    font-weight: 300;
+  }
+
+  /* Grid Layouts for Content */
+  .content-grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 2rem;
+    margin-top: 2rem;
+    width: 100%;
+    max-width: 1400px;
+  }
+
+  @media (min-width: 1024px) {
+    .content-grid {
+      grid-template-columns: 1fr 1fr;
+      gap: 4rem;
+    }
+  }
+
+  .column-header {
+    font-family: var(--font-hero);
+    font-size: 1.2rem;
+    font-weight: 700;
+    margin-bottom: 1.5rem;
+    padding-bottom: 0.5rem;
+    border-bottom: 1px solid rgba(255,255,255,0.1);
+    color: var(--text-main);
+  }
+
+  /* Initiative Cards */
+  .initiative-card {
+    background: var(--surface);
+    border: 1px solid rgba(255,255,255,0.05);
+    padding: 1.5rem;
+    margin-bottom: 1.5rem;
+    transition: all 0.4s var(--ease-out);
+    position: relative;
+    overflow: hidden;
+  }
+
+  .initiative-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 2px;
+    height: 100%;
+    background: var(--accent);
+    transform: scaleY(0);
+    transform-origin: bottom;
+    transition: transform 0.4s var(--ease-out);
+  }
+
+  .initiative-card:hover {
+    background: var(--surface-hover);
+    border-color: rgba(255,255,255,0.1);
+    transform: translateX(10px);
+    box-shadow: -10px 0 20px var(--accent-glow);
+  }
+
+  .initiative-card:hover::before {
+    transform: scaleY(1);
+    transform-origin: top;
+  }
+
+  .initiative-title {
+    font-family: var(--font-hero);
+    font-size: 1rem;
+    font-weight: 700;
+    margin-bottom: 0.75rem;
+    color: var(--text-main);
+  }
+
+  .initiative-desc {
+    font-size: 0.95rem;
+    line-height: 1.5;
+    color: var(--text-muted);
+  }
+
+  /* Animations */
+  .anim-elem {
+    opacity: 0;
+    transform: translateY(30px);
+    transition: opacity 0.8s var(--ease-out), transform 0.8s var(--ease-out);
+  }
+
+  .panel.is-visible .anim-elem {
+    opacity: 1;
+    transform: translateY(0);
+  }
+
+  /* Staggering */
+  .stagger-1 { transition-delay: 100ms; }
+  .stagger-2 { transition-delay: 200ms; }
+  .stagger-3 { transition-delay: 300ms; }
+  .stagger-4 { transition-delay: 400ms; }
+  .stagger-5 { transition-delay: 500ms; }
+  .stagger-6 { transition-delay: 600ms; }
+
+  /* Glitch effect on hover for hero titles */
+  .hero-title:hover {
+    filter: url(#glitch);
+    color: var(--accent);
+    transition: color 0.2s;
+  }
+
+  .nav-hub {
+    position: fixed;
+    top: 2rem;
+    left: 2rem;
+    z-index: 100;
+    color: var(--accent);
+    font-family: var(--font-hero);
+    text-decoration: none;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    background: rgba(5,5,5,0.8);
+    padding: 0.5rem 1rem;
+    border: 1px solid rgba(14, 165, 233, 0.3);
+    backdrop-filter: blur(4px);
+    border-radius: 4px;
+    transition: all 0.3s;
+    font-size: 0.9rem;
+  }
+
+  .nav-hub:hover {
+    background: var(--accent);
+    color: var(--bg);
+    border-color: var(--accent);
+  }
+
+  @media (max-width: 768px) {
+    .panel {
+      padding: 4rem 2rem;
+    }
+    .progress-tracker {
+      flex-direction: column;
+      gap: 0.5rem;
+      bottom: 1rem;
+      left: 1rem;
+    }
+    .hero-title {
+      font-size: 2rem;
+    }
+  }
+</style>
+</head>
+<body>
+
+  <!-- HUB Navigation -->
+  <a href="/geopolitical-diplomacy" class="nav-hub">
+    <span>←</span> HUB_RETURN_INITIATED
+  </a>
+
+  <!-- SVG Filters -->
+  <svg class="svg-filters">
+    <defs>
+      <filter id="noise">
+        <feTurbulence type="fractalNoise" baseFrequency="0.7" numOctaves="3" stitchTiles="stitch">
+          <animate attributeName="seed" values="0;100" dur="1s" repeatCount="indefinite" />
+        </feTurbulence>
+        <feColorMatrix type="matrix" values="1 0 0 0 0, 0 1 0 0 0, 0 0 1 0 0, 0 0 0 0.1 0" />
+      </filter>
+      <filter id="glitch">
+        <feColorMatrix type="matrix" values="1 0 0 0 0  0 0 0 0 0  0 0 0 0 0  0 0 0 1 0" in="SourceGraphic" result="red" />
+        <feOffset dx="4" dy="0" in="red" result="redShifted" />
+        <feColorMatrix type="matrix" values="0 0 0 0 0  0 1 0 0 0  0 0 1 0 0  0 0 0 1 0" in="SourceGraphic" result="cyan" />
+        <feOffset dx="-4" dy="0" in="cyan" result="cyanShifted" />
+        <feMerge>
+          <feMergeNode in="redShifted" />
+          <feMergeNode in="cyanShifted" />
+        </feMerge>
+      </filter>
+    </defs>
+  </svg>
+
+  <!-- Backgrounds -->
+  <div class="bg-layer"></div>
+  <rect class="noise-overlay" style="filter: url(#noise); width: 100%; height: 100%;"></rect>
+
+  <!-- Navigation Tracker -->
+  <nav class="progress-tracker" id="tracker">
+    <div class="track-item active" data-target="0">01 STRATEGY</div>
+    <div class="track-item" data-target="1">02 MIDDLE EAST</div>
+    <div class="track-item" data-target="2">03 UKRAINE</div>
+    <div class="track-item" data-target="3">04 TAIWAN</div>
+  </nav>
+
+  <!-- Main Content -->
+  <main class="carousel-container" id="carousel">
+    
+    <!-- PANEL 1: Objective -->
+    <section class="panel" id="panel-0" data-page="0">
+      <div class="meta-label anim-elem stagger-1">Task Overview</div>
+      <h1 class="hero-title anim-elem stagger-2">Diplomatic Countermeasures & Stabilization</h1>
+      <p class="body-text anim-elem stagger-3">
+        Signal US resolve in Ukraine and Taiwan via multilateral alliances and economic deterrents without requiring a full military pivot from the Middle East.
+      </p>
+    </section>
+
+    <!-- PANEL 2: Middle East -->
+    <section class="panel" id="panel-1" data-page="1">
+      <div class="meta-label anim-elem stagger-1">Theater 01</div>
+      <h1 class="hero-title anim-elem stagger-2">Middle East Economy of Force</h1>
+      <p class="body-text anim-elem stagger-3">
+        Transition to a localized burden-sharing posture in the Middle East. By leveraging the Abraham Accords framework and empowering regional partners (e.g., Saudi Arabia, UAE, Israel) to take the lead on local maritime security and anti-drone defense networks, the US can free up critical strategic bandwidth and naval assets for the Indo-Pacific and Europe without creating a regional power vacuum.
+      </p>
+    </section>
+
+    <!-- PANEL 3: Ukraine -->
+    <section class="panel" id="panel-2" data-page="2">
+      <div class="meta-label anim-elem stagger-1">Theater 02</div>
+      <h1 class="hero-title anim-elem stagger-2">Ukraine Countermeasures</h1>
+      
+      <div class="content-grid">
+        <div class="anim-elem stagger-3">
+          <h2 class="column-header">Multilateral Alliances</h2>
+          <div class="initiative-card">
+            <h3 class="initiative-title">Institutionalization of the Ukraine Defense Contact Group (UDCG)</h3>
+            <p class="initiative-desc">Transition the 'Ramstein format' from an ad-hoc coalition into a formalized, treaty-backed Joint Defense Procurement and Logistics Command. This secures long-term, predictable military aid and signals to Russia that Western support is deeply institutionalized and immune to individual domestic political shifts.</p>
+          </div>
+          <div class="initiative-card">
+            <h3 class="initiative-title">NATO-Ukraine Interoperability and Cyber Shield</h3>
+            <p class="initiative-desc">Establish multilateral cyber defense and intelligence-sharing hubs in frontline Eastern European states (e.g., Poland, Romania). By integrating Ukrainian officers into joint threat-hunting operations, the US signals deep, structural alliance integration short of formal Article 5 guarantees.</p>
+          </div>
+        </div>
+        
+        <div class="anim-elem stagger-4">
+          <h2 class="column-header">Economic Deterrents</h2>
+          <div class="initiative-card">
+            <h3 class="initiative-title">Aggressive Secondary Sanctions on Evasion Networks</h3>
+            <p class="initiative-desc">Implement targeted secondary sanctions on third-party financial institutions (particularly in the PRC, Central Asia, and the Gulf) that facilitate the transfer of dual-use technologies to Russia's military-industrial complex.</p>
+          </div>
+          <div class="initiative-card">
+            <h3 class="initiative-title">Multilateral Sovereign Asset Confiscation</h3>
+            <p class="initiative-desc">Coordinate with the G7 and EU to transition from merely utilizing the interest of immobilized Russian sovereign assets to the legal confiscation and transfer of the principal funds into a formalized 'Ukraine Reconstruction and Defense Trust'.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- PANEL 4: Taiwan -->
+    <section class="panel" id="panel-3" data-page="3">
+      <div class="meta-label anim-elem stagger-1">Theater 03</div>
+      <h1 class="hero-title anim-elem stagger-2">Taiwan Countermeasures</h1>
+      
+      <div class="content-grid">
+        <div class="anim-elem stagger-3">
+          <h2 class="column-header">Multilateral Alliances</h2>
+          <div class="initiative-card">
+            <h3 class="initiative-title">Expansion of AUKUS Pillar II and Quad Integration</h3>
+            <p class="initiative-desc">Incorporate regional allies like Japan and South Korea into AUKUS Pillar II (advanced asymmetric capabilities like AI, quantum, and hypersonics). Expand the Quad's Indo-Pacific Maritime Domain Awareness (IPMDA) initiative to implicitly integrate and share early-warning data with Taipei.</p>
+          </div>
+          <div class="initiative-card">
+            <h3 class="initiative-title">G7 Cross-Strait Contingency Planning</h3>
+            <p class="initiative-desc">Establish a formalized G7 working group dedicated to cross-strait contingencies. This explicitly links European economic security to Indo-Pacific stability, signaling to Beijing a united Western front that transcends regional US bilateral treaties.</p>
+          </div>
+        </div>
+        
+        <div class="anim-elem stagger-4">
+          <h2 class="column-header">Economic Deterrents</h2>
+          <div class="initiative-card">
+            <h3 class="initiative-title">Pre-Triggered Multilateral Sanctions Regime ('Economic Article 5')</h3>
+            <p class="initiative-desc">Codify a pre-negotiated, classified but publicly acknowledged package of severe, automatic capital controls, SWIFT expulsions, and trade embargoes with G7 and EU partners that trigger instantly upon a blockade or kinetic action against Taiwan.</p>
+          </div>
+          <div class="initiative-card">
+            <h3 class="initiative-title">Strategic Tech 'Friend-Shoring' and Supply Chain Weaponization</h3>
+            <p class="initiative-desc">Leverage CHIPS Act expansions and allied equivalents (e.g., EU Chips Act) to rapidly diversify critical semiconductor and battery supply chains away from mainland China. Simultaneously tighten multilateral export controls on legacy node manufacturing equipment to constrain Chinese market dominance.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      const panels = document.querySelectorAll('.panel');
+      const trackers = document.querySelectorAll('.track-item');
+      const carousel = document.getElementById('carousel');
+
+      // Intersection Observer to trigger entrance animations and update tracker
+      const observerOptions = {
+        root: carousel,
+        rootMargin: '0px',
+        threshold: 0.5 // Trigger when panel is 50% in view
+      };
+
+      const observer = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+          if (entry.isIntersecting) {
+            // Add visibility class for CSS animations
+            entry.target.classList.add('is-visible');
+            
+            // Update Tracker
+            const index = entry.target.dataset.page;
+            trackers.forEach(t => t.classList.remove('active'));
+            if(trackers[index]) trackers[index].classList.add('active');
+          }
+        });
+      }, observerOptions);
+
+      panels.forEach(panel => observer.observe(panel));
+
+      // Custom Cursor Logic
+      const cursor = document.createElement('div');
+      cursor.style.cssText = `
+        width: 20px;
+        height: 20px;
+        border: 1px solid var(--accent);
+        position: fixed;
+        border-radius: 50%;
+        pointer-events: none;
+        z-index: 9999;
+        transform: translate(-50%, -50%);
+        transition: width 0.2s, height 0.2s, background-color 0.2s;
+        mix-blend-mode: difference;
+      `;
+      document.body.appendChild(cursor);
+      document.body.style.cursor = 'none';
+
+      document.addEventListener('mousemove', (e) => {
+        cursor.style.left = e.clientX + 'px';
+        cursor.style.top = e.clientY + 'px';
+      });
+
+      // Expand cursor on interactive elements
+      const interactives = document.querySelectorAll('.initiative-card, .track-item, .hero-title, .nav-hub');
+      interactives.forEach(el => {
+        el.addEventListener('mouseenter', () => {
+          cursor.style.width = '40px';
+          cursor.style.height = '40px';
+          cursor.style.backgroundColor = 'rgba(14, 165, 233, 0.1)';
+        });
+        el.addEventListener('mouseleave', () => {
+          cursor.style.width = '20px';
+          cursor.style.height = '20px';
+          cursor.style.backgroundColor = 'transparent';
+        });
+      });
+    });
+  </script>
+</body>
+</html>

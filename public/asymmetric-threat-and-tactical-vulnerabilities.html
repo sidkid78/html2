@@ -1,0 +1,551 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Tactical Vulnerability Analysis</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600&family=Share+Tech+Mono&family=Teko:wght@400;600&display=swap');
+
+    :root {
+      --c-bg: #050507;
+      --c-text: #d4d4d8;
+      --c-accent: #ff4500;
+      --c-accent-dim: rgba(255, 69, 0, 0.2);
+      --c-panel: rgba(10, 10, 12, 0.85);
+
+      --f-hero: 'Teko', sans-serif;
+      --f-body: 'Inter', sans-serif;
+      --f-mono: 'Share Tech Mono', monospace;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      cursor: none !important;
+    }
+
+    body {
+      background-color: var(--c-bg);
+      color: var(--c-text);
+      font-family: var(--f-body);
+      overflow-x: hidden;
+      line-height: 1.6;
+    }
+
+    /* Custom Cursor */
+    #cursor-dot,
+    #cursor-ring {
+      position: fixed;
+      top: 0;
+      left: 0;
+      transform: translate(-50%, -50%);
+      border-radius: 50%;
+      pointer-events: none;
+      z-index: 9999;
+    }
+
+    #cursor-dot {
+      width: 4px;
+      height: 4px;
+      background-color: var(--c-accent);
+    }
+
+    #cursor-ring {
+      width: 30px;
+      height: 30px;
+      border: 1px solid var(--c-accent-dim);
+      transition: width 0.2s, height 0.2s;
+    }
+
+    /* SVG Filters & Overlays */
+    .screen-fx {
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      z-index: 100;
+    }
+
+    .noise {
+      opacity: 0.15;
+      mix-blend-mode: overlay;
+    }
+
+    .scanlines {
+      background: linear-gradient(to bottom, rgba(255, 255, 255, 0), rgba(255, 255, 255, 0) 50%, rgba(0, 0, 0, 0.2) 50%, rgba(0, 0, 0, 0.2));
+      background-size: 100% 4px;
+      opacity: 0.3;
+    }
+
+    .vignette {
+      box-shadow: inset 0 0 150px rgba(0, 0, 0, 0.9);
+    }
+
+    /* Background Images */
+    .bg-container {
+      position: fixed;
+      inset: 0;
+      z-index: 0;
+      background-color: #000;
+    }
+
+    .bg-layer {
+      position: absolute;
+      inset: 0;
+      background-size: cover;
+      background-position: center;
+      opacity: 0;
+      transform: scale(1.05);
+      transition: opacity 1.5s cubic-bezier(0.25, 1, 0.5, 1), transform 10s linear;
+      filter: url('#tactical-vision');
+    }
+
+    .bg-layer.active {
+      opacity: 0.4;
+      transform: scale(1);
+    }
+
+    /* Layout */
+    main {
+      position: relative;
+      z-index: 10;
+      width: 100%;
+      max-width: 800px;
+      margin: 0 auto;
+      padding: 0 20px;
+    }
+
+    section {
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      padding: 100px 0;
+    }
+
+    /* Panels & Content */
+    .dossier-panel {
+      background: var(--c-panel);
+      border: 1px solid var(--c-accent-dim);
+      padding: 40px;
+      position: relative;
+      -webkit-backdrop-filter: blur(10px);
+      backdrop-filter: blur(10px);
+
+      opacity: 0;
+      transform: translateY(40px);
+      transition: all 0.8s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    .dossier-panel::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 20px;
+      height: 2px;
+      background: var(--c-accent);
+    }
+
+    .dossier-panel::after {
+      content: '';
+      position: absolute;
+      bottom: 0;
+      right: 0;
+      width: 20px;
+      height: 2px;
+      background: var(--c-accent);
+    }
+
+    .dossier-panel.visible {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    /* Typography */
+    .meta {
+      font-family: var(--f-mono);
+      font-size: 0.8rem;
+      color: var(--c-accent);
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      margin-bottom: 20px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .meta::before {
+      content: '';
+      display: block;
+      width: 8px;
+      height: 8px;
+      background: var(--c-accent);
+      animation: blink 2s infinite;
+    }
+
+    h1,
+    h2,
+    h3 {
+      font-family: var(--f-hero);
+      text-transform: uppercase;
+      line-height: 1.1;
+      margin-bottom: 1rem;
+    }
+
+    h1 {
+      font-size: clamp(3rem, 6vw, 5rem);
+      color: #fff;
+      text-shadow: 0 0 10px rgba(255, 69, 0, 0.3);
+      margin-bottom: 2rem;
+    }
+
+    h2 {
+      font-size: clamp(2rem, 4vw, 3rem);
+      color: var(--c-text);
+      border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+      padding-bottom: 10px;
+      margin-top: 2rem;
+    }
+
+    h3 {
+      font-size: 1.5rem;
+      color: var(--c-accent);
+      margin-top: 1.5rem;
+      letter-spacing: 0.05em;
+    }
+
+    p {
+      margin-bottom: 1.5rem;
+      font-weight: 300;
+    }
+
+    strong {
+      color: #fff;
+      font-weight: 600;
+    }
+
+    ul {
+      list-style-type: none;
+      margin-bottom: 1.5rem;
+    }
+
+    li {
+      position: relative;
+      padding-left: 20px;
+      margin-bottom: 1rem;
+      font-weight: 300;
+    }
+
+    li::before {
+      content: '>';
+      font-family: var(--f-mono);
+      color: var(--c-accent);
+      position: absolute;
+      left: 0;
+      top: 0;
+    }
+
+    /* Animations */
+    @keyframes blink {
+
+      0%,
+      100% {
+        opacity: 1;
+      }
+
+      50% {
+        opacity: 0.3;
+      }
+    }
+
+    /* Intro specific */
+    .title-seq h1 {
+      opacity: 0;
+      transform: scale(0.95);
+      animation: hero-in 1.5s cubic-bezier(0.16, 1, 0.3, 1) forwards 0.5s;
+    }
+
+    @keyframes hero-in {
+      to {
+        opacity: 1;
+        transform: scale(1);
+      }
+    }
+  </style>
+</head>
+
+<body>
+
+  <svg style="display:none;">
+    <defs>
+      <!-- Reconnaissance Vision Filter -->
+      <filter id="tactical-vision">
+        <feColorMatrix type="matrix" values="
+        0.33 0.33 0.33 0 0
+        0.33 0.33 0.33 0 0
+        0.33 0.33 0.33 0 0
+        0    0    0    1 0" />
+        <feComponentTransfer>
+          <feFuncR type="linear" slope="1.5" intercept="0.1" />
+          <feFuncG type="linear" slope="0.5" intercept="0" />
+          <feFuncB type="linear" slope="0.2" intercept="0" />
+        </feComponentTransfer>
+      </filter>
+      <!-- Animated Noise -->
+      <filter id="static">
+        <feTurbulence type="fractalNoise" baseFrequency="0.8" numOctaves="3" stitchTiles="stitch">
+          <animate attributeName="seed" values="0;10;0" dur="1s" repeatCount="indefinite" />
+        </feTurbulence>
+        <feColorMatrix type="matrix" values="1 0 0 0 0, 0 1 0 0 0, 0 0 1 0 0, 0 0 0 0.2 0" />
+      </filter>
+    </defs>
+  </svg>
+
+  <div class="screen-fx scanlines"></div>
+  <div class="screen-fx noise" style="filter: url(#static);"></div>
+  <div class="screen-fx vignette"></div>
+
+  <div id="cursor-dot"></div>
+  <div id="cursor-ring"></div>
+
+<a href="/asymmetric-threats" style="position:fixed;top:2rem;left:2rem;z-index:1000;color:#06b6d4;font-family:monospace;text-decoration:none;display:flex;align-items:center;gap:0.5rem;background:rgba(3,4,6,0.8);padding:0.6rem 1.2rem;border:1px solid rgba(6,182,212,0.3);backdrop-filter:blur(8px);border-radius:2px;transition:all 0.3s;font-size:0.8rem;text-transform:uppercase;letter-spacing:0.1em;pointer-events:auto;" onmouseover="this.style.background='#06b6d4';this.style.color='#030406'" onmouseout="this.style.background='rgba(3,4,6,0.8)';this.style.color='#06b6d4'">
+  <span>←</span> HUB_RETURN_INITIATED
+</a>
+
+  <div class="bg-container">
+    <div class="bg-layer active" id="bg-1" style="background-image: url('./images/scene-1(8).jpg')"></div>
+    <div class="bg-layer" id="bg-2" style="background-image: url('./images/scene-2(8).jpg')"></div>
+    <div class="bg-layer" id="bg-3" style="background-image: url('./images/scene-3(8).jpg')"></div>
+    <div class="bg-layer" id="bg-4" style="background-image: url('./images/scene-4(8).jpg')"></div>
+    <div class="bg-layer" id="bg-5" style="background-image: url('./images/scene-5(9).jpg')"></div>
+  </div>
+
+  <main>
+    <!-- Section 1: Title & Goal -->
+    <section data-bg="1">
+      <div class="dossier-panel title-seq visible">
+        <div class="meta">SYS.REC // workers/tactical_vulnerabilities.md</div>
+        <h1>Asymmetric Threat and Tactical Vulnerability Analysis</h1>
+
+        <p><strong>Goal:</strong> Analyze the tactical effectiveness of Iranian asymmetric capabilities, specifically
+          fast-attack craft (swarm tactics), sea mines, and anti-ship cruise missiles against US naval architecture.
+          Identify specific vulnerabilities of US assets in restricted waterways. Save your findings to a file named
+          'workers/tactical_vulnerabilities.md'.</p>
+
+        <p><strong>Result:</strong> Technical assessment of Iranian asymmetric maritime threats (FAC/FIAC swarms, sea
+          mines, and ASCMs) identifies significant tactical vulnerabilities in US naval architecture, particularly in
+          restricted waterways like the Strait of Hormuz. Iranian 'swarm' tactics aim to bypass the Aegis Combat System
+          by exceeding engagement capacity (N+1 rule). Sea mines force US assets into predictable channels, where they
+          become targets for land-based ASCMs like the Noor or Ghadir. US platforms, including the Arleigh Burke-class
+          and LCS, face sensor saturation and economic asymmetry, where expensive interceptors are used against low-cost
+          drones and small boats. The synergy of these capabilities exploits the physical constraints of narrow channels
+          and the technical/economic limitations of high-end US defense systems.</p>
+      </div>
+    </section>
+
+    <!-- Section 2: Key Findings -->
+    <section data-bg="2">
+      <div class="dossier-panel">
+        <div class="meta">SUMMARY.DATA // OVERVIEW</div>
+        <h2>Key Findings:</h2>
+        <ul>
+          <li>Iranian swarm tactics utilize hundreds of small, agile craft and suicide USVs to saturate US ship-borne
+            defensive systems (CIWS, Mk 38).</li>
+          <li>Sea mine warfare acts as a 'sea denial' force multiplier, channeling US vessels into predictable paths
+            vulnerable to secondary attacks.</li>
+          <li>Restricted maneuver space in the Strait of Hormuz neutralizes US speed and standoff advantages, reducing
+            early warning windows to seconds.</li>
+          <li>Economic asymmetry between high-cost US interceptors ($2M+) and low-cost Iranian assets ($20k) poses a
+            long-term magazine depletion risk.</li>
+          <li>The combined-arms synergy of mines (fixing), swarms (distracting), and ASCMs (lethal strike) represents
+            the most significant threat to US assets.</li>
+        </ul>
+      </div>
+    </section>
+
+    <!-- Section 3: Assessment 1 -->
+    <section data-bg="2">
+      <div class="dossier-panel">
+        <div class="meta">ASSESSMENT.PART_01 // CAPABILITIES</div>
+        <h1>Technical Assessment: Iranian Asymmetric Threats vs. US Naval Architecture</h1>
+        <h2>1. Iranian Asymmetric Capability Analysis</h2>
+
+        <h3>A. Fast-Attack Craft (FAC) and Swarm Tactics</h3>
+        <p>Iranian naval doctrine, primarily executed by the Islamic Revolutionary Guard Corps Navy (IRGCN), revolves
+          around "swarm" tactics designed to overwhelm technologically superior adversaries.</p>
+        <ul>
+          <li><strong>Tactical Execution:</strong> Swarms utilize hundreds of small, agile boats (e.g.,
+            <em>Peykaap</em>, <em>Zolfaghar</em>, <em>Seraj</em> classes) to converge on high-value targets from
+            multiple vectors simultaneously.</li>
+          <li><strong>The "N+1" Rule:</strong> Iran aims to overwhelm a ship's tactical data links and weapons systems
+            by deploying more targets than the ship’s defensive suite (e.g., Phalanx CIWS, Mk 38 25mm guns) can engage
+            in a single window.</li>
+          <li><strong>Integration:</strong> Modern swarm tactics incorporate Uncrewed Aerial Vehicles (UAVs) for
+            real-time targeting and "suicide" uncrewed surface vessels (USVs) laden with explosives to bridge the gap
+            between harassment and lethal strikes.</li>
+        </ul>
+
+        <h3>B. Sea Mine Warfare</h3>
+        <p>Sea mines represent Iran’s most potent "sea denial" tool due to their low cost and high psychological impact.
+        </p>
+        <ul>
+          <li><strong>Capabilities:</strong> Iran possesses an estimated inventory of 2,000 to 6,000 mines, including
+            legacy contact mines and modern "influence" mines (triggered by acoustic, magnetic, or pressure signatures).
+          </li>
+          <li><strong>Deployment:</strong> Use of non-traditional minelayers (commercial dhows or <em>Ashoora</em>-class
+            small boats) allows for "stealth mining" that is difficult for US surveillance to preempt.</li>
+          <li><strong>Tactical Effect:</strong> Even the <em>rumor</em> of mines can paralyze commercial traffic and
+            force US warships into slow, predictable Mine Countermeasure (MCM) "cleared lanes," making them vulnerable
+            to secondary attacks.</li>
+        </ul>
+      </div>
+    </section>
+
+    <!-- Section 4: Assessment 2 (Missiles) -->
+    <section data-bg="3">
+      <div class="dossier-panel">
+        <div class="meta">ASSESSMENT.PART_02 // KINETIC_STRIKE</div>
+        <h3>C. Anti-Ship Cruise Missiles (ASCMs)</h3>
+        <p>Iran’s ASCM inventory has evolved from short-range coastal defense to long-range regional denial.</p>
+        <ul>
+          <li><strong>Key Systems:</strong> The <em>Noor</em> and <em>Ghadir</em> (300km range) are optimized for
+            chokepoints. Newer systems like the <em>Abu Mahdi</em> (1,000km+ range) use AI-powered seekers and
+            sea-skimming flight profiles to bypass Aegis radar horizons.</li>
+          <li><strong>Mobility:</strong> Land-based ASCMs are deployed on highly mobile coastal launchers, hidden in
+            rugged terrain or civilian infrastructure, making them "time-sensitive targets" that are difficult to
+            eliminate via preemptive air strikes.</li>
+        </ul>
+      </div>
+    </section>
+
+    <!-- Section 5: US Vulnerabilities -->
+    <section data-bg="4">
+      <div class="dossier-panel">
+        <div class="meta">ANALYSIS // RED_TEAM_PERSPECTIVE</div>
+        <h2>2. US Naval Architecture Vulnerabilities</h2>
+
+        <h3>A. Platform-Specific Weaknesses</h3>
+        <ul>
+          <li><strong>Arleigh Burke-class (DDG):</strong> While the "backbone" of the fleet, these ships have a large
+            radar cross-section and are "thin-skinned" compared to historical cruisers. Their primary defense, the Aegis
+            Combat System, can be saturated by high-volume, low-tech swarms.</li>
+          <li><strong>Littoral Combat Ship (LCS):</strong> Despite being designed for these environments, the LCS
+            suffers from limited magazine depth and questionable survivability (Level 1+). Its MCM modules are slow to
+            deploy and leave the ship vulnerable during clearance operations.</li>
+          <li><strong>Carrier Strike Groups (CSGs):</strong> The sheer size of a carrier limits its maneuverability in
+            restricted waters. Escorts must maintain a tight "defensive bubble," which can be stretched thin if forced
+            to defend against simultaneous swarm, mine, and missile threats.</li>
+        </ul>
+
+        <h3>B. Restricted Waterway Vulnerabilities (Strait of Hormuz)</h3>
+        <ul>
+          <li><strong>Maneuver Space:</strong> In channels as narrow as 21 miles (with only 2-mile wide shipping lanes),
+            US ships cannot utilize their speed or standoff advantages. They are effectively "channeled" into kill
+            zones.</li>
+          <li><strong>Sensor Saturation:</strong> Proximity to the Iranian coastline (often <10 miles) reduces
+              the "Early Warning" window for incoming missiles to seconds. High clutter from civilian traffic further
+              complicates target discrimination.</li>
+          <li><strong>Economic Asymmetry:</strong> US defenses rely on expensive interceptors ($2M–$4M per SM-2/SM-6) to
+            counter cheap Iranian assets ($20k drones/boats). In a prolonged engagement, US magazines could be depleted
+            before the threat is neutralized.</li>
+        </ul>
+      </div>
+    </section>
+
+    <!-- Section 6: Conclusion -->
+    <section data-bg="5">
+      <div class="dossier-panel">
+        <div class="meta">SYNTHESIS // END_REPORT</div>
+        <h2>3. Combined Tactical Effectiveness</h2>
+        <p>The true effectiveness of Iranian capabilities lies in <strong>weapon system synergy</strong>:</p>
+        <ul>
+          <li><strong>1. Mines</strong> force US assets to slow down and follow a predictable path.</li>
+          <li><strong>2. Swarms</strong> draw out defensive fire and saturate sensors.</li>
+          <li><strong>3. ASCMs</strong> deliver the lethal blow while the ship’s defenses are occupied with the swarm or
+            restricted by minefield navigation.</li>
+        </ul>
+
+        <h2>4. Conclusion</h2>
+        <p>US naval architecture remains optimized for "Blue Water" (open ocean) dominance. In "Brown Water" (littoral)
+          environments like the Strait of Hormuz, Iranian asymmetric tactics successfully exploit the physical
+          constraints of the geography and the technical/economic limitations of high-end US defense systems.</p>
+      </div>
+    </section>
+
+  </main>
+
+  <script>
+    // Custom Cursor Logic
+    const dot = document.getElementById('cursor-dot');
+    const ring = document.getElementById('cursor-ring');
+
+    let mouseX = window.innerWidth / 2;
+    let mouseY = window.innerHeight / 2;
+    let ringX = mouseX;
+    let ringY = mouseY;
+
+    window.addEventListener('mousemove', (e) => {
+      mouseX = e.clientX;
+      mouseY = e.clientY;
+    });
+
+    function animateCursor() {
+      // Instant dot tracking
+      dot.style.transform = `translate(${mouseX}px, ${mouseY}px)`;
+      // Interpolated ring tracking for smooth lag
+      ringX += (mouseX - ringX) * 0.15;
+      ringY += (mouseY - ringY) * 0.15;
+      ring.style.transform = `translate(${ringX}px, ${ringY}px)`;
+      requestAnimationFrame(animateCursor);
+    }
+    animateCursor();
+
+    // Scroll Reveal & Background Switch Logic
+    const observerOptions = {
+      root: null,
+      rootMargin: '0px',
+      threshold: 0.4
+    };
+
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          // Reveal Panel
+          const panel = entry.target.querySelector('.dossier-panel');
+          if (panel) panel.classList.add('visible');
+
+          // Switch Background
+          const bgId = entry.target.getAttribute('data-bg');
+          if (bgId) {
+            document.querySelectorAll('.bg-layer').forEach(bg => bg.classList.remove('active'));
+            const activeBg = document.getElementById('bg-' + bgId);
+            if (activeBg) activeBg.classList.add('active');
+          }
+        }
+      });
+    }, observerOptions);
+
+    document.querySelectorAll('section').forEach(sec => {
+      observer.observe(sec);
+    });
+
+    // Interactive Hover state for cursor on links/panels
+    document.querySelectorAll('.dossier-panel').forEach(el => {
+      el.addEventListener('mouseenter', () => {
+        ring.style.width = '50px';
+        ring.style.height = '50px';
+        ring.style.borderColor = '#ff4500';
+      });
+      el.addEventListener('mouseleave', () => {
+        ring.style.width = '30px';
+        ring.style.height = '30px';
+        ring.style.borderColor = 'rgba(255, 69, 0, 0.2)';
+      });
+    });
+  </script>
+</body>
+
+</html>

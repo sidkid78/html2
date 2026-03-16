@@ -1,0 +1,426 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Four Gateways Strategic Dossier</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600&family=Oswald:wght@500;700&family=Roboto+Mono:wght@400;700&display=swap');
+
+    :root {
+      --bg: #050506;
+      --text: #f4f4f5;
+      --accent: #ff2a2a;
+      --muted: #8a8a93;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      background-color: var(--bg);
+      color: var(--text);
+      font-family: 'Inter', sans-serif;
+      overflow-x: hidden;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    /* Hide Scrollbar */
+    ::-webkit-scrollbar {
+      width: 0px;
+      background: transparent;
+    }
+
+    /* Typography */
+    h1,
+    h2,
+    h3,
+    .hero-font {
+      font-family: 'Oswald', sans-serif;
+      text-transform: uppercase;
+    }
+
+    .mono {
+      font-family: 'Roboto Mono', monospace;
+    }
+
+    /* Structural Classes */
+    .panel {
+      position: relative;
+      min-height: 100vh;
+      width: 100vw;
+      display: flex;
+      align-items: center;
+      padding: 5vw;
+      overflow: hidden;
+    }
+
+    .panel-content {
+      position: relative;
+      z-index: 10;
+      max-w: 1200px;
+      width: 100%;
+      margin: 0 auto;
+    }
+
+    .bg-layer {
+      position: absolute;
+      top: -10%;
+      left: -10%;
+      right: -10%;
+      bottom: -10%;
+      background-size: cover;
+      background-position: center;
+      z-index: 1;
+      will-change: transform;
+    }
+
+    .overlay {
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(to bottom, rgba(5, 5, 6, 0.3) 0%, rgba(5, 5, 6, 0.9) 80%, #050506 100%);
+      z-index: 2;
+    }
+
+    /* SVG Filters & Effects */
+    .svg-filters {
+      position: absolute;
+      width: 0;
+      height: 0;
+      pointer-events: none;
+    }
+
+    .noise-overlay {
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      z-index: 9999;
+      opacity: 0.25;
+      mix-blend-mode: overlay;
+      background: url('data:image/svg+xml;utf8,%3Csvg viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg"%3E%3Cfilter id="noiseFilter"%3E%3CfeTurbulence type="fractalNoise" baseFrequency="0.85" numOctaves="3" stitchTiles="stitch"/%3E%3C/filter%3E%3Crect width="100%25" height="100%25" filter="url(%23noiseFilter)"/%3E%3C/svg%3E');
+    }
+
+    /* UI Elements */
+    #progress-bar {
+      position: fixed;
+      top: 0;
+      left: 0;
+      height: 3px;
+      background: var(--accent);
+      z-index: 1000;
+      width: 0%;
+      box-shadow: 0 0 10px var(--accent);
+    }
+
+    .fixed-header {
+      position: fixed;
+      top: 2rem;
+      left: 2rem;
+      z-index: 100;
+      mix-blend-mode: difference;
+    }
+
+    .data-label {
+      font-size: 0.75rem;
+      letter-spacing: 0.2em;
+      color: var(--accent);
+      margin-bottom: 1rem;
+      display: block;
+    }
+
+    /* Animation States */
+    .reveal {
+      opacity: 0;
+      transform: translateY(40px);
+      transition: opacity 1s cubic-bezier(0.19, 1, 0.22, 1), transform 1s cubic-bezier(0.19, 1, 0.22, 1);
+    }
+
+    .reveal.is-visible {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    .delay-1 {
+      transition-delay: 100ms;
+    }
+
+    .delay-2 {
+      transition-delay: 200ms;
+    }
+
+    .delay-3 {
+      transition-delay: 300ms;
+    }
+
+    .delay-4 {
+      transition-delay: 400ms;
+    }
+
+    /* Specific Layouts */
+    .grid-3 {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      gap: 2rem;
+    }
+
+    .border-left {
+      border-left: 1px solid rgba(255, 255, 255, 0.1);
+      padding-left: 1.5rem;
+    }
+
+    .glitch-hover:hover {
+      filter: url(#chromatic);
+      color: var(--accent);
+      transition: color 0.2s;
+    }
+  </style>
+</head>
+
+<body>
+
+<a href="/geopolitical-diplomacy" style="position:fixed;top:2rem;left:2rem;z-index:200;color:var(--accent);font-family:'Roboto Mono',monospace;text-decoration:none;display:flex;align-items:center;gap:0.5rem;background:rgba(5,5,6,0.8);padding:0.5rem 1rem;border:1px solid rgba(255,42,42,0.3);backdrop-filter:blur(4px);border-radius:4px;transition:all 0.3s;font-size:0.9rem;" onmouseover="this.style.background='var(--accent)';this.style.color='#050506'" onmouseout="this.style.background='rgba(5,5,6,0.8)';this.style.color='var(--accent)'">
+  <span>←</span> HUB_RETURN_INITIATED
+</a>
+
+  <svg class="svg-filters">
+    <defs>
+      <filter id="chromatic">
+        <feColorMatrix type="matrix" values="1 0 0 0 0  0 0 0 0 0  0 0 0 0 0  0 0 0 1 0" in="SourceGraphic"
+          result="red" />
+        <feOffset dx="3" dy="0" in="red" result="red_offset" />
+        <feColorMatrix type="matrix" values="0 0 0 0 0  0 1 0 0 0  0 0 0 0 0  0 0 0 1 0" in="SourceGraphic"
+          result="green" />
+        <feOffset dx="-3" dy="0" in="green" result="green_offset" />
+        <feColorMatrix type="matrix" values="0 0 0 0 0  0 0 0 0 0  0 0 1 0 0  0 0 0 1 0" in="SourceGraphic"
+          result="blue" />
+        <feMerge>
+          <feMergeNode in="red_offset" />
+          <feMergeNode in="green_offset" />
+          <feMergeNode in="blue" />
+        </feMerge>
+      </filter>
+    </defs>
+  </svg>
+
+  <div class="noise-overlay"></div>
+  <div id="progress-bar"></div>
+
+  <div class="fixed-header mono data-label">
+    SYS_ID: 4G_FW // STRAT_MAP_ACTIVE
+  </div>
+
+  <!-- PANEL 1: OVERVIEW -->
+  <section class="panel" id="panel-1">
+    <div class="bg-layer" style="background-image: url('./images/scene-1(5).jpg');"></div>
+    <div class="overlay"></div>
+
+    <div class="panel-content">
+      <span class="mono data-label reveal">FRAMEWORK_OVERVIEW</span>
+      <h1 class="hero-font glitch-hover reveal delay-1"
+        style="font-size: clamp(4rem, 10vw, 8rem); line-height: 0.9; margin-bottom: 2rem;">Four Gateways</h1>
+
+      <div class="grid-3">
+        <div class="reveal delay-2">
+          <p style="font-size: 1.25rem; line-height: 1.6; color: var(--muted);">
+            A geopolitical model conceptualizing the international system as a 'global fortress'. Its stability relies
+            on controlling key 'gates' or strategic corridors where rival powers project influence through the
+            intersection of geography, economy, military, and finance.
+          </p>
+        </div>
+        <div class="border-left reveal delay-3">
+          <span class="mono data-label">CORE_ELEMENTS</span>
+          <ul class="mono"
+            style="font-size: 0.85rem; color: var(--muted); list-style: none; display: flex; flex-direction: column; gap: 1rem;">
+            <li>[01] Geographic Access (chokepoints)</li>
+            <li>[02] Economic Infrastructure (supply chains)</li>
+            <li>[03] Military Positioning (deployments)</li>
+            <li>[04] Financial Connectivity (payment systems)</li>
+          </ul>
+        </div>
+        <div class="border-left reveal delay-4">
+          <span class="mono data-label">IDENTIFIED_GATEWAYS</span>
+          <ul class="hero-font"
+            style="font-size: 1.5rem; list-style: none; display: flex; flex-direction: column; gap: 0.5rem;">
+            <li>Western Hemisphere</li>
+            <li>Middle East</li>
+            <li>Arctic</li>
+            <li>Indo-Pacific</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- PANEL 2: TRIPARTITE LANDSCAPE & UKRAINE -->
+  <section class="panel" id="panel-2">
+    <div class="bg-layer" style="background-image: url('./images/scene-2(5).jpg');"></div>
+    <div class="overlay"></div>
+
+    <div class="panel-content">
+      <span class="mono data-label reveal">TRIPARTITE_LANDSCAPE</span>
+      <h2 class="hero-font reveal delay-1" style="font-size: clamp(3rem, 6vw, 5rem); margin-bottom: 4rem;">Systemic
+        Actors</h2>
+
+      <div class="grid-3" style="margin-bottom: 6rem;">
+        <div class="border-left reveal delay-2">
+          <h3 class="hero-font" style="font-size: 2rem; margin-bottom: 0.5rem;">United States</h3>
+          <span class="mono data-label" style="color: #00f0ff;">DEFENDER OF THE SYSTEMIC CORE</span>
+          <p class="body" style="color: var(--muted); line-height: 1.5;">Historically managed the principal entrances to
+            the global system via alliances, trade networks, and the US dollar. Now forced to secure these distributed
+            gateways against simultaneous multi-region probing through coordinated military and economic strategies.</p>
+        </div>
+        <div class="border-left reveal delay-3">
+          <h3 class="hero-font" style="font-size: 2rem; margin-bottom: 0.5rem;">Russia</h3>
+          <span class="mono data-label">SYSTEMIC DISRUPTOR</span>
+          <p class="body" style="color: var(--muted); line-height: 1.5;">Deepens military and economic cooperation along
+            strategic corridors to build resilience against Western sanctions. Capitalizes on energy flows and key
+            partnerships to fracture US hegemony.</p>
+        </div>
+        <div class="border-left reveal delay-4">
+          <h3 class="hero-font" style="font-size: 2rem; margin-bottom: 0.5rem;">China</h3>
+          <span class="mono data-label">STRATEGIC EXPANDER</span>
+          <p class="body" style="color: var(--muted); line-height: 1.5;">Partners with Russia to conduct distributed
+            competition. Expands influence via infrastructure investments, resource-backed loans, and military gray-zone
+            operations across multiple regions simultaneously.</p>
+        </div>
+      </div>
+
+      <div class="reveal">
+        <span class="mono data-label">CATALYST_ZONE</span>
+        <h2 class="hero-font" style="font-size: clamp(2.5rem, 5vw, 4rem); color: var(--accent); margin-bottom: 1rem;">
+          Ukraine</h2>
+        <p style="font-size: 1.2rem; max-width: 800px; color: var(--text); line-height: 1.6;">While the Cold War
+          centered on Europe, the Ukraine conflict has accelerated the shift toward the Four Gateways. It acts as a
+          cross-gateway catalyst, deepening the Russia-Iran (Middle East) and Russia-China (Arctic/Indo-Pacific)
+          military/economic alliances. The systemic vulnerability is that European conflict no longer isolates Russia,
+          but rather fuels a distributed alliance that bypasses the US-led financial order.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- PANEL 3: TAIWAN -->
+  <section class="panel" id="panel-3">
+    <div class="bg-layer" style="background-image: url('./images/scene-3(5).jpg');"></div>
+    <div class="overlay" style="background: linear-gradient(to right, rgba(5,5,6,0.95) 0%, rgba(5,5,6,0.4) 100%);">
+    </div>
+
+    <div class="panel-content">
+      <div style="max-width: 600px;">
+        <span class="mono data-label reveal">CONFLICT_ZONE_02 // INDO-PACIFIC GATEWAY</span>
+        <h2 class="hero-font glitch-hover reveal delay-1"
+          style="font-size: clamp(4rem, 8vw, 7rem); line-height: 1; margin-bottom: 2rem;">Taiwan</h2>
+        <p class="reveal delay-2" style="font-size: 1.5rem; line-height: 1.5; margin-bottom: 2rem; color: #fff;">
+          Taiwan is a quintessential strategic chokepoint.
+        </p>
+        <p class="reveal delay-3" style="font-size: 1.1rem; line-height: 1.6; color: var(--muted);">
+          China's intensification of naval exercises, air incursions, and gray-zone operations targets both geographical
+          access and critical economic infrastructure (global semiconductor supply chains). A breach here threatens the
+          foundational architecture of the US Pacific security network and global technological dominance.
+        </p>
+      </div>
+    </div>
+  </section>
+
+  <!-- PANEL 4: MIDDLE EAST -->
+  <section class="panel" id="panel-4">
+    <div class="bg-layer" style="background-image: url('./images/scene-4(5).jpg');"></div>
+    <div class="overlay"
+      style="background: radial-gradient(circle at 70% 50%, rgba(5,5,6,0.2) 0%, rgba(5,5,6,0.95) 80%);"></div>
+
+    <div class="panel-content">
+      <div style="max-width: 700px;">
+        <span class="mono data-label reveal">CONFLICT_ZONE_03 // MIDDLE EAST GATEWAY</span>
+        <h2 class="hero-font glitch-hover reveal delay-1"
+          style="font-size: clamp(3.5rem, 7vw, 6rem); line-height: 1; margin-bottom: 2rem;">Middle East</h2>
+        <p class="reveal delay-2"
+          style="font-size: 1.2rem; line-height: 1.6; color: var(--text); margin-bottom: 1.5rem;">
+          Centered heavily around actors like Iran, this gateway controls vital global energy supplies and maritime
+          chokepoints.
+        </p>
+        <div class="border-left reveal delay-3">
+          <span class="mono data-label">SYSTEMIC_VULNERABILITY</span>
+          <p style="font-size: 1rem; line-height: 1.6; color: var(--muted);">
+            Extreme systemic vulnerability is currently highlighted by the escalating regional conflict following the
+            March 2026 death of Iranian Supreme Leader Ayatollah Ali Khamenei. The volatile succession of Mojtaba
+            Khamenei and intensified Russia-Iran military cooperation threaten global energy markets, financial
+            stability, and maritime logistics, eroding US leverage.
+          </p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- PANEL 5: CONCLUSION -->
+  <section class="panel" id="panel-5">
+    <div class="bg-layer" style="background-image: url('./images/scene-5(6).jpg');"></div>
+    <div class="overlay" style="background: linear-gradient(to top, rgba(5,5,6,1) 0%, rgba(5,5,6,0.6) 100%);"></div>
+
+    <div class="panel-content" style="text-align: center; display: flex; flex-direction: column; align-items: center;">
+      <span class="mono data-label reveal">STRATEGIC_CONCLUSION</span>
+      <h2 class="hero-font glitch-hover reveal delay-1"
+        style="font-size: clamp(3rem, 6vw, 5rem); color: var(--accent); margin-bottom: 2rem;">Fortress Defense Dilemma
+      </h2>
+      <p class="reveal delay-2" style="font-size: 1.5rem; line-height: 1.6; max-width: 900px; color: var(--text);">
+        The mapping highlights that systemic vulnerabilities are now functionally interconnected and geographically
+        dispersed.
+      </p>
+      <p class="reveal delay-3"
+        style="font-size: 1.25rem; line-height: 1.6; max-width: 800px; color: var(--muted); margin-top: 2rem;">
+        The US faces a 'fortress defense' dilemma: a breach by the China-Russia partnership in any single strategic
+        corridor (whether via Taiwan's supply chains or Middle Eastern energy routes) can trigger cascading failures
+        across the global architecture.
+      </p>
+    </div>
+  </section>
+
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      // Intersection Observer for Scroll Reveals
+      const observerOptions = {
+        root: null,
+        rootMargin: '0px',
+        threshold: 0.15
+      };
+
+      const observer = new IntersectionObserver((entries, obs) => {
+        entries.forEach(entry => {
+          if (entry.isIntersecting) {
+            entry.target.classList.add('is-visible');
+            // Optional: stop observing once revealed
+            // obs.unobserve(entry.target); 
+          }
+        });
+      }, observerOptions);
+
+      document.querySelectorAll('.reveal').forEach(el => {
+        observer.observe(el);
+      });
+
+      // Scroll-driven Parallax and Progress Bar
+      const progressBar = document.getElementById('progress-bar');
+      const bgLayers = document.querySelectorAll('.bg-layer');
+
+      window.addEventListener('scroll', () => {
+        const scrollY = window.scrollY;
+        const maxScroll = document.documentElement.scrollHeight - window.innerHeight;
+
+        // Progress Bar
+        const progress = (scrollY / maxScroll) * 100;
+        progressBar.style.width = `${progress}%`;
+
+        // Subtle Parallax on backgrounds
+        bgLayers.forEach(layer => {
+          const speed = 0.15;
+          const yPos = -(scrollY * speed);
+          layer.style.transform = `translateY(${yPos}px) scale(1.1)`;
+        });
+      }, { passive: true });
+    });
+  </script>
+</body>
+
+</html>

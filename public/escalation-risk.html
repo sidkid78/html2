@@ -1,0 +1,797 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Strategic Escalation Briefing</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@500;700&family=Share+Tech+Mono&display=swap');
+
+    :root {
+      --bg: #030508;
+      --text-main: #a9bacb;
+      --text-bright: #ffffff;
+      --accent-red: #ff2a2a;
+      --accent-cyan: #00ffcc;
+      --accent-warn: #ffaa00;
+      --panel-bg: rgba(5, 12, 20, 0.85);
+      --grid-line: rgba(0, 255, 204, 0.1);
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      background-color: var(--bg);
+      color: var(--text-main);
+      font-family: 'Share Tech Mono', monospace;
+      overflow: hidden;
+      cursor: none;
+      line-height: 1.5;
+    }
+
+    /* Custom Cursor */
+    #cursor-crosshair {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 40px;
+      height: 40px;
+      pointer-events: none;
+      z-index: 10000;
+      transform: translate(-50%, -50%);
+      transition: width 0.2s, height 0.2s;
+    }
+
+    #cursor-crosshair::before,
+    #cursor-crosshair::after {
+      content: '';
+      position: absolute;
+      background: var(--accent-cyan);
+    }
+
+    #cursor-crosshair::before {
+      top: 50%;
+      left: 0;
+      width: 100%;
+      height: 1px;
+    }
+
+    #cursor-crosshair::after {
+      left: 50%;
+      top: 0;
+      height: 100%;
+      width: 1px;
+    }
+
+    .interactive-hover {
+      border: 1px solid var(--accent-red);
+    }
+
+    /* Global UI Overlays */
+    .ui-layer {
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      z-index: 9000;
+      border: 1px solid var(--grid-line);
+    }
+
+    .top-bar {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      padding: 10px 20px;
+      display: flex;
+      justify-content: space-between;
+      border-bottom: 1px solid var(--grid-line);
+      font-size: 0.75rem;
+      color: var(--accent-cyan);
+      background: rgba(0, 0, 0, 0.5);
+      text-transform: uppercase;
+    }
+
+    .corner-brackets {
+      position: absolute;
+      inset: 20px;
+    }
+
+    .corner-brackets::before,
+    .corner-brackets::after {
+      content: '';
+      position: absolute;
+      width: 20px;
+      height: 20px;
+    }
+
+    .corner-brackets::before {
+      top: 0;
+      left: 0;
+      border-top: 2px solid var(--accent-cyan);
+      border-left: 2px solid var(--accent-cyan);
+    }
+
+    .corner-brackets::after {
+      bottom: 0;
+      right: 0;
+      border-bottom: 2px solid var(--accent-cyan);
+      border-right: 2px solid var(--accent-cyan);
+    }
+
+    /* Carousel Structure */
+    .carousel-container {
+      display: flex;
+      width: 100vw;
+      height: 100vh;
+      overflow-x: auto;
+      overflow-y: hidden;
+      scroll-snap-type: x mandatory;
+      scrollbar-width: none;
+      scroll-behavior: smooth;
+    }
+
+    .carousel-container::-webkit-scrollbar {
+      display: none;
+    }
+
+    .panel {
+      flex: 0 0 100vw;
+      width: 100vw;
+      height: 100vh;
+      scroll-snap-align: start;
+      position: relative;
+      padding: 80px 60px 60px 60px;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+    }
+
+    /* Panel Backgrounds */
+    .bg-img {
+      position: absolute;
+      inset: 0;
+      z-index: -2;
+      background-size: cover;
+      background-position: center;
+      filter: grayscale(100%) brightness(0.3) contrast(1.5);
+      transition: transform 15s linear;
+    }
+
+    .panel:hover .bg-img {
+      transform: scale(1.05);
+    }
+
+    .vignette {
+      position: absolute;
+      inset: 0;
+      z-index: -1;
+      background: radial-gradient(circle at center, transparent 0%, #030508 80%);
+    }
+
+    .mesh-grid {
+      position: absolute;
+      inset: 0;
+      z-index: -1;
+      background-image:
+        linear-gradient(var(--grid-line) 1px, transparent 1px),
+        linear-gradient(90deg, var(--grid-line) 1px, transparent 1px);
+      background-size: 40px 40px;
+      opacity: 0.3;
+    }
+
+    /* Typography & Layout */
+    h1,
+    h2,
+    h3,
+    h4 {
+      font-family: 'Chakra Petch', sans-serif;
+      text-transform: uppercase;
+      margin-bottom: 1rem;
+      color: var(--text-bright);
+      line-height: 1.1;
+    }
+
+    h1 {
+      font-size: clamp(2.5rem, 5vw, 5rem);
+      color: var(--accent-red);
+      text-shadow: 0 0 10px rgba(255, 42, 42, 0.4);
+    }
+
+    h2 {
+      font-size: clamp(1.5rem, 2.5vw, 2.5rem);
+      border-bottom: 1px solid var(--grid-line);
+      padding-bottom: 0.5rem;
+      display: inline-block;
+    }
+
+    .label {
+      color: var(--accent-cyan);
+      font-size: 0.8rem;
+      letter-spacing: 0.1em;
+      margin-bottom: 0.25rem;
+      display: block;
+    }
+
+    p,
+    ul {
+      font-size: clamp(0.9rem, 1.1vw, 1.1rem);
+      max-width: 800px;
+      margin-bottom: 1.5rem;
+    }
+
+    ul {
+      padding-left: 1.5rem;
+    }
+
+    li {
+      margin-bottom: 0.75rem;
+    }
+
+    strong {
+      color: var(--text-bright);
+    }
+
+    .content-scroll {
+      flex-grow: 1;
+      overflow-y: auto;
+      padding-right: 20px;
+      scrollbar-width: thin;
+      scrollbar-color: var(--accent-cyan) transparent;
+      position: relative;
+      z-index: 10;
+    }
+
+    .content-scroll::-webkit-scrollbar {
+      width: 4px;
+    }
+
+    .content-scroll::-webkit-scrollbar-thumb {
+      background-color: var(--accent-cyan);
+    }
+
+    /* Grid Modules */
+    .data-block {
+      background: var(--panel-bg);
+      border: 1px solid var(--grid-line);
+      border-left: 3px solid var(--accent-cyan);
+      padding: 1.5rem;
+      margin-bottom: 1.5rem;
+      backdrop-filter: blur(4px);
+    }
+
+    .data-block.alert {
+      border-left-color: var(--accent-red);
+    }
+
+    /* Risk Matrix Grid */
+    .matrix-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+      gap: 1.5rem;
+      width: 100%;
+      padding-bottom: 2rem;
+    }
+
+    .threat-card {
+      background: rgba(5, 12, 20, 0.9);
+      border: 1px solid var(--grid-line);
+      padding: 1.25rem;
+      position: relative;
+    }
+
+    .threat-card::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 4px;
+      height: 100%;
+    }
+
+    .threat-card[data-level="Critical"]::before {
+      background: var(--accent-red);
+    }
+
+    .threat-card[data-level="Severe"]::before {
+      background: var(--accent-warn);
+    }
+
+    .threat-card[data-level="High"]::before {
+      background: var(--accent-warn);
+    }
+
+    .threat-card-header {
+      display: flex;
+      justify-content: space-between;
+      font-size: 0.75rem;
+      color: var(--accent-cyan);
+      margin-bottom: 1rem;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+      padding-bottom: 0.5rem;
+    }
+
+    .badge {
+      background: rgba(255, 42, 42, 0.2);
+      color: var(--accent-red);
+      padding: 2px 6px;
+      border-radius: 2px;
+    }
+
+    .badge.warn {
+      background: rgba(255, 170, 0, 0.2);
+      color: var(--accent-warn);
+    }
+
+    .path-box {
+      margin-top: 1rem;
+      padding: 0.75rem;
+      background: rgba(0, 0, 0, 0.4);
+      border: 1px dashed var(--grid-line);
+      font-size: 0.85rem;
+    }
+
+    /* Animations */
+    .anim-reveal {
+      opacity: 0;
+      transform: translateY(20px);
+      transition: all 0.8s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    .is-visible .anim-reveal {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    .glitch {
+      position: relative;
+    }
+
+    .glitch::before,
+    .glitch::after {
+      content: attr(data-text);
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: var(--bg);
+    }
+
+    .glitch::before {
+      left: 2px;
+      text-shadow: -1px 0 var(--accent-red);
+      clip-path: inset(24% 0 53% 0);
+      animation: glitch-anim-1 2s infinite linear alternate-reverse;
+    }
+
+    .glitch::after {
+      left: -2px;
+      text-shadow: -1px 0 var(--accent-cyan);
+      clip-path: inset(85% 0 2% 0);
+      animation: glitch-anim-2 2.5s infinite linear alternate-reverse;
+    }
+
+    @keyframes glitch-anim-1 {
+      0% {
+        clip-path: inset(20% 0 80% 0);
+      }
+
+      20% {
+        clip-path: inset(60% 0 10% 0);
+      }
+
+      40% {
+        clip-path: inset(40% 0 50% 0);
+      }
+
+      60% {
+        clip-path: inset(80% 0 5% 0);
+      }
+
+      80% {
+        clip-path: inset(10% 0 70% 0);
+      }
+
+      100% {
+        clip-path: inset(30% 0 50% 0);
+      }
+    }
+
+    @keyframes glitch-anim-2 {
+      0% {
+        clip-path: inset(10% 0 60% 0);
+      }
+
+      20% {
+        clip-path: inset(30% 0 20% 0);
+      }
+
+      40% {
+        clip-path: inset(70% 0 10% 0);
+      }
+
+      60% {
+        clip-path: inset(20% 0 50% 0);
+      }
+
+      80% {
+        clip-path: inset(50% 0 30% 0);
+      }
+
+      100% {
+        clip-path: inset(5% 0 80% 0);
+      }
+    }
+
+    /* SVG Filters Overlays */
+    .crt-effects {
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      z-index: 9999;
+    }
+
+    .noise {
+      width: 100%;
+      height: 100%;
+      opacity: 0.15;
+      filter: url(#svg-noise);
+      mix-blend-mode: overlay;
+    }
+
+    .scanlines {
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(to bottom, rgba(255, 255, 255, 0), rgba(255, 255, 255, 0) 50%, rgba(0, 0, 0, 0.2) 50%, rgba(0, 0, 0, 0.2));
+      background-size: 100% 4px;
+    }
+
+    /* Nav Progress */
+    .nav-progress {
+      position: fixed;
+      bottom: 20px;
+      left: 50%;
+      transform: translateX(-50%);
+      display: flex;
+      gap: 10px;
+      z-index: 9001;
+    }
+
+    .dot {
+      width: 30px;
+      height: 4px;
+      background: rgba(255, 255, 255, 0.2);
+      transition: background 0.3s;
+    }
+
+    .dot.active {
+      background: var(--accent-cyan);
+      box-shadow: 0 0 8px var(--accent-cyan);
+    }
+  </style>
+</head>
+
+<body style="cursor: default">
+  <button onclick="parent.postMessage('HUB_RETURN_INITIATED', '*')"
+    style="position: fixed; top: 20px; right: 20px; z-index: 10001; background: rgba(0, 255, 204, 0.1); border: 1px solid #00ffcc; color: #00ffcc; padding: 10px 20px; font-family: 'Share Tech Mono', monospace; cursor: pointer; backdrop-filter: blur(10px); transition: all 0.3s ease; display: flex; align-items: center;"
+    onmouseover="this.style.background='rgba(0, 255, 204, 0.2)'"
+    onmouseout="this.style.background='rgba(0, 255, 204, 0.1)'">
+    <span style="margin-right: 8px">←</span> RETURN TO HUB
+  </button>
+
+  <!-- Global SVGs -->
+  <svg style="display:none;">
+    <defs>
+      <filter id="svg-noise">
+        <feTurbulence type="fractalNoise" baseFrequency="0.8" numOctaves="3" stitchTiles="stitch">
+          <animate attributeName="seed" values="0;10;20;30;40;50;60;70;80;90;100" dur="1s" repeatCount="indefinite" />
+        </feTurbulence>
+        <feColorMatrix type="matrix" values="1 0 0 0 0, 0 1 0 0 0, 0 0 1 0 0, 0 0 0 0.5 0" />
+      </filter>
+    </defs>
+  </svg>
+
+  <div class="crt-effects">
+    <div class="noise"></div>
+    <div class="scanlines"></div>
+  </div>
+
+  <div id="cursor-crosshair"></div>
+
+  <div class="ui-layer">
+    <div class="top-bar">
+      <span>FILE: workers/escalation_risks.md</span>
+      <span style="color: var(--accent-red);">STATUS: CLASSIFIED</span>
+      <span>SYSTEM_READY</span>
+    </div>
+    <div class="corner-brackets"></div>
+  </div>
+
+  <div class="nav-progress" id="nav">
+    <div class="dot active"></div>
+    <div class="dot"></div>
+    <div class="dot"></div>
+    <div class="dot"></div>
+    <div class="dot"></div>
+  </div>
+
+  <div class="carousel-container" id="carousel">
+
+    <!-- PANEL 1: Initialization -->
+    <div class="panel" data-index="0">
+      <div class="bg-img" style="background-image: url('./images/scene-1(9).jpg');"></div>
+      <div class="vignette"></div>
+      <div class="mesh-grid"></div>
+      <div class="content-scroll">
+        <div class="anim-reveal" style="transition-delay: 0.1s;">
+          <span class="label">TASK</span>
+          <h1 class="glitch" data-text="Escalation Risk and Strategic Trigger Point Assessment">Escalation Risk and
+            Strategic Trigger Point Assessment</h1>
+        </div>
+
+        <div class="data-block anim-reveal" style="transition-delay: 0.3s; margin-top: 2rem;">
+          <span class="label">**Goal:**</span>
+          <p>Evaluate the military-strategic scenarios that could trigger a direct kinetic engagement, including
+            accidental collisions, proxy actions, and navigation interference. Assess the potential for conflict
+            expansion from the Strait to the broader Indian Ocean'.</p>
+        </div>
+
+        <div class="data-block alert anim-reveal" style="transition-delay: 0.5s;">
+          <span class="label">**Result:**</span>
+          <p>I have successfully evaluated the military-strategic scenarios and identified high-probability triggers
+            including de facto blockades, proxy asymmetric coercion, and tactical miscalculations due to EW. A detailed
+            risk matrix mapping these triggers to geographical escalation paths from regional straits to the broader
+            Indian Ocean has been generated.</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- PANEL 2: Executive Summary & Findings -->
+    <div class="panel" data-index="1">
+      <div class="bg-img" style="background-image: url('./images/scene-5(10).jpg');"></div>
+      <div class="vignette"></div>
+      <div class="mesh-grid"></div>
+      <div class="content-scroll">
+        <div class="anim-reveal" style="transition-delay: 0.1s;">
+          <h2>1. Executive Summary</h2>
+          <p>The geopolitical landscape across the Middle Eastern maritime corridors has reached a critical inflection
+            point following the escalation of the US-Israel-Iran conflict. The functional closure of the Strait of
+            Hormuz, combined with the activation of regional proxy networks, has fundamentally altered the maritime
+            security environment. This assessment evaluates the military-strategic scenarios capable of triggering
+            direct kinetic engagement and analyzes the ongoing expansion of the conflict from regional straits into the
+            broader Indian Ocean.</p>
+        </div>
+
+        <div class="data-block alert anim-reveal" style="transition-delay: 0.3s; margin-top: 2rem;">
+          <span class="label">**Key Findings:**</span>
+          <ul>
+            <li>De facto blockades and navigation interference in the Strait of Hormuz risk triggering direct kinetic
+              retaliation against sovereign Iranian territory.</li>
+            <li>Houthi threats in the Red Sea and Bab el-Mandeb create extreme vulnerabilities for diverted energy
+              routes, risking expanded US and coalition strikes.</li>
+            <li>Dense naval crowding combined with electronic warfare and AIS disruption creates a highly volatile
+              environment prone to accidental collisions and rapid escalation.</li>
+            <li>The conflict is actively spilling into the deep-water Indian Ocean, demonstrated by submarine
+              engagements far beyond traditional coastal chokepoints.</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+
+    <!-- PANEL 3: Risk Matrix -->
+    <div class="panel" data-index="2">
+      <div class="bg-img" style="background-image: url('./images/scene-3(9).jpg');"></div>
+      <div class="vignette"></div>
+      <div class="content-scroll">
+        <div class="anim-reveal" style="transition-delay: 0.1s;">
+          <h2>2. Risk Matrix: High-Probability Triggers and Escalation Paths</h2>
+        </div>
+
+        <div class="matrix-grid anim-reveal" style="transition-delay: 0.3s; margin-top: 1.5rem;">
+          <!-- Matrix Item 1 -->
+          <div class="threat-card" data-level="Critical">
+            <div class="threat-card-header">
+              <span>Navigation Interference</span>
+              <div><span class="badge">PROB: High</span> <span class="badge">IMPACT: Critical</span></div>
+            </div>
+            <h4>De Facto Blockade of Hormuz</h4>
+            <p>Forcible escort of commercial convoys through Hormuz by multinational coalitions (e.g., Operation
+              Aspides) triggering ASBM or UAV barrages.</p>
+            <div class="path-box">
+              <strong>Path:</strong> Strait of Hormuz → Iranian Coastal Territory: Defensive actions by coalitions lead
+              to kinetic retaliation against sovereign Iranian coastal defense batteries.
+            </div>
+          </div>
+
+          <!-- Matrix Item 2 -->
+          <div class="threat-card" data-level="Severe">
+            <div class="threat-card-header">
+              <span>Proxy Actions</span>
+              <div><span class="badge">PROB: High</span> <span class="badge warn">IMPACT: Severe</span></div>
+            </div>
+            <h4>Asymmetric Coercion by Houthis</h4>
+            <p>Houthi offensive targeting Saudi crude carriers diverted to the Red Sea or Bab el-Mandeb to bypass the
+              Hormuz blockade.</p>
+            <div class="path-box">
+              <strong>Path:</strong> Red Sea/Bab el-Mandeb → Yemen: Strikes on diverted energy arteries force expanded
+              kinetic strikes by US and partners against Houthi C2 centers in Yemen.
+            </div>
+          </div>
+
+          <!-- Matrix Item 3 -->
+          <div class="threat-card" data-level="High">
+            <div class="threat-card-header">
+              <span>Accidental Collisions</span>
+              <div><span class="badge warn">PROB: Med-High</span> <span class="badge warn">IMPACT: High</span></div>
+            </div>
+            <h4>Tactical Miscalculations</h4>
+            <p>Collision or accidental firing due to dense naval crowding, electronic warfare (EW), AIS disruption, and
+              gray zone shadowing tactics.</p>
+            <div class="path-box">
+              <strong>Path:</strong> Persian Gulf/Arabian Sea → Broad Regional Conflict: A minor incident misinterpreted
+              as a deliberate attack triggers cascading kinetic responses between multinational forces and regional
+              states.
+            </div>
+          </div>
+
+          <!-- Matrix Item 4 -->
+          <div class="threat-card" data-level="High">
+            <div class="threat-card-header">
+              <span>Conflict Expansion</span>
+              <div><span class="badge warn">PROB: Medium</span> <span class="badge warn">IMPACT: High</span></div>
+            </div>
+            <h4>Deep-Water Engagements</h4>
+            <p>Strategic targeting far beyond chokepoints (e.g., sinking of Iranian frigate IRIS Dena south of Sri Lanka
+              by a US submarine).</p>
+            <div class="path-box">
+              <strong>Path:</strong> Enclosed Straits → Central Indian Ocean: Battlespace expands into deep waters as
+              state and non-state actors hunt strategic targets across the broader Indian Ocean.
+            </div>
+          </div>
+
+          <!-- Matrix Item 5 -->
+          <div class="threat-card" data-level="Critical">
+            <div class="threat-card-header">
+              <span>Chokepoint Contagion</span>
+              <div><span class="badge warn">PROB: Medium</span> <span class="badge">IMPACT: Critical</span></div>
+            </div>
+            <h4>Dual-Chokepoint Blockade</h4>
+            <p>Simultaneous closure of Strait of Hormuz and Bab el-Mandeb Strait.</p>
+            <div class="path-box">
+              <strong>Path:</strong> Gulfs → Western Perimeter of Indian Ocean: Isolates the Arabian Sea, militarizing
+              the western Indian Ocean and forcing dispersed combat operations to secure alternate SLOCs.
+            </div>
+          </div>
+
+          <!-- Matrix Item 6 -->
+          <div class="threat-card" data-level="High">
+            <div class="threat-card-header">
+              <span>SLOC Diversion</span>
+              <div><span class="badge warn">PROB: Med-High</span> <span class="badge warn">IMPACT: High</span></div>
+            </div>
+            <h4>Attacks on Rerouted Shipping</h4>
+            <p>Harassment of global shipping rerouted around the Cape of Good Hope by long-range loitering munitions or
+              forward-deployed submarines.</p>
+            <div class="path-box">
+              <strong>Path:</strong> Middle East → Western/Southern Indian Ocean: Vulnerability perimeter extends deep
+              into the Indian Ocean along the extended logistical lifelines.
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- PANEL 4: Scenarios -->
+    <div class="panel" data-index="3">
+      <div class="bg-img" style="background-image: url('./images/scene-2(9).jpg');"></div>
+      <div class="vignette"></div>
+      <div class="content-scroll">
+        <div class="anim-reveal" style="transition-delay: 0.1s;">
+          <h2>3. Analysis of Escalation Scenarios</h2>
+        </div>
+
+        <div class="data-block anim-reveal" style="transition-delay: 0.2s;">
+          <h3>3.1 Navigation Interference and De Facto Blockades</h3>
+          <p>Iran has imposed a "de facto" closure of the Strait of Hormuz via persistent drone and anti-ship missile
+            threats. Traffic has plummeted. Any attempt by coalitions to forcibly escort vessels could trigger barrages,
+            forcing immediate retaliation against sovereign Iranian territory.</p>
+        </div>
+
+        <div class="data-block anim-reveal" style="transition-delay: 0.3s;">
+          <h3>3.2 Proxy Actions and Asymmetric Coercion</h3>
+          <p>Houthi forces pose a catastrophic threat to the Bab el-Mandeb Strait. With Saudi Arabia diverting crude via
+            Red Sea pipelines to bypass Hormuz, any Houthi attack on these alternate routes would choke off remaining
+            global energy arteries, triggering severe kinetic responses against Houthi command-and-control centers.</p>
+        </div>
+
+        <div class="data-block alert anim-reveal" style="transition-delay: 0.4s;">
+          <h3>3.3 Accidental Collisions and Tactical Miscalculations</h3>
+          <p>Unprecedented naval crowding (US, EU, China, India, etc.) combined with aggressive electronic warfare (over
+            40 injected signal zones and 90 AIS denial areas) drastically increases the risk of accidental kinetic
+            engagement. Misidentification in this hyper-alert environment could cascade into a full-scale kinetic
+            response.</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- PANEL 5: Expansion & Conclusion -->
+    <div class="panel" data-index="4">
+      <div class="bg-img" style="background-image: url('./images/scene-4(9).jpg');"></div>
+      <div class="vignette"></div>
+      <div class="content-scroll">
+        <div class="anim-reveal" style="transition-delay: 0.1s;">
+          <h2>4. Conflict Expansion to the Broader Indian Ocean</h2>
+          <p>The conflict has already demonstrated a decisive spillover from the enclosed straits into the broader
+            Indian Ocean:</p>
+          <ul style="margin-top: 1rem;">
+            <li><strong>Deep-Water Engagements:</strong> The sinking of the Iranian frigate *IRIS Dena* approximately 40
+              nautical miles south of Sri Lanka by a US submarine demonstrates active hunting of strategic targets far
+              beyond the Persian Gulf.</li>
+            <li><strong>Chokepoint Contagion:</strong> A dual blockade of Hormuz and Bab el-Mandeb would entirely
+              militarize the western perimeter of the Indian Ocean, trapping vessels and forcing Indian Ocean naval
+              commands into rapid dispersed combat operations.</li>
+            <li><strong>Vulnerability of Diverted SLOCs:</strong> The massive diversion of global trade around the Cape
+              of Good Hope extends targets deep into the western and southern Indian Ocean, incentivizing harassment by
+              hostile state actors and proxies using long-range munitions and forward-deployed submarine assets.</li>
+          </ul>
+        </div>
+
+        <div class="data-block alert anim-reveal" style="transition-delay: 0.3s; margin-top: 2rem;">
+          <h2>5. Conclusion</h2>
+          <p>The maritime environment from the Strait of Hormuz to the broader Indian Ocean has transitioned from a
+            localized security crisis to a multinational strategic flashpoint. The reliance on electronic interference,
+            the activation of heavily armed proxy militias, and the unprecedented willingness of major powers to execute
+            deep-water kinetic strikes dictate that the Indian Ocean is no longer a safe transit zone, but an active,
+            expanding theater of war.</p>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <script>
+    // Custom Cursor Logic
+    const cursor = document.getElementById('cursor-crosshair');
+    document.addEventListener('mousemove', (e) => {
+      cursor.style.left = e.clientX + 'px';
+      cursor.style.top = e.clientY + 'px';
+    });
+
+    // Scroll Snapping & Animation Trigger
+    const panels = document.querySelectorAll('.panel');
+    const dots = document.querySelectorAll('.dot');
+
+    const observerOptions = {
+      root: document.querySelector('.carousel-container'),
+      threshold: 0.5
+    };
+
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          entry.target.classList.add('is-visible');
+          // Update Nav Dots
+          const index = entry.target.getAttribute('data-index');
+          dots.forEach(dot => dot.classList.remove('active'));
+          if (dots[index]) dots[index].classList.add('active');
+        }
+      });
+    }, observerOptions);
+
+    panels.forEach(panel => {
+      observer.observe(panel);
+    });
+
+    // Initial trigger for first load
+    setTimeout(() => {
+      if (panels[0]) panels[0].classList.add('is-visible');
+    }, 100);
+  </script>
+</body>
+
+</html>

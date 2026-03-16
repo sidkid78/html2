@@ -1,0 +1,614 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Russian Strategic Opportunism</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link
+    href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=Oswald:wght@500;700&family=Space+Mono:wght@400;700&display=swap"
+    rel="stylesheet">
+  <style>
+    :root {
+      --bg: #030303;
+      --text-main: #e2e8f0;
+      --text-muted: #94a3b8;
+      --accent: #ef4444;
+      --accent-glow: rgba(239, 68, 68, 0.2);
+      --border: #334155;
+      --font-hero: 'Oswald', sans-serif;
+      --font-body: 'Inter', sans-serif;
+      --font-mono: 'Space Mono', monospace;
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      background-color: var(--bg);
+      color: var(--text-main);
+      font-family: var(--font-body);
+      overflow-x: hidden;
+      -webkit-font-smoothing: antialiased;
+      cursor: default;
+    }
+
+    ::selection {
+      background: var(--accent);
+      color: var(--bg);
+    }
+
+    /* SVG Filter & Noise */
+    .noise-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
+      pointer-events: none;
+      z-index: 9999;
+      opacity: 0.04;
+      mix-blend-mode: overlay;
+    }
+
+    /* Background Parallax System */
+    #bg-system {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
+      z-index: 0;
+      background: var(--bg);
+    }
+
+    .bg-layer {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-size: cover;
+      background-position: center;
+      opacity: 0;
+      transform: scale(1.05);
+      transition: opacity 1.5s ease-in-out, transform 10s linear;
+      filter: grayscale(80%) contrast(120%) brightness(0.6);
+    }
+
+    .bg-layer.active {
+      opacity: 1;
+      transform: scale(1);
+    }
+
+    .bg-vignette {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(to right, rgba(3, 3, 3, 0.95) 0%, rgba(3, 3, 3, 0.8) 40%, rgba(3, 3, 3, 0.4) 100%),
+        linear-gradient(to top, rgba(3, 3, 3, 1) 0%, rgba(3, 3, 3, 0) 20%);
+      z-index: 1;
+    }
+
+    /* Layout Elements */
+    .progress-bar {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 3px;
+      height: 0%;
+      background: var(--accent);
+      z-index: 100;
+      box-shadow: 0 0 10px var(--accent-glow);
+    }
+
+    .hud-lines {
+      position: fixed;
+      top: 5vh;
+      left: 2vw;
+      bottom: 5vh;
+      right: 2vw;
+      border: 1px solid rgba(255, 255, 255, 0.05);
+      pointer-events: none;
+      z-index: 90;
+    }
+
+    .hud-lines::before,
+    .hud-lines::after {
+      content: '';
+      position: absolute;
+      width: 10px;
+      height: 10px;
+      border: 1px solid var(--accent);
+    }
+
+    .hud-lines::before {
+      top: -1px;
+      left: -1px;
+      border-right: none;
+      border-bottom: none;
+    }
+
+    .hud-lines::after {
+      bottom: -1px;
+      right: -1px;
+      border-left: none;
+      border-top: none;
+    }
+
+    main {
+      position: relative;
+      z-index: 10;
+      width: 100%;
+    }
+
+    section {
+      min-height: 100vh;
+      width: 100%;
+      padding: 15vh 5vw 15vh 8vw;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      max-width: 1400px;
+      margin: 0 auto;
+    }
+
+    /* Typography Hierarchy */
+    .label {
+      font-family: var(--font-mono);
+      font-size: 0.75rem;
+      text-transform: uppercase;
+      letter-spacing: 0.2em;
+      color: var(--accent);
+      margin-bottom: 1rem;
+      display: block;
+    }
+
+    .hero-title {
+      font-family: var(--font-hero);
+      font-size: clamp(3rem, 6vw, 6rem);
+      line-height: 1.1;
+      text-transform: uppercase;
+      font-weight: 700;
+      margin-bottom: 2rem;
+      letter-spacing: -0.02em;
+    }
+
+    h2 {
+      font-family: var(--font-hero);
+      font-size: clamp(2rem, 4vw, 4rem);
+      text-transform: uppercase;
+      margin-bottom: 2rem;
+      color: #fff;
+    }
+
+    .body-text {
+      font-size: clamp(1rem, 1.5vw, 1.5rem);
+      line-height: 1.7;
+      color: var(--text-muted);
+      max-width: 800px;
+      margin-bottom: 2rem;
+    }
+
+    .body-text strong {
+      color: var(--text-main);
+      font-weight: 600;
+    }
+
+    /* Structural Blocks */
+    .meta-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+      gap: 2rem;
+      border-top: 1px solid var(--border);
+      border-bottom: 1px solid var(--border);
+      padding: 2rem 0;
+      margin: 3rem 0;
+      background: rgba(0, 0, 0, 0.3);
+      backdrop-filter: blur(5px);
+    }
+
+    .meta-item .meta-key {
+      font-family: var(--font-mono);
+      font-size: 0.7rem;
+      color: var(--text-muted);
+      margin-bottom: 0.5rem;
+    }
+
+    .meta-item .meta-val {
+      font-size: 1rem;
+      font-weight: 500;
+    }
+
+    .data-list {
+      list-style: none;
+      max-width: 900px;
+    }
+
+    .data-list li {
+      position: relative;
+      padding-left: 2rem;
+      margin-bottom: 1.5rem;
+      font-size: clamp(1rem, 1.2vw, 1.25rem);
+      line-height: 1.6;
+      color: var(--text-muted);
+    }
+
+    .data-list li::before {
+      content: '→';
+      position: absolute;
+      left: 0;
+      color: var(--accent);
+      font-family: var(--font-mono);
+    }
+
+    .cards-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      gap: 2rem;
+      width: 100%;
+    }
+
+    .data-card {
+      background: rgba(15, 23, 42, 0.4);
+      border: 1px solid var(--border);
+      padding: 2.5rem;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .data-card::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 2px;
+      background: var(--accent);
+      transform: scaleX(0);
+      transform-origin: left;
+      transition: transform 0.6s ease;
+    }
+
+    .is-visible .data-card::before {
+      transform: scaleX(1);
+    }
+
+    .card-header {
+      font-family: var(--font-mono);
+      font-size: 0.85rem;
+      color: var(--accent);
+      margin-bottom: 1rem;
+    }
+
+    .card-title {
+      font-family: var(--font-hero);
+      font-size: 1.5rem;
+      text-transform: uppercase;
+      margin-bottom: 1rem;
+      color: #fff;
+    }
+
+    .card-body {
+      font-size: 1rem;
+      color: var(--text-muted);
+      line-height: 1.6;
+    }
+
+    .eval-row {
+      display: grid;
+      grid-template-columns: 1fr 3fr;
+      gap: 2rem;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+      padding: 2rem 0;
+    }
+
+    .eval-row:first-of-type {
+      border-top: 1px solid rgba(255, 255, 255, 0.1);
+    }
+
+    .eval-key {
+      font-family: var(--font-mono);
+      text-transform: uppercase;
+      color: var(--text-main);
+      font-size: 0.9rem;
+    }
+
+    .eval-val {
+      color: var(--text-muted);
+      font-size: 1.1rem;
+      line-height: 1.6;
+    }
+
+    /* Animations */
+    .reveal {
+      opacity: 0;
+      transform: translateY(30px);
+      transition: opacity 1s cubic-bezier(0.2, 1, 0.3, 1), transform 1s cubic-bezier(0.2, 1, 0.3, 1);
+    }
+
+    .is-visible .reveal {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    .d-1 {
+      transition-delay: 0.1s;
+    }
+
+    .d-2 {
+      transition-delay: 0.2s;
+    }
+
+    .d-3 {
+      transition-delay: 0.3s;
+    }
+
+    .d-4 {
+      transition-delay: 0.4s;
+    }
+
+    .d-5 {
+      transition-delay: 0.5s;
+    }
+
+    @media (max-width: 768px) {
+      .eval-row {
+        grid-template-columns: 1fr;
+        gap: 0.5rem;
+      }
+
+      .eval-key {
+        margin-bottom: 0.5rem;
+        color: var(--accent);
+      }
+
+      section {
+        padding: 10vh 5vw;
+      }
+    }
+  </style>
+</head>
+
+<body>
+
+  <!-- SVG Filters -->
+  <svg style="display:none;">
+    <filter id="noiseFilter">
+      <feTurbulence type="fractalNoise" baseFrequency="0.8" numOctaves="3" stitchTiles="stitch">
+        <animate attributeName="seed" values="1;2;3;4;5;6;7;8;9;10" dur="1s" repeatCount="indefinite" />
+      </feTurbulence>
+      <feColorMatrix type="matrix" values="1 0 0 0 0, 0 1 0 0 0, 0 0 1 0 0, 0 0 0 0.2 0" />
+    </filter>
+  </svg>
+  <div class="noise-overlay" style="filter: url(#noiseFilter);"></div>
+
+  <!-- Structural UI -->
+  <div class="progress-bar" id="progressBar"></div>
+  <div class="hud-lines"></div>
+
+  <!-- Background Parallax -->
+  <div id="bg-system">
+    <div class="bg-layer active" data-index="0" style="background-image: url('./images/scene-1\(6\).jpg')"></div>
+    <div class="bg-layer" data-index="1" style="background-image: url('./images/scene-2\(6\).jpg')"></div>
+    <div class="bg-layer" data-index="2" style="background-image: url('./images/scene-3\(6\).jpg')"></div>
+    <div class="bg-layer" data-index="3" style="background-image: url('./images/scene-4\(6\).jpg')"></div>
+    <div class="bg-layer" data-index="4" style="background-image: url('./images/scene-5\(7\).jpg')"></div>
+    <div class="bg-vignette"></div>
+  </div>
+
+  <!-- Content -->
+  <main>
+
+    <!-- Section 1: Introduction & Result -->
+    <section id="sec-0" class="observe-me">
+      <div class="reveal">
+        <span class="label">Task</span>
+        <h1 class="hero-title">Russian Strategic<br>Opportunism<br><span style="color: var(--accent)">in Ukraine</span>
+        </h1>
+      </div>
+
+      <div class="reveal d-1">
+        <p class="body-text">
+          <strong>Goal:</strong> Analyze specific instances and tactical shifts where Russia has intensified its
+          operations or consolidated gains in Ukraine coinciding with periods of high US diplomatic and military focus
+          on the Middle East. Evaluate how these maneuvers bypass Western deterrents.'.
+        </p>
+      </div>
+
+      <div class="meta-grid reveal d-2">
+        <div class="meta-item">
+          <div class="meta-key">STATUS</div>
+          <div class="meta-val">Detailed Findings Completed</div>
+        </div>
+        <div class="meta-item">
+          <div class="meta-key">TIMELINE</div>
+          <div class="meta-val">October 2023 - March 2026</div>
+        </div>
+        <div class="meta-item">
+          <div class="meta-key">SUBJECT</div>
+          <div class="meta-val">Russian Strategic Opportunism vs. US Middle East Focus</div>
+        </div>
+      </div>
+
+      <div class="reveal d-3">
+        <span class="label">Result</span>
+        <p class="body-text" style="font-size: 1.1rem;">
+          Russia's strategic synchronization of military escalations in Ukraine with Middle Eastern crises has evolved
+          into a sophisticated doctrine of 'opportunistic attrition.' By exploiting periods where US diplomatic and
+          military bandwidth is divided, Moscow has successfully bypassed high-end Western deterrents. Key instances
+          include the October 2023 offensive in Avdiivka, launched days after the Hamas attacks on Israel, and the
+          February 2026 missile campaign timed to coincide with US-Israeli strikes on Iran. This latter campaign
+          exploited a shortage of PAC-3 Patriot interceptors diverted to the Middle East. Tactically, Russia has shifted
+          from failed mechanized 'meat waves' to small infiltration teams and the saturation of glide bombs (KABs) to
+          outrange Ukrainian air defenses. Furthermore, Russia leverages Middle East-induced oil price spikes to finance
+          its expanded military (reaching 1.5 million active personnel by 2026) and utilizes the diplomatic vacuum
+          created by Middle East conflicts to maintain a policy of calculated intransigence in negotiations.
+        </p>
+      </div>
+    </section>
+
+    <!-- Section 2: Key Findings -->
+    <section id="sec-1" class="observe-me">
+      <div class="reveal">
+        <span class="label">Summary</span>
+        <h2>Key Findings</h2>
+      </div>
+      <ul class="data-list">
+        <li class="reveal d-1">Russia synchronizes major offensives in Ukraine with Middle Eastern crises to exploit
+          divided US diplomatic and military bandwidth.</li>
+        <li class="reveal d-2">Strategic resource competition forces the US to divert critical air defense assets (PAC-3
+          interceptors) from Ukraine to the Middle East during regional escalations.</li>
+        <li class="reveal d-3">Russia has bypassed Western deterrents by shifting to low-tech infiltration tactics,
+          glide bomb saturation, and advanced EW adaptation to jam precision-guided munitions.</li>
+        <li class="reveal d-4">Middle East-induced oil price spikes provide Russia with the surplus revenue needed to
+          sustain a high-attrition positional war and expand its military end-strength.</li>
+        <li class="reveal d-5">The US focus on Middle East de-escalation creates a diplomatic vacuum that reduces
+          pressure on Moscow for territorial concessions during negotiations.</li>
+      </ul>
+    </section>
+
+    <!-- Section 3: Specific Instances -->
+    <section id="sec-2" class="observe-me">
+      <div class="reveal">
+        <span class="label">Chronology</span>
+        <h2>Specific Instances</h2>
+      </div>
+      <div class="cards-grid">
+        <div class="data-card reveal d-1">
+          <div class="card-header">Period: October 2023</div>
+          <div class="card-title">Avdiivka Offensive</div>
+          <div class="card-body">
+            <strong>Middle East Trigger:</strong> October 7 Hamas Attacks<br><br>
+            <strong>Russian Intensification:</strong> Launch of the Battle of Avdiivka; recapturing operational
+            initiative.<br><br>
+            <strong>Tactical Gain:</strong> Initiated massive artillery and aerial bombardment, the strongest in the
+            Donbas since the start of the war.
+          </div>
+        </div>
+        <div class="data-card reveal d-2">
+          <div class="card-header">Period: February-March 2026</div>
+          <div class="card-title">Missile Campaign</div>
+          <div class="card-body">
+            <strong>Middle East Trigger:</strong> US-Israeli strikes on Iran & Strait of Hormuz crisis<br><br>
+            <strong>Russian Intensification:</strong> Highest intensity of ballistic missile strikes in four years of
+            war.<br><br>
+            <strong>Tactical Gain:</strong> Exploited the diversion of PAC-3 interceptors to the Gulf to strike
+            Ukrainian energy and rail infrastructure.
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Section 4: Tactical Shifts -->
+    <section id="sec-3" class="observe-me">
+      <div class="reveal">
+        <span class="label">Evolution</span>
+        <h2>Tactical Shifts</h2>
+      </div>
+      <div class="cards-grid">
+        <div class="data-card reveal d-1">
+          <div class="card-header">Shift 01</div>
+          <div class="card-title">Infiltration Groups</div>
+          <div class="card-body">
+            Transition from failed mechanized 'meat waves' to small, stealthy infantry teams that infiltrate Ukrainian
+            positions to cause chaos.
+          </div>
+        </div>
+        <div class="data-card reveal d-2">
+          <div class="card-header">Shift 02</div>
+          <div class="card-title">Areal Saturation</div>
+          <div class="card-body">
+            Massive use of KAB glide bombs to destroy fortifications from distances outside Ukrainian SHORAD range.
+          </div>
+        </div>
+        <div class="data-card reveal d-3">
+          <div class="card-header">Shift 03</div>
+          <div class="card-title">EW Adaptation</div>
+          <div class="card-body">
+            Rapid technological spiral to jam Western precision-guided munitions (GPS/Laser), reducing their hit rates
+            significantly.
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Section 5: Deterrent Evaluation -->
+    <section id="sec-4" class="observe-me">
+      <div class="reveal">
+        <span class="label">Analysis</span>
+        <h2>Deterrent Bypass Evaluation</h2>
+      </div>
+      <div style="max-width: 1000px; width: 100%;">
+        <div class="eval-row reveal d-1">
+          <div class="eval-key">Resource Competition</div>
+          <div class="eval-val">US and Gulf partners burning through a year's worth of PAC-3 production in days, leaving
+            Ukraine's skies unprotected.</div>
+        </div>
+        <div class="eval-row reveal d-2">
+          <div class="eval-key">Economic Impact</div>
+          <div class="eval-val">Oil price spikes (Brent $84+) provide Russia with surplus revenue (Urals >$70) to
+            sustain a high-attrition positional war.</div>
+        </div>
+        <div class="eval-row reveal d-3">
+          <div class="eval-key">Diplomatic Dilution</div>
+          <div class="eval-val">Shift of high-level US attention to Middle East de-escalation reduces the pressure for a
+            'just' termination in Ukraine, favoring Russian stalling tactics.</div>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      // Scroll Progress Bar
+      const progressBar = document.getElementById('progressBar');
+      window.addEventListener('scroll', () => {
+        const winScroll = document.body.scrollTop || document.documentElement.scrollTop;
+        const height = document.documentElement.scrollHeight - document.documentElement.clientHeight;
+        const scrolled = (winScroll / height) * 100;
+        progressBar.style.height = scrolled + '%';
+      });
+
+      // Intersection Observer for Text Reveals & Background Swapping
+      const sections = document.querySelectorAll('.observe-me');
+      const bgLayers = document.querySelectorAll('.bg-layer');
+
+      const observerOptions = {
+        root: null,
+        rootMargin: '-20% 0px -20% 0px',
+        threshold: 0.1
+      };
+
+      const observer = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+          if (entry.isIntersecting) {
+            // Reveal text
+            entry.target.classList.add('is-visible');
+
+            // Swap Background
+            const index = entry.target.id.split('-')[1];
+            bgLayers.forEach(layer => layer.classList.remove('active'));
+            if (bgLayers[index]) {
+              bgLayers[index].classList.add('active');
+            }
+          }
+        });
+      }, observerOptions);
+
+      sections.forEach(section => {
+        observer.observe(section);
+      });
+    });
+  </script>
+</body>
+
+</html>

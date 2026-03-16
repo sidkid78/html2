@@ -1,0 +1,884 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Domain Report: Geopolitical Diplomacy</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link
+    href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600&family=JetBrains+Mono:wght@100;400;700&family=Oswald:wght@400;500;700&display=swap"
+    rel="stylesheet">
+  <style>
+    :root {
+      --bg: #030406;
+      --surface: #0a0c10;
+      --text-main: #d1d5db;
+      --text-muted: #6b7280;
+      --accent: #ff2a2a;
+      --grid-line: rgba(255, 255, 255, 0.08);
+
+      --font-head: 'Oswald', sans-serif;
+      --font-body: 'Inter', sans-serif;
+      --font-mono: 'JetBrains Mono', monospace;
+
+      --ease: cubic-bezier(0.19, 1, 0.22, 1);
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      cursor: none;
+      /* Custom cursor */
+    }
+
+    body {
+      background-color: var(--bg);
+      color: var(--text-main);
+      font-family: var(--font-body);
+      overflow: hidden;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    /* Custom Cursor */
+    #cursor-dot {
+      position: fixed;
+      width: 4px;
+      height: 4px;
+      background: var(--accent);
+      border-radius: 50%;
+      pointer-events: none;
+      z-index: 9999;
+      transform: translate(-50%, -50%);
+      transition: width 0.2s, height 0.2s;
+    }
+
+    #cursor-ring {
+      position: fixed;
+      width: 30px;
+      height: 30px;
+      border: 1px solid rgba(255, 42, 42, 0.5);
+      border-radius: 50%;
+      pointer-events: none;
+      z-index: 9998;
+      transform: translate(-50%, -50%);
+      transition: transform 0.1s ease-out, width 0.2s, height 0.2s;
+    }
+
+    body:active #cursor-ring {
+      transform: translate(-50%, -50%) scale(0.8);
+      border-color: var(--accent);
+    }
+
+    /* Global UI / Chrome */
+    .ui-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+      z-index: 50;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      padding: 2vw;
+    }
+
+    .ui-header {
+      display: flex;
+      justify-content: space-between;
+      font-family: var(--font-mono);
+      font-size: 0.75rem;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      color: var(--text-muted);
+      border-bottom: 1px solid var(--grid-line);
+      padding-bottom: 1rem;
+    }
+
+    .ui-header span.alert {
+      color: var(--accent);
+    }
+
+    .ui-footer {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-end;
+      font-family: var(--font-mono);
+    }
+
+    .progress-tracker {
+      font-size: 2rem;
+      font-weight: 700;
+      color: var(--text-main);
+      display: flex;
+      align-items: flex-end;
+      gap: 0.5rem;
+    }
+
+    .progress-tracker span.total {
+      font-size: 1rem;
+      color: var(--text-muted);
+      margin-bottom: 0.2rem;
+    }
+
+    .scroll-indicator {
+      font-size: 0.7rem;
+      text-transform: uppercase;
+      letter-spacing: 0.2em;
+      color: var(--text-muted);
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+    }
+
+    .scroll-line {
+      width: 40px;
+      height: 1px;
+      background: var(--text-muted);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .scroll-line::after {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      height: 100%;
+      width: 50%;
+      background: var(--accent);
+      animation: scroll-scan 2s linear infinite;
+    }
+
+    @keyframes scroll-scan {
+      0% {
+        transform: translateX(-100%);
+      }
+
+      100% {
+        transform: translateX(200%);
+      }
+    }
+
+    /* SVG Filters */
+    .noise-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+      z-index: 100;
+      opacity: 0.04;
+      background: url('data:image/svg+xml,%3Csvg viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg"%3E%3Cfilter id="noiseFilter"%3E%3CfeTurbulence type="fractalNoise" baseFrequency="0.85" numOctaves="3" stitchTiles="stitch"/%3E%3C/filter%3E%3Crect width="100%25" height="100%25" filter="url(%23noiseFilter)"/%3E%3C/svg%3E');
+    }
+
+    /* Carousel Structure */
+    .carousel {
+      display: flex;
+      width: 100vw;
+      height: 100vh;
+      overflow-x: scroll;
+      overflow-y: hidden;
+      scroll-snap-type: x mandatory;
+      scrollbar-width: none;
+      /* Firefox */
+      -ms-overflow-style: none;
+      /* IE and Edge */
+    }
+
+    .carousel::-webkit-scrollbar {
+      display: none;
+    }
+
+    .panel {
+      flex: 0 0 100vw;
+      height: 100vh;
+      scroll-snap-align: start;
+      position: relative;
+      padding: 6vw;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    /* Typography Hierarchy */
+    h1,
+    h2,
+    h3 {
+      font-family: var(--font-head);
+      text-transform: uppercase;
+      line-height: 1.1;
+      margin-bottom: 1rem;
+    }
+
+    h1 {
+      font-size: clamp(3rem, 6vw, 7rem);
+      color: #fff;
+      font-weight: 700;
+    }
+
+    h2 {
+      font-size: clamp(2rem, 4vw, 4rem);
+      color: var(--text-main);
+      font-weight: 500;
+      border-left: 4px solid var(--accent);
+      padding-left: 1rem;
+      margin-top: 2rem;
+    }
+
+    h3 {
+      font-size: clamp(1.2rem, 2vw, 1.8rem);
+      color: #fff;
+      margin-top: 1.5rem;
+      letter-spacing: 0.05em;
+    }
+
+    p,
+    li {
+      font-size: clamp(0.9rem, 1.1vw, 1.2rem);
+      line-height: 1.6;
+      margin-bottom: 1.2rem;
+      max-width: 65ch;
+    }
+
+    strong {
+      color: #fff;
+      font-weight: 600;
+    }
+
+    ul {
+      margin-left: 1.5rem;
+      margin-bottom: 1.5rem;
+      list-style-type: square;
+    }
+
+    li::marker {
+      color: var(--accent);
+    }
+
+    .mono-label {
+      font-family: var(--font-mono);
+      font-size: 0.8rem;
+      letter-spacing: 0.1em;
+      color: var(--accent);
+      text-transform: uppercase;
+      margin-bottom: 0.5rem;
+      display: block;
+    }
+
+    /* Layout Archetypes */
+
+    /* Panel 1: Title Screen */
+    #panel-1 {
+      flex-direction: column;
+      align-items: flex-start;
+      justify-content: center;
+    }
+
+    #panel-1 .bg-img {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      z-index: -1;
+      background-image: url('./images/scene-1\(7\).jpg');
+      background-size: cover;
+      background-position: center;
+      filter: grayscale(100%) contrast(1.2) brightness(0.2);
+      transition: transform 10s ease-out;
+    }
+
+    #panel-1.in-view .bg-img {
+      transform: scale(1.05);
+    }
+
+    #panel-1 .content {
+      position: relative;
+      z-index: 2;
+      max-width: 800px;
+    }
+
+    .goal-box {
+      border: 1px solid var(--grid-line);
+      background: rgba(10, 12, 16, 0.8);
+      padding: 2rem;
+      backdrop-filter: blur(10px);
+      margin-top: 2rem;
+      border-left: 4px solid var(--accent);
+    }
+
+    .goal-box strong {
+      font-family: var(--font-mono);
+      color: var(--accent);
+      text-transform: uppercase;
+      display: block;
+      margin-bottom: 0.5rem;
+    }
+
+    /* Panel 2: Split Screen */
+    #panel-2 {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 4vw;
+      align-items: stretch;
+      padding: 6vw 4vw;
+    }
+
+    #panel-2 .text-col {
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+    }
+
+    #panel-2 .img-col {
+      position: relative;
+      border: 1px solid var(--grid-line);
+      overflow: hidden;
+    }
+
+    #panel-2 .img-col img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      filter: sepia(100%) hue-rotate(320deg) saturate(200%) brightness(0.4) contrast(1.5);
+    }
+
+    .scanline {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 2px;
+      background: rgba(255, 42, 42, 0.5);
+      box-shadow: 0 0 10px var(--accent);
+      animation: scan 4s linear infinite;
+    }
+
+    @keyframes scan {
+      0% {
+        top: 0;
+      }
+
+      100% {
+        top: 100%;
+      }
+    }
+
+    /* Panel 3: Technical Overlay */
+    #panel-3 {
+      align-items: center;
+    }
+
+    #panel-3 .bg-img {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      z-index: -1;
+      background-image: url('./images/scene-2\(7\).jpg');
+      background-size: cover;
+      background-position: center;
+      filter: grayscale(80%) brightness(0.3);
+    }
+
+    #panel-3 .grid-content {
+      display: grid;
+      grid-template-columns: repeat(12, 1fr);
+      gap: 2vw;
+      width: 100%;
+      position: relative;
+      z-index: 2;
+    }
+
+    #panel-3 .main-text {
+      grid-column: 2 / 7;
+      background: rgba(0, 0, 0, 0.7);
+      padding: 3rem;
+      border: 1px solid var(--grid-line);
+      backdrop-filter: blur(5px);
+    }
+
+    #panel-3 .sub-text {
+      grid-column: 8 / 12;
+      display: flex;
+      flex-direction: column;
+      justify-content: flex-end;
+      gap: 2rem;
+    }
+
+    .data-block {
+      border-top: 1px solid var(--accent);
+      padding-top: 1rem;
+    }
+
+    /* Panel 4: Brutalist Data */
+    #panel-4 {
+      flex-direction: row-reverse;
+      gap: 4vw;
+    }
+
+    #panel-4 .img-wrapper {
+      flex: 1;
+      height: 70vh;
+      position: relative;
+      overflow: hidden;
+      clip-path: polygon(10% 0, 100% 0, 100% 90%, 90% 100%, 0 100%, 0 10%);
+    }
+
+    #panel-4 .img-wrapper img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      filter: grayscale(100%) contrast(1.2) brightness(0.5);
+    }
+
+    #panel-4 .text-wrapper {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+    }
+
+    .phase-list {
+      list-style: none;
+      margin-left: 0;
+      position: relative;
+      padding-left: 2rem;
+      border-left: 1px dashed var(--text-muted);
+    }
+
+    .phase-list li {
+      margin-bottom: 1.5rem;
+      position: relative;
+    }
+
+    .phase-list li::before {
+      content: '';
+      position: absolute;
+      left: -2.4rem;
+      top: 0.5rem;
+      width: 10px;
+      height: 10px;
+      background: var(--accent);
+      border-radius: 50%;
+      box-shadow: 0 0 10px var(--accent);
+    }
+
+    .phase-list strong {
+      font-family: var(--font-mono);
+      color: var(--text-main);
+      font-size: 0.9em;
+    }
+
+    /* Panel 5: Dense Grid */
+    #panel-5 {
+      flex-direction: column;
+      align-items: flex-start;
+      justify-content: center;
+      padding-top: 8vw;
+    }
+
+    #panel-5 .bg-img {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      z-index: -1;
+      background-image: url('./images/scene-5\(8\).jpg');
+      background-size: cover;
+      background-position: center;
+      filter: grayscale(100%) brightness(0.15);
+    }
+
+    .countermeasures-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 2rem;
+      margin-top: 2rem;
+      width: 100%;
+      max-width: 1200px;
+    }
+
+    .cm-item {
+      border: 1px solid var(--grid-line);
+      padding: 1.5rem;
+      background: rgba(10, 12, 16, 0.6);
+      position: relative;
+      transition: border-color 0.3s;
+    }
+
+    .cm-item:hover {
+      border-color: var(--accent);
+    }
+
+    .cm-number {
+      position: absolute;
+      top: -10px;
+      right: 10px;
+      font-family: var(--font-mono);
+      font-size: 2rem;
+      color: rgba(255, 255, 255, 0.1);
+      font-weight: 700;
+    }
+
+    .conclusion-note {
+      margin-top: 4rem;
+      font-style: italic;
+      color: var(--text-muted);
+      font-size: 0.85rem;
+      border-top: 1px solid var(--grid-line);
+      padding-top: 1rem;
+      width: 100%;
+      max-width: 1200px;
+    }
+
+    /* Animation Classes */
+    .reveal {
+      opacity: 0;
+      transform: translateY(20px);
+      transition: opacity 0.8s var(--ease), transform 0.8s var(--ease);
+    }
+
+    .in-view .reveal {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    .del-1 {
+      transition-delay: 0.1s;
+    }
+
+    .del-2 {
+      transition-delay: 0.2s;
+    }
+
+    .del-3 {
+      transition-delay: 0.3s;
+    }
+
+    .del-4 {
+      transition-delay: 0.4s;
+    }
+
+    .del-5 {
+      transition-delay: 0.5s;
+    }
+
+    /* Glitch Text Effect via SVG Filter applied to class */
+    .glitch-text {
+      filter: url(#ca-filter);
+    }
+
+    /* Responsive constraints */
+    @media (max-width: 1024px) {
+      #panel-2 {
+        grid-template-columns: 1fr;
+        grid-template-rows: 40vh auto;
+        padding-top: 10vh;
+      }
+
+      #panel-3 .grid-content {
+        display: flex;
+        flex-direction: column;
+      }
+
+      #panel-4 {
+        flex-direction: column;
+      }
+
+      #panel-4 .img-wrapper {
+        height: 30vh;
+      }
+
+      .countermeasures-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
+</head>
+
+<body>
+
+  <a href="/geopolitical-diplomacy"
+    style="position:fixed;top:2rem;left:2rem;z-index:1000;color:var(--accent);font-family:var(--font-mono);text-decoration:none;display:flex;align-items:center;gap:0.5rem;background:rgba(3,4,6,0.8);padding:0.6rem 1.2rem;border:1px solid rgba(255,42,42,0.3);backdrop-filter:blur(8px);border-radius:2px;transition:all 0.3s;font-size:0.8rem;text-transform:uppercase;letter-spacing:0.1em;pointer-events:auto;"
+    onmouseover="this.style.background='var(--accent)';this.style.color='#030406'"
+    onmouseout="this.style.background='rgba(3,4,6,0.8)';this.style.color='var(--accent)'">
+    <span>←</span> HUB_RETURN_INITIATED
+  </a>
+
+  <!-- Custom Cursor Elements -->
+  <div id="cursor-dot"></div>
+  <div id="cursor-ring"></div>
+
+  <!-- SVG Filters -->
+  <svg style="display: none;">
+    <filter id="ca-filter">
+      <feColorMatrix type="matrix" values="1 0 0 0 0  0 0 0 0 0  0 0 0 0 0  0 0 0 1 0" in="SourceGraphic"
+        result="red" />
+      <feOffset dx="3" dy="0" in="red" result="red_offset">
+        <animate attributeName="dx" values="0;3;-1;2;0" dur="3s" repeatCount="indefinite" />
+      </feOffset>
+      <feColorMatrix type="matrix" values="0 0 0 0 0  0 1 0 0 0  0 0 0 0 0  0 0 0 1 0" in="SourceGraphic"
+        result="green" />
+      <feOffset dx="-3" dy="0" in="green" result="green_offset">
+        <animate attributeName="dx" values="0;-3;1;-2;0" dur="3s" repeatCount="indefinite" />
+      </feOffset>
+      <feColorMatrix type="matrix" values="0 0 0 0 0  0 0 0 0 0  0 0 1 0 0  0 0 0 1 0" in="SourceGraphic"
+        result="blue" />
+      <feBlend mode="screen" in="red_offset" in2="green_offset" result="rg" />
+      <feBlend mode="screen" in="rg" in2="blue" />
+    </filter>
+  </svg>
+
+  <div class="noise-overlay"></div>
+
+  <!-- Fixed UI Chrome -->
+  <div class="ui-overlay">
+    <div class="ui-header">
+      <span>Classified // Eyes Only</span>
+      <span class="alert">Access Granted</span>
+      <span>FWD: STRATCOM</span>
+    </div>
+    <div class="ui-footer">
+      <div class="scroll-indicator">
+        <span>Swipe / Scroll</span>
+        <div class="scroll-line"></div>
+      </div>
+      <div class="progress-tracker">
+        <span id="current-page">01</span>
+        <span class="total">/05</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Carousel Main Container -->
+  <div class="carousel">
+
+    <!-- PANEL 1: Title & Synthesis -->
+    <section class="panel" id="panel-1" data-index="01">
+      <div class="bg-img"></div>
+      <div class="content">
+        <span class="mono-label reveal">Domain Report</span>
+        <h1 class="glitch-text reveal del-1">Geopolitical Diplomacy and Alliance Leverage</h1>
+        <div class="goal-box reveal del-2">
+          <strong>Goal:</strong>
+          <p>Investigate how Russia and China leverage US distraction in the Middle East to advance their strategic
+            interests in Ukraine and Taiwan. Provide a self-contained analysis of these geopolitical maneuvers within
+            the Four Gateways framework and propose diplomatic countermeasures to support US regional stabilization.</p>
+        </div>
+        <h2 class="reveal del-3" style="margin-top: 3rem;">Strategic Synthesis: Exploiting the Middle East Pivot</h2>
+        <p class="reveal del-4">This report provides a comprehensive analysis of how the Russian Federation and the
+          People’s Republic of China (PRC) utilize United States' involvement in Middle Eastern conflicts to advance
+          their respective strategic objectives in Ukraine and Taiwan. Using the <strong>Four Gateways
+            Framework</strong>, this synthesis outlines the mechanisms of "opportunistic attrition" and "creeping
+          escalation" while proposing a structured suite of diplomatic and military countermeasures.</p>
+      </div>
+    </section>
+
+    <!-- PANEL 2: Four Gateways -->
+    <section class="panel" id="panel-2" data-index="02">
+      <div class="text-col">
+        <span class="mono-label reveal">Strategic Landscape</span>
+        <h2 class="reveal del-1">The Four Gateways</h2>
+        <p class="reveal del-2">The contemporary global security environment is defined by four critical strategic
+          corridors: the Western Hemisphere (Atlantic/Europe), the Middle East, the Arctic, and the Indo-Pacific. Under
+          the Four Gateways framework, the United States currently maintains a defensive posture across this distributed
+          architecture.</p>
+        <p class="reveal del-3">Russia and China, conversely, operate via a "distributed competition" model, seeking to
+          bypass direct systemic overthrow by inducing "bandwidth exhaustion" in the U.S. security apparatus.</p>
+        <p class="reveal del-4">The Middle East gateway serves as a primary point of systemic vulnerability. While it
+          represents a critical chokepoint for global energy supplies, its volatility effectively acts as a resource
+          drain, forcing the U.S. to divert high-end kinetic and diplomatic assets away from the European and Pacific
+          gateways. This diversion creates windows of opportunity that Moscow and Beijing have increasingly synchronized
+          to their advantage.</p>
+      </div>
+      <div class="img-col reveal del-2">
+        <img src="./images/scene-4(7).jpg" alt="Geopolitical Map">
+        <div class="scanline"></div>
+      </div>
+    </section>
+
+    <!-- PANEL 3: Russian Opportunism -->
+    <section class="panel" id="panel-3" data-index="03">
+      <div class="bg-img"></div>
+      <div class="grid-content">
+        <div class="main-text reveal">
+          <span class="mono-label">Theater: Europe</span>
+          <h2>Russian Strategic Opportunism in Ukraine</h2>
+          <p>Russia has refined a doctrine of "opportunistic attrition," specifically timing its most aggressive
+            military maneuvers to coincide with U.S. focus on Middle Eastern escalations. This strategy allows Moscow to
+            bypass high-end Western deterrents that would otherwise be focused on the Ukrainian theater.</p>
+        </div>
+        <div class="sub-text">
+          <div class="data-block reveal del-2">
+            <h3>Tactical Synchronization</h3>
+            <p>Evidence of this synchronization is found in two major escalatory periods. In October 2023, Russia
+              launched a massive offensive in Avdiivka within days of the Hamas attacks on Israel. More recently, the
+              missile campaigns of early 2026 were timed to exploit the redeployment of PAC-3 Patriot interceptors to
+              the Middle East following U.S.-Israeli strikes on Iran. By ensuring the U.S. is forced to choose which
+              ally receives limited air defense inventory, Russia has successfully saturated Ukrainian defenses using
+              glide bombs (KABs) and advanced electronic warfare (EW) to neutralize precision-guided munitions.</p>
+          </div>
+          <div class="data-block reveal del-3">
+            <h3>Economic and Diplomatic Exploitation</h3>
+            <p>The conflict in the Middle East provides Russia with a dual economic and diplomatic advantage. Regional
+              instability typically induces oil price spikes, providing the Kremlin with the surplus revenue necessary
+              to sustain a high-attrition positional war and expand its military to 1.5 million active personnel.
+              Diplomatically, the U.S. focus on preventing a regional Middle Eastern war creates a vacuum where pressure
+              on Moscow for territorial concessions is significantly diminished, allowing Russia to maintain a policy of
+              calculated intransigence.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- PANEL 4: Chinese Escalation -->
+    <section class="panel" id="panel-4" data-index="04">
+      <div class="img-wrapper reveal">
+        <img src="./images/scene-3(7).jpg" alt="Naval Fleet">
+        <div class="scanline"></div>
+      </div>
+      <div class="text-wrapper">
+        <span class="mono-label reveal">Theater: Indo-Pacific</span>
+        <h2 class="reveal del-1">Chinese Creeping Escalation</h2>
+        <p class="reveal del-2">China employs a "creeping escalation" strategy in the Indo-Pacific, utilizing Middle
+          Eastern "windows of distraction" to shift the status quo in the Taiwan Strait and South China Sea with reduced
+          risk of a high-intensity U.S. response.</p>
+
+        <h3 class="reveal del-3">The Three-Phase Escalation Pattern</h3>
+        <p class="reveal del-3" style="font-size: 0.85rem; color: var(--text-muted);">Research into PRC posturing from
+          2024 to 2026 reveals a phased approach to regional dominance:</p>
+        <ul class="phase-list reveal del-4">
+          <li><strong>Phase 1 (2024):</strong> Exploiting the Red Sea crisis, the PRC conducted the <em>Joint
+              Sword-2024A</em> exercises and intensified clashes at the Second Thomas Shoal.</li>
+          <li><strong>Phase 2 (2025):</strong> Following the June 2025 conflict with Iran, Beijing launched <em>Justice
+              Mission 2025</em>, involving direct People's Liberation Army Navy (PLAN) intervention at Scarborough
+            Shoal.</li>
+          <li><strong>Phase 3 (2026):</strong> Utilizing the redeployment of U.S. THAAD and Patriot batteries to the
+            Middle East, the PRC conducted snap drills to establish a "new normal" regarding its military presence
+            around Taiwan.</li>
+        </ul>
+
+        <h3 class="reveal del-5">Tactical Evolution</h3>
+        <p class="reveal del-5">The PRC has transitioned from purely "gray-zone" tactics (using the Coast Guard) to an
+          integrated "cabbage strategy" that meshes the PLAN and the Chinese Coast Guard (CCG). This integrated
+          approach, launched during U.S. naval diversions to the Middle East, aims to incrementally seize control of
+          disputed maritime territories while the U.S. carrier strike groups are occupied elsewhere.</p>
+      </div>
+    </section>
+
+    <!-- PANEL 5: Countermeasures -->
+    <section class="panel" id="panel-5" data-index="05">
+      <div class="bg-img"></div>
+      <div style="position: relative; z-index: 2; width: 100%; max-width: 1200px;">
+        <span class="mono-label reveal">Strategic Directives</span>
+        <h2 class="reveal del-1">Systemic Vulnerabilities & Countermeasures</h2>
+        <p class="reveal del-2">The crisis in the Middle East does not exist in a vacuum; it acts as a catalyst that
+          deepens the strategic alignment between Russia, China, and Iran. This "crisscross" of interests allows Russia
+          to leverage Iranian drone technology in Ukraine while China secures long-term energy concessions from a
+          besieged Tehran. Taiwan remains the ultimate Indo-Pacific chokepoint; should the U.S. fail to maintain its
+          Pacific security network due to Middle Eastern over-extension, the global technological and economic
+          architecture would face a terminal threat.</p>
+        <p class="reveal del-2">To mitigate these threats, the United States must transition from a reactive posture to
+          an "Economy of Force" strategy that stabilizes the Middle East while reinforcing the European and Pacific
+          gateways.</p>
+
+        <div class="countermeasures-grid">
+          <div class="cm-item reveal del-3">
+            <div class="cm-number">01</div>
+            <h3>Middle East Economy of Force</h3>
+            <p>The U.S. should empower regional partners to manage local security, reducing the direct requirement for
+              U.S. missile defense and naval assets. This involves formalized burden-sharing agreements and the creation
+              of an integrated regional air defense architecture among allies that does not rely solely on U.S.
+              interceptor inventory.</p>
+          </div>
+          <div class="cm-item reveal del-4">
+            <div class="cm-number">02</div>
+            <h3>Institutionalizing Support for Ukraine</h3>
+            <p>To counter Russian attrition, the U.S. and its allies should establish a <strong>Joint Defense
+                Procurement Command</strong>. This body would move beyond ad-hoc military aid toward a formalized,
+              long-term industrial strategy. Additionally, aggressive secondary sanctions should be applied to entities
+              in third-party nations that facilitate the transit of dual-use technologies to the Russian defense sector.
+            </p>
+          </div>
+          <div class="cm-item reveal del-5">
+            <div class="cm-number">03</div>
+            <h3>Signaling Resolve in the Indo-Pacific</h3>
+            <p>Deterring China requires a visible and multi-lateral commitment to the status quo.</p>
+            <ul style="font-size: 0.9rem; margin-bottom:0;">
+              <li><strong>AUKUS and the Quad:</strong> Expand AUKUS Pillar II (advanced capabilities) and integrate the
+                Quad (U.S., Japan, India, Australia) into maritime domain awareness programs.</li>
+              <li><strong>Pre-Triggered Sanctions:</strong> The U.S. and its G7 partners should codify a "pre-triggered"
+                multilateral sanctions regime that would automatically activate in the event of a blockade or kinetic
+                assault on Taiwan, removing the element of diplomatic hesitation.</li>
+            </ul>
+          </div>
+          <div class="cm-item reveal del-5">
+            <div class="cm-number">04</div>
+            <h3>Strategic Resource Management</h3>
+            <p>The U.S. must prioritize the rapid expansion of its munitions industrial base, particularly for PAC-3 and
+              long-range anti-ship missiles. By addressing the "interceptor gap," the U.S. can reduce the strategic
+              trade-offs it is currently forced to make between the Middle Eastern and Indo-Pacific theaters.</p>
+          </div>
+        </div>
+
+        <div class="conclusion-note reveal">
+          <p>*Note: The findings regarding 2026 missile campaigns and "Justice Mission 2025" are based on worker
+            projections and strategic modeling provided in the task briefings.*</p>
+        </div>
+      </div>
+    </section>
+
+  </div>
+
+  <script>
+    // Custom Cursor Logic
+    const cursorDot = document.getElementById('cursor-dot');
+    const cursorRing = document.getElementById('cursor-ring');
+
+    window.addEventListener('mousemove', (e) => {
+      cursorDot.style.left = e.clientX + 'px';
+      cursorDot.style.top = e.clientY + 'px';
+
+      // Add slight lag to ring for organic feel
+      setTimeout(() => {
+        cursorRing.style.left = e.clientX + 'px';
+        cursorRing.style.top = e.clientY + 'px';
+      }, 50);
+    });
+
+    // Intersection Observer for scroll animations and progress tracking
+    const panels = document.querySelectorAll('.panel');
+    const pageIndicator = document.getElementById('current-page');
+
+    const observerOptions = {
+      root: document.querySelector('.carousel'),
+      threshold: 0.5
+    };
+
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          // Add animation class
+          entry.target.classList.add('in-view');
+          // Update UI counter based on data-index
+          pageIndicator.textContent = entry.target.getAttribute('data-index');
+        }
+      });
+    }, observerOptions);
+
+    panels.forEach(panel => {
+      observer.observe(panel);
+    });
+  </script>
+</body>
+
+</html>
