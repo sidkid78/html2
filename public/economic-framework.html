@@ -1,0 +1,621 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Economic & Energy Policy Stabilization Framework</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500&family=JetBrains+Mono:wght@400;700&family=Space+Grotesk:wght@500;700&display=swap');
+
+    :root {
+      --bg: #050914;
+      --text-main: #e2e8f0;
+      --text-muted: rgba(226, 232, 240, 0.6);
+      --accent: #00f0ff;
+      --accent-dim: rgba(0, 240, 255, 0.2);
+      --grid-line: rgba(255, 255, 255, 0.04);
+      --font-hero: 'Space Grotesk', sans-serif;
+      --font-body: 'Inter', sans-serif;
+      --font-mono: 'JetBrains Mono', monospace;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      cursor: none !important;
+    }
+
+    body,
+    html {
+      width: 100vw;
+      height: 100vh;
+      background-color: var(--bg);
+      color: var(--text-main);
+      font-family: var(--font-body);
+      overflow: hidden;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    /* Custom Cursor */
+    #cursor {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 20px;
+      height: 20px;
+      pointer-events: none;
+      z-index: 9999;
+      mix-blend-mode: difference;
+      transition: transform 0.1s ease;
+    }
+
+    #cursor::before,
+    #cursor::after {
+      content: '';
+      position: absolute;
+      background: var(--accent);
+    }
+
+    #cursor::before {
+      top: 9px;
+      left: -5px;
+      width: 30px;
+      height: 2px;
+    }
+
+    #cursor::after {
+      left: 9px;
+      top: -5px;
+      width: 2px;
+      height: 30px;
+    }
+
+    /* Global Grid Background */
+    .grid-bg {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
+      background-image:
+        linear-gradient(var(--grid-line) 1px, transparent 1px),
+        linear-gradient(90deg, var(--grid-line) 1px, transparent 1px);
+      background-size: 5vw 5vw;
+      z-index: 0;
+      pointer-events: none;
+    }
+
+    /* UI HUD */
+    .hud {
+      position: fixed;
+      z-index: 100;
+      font-family: var(--font-mono);
+      font-size: 0.75rem;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      color: var(--accent);
+      pointer-events: none;
+    }
+
+    .hud-top-left {
+      top: 2vw;
+      left: 2vw;
+    }
+
+    .hud-top-right {
+      top: 2vw;
+      right: 2vw;
+    }
+
+    .hud-bottom-left {
+      bottom: 2vw;
+      left: 2vw;
+    }
+
+    .hud-bottom-right {
+      bottom: 2vw;
+      right: 2vw;
+      display: flex;
+      gap: 1vw;
+      align-items: baseline;
+    }
+
+    .hud-progress {
+      font-size: 2rem;
+      font-weight: 700;
+      color: var(--text-main);
+      line-height: 1;
+    }
+
+    /* Carousel Container */
+    .carousel {
+      position: relative;
+      z-index: 10;
+      display: flex;
+      width: 100vw;
+      height: 100vh;
+      overflow-x: auto;
+      overflow-y: hidden;
+      scroll-snap-type: x mandatory;
+      scrollbar-width: none;
+    }
+
+    .carousel::-webkit-scrollbar {
+      display: none;
+    }
+
+    /* Panel Base */
+    .panel {
+      min-width: 100vw;
+      height: 100vh;
+      scroll-snap-align: start;
+      display: grid;
+      padding: 6vw;
+      position: relative;
+    }
+
+    /* Typography */
+    .hero-title {
+      font-family: var(--font-hero);
+      font-size: clamp(2.5rem, 5vw, 5rem);
+      line-height: 1.1;
+      text-transform: uppercase;
+      letter-spacing: -0.02em;
+      margin-bottom: 2rem;
+      color: #fff;
+    }
+
+    .section-num {
+      font-family: var(--font-mono);
+      font-size: clamp(3rem, 8vw, 8rem);
+      font-weight: 700;
+      color: transparent;
+      -webkit-text-stroke: 1px var(--accent-dim);
+      position: absolute;
+      top: 4vw;
+      left: 4vw;
+      opacity: 0.3;
+      z-index: -1;
+      filter: url(#chromatic);
+    }
+
+    .sub-title {
+      font-family: var(--font-hero);
+      font-size: clamp(1.5rem, 3vw, 2.5rem);
+      margin-bottom: 1.5rem;
+      color: var(--accent);
+    }
+
+    p {
+      font-size: clamp(1rem, 1.2vw, 1.25rem);
+      line-height: 1.6;
+      color: var(--text-muted);
+      margin-bottom: 1.5rem;
+      max-width: 60ch;
+    }
+
+    /* Data Points / Bullets */
+    .data-point {
+      border-left: 2px solid var(--accent-dim);
+      padding-left: 1.5rem;
+      margin-bottom: 2rem;
+      position: relative;
+      transition: all 0.3s ease;
+    }
+
+    .data-point:hover {
+      border-left-color: var(--accent);
+      background: linear-gradient(90deg, var(--accent-dim) 0%, transparent 100%);
+    }
+
+    .data-point::before {
+      content: '[SYS.DATA]';
+      display: block;
+      font-family: var(--font-mono);
+      font-size: 0.65rem;
+      color: var(--accent);
+      margin-bottom: 0.5rem;
+    }
+
+    .data-point strong {
+      color: var(--text-main);
+      font-family: var(--font-hero);
+      display: block;
+      margin-bottom: 0.25rem;
+      font-size: 1.1em;
+    }
+
+    /* Image Containers */
+    .img-container {
+      position: relative;
+      width: 100%;
+      height: 100%;
+      border: 1px solid var(--accent-dim);
+      padding: 1vw;
+      background: rgba(0, 240, 255, 0.02);
+      overflow: hidden;
+    }
+
+    .img-container::after {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: linear-gradient(0deg, var(--bg) 0%, transparent 50%);
+      pointer-events: none;
+    }
+
+    .img-container::before {
+      content: 'LIVE_FEED_ACTIVE';
+      position: absolute;
+      top: 2vw;
+      right: 2vw;
+      font-family: var(--font-mono);
+      font-size: 0.65rem;
+      color: var(--accent);
+      z-index: 2;
+      animation: blink 2s infinite;
+    }
+
+    .media-bg {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      filter: grayscale(80%) contrast(1.2) brightness(0.8);
+      transition: filter 0.5s ease;
+    }
+
+    .panel:hover .media-bg {
+      filter: grayscale(20%) contrast(1.1) brightness(0.9);
+    }
+
+    /* Specific Panel Layouts */
+    #panel-1 {
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: flex-start;
+    }
+
+    .split-panel {
+      grid-template-columns: 1fr 1fr;
+      gap: 4vw;
+      align-items: center;
+    }
+
+    .split-panel.reverse {
+      grid-template-columns: 1fr 1fr;
+    }
+
+    .split-panel.reverse .content-col {
+      order: 2;
+    }
+
+    .split-panel.reverse .img-col {
+      order: 1;
+    }
+
+    #panel-5 {
+      grid-template-columns: 1fr;
+      align-items: end;
+    }
+
+    #panel-5 .img-container {
+      position: absolute;
+      top: 4vw;
+      left: 4vw;
+      right: 4vw;
+      bottom: 4vw;
+      width: auto;
+      height: auto;
+      z-index: 0;
+    }
+
+    #panel-5 .content-col {
+      position: relative;
+      z-index: 2;
+      background: rgba(5, 9, 20, 0.85);
+      padding: 3vw;
+      border: 1px solid var(--accent-dim);
+      backdrop-filter: blur(10px);
+      max-width: 800px;
+    }
+
+    /* Animations */
+    @keyframes blink {
+
+      0%,
+      100% {
+        opacity: 1;
+      }
+
+      50% {
+        opacity: 0;
+      }
+    }
+
+    .anim-el {
+      opacity: 0;
+      transform: translateY(30px);
+      transition: opacity 0.8s cubic-bezier(0.16, 1, 0.3, 1), transform 0.8s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    .is-active .anim-el {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    .delay-1 {
+      transition-delay: 0.1s;
+    }
+
+    .delay-2 {
+      transition-delay: 0.2s;
+    }
+
+    .delay-3 {
+      transition-delay: 0.3s;
+    }
+
+    .delay-4 {
+      transition-delay: 0.4s;
+    }
+
+    /* Responsive */
+    @media (max-width: 1024px) {
+
+      .split-panel,
+      .split-panel.reverse {
+        grid-template-columns: 1fr;
+        grid-template-rows: auto 1fr;
+        overflow-y: auto;
+      }
+
+      .split-panel.reverse .content-col {
+        order: 1;
+      }
+
+      .split-panel.reverse .img-col {
+        order: 2;
+        height: 40vh;
+      }
+
+      .img-col {
+        height: 40vh;
+      }
+    }
+  </style>
+</head>
+
+<body>
+
+  <!-- SVG Filters -->
+  <svg width="0" height="0" style="position:absolute;">
+    <defs>
+      <filter id="chromatic">
+        <feColorMatrix type="matrix" values="1 0 0 0 0  0 0 0 0 0  0 0 0 0 0  0 0 0 1 0" in="SourceGraphic"
+          result="red" />
+        <feColorMatrix type="matrix" values="0 0 0 0 0  0 1 0 0 0  0 0 0 0 0  0 0 0 1 0" in="SourceGraphic"
+          result="green" />
+        <feColorMatrix type="matrix" values="0 0 0 0 0  0 0 0 0 0  0 0 1 0 0  0 0 0 1 0" in="SourceGraphic"
+          result="blue" />
+        <feOffset in="red" dx="-4" dy="0" result="red_offset">
+          <animate attributeName="dx" values="-4;4;-2;3;-4" dur="5s" repeatCount="indefinite" />
+        </feOffset>
+        <feOffset in="blue" dx="4" dy="0" result="blue_offset">
+          <animate attributeName="dx" values="4;-4;2;-3;4" dur="5s" repeatCount="indefinite" />
+        </feOffset>
+        <feBlend mode="screen" in="red_offset" in2="green" result="rg" />
+        <feBlend mode="screen" in="rg" in2="blue_offset" result="rgb" />
+      </filter>
+      <filter id="noise">
+        <feTurbulence type="fractalNoise" baseFrequency="0.8" numOctaves="3" stitchTiles="stitch">
+          <animate attributeName="baseFrequency" values="0.8;0.9;0.8" dur="0.2s" repeatCount="indefinite" />
+        </feTurbulence>
+        <feColorMatrix type="matrix" values="1 0 0 0 0, 0 1 0 0 0, 0 0 1 0 0, 0 0 0 0.05 0" />
+      </filter>
+    </defs>
+  </svg>
+
+  <div class="grid-bg"></div>
+  <div
+    style="position:fixed; top:0; left:0; width:100%; height:100%; pointer-events:none; z-index:90; filter:url(#noise);">
+  </div>
+
+  <div id="cursor"></div>
+
+  <!-- HUD Elements -->
+  <div class="hud hud-top-left">DEFCON // STABILIZATION_FRAMEWORK</div>
+  <div class="hud hud-top-right">SYS_STATUS: ONLINE</div>
+  <div class="hud hud-bottom-left">SCROLL TO PROCEED // ALIGN PROTOCOLS</div>
+  <div class="hud hud-bottom-right">
+    <span>MODULE</span>
+    <span class="hud-progress current-panel">01</span>
+    <span>/ 05</span>
+  </div>
+
+  <div class="carousel">
+
+    <!-- PANEL 1: EXECUTIVE SUMMARY -->
+    <section class="panel" id="panel-1">
+      <div class="section-num">01</div>
+      <div class="content-col">
+        <h1 class="hero-title anim-el">Economic and Energy<br>Policy Stabilization<br>Framework</h1>
+        <h2 class="sub-title anim-el delay-1">Mitigating the Impact of Middle East Conflict</h2>
+        <p class="anim-el delay-2"><strong>1. Executive Summary</strong></p>
+        <p class="anim-el delay-3">A sustained conflict in the Middle East presents significant risks to the US economy,
+          primarily through energy market volatility, inflationary pressures, and disruptions to global supply chains.
+        </p>
+        <p class="anim-el delay-4">This framework outlines a set of actionable, self-contained policy recommendations
+          for US decision-makers to stabilize the economy and secure energy resources. The strategies focus on proactive
+          Strategic Petroleum Reserve (SPR) management, calibrated monetary policy, and enhanced trade route security.
+        </p>
+      </div>
+    </section>
+
+    <!-- PANEL 2: SPR -->
+    <section class="panel split-panel" id="panel-2">
+      <div class="section-num">02</div>
+      <div class="content-col">
+        <h2 class="sub-title anim-el">2. Strategic Petroleum Reserve (SPR) Management</h2>
+        <p class="anim-el delay-1">The SPR is the primary defense against acute oil supply shocks. Its management must
+          shift from reactive to strategically predictive to maintain market confidence and price stability.</p>
+
+        <div class="data-point anim-el delay-2">
+          <strong>Phased, Data-Driven Release Protocol:</strong>
+          Instead of bulk releases, implement a phased release mechanism triggered by specific metrics (e.g., Brent
+          crude sustaining above a predefined threshold for 72 hours, or a quantifiable sudden drop in global output).
+          This avoids depleting reserves prematurely and provides a steadying market signal.
+        </div>
+
+        <div class="data-point anim-el delay-3">
+          <strong>Dynamic Restocking Mechanism:</strong>
+          Establish an automated, price-triggered buyback program. Commit to purchasing oil for the SPR when domestic
+          prices fall below a specific floor (e.g., $65-$70 per barrel). This provides downside protection for domestic
+          producers, encouraging continued domestic output during periods of uncertainty.
+        </div>
+
+        <div class="data-point anim-el delay-4">
+          <strong>Coordinated IEA Action:</strong>
+          Lead negotiations with the International Energy Agency (IEA) for synchronized global stockpile releases.
+          Coordinated actions have a significantly larger dampening effect on speculative price spikes than unilateral
+          US action.
+        </div>
+      </div>
+      <div class="img-col anim-el delay-2">
+        <div class="img-container">
+          <img src="./images/scene-1 (4).jpg" alt="SPR Facility" class="media-bg">
+        </div>
+      </div>
+    </section>
+
+    <!-- PANEL 3: MONETARY POLICY -->
+    <section class="panel split-panel reverse" id="panel-3">
+      <div class="section-num">03</div>
+      <div class="content-col">
+        <h2 class="sub-title anim-el">3. Monetary Policy Adjustments for Inflation</h2>
+        <p class="anim-el delay-1">Energy shocks typically drive up headline inflation, but the Federal Reserve must
+          balance the need to anchor inflation expectations with the risk of triggering a recession.</p>
+
+        <div class="data-point anim-el delay-2">
+          <strong>Focus on Core Inflation Dynamics:</strong>
+          The Federal Reserve should explicitly communicate its focus on core inflation (excluding volatile food and
+          energy) to avoid overreacting to temporary energy price spikes. Rate hikes should be targeted only if
+          secondary effects (e.g., wage-price spirals or broad-based price increases) begin to materialize.
+        </div>
+
+        <div class="data-point anim-el delay-3">
+          <strong>Targeted Liquidity Provision:</strong>
+          If energy market volatility threatens financial stability (e.g., margin calls for energy traders), the Fed
+          should be prepared to deploy targeted liquidity facilities to ensure the smooth functioning of commodity
+          derivatives markets without broadly loosening monetary policy.
+        </div>
+
+        <div class="data-point anim-el delay-4">
+          <strong>Enhanced Forward Guidance:</strong>
+          Provide clear, frequent public communication differentiating between temporary supply-side inflation and
+          persistent demand-driven inflation. Transparency reduces market uncertainty and prevents panic-driven
+          sell-offs in equities and bonds.
+        </div>
+      </div>
+      <div class="img-col anim-el delay-2">
+        <div class="img-container">
+          <img src="./images/scene-2 (6).jpg" alt="Monetary Policy Dashboard" class="media-bg">
+        </div>
+      </div>
+    </section>
+
+    <!-- PANEL 4: TRADE ROUTE -->
+    <section class="panel split-panel" id="panel-4">
+      <div class="section-num">04</div>
+      <div class="content-col">
+        <h2 class="sub-title anim-el">4. Trade Route Security and Supply Chain Resilience</h2>
+        <p class="anim-el delay-1">Securing maritime chokepoints (such as the Strait of Hormuz, Bab-el-Mandeb, and the
+          Suez Canal) is vital for the uninterrupted flow of global trade and energy.</p>
+
+        <div class="data-point anim-el delay-2">
+          <strong>Expanded Multinational Naval Coalitions:</strong>
+          Escalate US leadership in maritime security frameworks, such as the Combined Maritime Forces (CMF). Establish
+          robust, multi-nation naval escort operations for commercial vessels transiting high-risk chokepoints.
+        </div>
+
+        <div class="data-point anim-el delay-3">
+          <strong>Insurance and Indemnification Backstops:</strong>
+          In the event that private maritime insurance becomes prohibitively expensive or unavailable for critical
+          shipping routes, the US government should temporarily underwrite or provide indemnification backstops for
+          essential cargo (specifically energy and critical minerals) to ensure trade does not halt.
+        </div>
+
+        <div class="data-point anim-el delay-4">
+          <strong>Diversification and Nearshoring Incentives:</strong>
+          Implement targeted tax incentives and fast-track regulatory approvals for critical supply chains to reroute or
+          nearshore operations. Support alternative overland energy transit routes and port infrastructure expansions
+          outside conflict zones.
+        </div>
+      </div>
+      <div class="img-col anim-el delay-2">
+        <div class="img-container">
+          <img src="./images/scene-3 (4).jpg" alt="Naval Escort Operation" class="media-bg">
+        </div>
+      </div>
+    </section>
+
+    <!-- PANEL 5: CONCLUSION -->
+    <section class="panel" id="panel-5">
+      <div class="section-num">05</div>
+      <div class="img-container anim-el">
+        <img src="./images/scene-4 (5).jpg" alt="Global Resilience Shield" class="media-bg"
+          style="filter: grayscale(60%) contrast(1.1) brightness(0.6);">
+      </div>
+      <div class="content-col anim-el delay-2">
+        <h2 class="sub-title">5. Conclusion</h2>
+        <p>A Middle East conflict requires a swift, coordinated response across energy, monetary, and security domains.
+        </p>
+        <p>By intelligently deploying the SPR, maintaining a steady, core-focused monetary policy, and securing global
+          maritime trade routes, US policymakers can significantly mitigate economic contagion, protect consumers, and
+          maintain macroeconomic stability.</p>
+      </div>
+    </section>
+
+  </div>
+
+  <script>
+    // Custom Cursor Tracking
+    const cursor = document.getElementById('cursor');
+    document.addEventListener('mousemove', (e) => {
+      cursor.style.transform = `translate(${e.clientX}px, ${e.clientY}px)`;
+    });
+
+    // Intersection Observer for Animations and HUD update
+    const panels = document.querySelectorAll('.panel');
+    const counter = document.querySelector('.current-panel');
+
+    const observerOptions = {
+      root: document.querySelector('.carousel'),
+      threshold: 0.6
+    };
+
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          // Add animation class
+          entry.target.classList.add('is-active');
+
+          // Update HUD counter based on panel index
+          const index = Array.from(panels).indexOf(entry.target) + 1;
+          counter.textContent = `0${index}`;
+        }
+      });
+    }, observerOptions);
+
+    panels.forEach(panel => {
+      observer.observe(panel);
+    });
+  </script>
+</body>
+
+</html>

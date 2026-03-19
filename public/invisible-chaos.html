@@ -1,0 +1,614 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>The Quanteon Manifesto</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600&family=Oswald:wght@500;700&display=swap"
+    rel="stylesheet">
+  <style>
+    :root {
+      --bg-dark: #050507;
+      --text-main: #f0f0f5;
+      --accent-red: #ff2a2a;
+      --accent-cyan: #00f3ff;
+      --accent-amber: #ffb700;
+      --font-heading: 'Oswald', sans-serif;
+      --font-body: 'Inter', sans-serif;
+      --spacing-edge: clamp(1.5rem, 5vw, 4rem);
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      cursor: none;
+      /* Custom cursor */
+    }
+
+    body {
+      background-color: var(--bg-dark);
+      color: var(--text-main);
+      font-family: var(--font-body);
+      overflow-x: hidden;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    /* Custom Cursor */
+    .cursor-dot {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 8px;
+      height: 8px;
+      background: var(--accent-cyan);
+      border-radius: 50%;
+      transform: translate(-50%, -50%);
+      pointer-events: none;
+      z-index: 9999;
+      transition: width 0.2s, height 0.2s, background-color 0.2s;
+      mix-blend-mode: difference;
+    }
+
+    .cursor-ring {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 40px;
+      height: 40px;
+      border: 1px solid rgba(0, 243, 255, 0.4);
+      border-radius: 50%;
+      transform: translate(-50%, -50%);
+      pointer-events: none;
+      z-index: 9998;
+      transition: transform 0.1s ease-out;
+    }
+
+    body:hover .cursor-dot.hovered {
+      width: 24px;
+      height: 24px;
+      background: var(--accent-red);
+    }
+
+    /* Global Noise Overlay */
+    .noise-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
+      pointer-events: none;
+      z-index: 9000;
+      opacity: 0.04;
+    }
+
+    /* Scrollytelling Structure */
+    .stack-container {
+      position: relative;
+    }
+
+    .panel {
+      position: sticky;
+      top: 0;
+      height: 100vh;
+      width: 100%;
+      overflow: hidden;
+      display: flex;
+      align-items: center;
+      box-shadow: 0 -10px 30px rgba(0, 0, 0, 0.5);
+    }
+
+    .panel-bg {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-size: cover;
+      background-position: center;
+      z-index: 1;
+      transform: scale(1.05);
+      transition: transform 10s ease-out;
+    }
+
+    .panel.is-active .panel-bg {
+      transform: scale(1);
+    }
+
+    .overlay-gradient {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      z-index: 2;
+    }
+
+    .panel-content {
+      position: relative;
+      z-index: 3;
+      padding: var(--spacing-edge);
+      width: 100%;
+      max-width: 1400px;
+      margin: 0 auto;
+      display: grid;
+      gap: 2rem;
+    }
+
+    /* Typography Hierarchy */
+    h1,
+    h2,
+    h3 {
+      font-family: var(--font-heading);
+      text-transform: uppercase;
+      line-height: 1.1;
+    }
+
+    .hero-label {
+      font-family: var(--font-body);
+      font-size: 0.875rem;
+      letter-spacing: 0.2em;
+      color: var(--accent-cyan);
+      margin-bottom: 1rem;
+      display: block;
+    }
+
+    .title-main {
+      font-size: clamp(3rem, 8vw, 7rem);
+      font-weight: 700;
+      margin-bottom: 0.5rem;
+      filter: url(#glitch-warp);
+    }
+
+    .title-sub {
+      font-size: clamp(1.5rem, 4vw, 3rem);
+      color: var(--accent-red);
+      font-weight: 500;
+    }
+
+    h3 {
+      font-size: clamp(2rem, 4vw, 3.5rem);
+      margin-bottom: 1.5rem;
+      position: relative;
+      display: inline-block;
+    }
+
+    h3::after {
+      content: '';
+      position: absolute;
+      left: 0;
+      bottom: -5px;
+      width: 0%;
+      height: 2px;
+      background: currentColor;
+      transition: width 0.8s cubic-bezier(0.19, 1, 0.22, 1) 0.3s;
+    }
+
+    .panel.is-active h3::after {
+      width: 100%;
+    }
+
+    p {
+      font-size: clamp(1rem, 1.5vw, 1.25rem);
+      line-height: 1.7;
+      max-width: 650px;
+      color: rgba(255, 255, 255, 0.85);
+      margin-bottom: 1.5rem;
+    }
+
+    strong,
+    .highlight {
+      color: #fff;
+      font-weight: 600;
+    }
+
+    .highlight-red {
+      color: var(--accent-red);
+    }
+
+    .highlight-cyan {
+      color: var(--accent-cyan);
+    }
+
+    .highlight-amber {
+      color: var(--accent-amber);
+    }
+
+    /* Layout Archetypes within Panels */
+    .grid-split {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 4rem;
+    }
+
+    @media (min-width: 900px) {
+      .grid-split {
+        grid-template-columns: 1fr 1fr;
+        align-items: center;
+      }
+    }
+
+    .list-grid {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 2rem;
+      margin-top: 2rem;
+    }
+
+    @media (min-width: 768px) {
+      .list-grid {
+        grid-template-columns: 1fr 1fr;
+      }
+    }
+
+    .step-card {
+      position: relative;
+      padding: 2rem;
+      background: rgba(10, 10, 15, 0.6);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      backdrop-filter: blur(10px);
+      transform: translateY(30px);
+      opacity: 0;
+      transition: all 0.8s cubic-bezier(0.19, 1, 0.22, 1);
+    }
+
+    .panel.is-active .step-card {
+      transform: translateY(0);
+      opacity: 1;
+    }
+
+    .panel.is-active .step-card:nth-child(1) {
+      transition-delay: 0.2s;
+    }
+
+    .panel.is-active .step-card:nth-child(2) {
+      transition-delay: 0.4s;
+    }
+
+    .step-num {
+      position: absolute;
+      top: -20px;
+      right: 20px;
+      font-family: var(--font-heading);
+      font-size: 5rem;
+      font-weight: 700;
+      color: transparent;
+      -webkit-text-stroke: 1px rgba(255, 255, 255, 0.2);
+      line-height: 1;
+      z-index: -1;
+    }
+
+    /* Scroll Progress Indicator */
+    .progress-bar {
+      position: fixed;
+      left: 2rem;
+      top: 50%;
+      transform: translateY(-50%);
+      height: 40vh;
+      width: 2px;
+      background: rgba(255, 255, 255, 0.1);
+      z-index: 100;
+      display: none;
+    }
+
+    @media(min-width: 1024px) {
+      .progress-bar {
+        display: block;
+      }
+    }
+
+    .progress-fill {
+      width: 100%;
+      background: var(--accent-cyan);
+      transform-origin: top;
+      transform: scaleY(0);
+      transition: transform 0.1s linear;
+    }
+
+    /* Reveal Animations */
+    .reveal-text {
+      clip-path: inset(0 0 100% 0);
+      transform: translateY(20px);
+      transition: clip-path 1s cubic-bezier(0.77, 0, 0.175, 1), transform 1s cubic-bezier(0.77, 0, 0.175, 1);
+    }
+
+    .panel.is-active .reveal-text {
+      clip-path: inset(0 0 0% 0);
+      transform: translateY(0);
+    }
+
+    .delay-1 {
+      transition-delay: 0.1s;
+    }
+
+    .delay-2 {
+      transition-delay: 0.2s;
+    }
+
+    .delay-3 {
+      transition-delay: 0.3s;
+    }
+
+    /* Specific Panel Stylings */
+    #panel-hero {
+      background: var(--bg-dark);
+      z-index: 10;
+    }
+
+    #panel-hero .panel-content {
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      height: 100vh;
+    }
+
+    #panel-1 {
+      z-index: 20;
+    }
+
+    #panel-1 .overlay-gradient {
+      background: linear-gradient(135deg, rgba(5, 5, 7, 0.95) 0%, rgba(5, 5, 7, 0.7) 40%, rgba(255, 42, 42, 0.1) 100%);
+    }
+
+    #panel-2 {
+      z-index: 30;
+    }
+
+    #panel-2 .overlay-gradient {
+      background: linear-gradient(to right, rgba(5, 5, 7, 0.95) 0%, rgba(5, 5, 7, 0.4) 100%);
+    }
+
+    #panel-3 {
+      z-index: 40;
+    }
+
+    #panel-3b {
+      z-index: 45;
+    }
+
+    #panel-3 .overlay-gradient {
+      background: linear-gradient(to bottom, rgba(5, 5, 7, 0.9) 0%, rgba(0, 243, 255, 0.1) 100%);
+    }
+
+    #panel-4 {
+      z-index: 50;
+    }
+
+    #panel-4 .overlay-gradient {
+      background: linear-gradient(to top, rgba(5, 5, 7, 1) 0%, rgba(5, 5, 7, 0.6) 100%);
+    }
+
+    #panel-4 .panel-content {
+      text-align: center;
+      justify-items: center;
+      align-content: center;
+    }
+
+    #panel-4 p {
+      text-align: center;
+      margin-left: auto;
+      margin-right: auto;
+    }
+  </style>
+</head>
+
+<body>
+
+  <!-- SVG Filters -->
+  <svg width="0" height="0" style="position:absolute;">
+    <filter id="glitch-warp" x="-20%" y="-20%" width="140%" height="140%">
+      <feTurbulence type="fractalNoise" baseFrequency="0.01 0.1" numOctaves="1" result="warp" />
+      <feDisplacementMap xChannelSelector="R" yChannelSelector="G" scale="15" in="SourceGraphic" in2="warp" />
+    </filter>
+    <filter id="film-grain">
+      <feTurbulence type="fractalNoise" baseFrequency="0.8" numOctaves="3" stitchTiles="stitch" />
+      <feColorMatrix type="matrix" values="1 0 0 0 0, 0 1 0 0 0, 0 0 1 0 0, 0 0 0 0.1 0" />
+    </filter>
+  </svg>
+
+  <!-- Noise Layer -->
+  <div class="noise-overlay" style="filter: url(#film-grain);"></div>
+
+  <!-- Custom Cursors -->
+  <div class="cursor-dot" id="cursor-dot"></div>
+  <div class="cursor-ring" id="cursor-ring"></div>
+
+  <!-- Progress Bar -->
+  <div class="progress-bar">
+    <div class="progress-fill" id="progress-fill"></div>
+  </div>
+
+  <main class="stack-container">
+
+    <!-- HERO TITLE -->
+    <section class="panel" id="panel-hero">
+      <div class="panel-content">
+        <span class="hero-label reveal-text">TITLE</span>
+        <h1 class="title-main reveal-text delay-1 interactive-text">The Quanteon<br>Manifesto</h1>
+        <h2 class="title-sub reveal-text delay-2">Ending the Era of Invisible Chaos</h2>
+      </div>
+    </section>
+
+    <!-- PANEL 1: Proclamation & Enemy -->
+    <section class="panel" id="panel-1">
+      <div class="panel-bg" style="background-image: url('./images/scene-1 (5).jpg');"></div>
+      <div class="overlay-gradient"></div>
+      <div class="panel-content grid-split">
+        <div>
+          <h3 class="highlight-red reveal-text">The Proclamation <br><span style="font-size:0.5em; opacity:0.7;">(The
+              Mission)</span></h3>
+          <p class="reveal-text delay-1">
+            Most businesses are dying from a thousand small cuts they cannot see. We’ve watched brilliant founders in
+            HVAC, Real Estate, and Healthcare build incredible companies, only to become slaves to their own
+            success—buried under a mountain of manual admin, missed leads, and "system noise."
+          </p>
+          <p class="reveal-text delay-2">
+            The industry tried to sell you "AI" as a magic wand. They sold you generic bots and "vaporware" that added
+            more complexity than value. <strong class="highlight-red">We are here to kill the buzzword and restore the
+              engine.</strong>
+          </p>
+        </div>
+        <div>
+          <h3 class="reveal-text">The Enemy: <br>Revenue Leakage &amp; Human Burnout</h3>
+          <p class="reveal-text delay-1">
+            At QUANTEON, we don’t sell tools; we sell <strong>Operational Sovereignty.</strong> We believe every hour
+            your team spends on a manual data entry task is a theft of their potential.
+          </p>
+          <p class="reveal-text delay-2">
+            We believe every lead that goes unresponded for 10 minutes is a betrayal of your marketing budget. We aren't
+            just "optimizing workflows"; we are reclaiming the lost hours and "ghost revenue" that belong to you.
+          </p>
+        </div>
+      </div>
+    </section>
+
+    <!-- PANEL 2: Methodology Intro -->
+    <section class="panel" id="panel-2">
+      <div class="panel-bg" style="background-image: url('./images/scene-2 (7).jpg');"></div>
+      <div class="overlay-gradient"></div>
+      <div class="panel-content">
+        <div style="max-width: 800px;">
+          <h3 class="highlight-amber reveal-text">The Methodology: <br>The RPI Crusade</h3>
+          <p class="reveal-text delay-1" style="font-size: 1.5rem;">
+            We refuse to build software in a vacuum. Most SaaS companies guess what you need; we <strong>live</strong>
+            it with you. Through our Revenue Performance Integrations (RPI) framework, we enter the trenches of your
+            business.
+          </p>
+        </div>
+      </div>
+    </section>
+
+    <!-- PANEL 3: Methodology Steps 1 & 2 -->
+    <section class="panel" id="panel-3">
+      <div class="panel-bg" style="background-image: url('./images/scene-3 (5).jpg');"></div>
+      <div class="overlay-gradient"></div>
+      <div class="panel-content">
+        <div class="list-grid">
+          <div class="step-card interactive-text">
+            <div class="step-num">01</div>
+            <h3 style="font-size: 1.5rem; color: var(--accent-cyan);">The Diagnostic <br><span
+                style="color:#fff;">(Exposing the Ghost)</span></h3>
+            <p>We don't guess. We use a high-precision diagnostic engine to show you exactly where your money is
+              bleeding out.</p>
+          </div>
+          <div class="step-card interactive-text">
+            <div class="step-num">02</div>
+            <h3 style="font-size: 1.5rem; color: var(--accent-cyan);">The Engineering <br><span
+                style="color:#fff;">(Cleaning the Slate)</span></h3>
+            <p>We don't automate a mess. We redesign your legacy chaos into a high-performance machine.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- PANEL 4: Methodology Steps 3 & 4 (Using Server Image as background to step 3&4)-->
+    <section class="panel" id="panel-3b">
+      <div class="panel-bg" style="background-image: url('./images/scene-4 (6).jpg');"></div>
+      <div class="overlay-gradient"
+        style="background: linear-gradient(to right, rgba(5,5,7,0.95) 0%, rgba(5,5,7,0.6) 100%);"></div>
+      <div class="panel-content">
+        <div class="list-grid">
+          <div class="step-card interactive-text">
+            <div class="step-num">03</div>
+            <h3 style="font-size: 1.5rem; color: var(--accent-cyan);">The Automation <br><span style="color:#fff;">(The
+                Control Layer)</span></h3>
+            <p>We deploy battle-tested RPI systems that handle the "boring" stuff—lead intake, follow-up, reporting—with
+              100% fidelity.</p>
+          </div>
+          <div class="step-card interactive-text">
+            <div class="step-num">04</div>
+            <h3 style="font-size: 1.5rem; color: var(--accent-cyan);">The Evolution</h3>
+            <p>We stay in the lab with you, refining the logic until the friction is gone.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- PANEL 5: Vision & Bottom Line -->
+    <section class="panel" id="panel-4">
+      <div class="panel-bg" style="background-image: url('./images/scene-5 (5).jpg');"></div>
+      <div class="overlay-gradient"></div>
+      <div class="panel-content">
+        <div style="margin-bottom: 4rem;">
+          <h3 class="highlight-amber reveal-text">The Vision: <br>From Service to Standard</h3>
+          <p class="reveal-text delay-1">
+            Our "Consulting-First" model isn't just a business strategy—it's our commitment to truth. We are building
+            the QUANTEON platform based on the real-world scars and successes of our clients. We aren't building what we
+            <em>think</em> the market wants; we are hard-coding the solutions to the problems we’ve solved in the real
+            world.
+          </p>
+        </div>
+        <div>
+          <h3 class="reveal-text delay-2">The Bottom Line</h3>
+          <p class="reveal-text delay-3" style="font-size: clamp(1.2rem, 2vw, 1.75rem); color: #fff; font-weight: 300;">
+            We aren't looking for "clients." We are looking for partners who are tired of "good enough" operations. If
+            you are ready to stop fighting your systems and start scaling your vision, <strong
+              class="highlight-amber">it’s time to move from AI speculation to Revenue Performance.</strong>
+          </p>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <script>
+    // Custom Cursor Logic
+    const dot = document.getElementById('cursor-dot');
+    const ring = document.getElementById('cursor-ring');
+
+    window.addEventListener('mousemove', (e) => {
+      dot.style.transform = `translate(${e.clientX}px, ${e.clientY}px) translate(-50%, -50%)`;
+
+      // slight delay for ring to create drag effect
+      setTimeout(() => {
+        ring.style.transform = `translate(${e.clientX}px, ${e.clientY}px) translate(-50%, -50%)`;
+      }, 50);
+    });
+
+    // Interactive text hover states
+    document.querySelectorAll('.interactive-text').forEach(el => {
+      el.addEventListener('mouseenter', () => dot.classList.add('hovered'));
+      el.addEventListener('mouseleave', () => dot.classList.remove('hovered'));
+    });
+
+    // Intersection Observer for Panel Activation & Text Reveals
+    const panels = document.querySelectorAll('.panel');
+
+    const observerOptions = {
+      root: null,
+      rootMargin: '0px',
+      threshold: 0.3 // Trigger when 30% of panel is visible
+    };
+
+    const panelObserver = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          entry.target.classList.add('is-active');
+        }
+      });
+    }, observerOptions);
+
+    panels.forEach(panel => {
+      panelObserver.observe(panel);
+    });
+
+    // Trigger initial hero state immediately
+    setTimeout(() => {
+      document.getElementById('panel-hero').classList.add('is-active');
+    }, 100);
+
+    // Scroll Progress Bar Logic
+    const progressBar = document.getElementById('progress-fill');
+    window.addEventListener('scroll', () => {
+      const scrollPx = document.documentElement.scrollTop;
+      const winHeightPx = document.documentElement.scrollHeight - document.documentElement.clientHeight;
+      const scrolled = scrollPx / winHeightPx;
+      progressBar.style.transform = `scaleY(${scrolled})`;
+    });
+  </script>
+</body>
+
+</html>
