@@ -12,6 +12,13 @@ const articles = [
     accent: "from-cyan-500/20 to-blue-500/20"
   },
   {
+    title: "2026 AI Consulting Strategic Blueprint",
+    description: "Executive-level synthesis of strategic insights, market bifurcation, and prioritized next steps.",
+    href: "/executive.html",
+    icon: "📑",
+    accent: "from-blue-600/20 to-cyan-400/20"
+  },
+  {
     title: "2026 AI Consulting Competitive Landscape",
     description: "Mapping market sizing, key player archetypes, and the shift toward outcome-based pricing models.",
     href: "/consulting-2.html",
@@ -64,13 +71,16 @@ export default function AIConsultingHub() {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {articles.map((article, idx) => {
             const isDomainReport = article.href.includes('consulting-1');
+            const isExecutive = article.href.includes('executive');
+            const isHighlighted = isDomainReport || isExecutive;
+            
             return (
               <a
                 key={idx}
                 href={article.href}
                 className={`group relative block p-8 rounded-3xl bg-slate-900/40 border border-slate-800 transition-all duration-500 overflow-hidden shadow-2xl
-                  ${isDomainReport 
-                    ? 'lg:col-span-2 border-cyan-500/40 bg-linear-to-br from-slate-900 via-slate-900 to-cyan-950/30' 
+                  ${isHighlighted 
+                    ? `lg:col-span-2 border-cyan-500/40 bg-linear-to-br from-slate-900 via-slate-900 to-${isExecutive ? 'blue' : 'cyan'}-950/30` 
                     : 'hover:border-cyan-500/50 hover:shadow-[0_0_40px_-10px_rgba(6,182,212,0.2)]'
                   }`}
               >
@@ -79,24 +89,29 @@ export default function AIConsultingHub() {
                     Master Synthesis
                   </div>
                 )}
+                {isExecutive && (
+                  <div className="absolute top-4 right-4 z-20 px-3 py-1 rounded-full bg-blue-500 text-slate-950 text-[10px] font-black tracking-tighter uppercase">
+                    Strategic Briefing
+                  </div>
+                )}
                 
-                <div className={`absolute inset-0 rounded-3xl bg-linear-to-br ${article.accent} ${isDomainReport ? 'opacity-40' : 'opacity-0'} group-hover:opacity-100 transition-opacity duration-500`} />
+                <div className={`absolute inset-0 rounded-3xl bg-linear-to-br ${article.accent} ${isHighlighted ? 'opacity-40' : 'opacity-0'} group-hover:opacity-100 transition-opacity duration-500`} />
                 
                 <div className="relative z-10 h-full flex flex-col">
                   <div className="flex items-start justify-between mb-6">
                     <div className="text-4xl">{article.icon}</div>
-                    {isDomainReport && <div className="text-cyan-500/50 font-mono text-xs">REF: DR-AI-001</div>}
+                    {isHighlighted && <div className="text-cyan-500/50 font-mono text-xs">REF: {isExecutive ? 'EB-AI-2026' : 'DR-AI-001'}</div>}
                   </div>
                   
-                  <h2 className={`font-bold text-white mb-3 group-hover:text-cyan-400 transition-colors ${isDomainReport ? 'text-4xl leading-tight' : 'text-2xl'}`}>
+                  <h2 className={`font-bold text-white mb-3 group-hover:text-cyan-400 transition-colors ${isHighlighted ? 'text-4xl leading-tight' : 'text-2xl'}`}>
                     {article.title}
                   </h2>
-                  <p className={`text-slate-400 leading-relaxed grow ${isDomainReport ? 'text-lg max-w-2xl' : 'text-base'}`}>
+                  <p className={`text-slate-400 leading-relaxed grow ${isHighlighted ? 'text-lg max-w-2xl' : 'text-base'}`}>
                     {article.description}
                   </p>
                   
                   <div className="mt-8 flex items-center text-sm font-bold text-cyan-500 group-hover:text-cyan-400 transition-colors">
-                    {isDomainReport ? 'INITIALIZE FULL ANALYSIS' : 'READ REPORT'}
+                    {isHighlighted ? 'INITIALIZE FULL ANALYSIS' : 'READ REPORT'}
                     <span className="ml-2 transform group-hover:translate-x-1 transition-transform">→</span>
                   </div>
                 </div>

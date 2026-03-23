@@ -1,0 +1,625 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>2026 AI Consulting Strategic Blueprint</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;800&family=Space+Mono:ital,wght@0,400;0,700;1,400&display=swap');
+
+    :root {
+      --bg: #070709;
+      --text-main: #E5E7EB;
+      --text-muted: #8892B0;
+      --accent: #00F2FE;
+      --accent-dark: #00818A;
+      --grid-line: rgba(255, 255, 255, 0.05);
+      --ease: cubic-bezier(0.16, 1, 0.3, 1);
+      --space-sm: 2rem;
+      --space-md: 4rem;
+      --space-lg: 8rem;
+      --space-xl: 12rem;
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Inter', sans-serif;
+      background-color: var(--bg);
+      color: var(--text-main);
+      line-height: 1.6;
+      overflow-x: hidden;
+      cursor: none;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    /* Custom Cursor */
+    #cursor {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 20px;
+      height: 20px;
+      border: 1px solid var(--accent);
+      border-radius: 50%;
+      transform: translate(-50%, -50%);
+      pointer-events: none;
+      z-index: 9999;
+      transition: width 0.3s var(--ease), height 0.3s var(--ease), background 0.3s var(--ease);
+      mix-blend-mode: difference;
+    }
+
+    #cursor::after {
+      content: '';
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      width: 4px;
+      height: 4px;
+      background: var(--accent);
+      transform: translate(-50%, -50%);
+    }
+
+    body:hover #cursor {
+      opacity: 1;
+    }
+
+    .hover-target:hover~#cursor {
+      width: 60px;
+      height: 60px;
+      background: rgba(0, 242, 254, 0.1);
+    }
+
+    /* SVG Filter Layer */
+    #noise-layer {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
+      pointer-events: none;
+      z-index: 9999;
+      opacity: 0.04;
+      mix-blend-mode: screen;
+    }
+
+    /* SVG Noise Overlay */
+    .noise-bg {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
+      pointer-events: none;
+      z-index: 9998;
+      opacity: 0.03;
+      mix-blend-mode: overlay;
+    }
+
+    /* Typography */
+    h1,
+    h2,
+    h3 {
+      font-weight: 800;
+      line-height: 1.1;
+      letter-spacing: -0.02em;
+    }
+
+    h1 {
+      font-size: clamp(3rem, 8vw, 8rem);
+      text-transform: uppercase;
+      color: #fff;
+    }
+
+    h2 {
+      font-size: clamp(2rem, 4vw, 4rem);
+      margin-bottom: var(--space-sm);
+    }
+
+    h3 {
+      font-size: 1.25rem;
+      margin-bottom: 0.5rem;
+      color: #fff;
+    }
+
+    p {
+      font-size: 1.1rem;
+      color: var(--text-muted);
+      max-width: 65ch;
+    }
+
+    .mono {
+      font-family: 'Space Mono', monospace;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      font-size: 0.85rem;
+    }
+
+    .highlight {
+      color: var(--text-main);
+      font-weight: 600;
+    }
+
+    /* Layout Grid */
+    .container {
+      max-width: 1400px;
+      margin: 0 auto;
+      padding: 0 5vw;
+      position: relative;
+    }
+
+    .grid-layout {
+      display: grid;
+      grid-template-columns: repeat(12, 1fr);
+      gap: 2rem;
+    }
+
+    /* Structural Elements */
+    .hero-section {
+      height: 100vh;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      position: relative;
+      padding-top: var(--space-lg);
+    }
+
+    .hero-img-bg {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      z-index: -1;
+      opacity: 0.2;
+      filter: grayscale(100%) contrast(1.2) url(#glitch);
+    }
+
+    .hero-meta {
+      margin-bottom: var(--space-sm);
+      display: flex;
+      gap: 2rem;
+      color: var(--accent);
+    }
+
+    .section-block {
+      padding: var(--space-xl) 0;
+      border-top: 1px solid var(--grid-line);
+      position: relative;
+    }
+
+    .section-number {
+      position: absolute;
+      top: -1.5rem;
+      left: 5vw;
+      font-size: 8rem;
+      font-weight: 800;
+      color: transparent;
+      -webkit-text-stroke: 1px rgba(255, 255, 255, 0.1);
+      line-height: 1;
+      pointer-events: none;
+    }
+
+    .content-col {
+      grid-column: 1 / 7;
+    }
+
+    .media-col {
+      grid-column: 8 / 13;
+      position: relative;
+    }
+
+    .media-col.sticky {
+      position: sticky;
+      top: 20vh;
+      height: max-content;
+    }
+
+    @media (max-width: 1024px) {
+
+      .content-col,
+      .media-col {
+        grid-column: 1 / -1;
+      }
+
+      .media-col.sticky {
+        position: relative;
+        top: 0;
+        margin-top: var(--space-md);
+      }
+    }
+
+    /* List Blocks */
+    .bullet-card {
+      border-left: 2px solid var(--grid-line);
+      padding-left: 2rem;
+      margin-bottom: 3rem;
+      position: relative;
+      transition: border-color 0.4s var(--ease);
+    }
+
+    .bullet-card:hover {
+      border-color: var(--accent);
+    }
+
+    .bullet-card::before {
+      content: '';
+      position: absolute;
+      left: -5px;
+      top: 0;
+      width: 8px;
+      height: 8px;
+      background: var(--bg);
+      border: 1px solid var(--grid-line);
+      transition: all 0.4s var(--ease);
+    }
+
+    .bullet-card:hover::before {
+      background: var(--accent);
+      border-color: var(--accent);
+      box-shadow: 0 0 10px var(--accent);
+    }
+
+    /* Image Styling */
+    .img-wrapper {
+      width: 100%;
+      height: 0;
+      padding-bottom: 120%;
+      /* Portrait crop */
+      position: relative;
+      overflow: hidden;
+      background: #111;
+    }
+
+    .img-wrapper.landscape {
+      padding-bottom: 60%;
+    }
+
+    .img-wrapper img {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      filter: grayscale(100%) contrast(1.1);
+      transition: filter 0.8s var(--ease), transform 0.8s var(--ease);
+    }
+
+    .img-wrapper:hover img {
+      filter: grayscale(0%) contrast(1);
+      transform: scale(1.05);
+    }
+
+    /* Animations & Reveals */
+    .obs {
+      opacity: 0;
+      transform: translateY(40px);
+      transition: opacity 1s var(--ease), transform 1s var(--ease);
+    }
+
+    .obs.in-view {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    .obs-clip {
+      clip-path: inset(100% 0 0 0);
+      transition: clip-path 1.2s var(--ease);
+    }
+
+    .obs-clip.in-view {
+      clip-path: inset(0 0 0 0);
+    }
+
+    .delay-1 {
+      transition-delay: 0.1s;
+    }
+
+    .delay-2 {
+      transition-delay: 0.2s;
+    }
+
+    .delay-3 {
+      transition-delay: 0.3s;
+    }
+
+    /* Specific structural tweaks */
+    .intro-text {
+      font-size: 1.5rem;
+      color: #fff;
+      margin-bottom: var(--space-md);
+      max-width: 30ch;
+    }
+
+    .data-pill {
+      display: inline-block;
+      padding: 0.2em 0.5em;
+      border: 1px solid var(--accent-dark);
+      color: var(--accent);
+      font-size: 0.8rem;
+      border-radius: 2px;
+      margin-bottom: 1rem;
+    }
+
+    .ordered-list {
+      counter-reset: custom-counter;
+    }
+
+    .ordered-item {
+      position: relative;
+      margin-bottom: 4rem;
+      padding-top: 1rem;
+      border-top: 1px solid rgba(255, 255, 255, 0.1);
+    }
+
+    .ordered-item::before {
+      counter-increment: custom-counter;
+      content: "0" counter(custom-counter);
+      position: absolute;
+      top: 1rem;
+      right: 0;
+      font-family: 'Space Mono', monospace;
+      font-size: 3rem;
+      color: rgba(255, 255, 255, 0.05);
+      font-weight: 700;
+      line-height: 1;
+    }
+  </style>
+</head>
+
+<body>
+
+  <div id="cursor"></div>
+
+  <!-- SVG Filters -->
+  <svg style="display: none;">
+    <defs>
+      <filter id="noise-filter">
+        <feTurbulence type="fractalNoise" baseFrequency="0.8" numOctaves="3" stitchTiles="stitch" />
+      </filter>
+      <filter id="glitch">
+        <feColorMatrix type="matrix" values="1 0 0 0 0  0 1 0 0 0  0 0 1 0 0  0 0 0 1 0" />
+        <feOffset dx="2" dy="0" in="SourceGraphic" result="red-shift" />
+        <feOffset dx="-2" dy="0" in="SourceGraphic" result="blue-shift" />
+        <feBlend mode="screen" in="red-shift" in2="blue-shift" />
+      </filter>
+    </defs>
+  </svg>
+
+  <div class="noise-bg"
+    style="background: url('data:image/svg+xml,%3Csvg viewBox=%220 0 200 200%22 xmlns=%22http://www.w3.org/2000/svg%22%3E%3Cfilter id=%22noiseFilter%22%3E%3CfeTurbulence type=%22fractalNoise%22 baseFrequency=%220.65%22 numOctaves=%223%22 stitchTiles=%22stitch%22/%3E%3C/filter%3E%3Crect width=%22100%25%22 height=%22100%25%22 filter=%22url(%23noiseFilter)%22/%3E%3C/svg%3E');">
+  </div>
+
+  <main>
+    <!-- HERO -->
+    <header class="hero-section container">
+      <img src="./images/scene-111(13).jpg" alt="Autonomous Enterprise" class="hero-img-bg">
+      <div class="hero-meta mono obs">
+        <span>INIT: 2026.Q1</span>
+        <span>CLASSIFICATION: STRATEGIC</span>
+        <span>STATUS: CRITICAL</span>
+      </div>
+      <h1 class="obs delay-1">2026 AI Consulting<br>Strategic Blueprint</h1>
+      <p class="mono obs delay-2" style="margin-top: 2rem; color: var(--accent);">// Navigating the Autonomous
+        Enterprise</p>
+    </header>
+
+    <!-- SECTION 1 -->
+    <section class="section-block container">
+      <div class="section-number">01</div>
+      <div class="grid-layout">
+        <div class="content-col">
+          <h2 class="obs">High-Impact Strategic Insights</h2>
+          <p class="intro-text obs delay-1">The AI consulting industry has definitively exited the "Innovation Theater"
+            and pilot-wrapper era of 2023–2024. As the market expands toward $30B, AI delivery has matured into an
+            industrialized, high-stakes engineering discipline focused on scaled, autonomous orchestration. For the
+            C-Suite, three macro-shifts dictate immediate strategy:</p>
+
+          <div class="bullet-card obs delay-2">
+            <span class="data-pill mono">PARADIGM SHIFT</span>
+            <h3>The Death of Time-and-Materials (T&M) Billing</h3>
+            <p>AI-driven delivery has created an "efficiency paradox." Firms billing hourly are cannibalizing their own
+              revenues as AI speeds up execution. Survival requires pivoting to the <span class="highlight">BIO
+                (Baseline, Instrument, Outcome)</span> framework and shared-liability performance models.</p>
+          </div>
+
+          <div class="bullet-card obs">
+            <span class="data-pill mono">ARCHITECTURE</span>
+            <h3>The Shift to Autonomous Orchestration</h3>
+            <p>Monolithic LLM prompt-response systems are obsolete. Enterprise value is now driven by <span
+                class="highlight">Multi-Agent Systems (MAS)</span> and the Model Context Protocol (MCP), where the
+              consultant’s role shifts from prompt engineer to System Architect governing complex, non-linear workflows.
+            </p>
+          </div>
+
+          <div class="bullet-card obs">
+            <span class="data-pill mono">PROCUREMENT</span>
+            <h3>The "AI Trio" Procurement Power Shift</h3>
+            <p>Decision-making has consolidated. The CFO, CDO, and CTO now demand hard P&L impact, strict regulatory
+              compliance (EU AI Act, ISO 42001), and production-grade architectures over novelty.</p>
+          </div>
+        </div>
+        <div class="media-col sticky">
+          <div class="img-wrapper hover-target obs-clip delay-1">
+            <img src="./images/scene-112(13).jpg" alt="C-Suite Analytics">
+          </div>
+          <p class="mono" style="margin-top:1rem; font-size:0.75rem;">FIG 1.0 — THE AI TRIO GOVERNANCE MODEL</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- SECTION 2 -->
+    <section class="section-block container">
+      <div class="section-number">02</div>
+      <div class="grid-layout">
+        <div class="media-col sticky" style="grid-column: 1 / 6; z-index: 2;">
+          <div class="img-wrapper hover-target obs-clip">
+            <img src="./images/scene-113(14).jpg" alt="Infrastructure vs Agile Boutiques">
+          </div>
+          <p class="mono" style="margin-top:1rem; font-size:0.75rem;">FIG 2.0 — MARKET BIFURCATION (K-SHAPE)</p>
+        </div>
+        <div class="content-col" style="grid-column: 7 / 13;">
+          <h2 class="obs">Cross-Domain Strategic Alignments</h2>
+          <p class="obs delay-1" style="margin-bottom: 3rem;">By cross-referencing market dynamics, technological
+            evolution, and buyer behavior, several interconnected realities emerge:</p>
+
+          <div class="bullet-card obs">
+            <h3>The Technology-Governance Nexus</h3>
+            <p>The shift toward decentralized Multi-Agent Systems (MAS) directly correlates with the new procurement
+              mandates for strict liability. Technologies like Zero-Trust Agent-to-Agent (A2A) protocols, Infinite
+              Agency Prevention, and Immutable Agent Ledgers are no longer just technical best practices—they are the
+              prerequisite features required to pass the enterprise's mandatory <span class="highlight">"Triple-Gate
+                MLOps"</span> governance audits.</p>
+          </div>
+
+          <div class="bullet-card obs">
+            <h3>Market Bifurcation and Engagement Models</h3>
+            <p>The market has taken a "K-shape," polarizing into massive Infrastructure Integrators and
+              hyper-specialized Agile Boutiques. This aligns perfectly with the new C-suite "Phased Hybrid" buying
+              model: Agile boutiques are favored for Discovery and MVP delivery (leveraging PhD-led speed), while
+              Infrastructure Integrators are tasked with Scaling and AgentOps (leveraging global workforces and
+              outcome-based SLAs).</p>
+          </div>
+
+          <div class="bullet-card obs">
+            <h3>AgentOps as the New Recurring Revenue</h3>
+            <p>With maintenance and compliance of autonomous systems ("AgentOps") costing 17-30% of initial development,
+              consulting firms have a massive opportunity to replace lost T&M revenue with Agent Licensing and
+              continuous monitoring SLAs.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- SECTION 3 -->
+    <section class="section-block container">
+      <div class="section-number">03</div>
+      <div class="grid-layout">
+        <div class="content-col">
+          <h2 class="obs">Critical Tensions and Contradictions</h2>
+          <p class="obs delay-1" style="margin-bottom: 3rem;">Strategic planning must navigate several emerging
+            paradoxes across the domains:</p>
+
+          <div class="bullet-card obs">
+            <span class="data-pill mono" style="color: #ff4757; border-color: #ff4757;">PARADOX 01</span>
+            <h3>The Budget Reality vs. Technical Focus</h3>
+            <p>While market and tech domains obsess over MAS, heterogeneous routing, and edge DeAI, enterprise budgeting
+              reveals a stark contradiction: <span class="highlight">70% of AI budgets are actually allocated to
+                business process redesign and human upskilling</span> (the 10-20-70 model). Consultancies over-indexing
+              on technical architecture while ignoring change management will lose enterprise bids.</p>
+          </div>
+
+          <div class="bullet-card obs">
+            <span class="data-pill mono" style="color: #ff4757; border-color: #ff4757;">PARADOX 02</span>
+            <h3>The CapEx Shift vs. OpEx Licensing</h3>
+            <p>Enterprises are executing a "Great Realignment" toward CapEx (on-prem infrastructure) to secure an 18x
+              cost advantage over cloud APIs. However, consultancies are simultaneously attempting to push OpEx "Agent
+              Licensing" models. This creates a severe pricing tension between buyers wanting to own their
+              cost-efficiencies and vendors trying to rent back the value.</p>
+          </div>
+
+          <div class="bullet-card obs">
+            <span class="data-pill mono" style="color: #ff4757; border-color: #ff4757;">PARADOX 03</span>
+            <h3>Consolidation vs. The Brain Drain</h3>
+            <p>Large infrastructure firms are aggressively acquiring mid-tier boutiques to capture "Agentic
+              Orchestration" capabilities. However, these acquisitions face critical "integration debt" due to
+              non-interoperable agent frameworks, compounded by elite PhD talent fleeing large-firm bureaucracy. Scale
+              is actively working against technical agility.</p>
+          </div>
+        </div>
+        <div class="media-col sticky">
+          <div class="img-wrapper hover-target obs-clip delay-1">
+            <img src="./images/scene-114(15).jpg" alt="Human Upskilling 10-20-70 Model">
+          </div>
+          <p class="mono" style="margin-top:1rem; font-size:0.75rem;">FIG 3.0 — BUDGET ALLOCATION VS TECH FOCUS</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- SECTION 4 -->
+    <section class="section-block container"
+      style="padding-bottom: var(--space-lg); border-bottom: 1px solid var(--grid-line);">
+      <div class="section-number">04</div>
+      <h2 class="obs" style="text-align: center; margin-bottom: var(--space-lg);">Prioritized Next Steps</h2>
+      <div class="grid-layout">
+        <div class="content-col ordered-list" style="grid-column: 1 / 8;">
+          <p class="mono obs" style="margin-bottom: 2rem;">To dominate the 2026 landscape, the executive team must
+            immediately initiate the following:</p>
+
+          <div class="ordered-item obs">
+            <h3>Transition to Deflection-Rate Pricing & The BIO Framework</h3>
+            <p>Restructure commercial agreements immediately. Phase out T&M for production work. Implement the
+              Baseline-Instrument-Outcome framework to capture 5-20% of quantified value (e.g., tasks automated, revenue
+              generated, costs deflected).</p>
+          </div>
+
+          <div class="ordered-item obs">
+            <h3>Architect for "Compliance-by-Design"</h3>
+            <p>Mandate that all engineering teams integrate Triple-Gate MLOps, DAG-based tracing, and Immutable Ledgers
+              into core delivery templates. Certifications (SOC 2 Type 2, ISO 42001) must be leveraged as competitive
+              moats in the procurement process.</p>
+          </div>
+
+          <div class="ordered-item obs">
+            <h3>Realign Delivery Resources to the 10-20-70 Model</h3>
+            <p>Shift the firm's center of gravity. While maintaining elite System Architect talent for the 30% technical
+              build, aggressively expand Organizational Design and Change Management practices to capture the 70% of
+              enterprise budget dedicated to human upskilling and process redesign.</p>
+          </div>
+
+          <div class="ordered-item obs">
+            <h3>Productize "AgentOps" Maintenance Tiers</h3>
+            <p>Launch distinct, subscription-based SLA tiers for post-deployment management. Offer "tamper-evident"
+              audits, infinite agency prevention, and model drift remediation as a recurring service line to secure
+              long-term revenue streams.</p>
+          </div>
+        </div>
+        <div class="media-col sticky" style="grid-column: 8 / 13; top: 10vh;">
+          <div class="img-wrapper landscape hover-target obs-clip delay-2" style="padding-bottom: 150%;">
+            <img src="./images/scene-115(16).jpg" alt="AgentOps Security Monitor">
+          </div>
+          <p class="mono" style="margin-top:1rem; font-size:0.75rem;">FIG 4.0 — AGENTOPS SLA DASHBOARD</p>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <script>
+    // Custom Cursor Logic
+    const cursor = document.getElementById('cursor');
+
+    document.addEventListener('mousemove', (e) => {
+      cursor.style.left = e.clientX + 'px';
+      cursor.style.top = e.clientY + 'px';
+    });
+
+    // Intersection Observer for Scroll Reveals
+    const observerOptions = {
+      root: null,
+      rootMargin: '0px 0px -10% 0px',
+      threshold: 0.1
+    };
+
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          entry.target.classList.add('in-view');
+          observer.unobserve(entry.target); // Only animate once
+        }
+      });
+    }, observerOptions);
+
+    document.querySelectorAll('.obs, .obs-clip').forEach(el => {
+      observer.observe(el);
+    });
+  </script>
+</body>
+
+</html>
