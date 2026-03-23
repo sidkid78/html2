@@ -1,0 +1,523 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Domain Report: 2026 Enterprise AI</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=Space+Grotesk:wght@400;500;700&display=swap');
+
+    :root {
+      --bg-dark: #07090f;
+      --bg-panel: rgba(7, 9, 15, 0.75);
+      --text-main: #f0f4f8;
+      --text-muted: #8e9eb0;
+      --accent: #00f0ff;
+      --accent-glow: rgba(0, 240, 255, 0.2);
+      --font-hero: 'Space Grotesk', sans-serif;
+      --font-body: 'Inter', sans-serif;
+      --spacing-base: max(4vw, 2rem);
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      background-color: var(--bg-dark);
+      color: var(--text-main);
+      font-family: var(--font-body);
+      overflow: hidden;
+      cursor: none;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    /* Custom Cursor */
+    #cursor {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 20px;
+      height: 20px;
+      border: 1px solid var(--accent);
+      border-radius: 50%;
+      transform: translate(-50%, -50%);
+      pointer-events: none;
+      z-index: 9999;
+      transition: width 0.2s, height 0.2s, background-color 0.2s;
+      mix-blend-mode: difference;
+    }
+
+    #cursor::after {
+      content: '';
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      width: 4px;
+      height: 4px;
+      background: var(--accent);
+      border-radius: 50%;
+      transform: translate(-50%, -50%);
+    }
+
+    /* SVG Noise Filter */
+    .noise-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
+      pointer-events: none;
+      z-index: 50;
+      opacity: 0.4;
+      mix-blend-mode: overlay;
+    }
+
+    /* Carousel Container */
+    .carousel-container {
+      width: 100vw;
+      height: 100vh;
+      overflow-y: scroll;
+      scroll-snap-type: y mandatory;
+      scrollbar-width: none;
+      /* Firefox */
+      -ms-overflow-style: none;
+      /* IE and Edge */
+    }
+
+    .carousel-container::-webkit-scrollbar {
+      display: none;
+    }
+
+    /* Navigation Progress */
+    .progress-nav {
+      position: fixed;
+      right: 2rem;
+      top: 50%;
+      transform: translateY(-50%);
+      z-index: 100;
+      display: flex;
+      flex-direction: column;
+      gap: 1.5rem;
+      align-items: center;
+    }
+
+    .nav-dot {
+      width: 6px;
+      height: 6px;
+      background: var(--text-muted);
+      border-radius: 50%;
+      transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    .nav-dot.active {
+      background: var(--accent);
+      transform: scale(1.5);
+      box-shadow: 0 0 10px var(--accent-glow);
+    }
+
+    .nav-line {
+      width: 1px;
+      height: 0;
+      background: var(--accent);
+      position: absolute;
+      top: 0;
+      z-index: -1;
+      transition: height 0.3s ease;
+    }
+
+    /* Panel Styles */
+    .panel {
+      width: 100vw;
+      height: 100vh;
+      scroll-snap-align: start;
+      position: relative;
+      display: flex;
+      align-items: center;
+      padding: var(--spacing-base);
+    }
+
+    .panel-bg {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-size: cover;
+      background-position: center;
+      z-index: 1;
+      filter: grayscale(20%) contrast(1.1);
+    }
+
+    .panel-bg::after {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(135deg, rgba(7, 9, 15, 0.95) 0%, rgba(7, 9, 15, 0.6) 50%, rgba(7, 9, 15, 0.9) 100%);
+    }
+
+    .panel-content {
+      position: relative;
+      z-index: 10;
+      max-width: 700px;
+      background: rgba(10, 15, 22, 0.65);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      border: 1px solid rgba(255, 255, 255, 0.05);
+      padding: 3rem;
+      border-radius: 4px;
+      border-left: 3px solid var(--accent);
+    }
+
+    /* Layout Variations */
+    .panel:nth-child(even) {
+      justify-content: flex-end;
+    }
+
+    .panel:nth-child(even) .panel-content {
+      border-left: none;
+      border-right: 3px solid var(--accent);
+    }
+
+    .panel:first-child {
+      justify-content: flex-start;
+    }
+
+    .panel:first-child .panel-content {
+      max-width: 900px;
+      background: transparent;
+      border: none;
+      backdrop-filter: none;
+      padding: 0;
+    }
+
+    /* Typography */
+    .label {
+      font-family: var(--font-hero);
+      font-size: 0.75rem;
+      text-transform: uppercase;
+      letter-spacing: 0.2em;
+      color: var(--accent);
+      margin-bottom: 1rem;
+      display: block;
+    }
+
+    h1 {
+      font-family: var(--font-hero);
+      font-size: clamp(2.5rem, 5vw, 4.5rem);
+      line-height: 1.1;
+      font-weight: 700;
+      margin-bottom: 2rem;
+      letter-spacing: -0.02em;
+    }
+
+    h2 {
+      font-family: var(--font-hero);
+      font-size: clamp(1.5rem, 3vw, 2.5rem);
+      line-height: 1.2;
+      font-weight: 500;
+      margin-bottom: 1.5rem;
+      color: #fff;
+    }
+
+    h3 {
+      font-family: var(--font-hero);
+      font-size: 1.25rem;
+      color: var(--accent);
+      margin: 2rem 0 1rem;
+    }
+
+    p {
+      font-size: 1.125rem;
+      line-height: 1.7;
+      color: var(--text-muted);
+      margin-bottom: 1.5rem;
+    }
+
+    strong,
+    .highlight {
+      color: var(--text-main);
+      font-weight: 600;
+    }
+
+    .accent-text {
+      color: var(--accent);
+    }
+
+    ul,
+    ol {
+      margin-left: 0;
+      margin-bottom: 1.5rem;
+      list-style: none;
+    }
+
+    li {
+      font-size: 1.125rem;
+      line-height: 1.6;
+      color: var(--text-muted);
+      margin-bottom: 0.75rem;
+      padding-left: 1.5rem;
+      position: relative;
+    }
+
+    li::before {
+      content: '→';
+      position: absolute;
+      left: 0;
+      color: var(--accent);
+      font-family: var(--font-hero);
+    }
+
+    .data-block {
+      background: rgba(0, 240, 255, 0.05);
+      border: 1px solid rgba(0, 240, 255, 0.1);
+      padding: 1.5rem;
+      margin-top: 1rem;
+    }
+
+    /* Animations */
+    .reveal {
+      opacity: 0;
+      transform: translateY(40px);
+      transition: opacity 1s cubic-bezier(0.16, 1, 0.3, 1), transform 1s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    .is-visible .reveal {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    .delay-1 {
+      transition-delay: 0.1s;
+    }
+
+    .delay-2 {
+      transition-delay: 0.2s;
+    }
+
+    .delay-3 {
+      transition-delay: 0.3s;
+    }
+
+    .delay-4 {
+      transition-delay: 0.4s;
+    }
+  </style>
+</head>
+
+<body>
+
+  <div id="cursor"></div>
+
+  <!-- SVG Noise Filter -->
+  <svg class="noise-overlay">
+    <filter id="noise">
+      <feTurbulence type="fractalNoise" baseFrequency="0.8" numOctaves="3" stitchTiles="stitch">
+        <animate attributeName="seed" values="1;50;1" dur="10s" repeatCount="indefinite" />
+      </feTurbulence>
+      <feColorMatrix type="matrix" values="1 0 0 0 0, 0 1 0 0 0, 0 0 1 0 0, 0 0 0 0.15 0" />
+    </filter>
+    <rect width="100%" height="100%" filter="url(#noise)" />
+  </svg>
+
+  <!-- Navigation UI -->
+  <div class="progress-nav" id="nav">
+    <div class="nav-line" id="nav-line"></div>
+    <div class="nav-dot active"></div>
+    <div class="nav-dot"></div>
+    <div class="nav-dot"></div>
+    <div class="nav-dot"></div>
+    <div class="nav-dot"></div>
+  </div>
+
+  <div class="carousel-container" id="scroll-container">
+
+    <!-- PANEL 1: Title & Exec Summary -->
+    <section class="panel" data-index="0">
+      <div class="panel-bg" style="background-image: url('./images/scene-12.jpg');"></div>
+      <div class="panel-content">
+        <span class="label reveal">Report / 2026</span>
+        <h1 class="reveal delay-1">Domain Report:<br><span class="accent-text">Client Demand and Buyer Behavior</span>
+        </h1>
+
+        <div class="data-block reveal delay-2">
+          <p style="margin-bottom: 0; color: var(--text-main);"><strong>Goal:</strong> Investigate 2026 enterprise buyer
+            behavior in AI consulting, focusing on the evolution of procurement criteria, the shift toward strict ROI
+            and governance requirements, and how clients are budgeting for scaled autonomous enterprise transformation.
+          </p>
+        </div>
+
+        <h3 class="reveal delay-3">Strategic Analysis: 2026 Enterprise AI Consulting and Procurement Landscape</h3>
+        <h2 class="reveal delay-3" style="font-size: 1.5rem;">Executive Summary</h2>
+        <p class="reveal delay-4">By 2026, the era of "Innovation Theater" in enterprise AI has concluded. The market
+          has matured into a rigorous, production-grade ecosystem where AI consulting is no longer judged by the novelty
+          of a pilot, but by its integration into core business operations. Procurement has shifted toward a "Proof of
+          Value" (PoV) model, demanding strict regulatory compliance, hard financial ROI, and architectural
+          interoperability. Budgetary power has consolidated within a C-suite "AI Trio," and engagement models have
+          moved from traditional billable hours to high-stakes, outcome-based partnerships.</p>
+      </div>
+    </section>
+
+    <!-- PANEL 2: Evolution of Procurement -->
+    <section class="panel" data-index="1">
+      <div class="panel-bg" style="background-image: url('./images/scene-34.jpg');"></div>
+      <div class="panel-content">
+        <span class="label reveal">Pillar I / Infrastructure</span>
+        <h2 class="reveal delay-1">The Evolution of Procurement: From Pilots to Production</h2>
+        <p class="reveal delay-2">Enterprise procurement criteria have undergone a fundamental shift toward operational
+          resilience and technical standardization. By 2026, over 90% of Fortune 500 firms require AI vendors to provide
+          SOC 2 Type 2 and ISO 42001 certifications as non-negotiable prerequisites.</p>
+        <p class="reveal delay-3">Technical requirements now prioritize the <strong>Composable Intelligence
+            Stack</strong>. This includes mandatory support for the Model Context Protocol (MCP) and open data standards
+          like Apache Iceberg to ensure multi-agent interoperability and prevent vendor lock-in.</p>
+        <p class="reveal delay-4">Procurement success is no longer measured by simple model accuracy; instead, buyers
+          use production-grade benchmarks such as cost-per-token efficiency, latency at scale, and "tamper-evident"
+          audit trails for model provenance. This shift ensures that AI systems are not only intelligent but also
+          compliant with global regulations like the EU AI Act.</p>
+      </div>
+    </section>
+
+    <!-- PANEL 3: Governance & ROI -->
+    <section class="panel" data-index="2">
+      <div class="panel-bg" style="background-image: url('./images/scene-23.jpg');"></div>
+      <div class="panel-content">
+        <span class="label reveal">Pillar II / Compliance</span>
+        <h2 class="reveal delay-1">Governance and the ROI Imperative</h2>
+        <p class="reveal delay-2">The 2026 landscape is defined by strict adherence to the EU AI Act and the revised
+          Product Liability Directive. These regulations impose strict liability on AI systems, necessitating
+          "compliance-by-design" architectures.</p>
+        <p class="reveal delay-3">Consulting firms are now expected to implement <strong>Triple-Gate MLOps
+            pipelines</strong>, which integrate automated oversight through three distinct lenses:</p>
+        <ul class="reveal delay-3">
+          <li><strong>Metric Gates:</strong> Performance and accuracy tracking.</li>
+          <li><strong>Governance Gates:</strong> Ethical alignment and regulatory compliance.</li>
+          <li><strong>Eco Gates:</strong> Sustainability and resource efficiency metrics.</li>
+        </ul>
+        <p class="reveal delay-4">Furthermore, the demand for ROI has moved from productivity estimates to hard P&L
+          impact. Enterprise buyers require multi-year Total Cost of Ownership (TCO) modeling and hard KPIs, such as
+          top-line revenue growth and bottom-line profitability. To mitigate risk, consulting firms are increasingly
+          entering into shared liability models and post-deployment SLAs that guarantee continuous monitoring and
+          remediation of model drift.</p>
+      </div>
+    </section>
+
+    <!-- PANEL 4: Budgeting -->
+    <section class="panel" data-index="3">
+      <div class="panel-bg" style="background-image: url('./images/scene-45.jpg');"></div>
+      <div class="panel-content">
+        <span class="label reveal">Pillar III / Capital</span>
+        <h2 class="reveal delay-1">Budgeting for the Autonomous Enterprise</h2>
+        <p class="reveal delay-2">Corporate budgeting for AI has transitioned from experimental R&D pots to integrated
+          operational lines, now capturing 20-25% of total IT budgets. A significant trend is the "Great Realignment"
+          toward CAPEX. Large enterprises are increasingly investing in on-premises infrastructure to achieve an
+          estimated 18x cost advantage over the "rental trap" of cloud APIs.</p>
+        <div class="data-block reveal delay-3">
+          <h3 style="margin-top:0;">Resource allocation follows a disciplined 10-20-70 model:</h3>
+          <ul>
+            <li><strong>10%</strong> is dedicated to algorithms and model selection.</li>
+            <li><strong>20%</strong> is allocated to data infrastructure and technical architecture.</li>
+            <li><strong>70%</strong> is focused on the most critical element: business process redesign and human
+              upskilling.</li>
+          </ul>
+        </div>
+        <p class="reveal delay-4" style="margin-top: 1.5rem;">Ongoing maintenance is now a permanent budget line item,
+          known as <strong>AgentOps</strong>. Maintaining an autonomous enterprise is resource-intensive, with annual
+          costs for model drift, security guardrails, and compliance typically reaching 17-30% of the initial
+          development cost. Notably, 42% of Fortune 100 companies have begun shifting budget growth from traditional
+          human headcount to "AI Worker" licenses.</p>
+      </div>
+    </section>
+
+    <!-- PANEL 5: Stakeholders -->
+    <section class="panel" data-index="4">
+      <div class="panel-bg" style="background-image: url('./images/scene-56.jpg');"></div>
+      <div class="panel-content">
+        <span class="label reveal">Pillar IV / Partnerships</span>
+        <h2 class="reveal delay-1">Strategic Stakeholders and Engagement Models</h2>
+        <p class="reveal delay-2">The decision-making process has moved away from isolated IT departments to a C-suite
+          council known as the <strong>"AI Trio"</strong>:</p>
+        <ul class="reveal delay-2">
+          <li><strong>The CFO (Value Auditor):</strong> Focuses on P&L impact and hard ROI.</li>
+          <li><strong>The CDO (Value Generator):</strong> Manages data as a high-margin revenue product.</li>
+          <li><strong>The CTO (AI-Native Architect):</strong> Orchestrates compound AI systems and infrastructure.</li>
+        </ul>
+        <p class="reveal delay-3">This shift in leadership has revolutionized how consultants are hired. The traditional
+          hourly billing model has been largely abandoned for production phases in favor of a <strong>Phased Hybrid
+            model</strong>:</p>
+        <ul class="reveal delay-3">
+          <li><strong>Discovery:</strong> Time & Materials (T&M).</li>
+          <li><strong>MVP Delivery:</strong> Fixed-Price contracts.</li>
+          <li><strong>Scaling:</strong> Outcome-Based "Success Fees" (typically 5-20% of quantified value).</li>
+        </ul>
+        <p class="reveal delay-4">Consulting incentives are now directly aligned with client efficiency, often using
+          "deflection-rate" pricing—where the consultant’s compensation is tied to the volume of tasks successfully
+          automated or "deflected" from manual processes. This structure effectively eliminates "pilot purgatory" and
+          ensures that AI initiatives deliver measurable, scalable impact.</p>
+      </div>
+    </section>
+
+  </div>
+
+  <script>
+    // Custom Cursor Logic
+    const cursor = document.getElementById('cursor');
+    document.addEventListener('mousemove', (e) => {
+      requestAnimationFrame(() => {
+        cursor.style.left = e.clientX + 'px';
+        cursor.style.top = e.clientY + 'px';
+      });
+    });
+
+    // Interactive elements hover state for cursor
+    const interactives = document.querySelectorAll('h1, h2, strong');
+    interactives.forEach(el => {
+      el.addEventListener('mouseenter', () => {
+        cursor.style.width = '40px';
+        cursor.style.height = '40px';
+        cursor.style.backgroundColor = 'rgba(0, 240, 255, 0.1)';
+      });
+      el.addEventListener('mouseleave', () => {
+        cursor.style.width = '20px';
+        cursor.style.height = '20px';
+        cursor.style.backgroundColor = 'transparent';
+      });
+    });
+
+    // Intersection Observer for Scroll Reveals and Nav Updates
+    const panels = document.querySelectorAll('.panel');
+    const dots = document.querySelectorAll('.nav-dot');
+
+    const observerOptions = {
+      root: document.getElementById('scroll-container'),
+      threshold: 0.5
+    };
+
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          entry.target.classList.add('is-visible');
+
+          // Update Navigation
+          const index = entry.target.getAttribute('data-index');
+          dots.forEach(dot => dot.classList.remove('active'));
+          if (dots[index]) dots[index].classList.add('active');
+        }
+      });
+    }, observerOptions);
+
+    panels.forEach(panel => observer.observe(panel));
+
+    // Trigger visibility on load for first panel if already in view
+    setTimeout(() => {
+      if (panels[0].getBoundingClientRect().top < window.innerHeight) {
+        panels[0].classList.add('is-visible');
+      }
+    }, 100);
+
+  </script>
+</body>
+
+</html>

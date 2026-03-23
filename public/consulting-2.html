@@ -1,0 +1,729 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>2026 AI Consulting Competitive Landscape</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;800&family=JetBrains+Mono:wght@100;400;700&display=swap');
+
+    :root {
+      --bg: #05080a;
+      --text: #e2e8f0;
+      --text-dim: #94a3b8;
+      --accent: #00ffcc;
+      --accent-glow: rgba(0, 255, 204, 0.2);
+      --border: rgba(255, 255, 255, 0.1);
+      --font-sans: 'Inter', sans-serif;
+      --font-mono: 'JetBrains Mono', monospace;
+      --ease: cubic-bezier(0.19, 1, 0.22, 1);
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      cursor: none;
+      /* Custom cursor */
+    }
+
+    body {
+      background-color: var(--bg);
+      color: var(--text);
+      font-family: var(--font-sans);
+      line-height: 1.6;
+      overflow: hidden;
+      /* Handled by main scroller */
+      -webkit-font-smoothing: antialiased;
+    }
+
+    /* Custom Cursor */
+    #cursor {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 20px;
+      height: 20px;
+      border: 1px solid var(--accent);
+      border-radius: 50%;
+      transform: translate(-50%, -50%);
+      pointer-events: none;
+      z-index: 9999;
+      transition: width 0.2s, height 0.2s, background-color 0.2s;
+      mix-blend-mode: difference;
+    }
+
+    #cursor::after {
+      content: '';
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      width: 4px;
+      height: 4px;
+      background: var(--accent);
+      border-radius: 50%;
+      transform: translate(-50%, -50%);
+    }
+
+    body:hover #cursor.active {
+      width: 40px;
+      height: 40px;
+      background-color: rgba(0, 255, 204, 0.1);
+    }
+
+    /* SVG Filters SVG Holder */
+    #svg-filters {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 0;
+      height: 0;
+      pointer-events: none;
+    }
+
+    /* Noise Overlay */
+    .noise-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
+      pointer-events: none;
+      z-index: 5000;
+      opacity: 0.04;
+      filter: url(#noiseFilter);
+    }
+
+    /* Navigation / HUD */
+    .hud {
+      position: fixed;
+      top: 2rem;
+      left: 2rem;
+      right: 2rem;
+      display: flex;
+      justify-content: space-between;
+      font-family: var(--font-mono);
+      font-size: 0.75rem;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      color: var(--accent);
+      z-index: 100;
+      mix-blend-mode: difference;
+    }
+
+    .hud-progress {
+      display: flex;
+      gap: 1rem;
+      align-items: center;
+    }
+
+    .progress-bar {
+      width: 40px;
+      height: 1px;
+      background: var(--border);
+      position: relative;
+    }
+
+    .progress-fill {
+      position: absolute;
+      top: 0;
+      left: 0;
+      height: 100%;
+      background: var(--accent);
+      width: 0%;
+      transition: width 0.5s var(--ease);
+    }
+
+    /* Scroller */
+    main {
+      height: 100vh;
+      overflow-y: scroll;
+      scroll-snap-type: y mandatory;
+      scroll-behavior: smooth;
+      scrollbar-width: none;
+      /* Firefox */
+    }
+
+    main::-webkit-scrollbar {
+      display: none;
+    }
+
+    /* Panels */
+    .panel {
+      min-height: 100vh;
+      width: 100vw;
+      scroll-snap-align: start;
+      position: relative;
+      display: flex;
+      padding: 6rem 4rem;
+      overflow: hidden;
+    }
+
+    /* Typography Base */
+    h1,
+    h2,
+    h3,
+    h4 {
+      font-weight: 800;
+      line-height: 1.1;
+      letter-spacing: -0.02em;
+      margin-bottom: 1rem;
+    }
+
+    h1 {
+      font-size: clamp(3rem, 6vw, 6rem);
+    }
+
+    h2 {
+      font-size: clamp(2rem, 4vw, 3.5rem);
+    }
+
+    h3 {
+      font-size: 1.5rem;
+      color: var(--accent);
+    }
+
+    p,
+    ul {
+      margin-bottom: 1.5rem;
+      font-size: 1.125rem;
+      font-weight: 300;
+      color: var(--text-dim);
+    }
+
+    strong {
+      color: var(--text);
+      font-weight: 600;
+    }
+
+    ul {
+      padding-left: 1.5rem;
+    }
+
+    li {
+      margin-bottom: 0.5rem;
+    }
+
+    /* Structural Elements */
+    .label {
+      font-family: var(--font-mono);
+      font-size: 0.85rem;
+      color: var(--accent);
+      text-transform: uppercase;
+      letter-spacing: 0.15em;
+      margin-bottom: 1rem;
+      display: block;
+    }
+
+    .grid-layout {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 4rem;
+      width: 100%;
+      max-width: 1600px;
+      margin: 0 auto;
+      align-items: center;
+    }
+
+    /* Image Styling */
+    .image-container {
+      position: relative;
+      width: 100%;
+      height: 60vh;
+      overflow: hidden;
+      border: 1px solid var(--border);
+    }
+
+    .image-container img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      filter: url(#duotone);
+      transform: scale(1.05);
+      transition: transform 1.5s var(--ease);
+    }
+
+    .panel.is-active .image-container img {
+      transform: scale(1);
+    }
+
+    .image-container::after {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(to top, var(--bg), transparent);
+      opacity: 0.5;
+    }
+
+    /* Specific Panel Tweaks */
+    /* Panel 1: Cover */
+    #panel-1 {
+      flex-direction: column;
+      justify-content: center;
+      text-align: center;
+    }
+
+    #panel-1 .bg-img {
+      position: absolute;
+      inset: 0;
+      z-index: -1;
+      opacity: 0.2;
+    }
+
+    #panel-1 .bg-img img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      filter: url(#duotone);
+    }
+
+    #panel-1 .content {
+      max-width: 800px;
+      margin: 0 auto;
+    }
+
+    #panel-1 .goal-box {
+      border: 1px solid var(--accent);
+      padding: 1.5rem;
+      background: rgba(0, 255, 204, 0.05);
+      text-align: left;
+      font-family: var(--font-mono);
+      font-size: 0.9rem;
+      margin-top: 3rem;
+    }
+
+    /* Panel 3: Pillars */
+    .pillars-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 2rem;
+      width: 100%;
+    }
+
+    .pillar-card {
+      border-top: 2px solid var(--border);
+      padding-top: 1.5rem;
+      transition: border-color 0.3s;
+    }
+
+    .pillar-card:hover {
+      border-color: var(--accent);
+    }
+
+    /* Panel 6: Table */
+    .data-table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 2rem;
+      font-family: var(--font-mono);
+      font-size: 0.9rem;
+    }
+
+    .data-table th,
+    .data-table td {
+      padding: 1.2rem 1rem;
+      text-align: left;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .data-table th {
+      color: var(--accent);
+      font-weight: 400;
+    }
+
+    .data-table tr:hover td {
+      background: rgba(255, 255, 255, 0.02);
+    }
+
+    /* Animations (Triggered via JS class .is-active) */
+    .reveal {
+      opacity: 0;
+      transform: translateY(30px);
+      transition: opacity 0.8s var(--ease), transform 0.8s var(--ease);
+    }
+
+    .is-active .reveal {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    .is-active .d-1 {
+      transition-delay: 0.1s;
+    }
+
+    .is-active .d-2 {
+      transition-delay: 0.2s;
+    }
+
+    .is-active .d-3 {
+      transition-delay: 0.3s;
+    }
+
+    .is-active .d-4 {
+      transition-delay: 0.4s;
+    }
+
+    /* Confidence Flag */
+    .confidence-flag {
+      position: absolute;
+      bottom: 2rem;
+      right: 4rem;
+      max-width: 400px;
+      font-size: 0.8rem;
+      font-family: var(--font-mono);
+      border-left: 2px solid var(--accent);
+      padding-left: 1rem;
+      color: var(--text-dim);
+    }
+
+    /* Responsive */
+    @media (max-width: 1024px) {
+      .grid-layout {
+        grid-template-columns: 1fr;
+        gap: 2rem;
+      }
+
+      .image-container {
+        height: 40vh;
+      }
+
+      .panel {
+        padding: 5rem 2rem;
+      }
+    }
+
+    @media (max-width: 768px) {
+      .pillars-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .hud {
+        font-size: 0.6rem;
+      }
+
+      h1 {
+        font-size: 2.5rem;
+      }
+
+      .confidence-flag {
+        position: relative;
+        right: 0;
+        bottom: 0;
+        margin-top: 2rem;
+      }
+
+      .data-table {
+        font-size: 0.75rem;
+        display: block;
+        overflow-x: auto;
+      }
+    }
+  </style>
+</head>
+
+<body>
+
+  <div id="cursor"></div>
+
+  <!-- SVG Filters -->
+  <svg id="svg-filters">
+    <defs>
+      <!-- Animated Noise -->
+      <filter id="noiseFilter" x="0" y="0" width="100%" height="100%">
+        <feTurbulence type="fractalNoise" baseFrequency="0.8" numOctaves="3" stitchTiles="stitch">
+          <animate attributeName="seed" from="0" to="100" dur="5s" repeatCount="indefinite" />
+        </feTurbulence>
+        <feColorMatrix type="matrix" values="1 0 0 0 0, 0 1 0 0 0, 0 0 1 0 0, 0 0 0 1 0" />
+      </filter>
+      <!-- Duotone for Images (Cyan/Dark Blue) -->
+      <filter id="duotone">
+        <feColorMatrix type="matrix" values="
+        0.2 0   0   0   0.02
+        0.8 0   0   0   0.03
+        1   0   0   0   0.04
+        0   0   0   1   0
+      " />
+        <feComponentTransfer color-interpolation-filters="sRGB">
+          <feFuncR type="table" tableValues="0.019 0.0"></feFuncR>
+          <feFuncG type="table" tableValues="0.031 1.0"></feFuncG>
+          <feFuncB type="table" tableValues="0.039 0.8"></feFuncB>
+        </feComponentTransfer>
+      </filter>
+    </defs>
+  </svg>
+
+  <div class="noise-overlay"></div>
+
+  <div class="hud">
+    <div>Domain Report: 2026</div>
+    <div class="hud-progress">
+      <span id="current-panel">01</span>
+      <div class="progress-bar">
+        <div class="progress-fill" id="p-bar"></div>
+      </div>
+      <span>06</span>
+    </div>
+  </div>
+
+  <main id="scroller">
+
+    <!-- PANEL 1: Title & Exec Summary -->
+    <section class="panel is-active" id="panel-1">
+      <div class="bg-img">
+        <img src="./images/scene-112(11).jpg" alt="Global AI Map">
+      </div>
+      <div class="content">
+        <span class="label reveal d-1">Market Synthesis Report</span>
+        <h1 class="reveal d-2">2026 AI Consulting Competitive Landscape</h1>
+
+        <div class="goal-box reveal d-3 interactive">
+          <strong>Goal:</strong> Map the 2026 AI consulting competitive landscape, including market sizing, key player
+          archetypes from traditional firms to specialized AI boutiques, emerging pricing models shifting to
+          outcome-based structures, and overall consolidation trends.
+        </div>
+
+        <div class="reveal d-4" style="margin-top: 3rem; text-align: left;">
+          <span class="label">Executive Summary</span>
+          <p>By 2026, the AI consulting market has transitioned from a fragmented era of experimental proofs-of-concept
+            to a mature, high-stakes industry defined by industrial-scale execution. The market is projected to reach
+            between <strong>$11 billion and $30 billion</strong>, driven by a robust CAGR of 20% to 26%.</p>
+          <p>This landscape is characterized by a "K-shaped" structure: massive, consolidated global integrators
+            dominate enterprise infrastructure, while agile, PhD-led boutiques serve the mid-market with high-speed
+            technical execution. The most significant shift in the industry is the move away from traditional billing
+            toward outcome-based pricing models, necessitated by the "efficiency paradox" of AI-driven delivery.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- PANEL 2: Market Sizing -->
+    <section class="panel" id="panel-2">
+      <div class="grid-layout">
+        <div>
+          <span class="label reveal d-1">Section 01</span>
+          <h2 class="reveal d-2">Market Sizing and Regional Growth</h2>
+          <div class="reveal d-3">
+            <p>The global AI consulting market for 2026 is seeing rapid expansion as organizations move beyond Large
+              Language Model (LLM) selection into the operationalization of Agentic AI and inference optimization.</p>
+            <ul style="margin-top: 2rem;">
+              <li><strong>Valuation:</strong> Market estimates range from $11 billion on the conservative end to $30
+                billion for total addressable services including implementation.</li>
+              <li><strong>Geographic Trends:</strong> North America maintains its position as the dominant market share
+                leader, primarily due to high concentrations of enterprise headquarters and capital. However, the
+                Asia-Pacific (APAC) region is currently the fastest-growing market, fueled by rapid digital
+                transformation and less legacy infrastructure friction.</li>
+              <li><strong>Growth Drivers:</strong> Key catalysts include the need for scaled production environments,
+                the management of "Agentic Orchestration" (autonomous AI agents), and the navigation of complex global
+                regulatory requirements such as the EU AI Act.</li>
+            </ul>
+          </div>
+        </div>
+        <div class="image-container reveal d-4">
+          <img src="./images/scene-115(15).jpg" alt="Global Operations">
+        </div>
+      </div>
+    </section>
+
+    <!-- PANEL 3: Archetypes -->
+    <section class="panel" id="panel-3">
+      <div style="width: 100%; max-width: 1600px; margin: 0 auto;">
+        <span class="label reveal d-1">Section 02</span>
+        <h2 class="reveal d-2" style="margin-bottom: 3rem;">Competitive Archetypes:<br>The Four Pillars</h2>
+
+        <div class="grid-layout">
+          <div class="image-container reveal d-3">
+            <img src="./images/scene-112(12).jpg" alt="Corporate Infrastructure">
+          </div>
+          <div class="pillars-grid reveal d-4">
+            <div class="pillar-card interactive">
+              <h3>Strategy Leaders</h3>
+              <span class="label" style="font-size: 0.65rem;">(MBB: McKinsey, BCG, Bain)</span>
+              <p style="font-size: 0.95rem;">Pivoted from general digital strategy to end-to-end enterprise
+                transformation. Focus on organizational design and the "ROI or Bust" mandate, utilizing
+                performance-linked fee structures.</p>
+            </div>
+            <div class="pillar-card interactive">
+              <h3>Governance Guardians</h3>
+              <span class="label" style="font-size: 0.65rem;">(The Big 4: Deloitte, EY, KPMG, PwC)</span>
+              <p style="font-size: 0.95rem;">Dominating regulated sectors. Masters of AI Audit and Trust frameworks.
+                Value proposition is risk mitigation, ethical compliance, and international standards adherence.</p>
+            </div>
+            <div class="pillar-card interactive">
+              <h3>Infrastructure Integrators</h3>
+              <span class="label" style="font-size: 0.65rem;">(Accenture, IBM, Capgemini)</span>
+              <p style="font-size: 0.95rem;">Lead in global-scale "Agent OS" deployments. Provide massive workforce for
+                deep technical integration and maintenance of multi-modal AI ecosystems.</p>
+            </div>
+            <div class="pillar-card interactive">
+              <h3>Agile Boutiques</h3>
+              <span class="label" style="font-size: 0.65rem;">(Vstorm, Addepto, etc.)</span>
+              <p style="font-size: 0.95rem;">Hyper-specialized firms in the "Practitioner Gap." Direct access to senior
+                technical talent/PhDs. Deliver rapid prototypes within 8-week windows. Disruptors of the leverage model.
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- PANEL 4: Pricing -->
+    <section class="panel" id="panel-4">
+      <div class="grid-layout">
+        <div>
+          <span class="label reveal d-1">Section 03</span>
+          <h2 class="reveal d-2">The Shift to Outcome-Based Pricing</h2>
+          <p class="reveal d-3">A fundamental shift in 2026 is the decline of Time-and-Materials (T&M) billing. As AI
+            tools allow consultants to perform tasks significantly faster, traditional hourly billing has become an
+            "efficiency paradox" that penalizes the most capable firms.</p>
+
+          <div class="reveal d-4" style="margin-top: 2rem;">
+            <h3>The BIO Framework</h3>
+            <p>Consultancies now largely utilize the BIO framework to measure ROI:</p>
+            <ul style="font-family: var(--font-mono); font-size: 0.9rem; color: var(--text);">
+              <li><span style="color: var(--accent)">[B]</span> <strong>Baseline:</strong> Establishing the pre-AI
+                performance metric.</li>
+              <li><span style="color: var(--accent)">[I]</span> <strong>Instrument:</strong> Implementing AI solution &
+                tracking real-time data.</li>
+              <li><span style="color: var(--accent)">[O]</span> <strong>Outcome:</strong> Measuring the delta in value
+                for fee calculation.</li>
+            </ul>
+
+            <h3 style="margin-top: 2rem;">Emerging Fee Structures</h3>
+            <ul>
+              <li><strong>Gain-Sharing:</strong> Percentage of cost savings/revenue growth generated.</li>
+              <li><strong>Performance-Gated Fixed Bids:</strong> Payments released upon milestones (accuracy/latency).
+              </li>
+              <li><strong>Agent Licensing:</strong> Consultancies as "Value-Added Resellers," charging recurring fees
+                for proprietary agents.</li>
+            </ul>
+          </div>
+        </div>
+        <div class="image-container reveal d-3">
+          <img src="./images/scene-113(13).jpg" alt="Outcome based pricing tablet">
+        </div>
+      </div>
+    </section>
+
+    <!-- PANEL 5: Consolidation -->
+    <section class="panel" id="panel-5">
+      <div class="grid-layout">
+        <div class="image-container reveal d-1">
+          <img src="./images/scene-114(14).jpg" alt="K-Shaped Market Consolidation">
+        </div>
+        <div>
+          <span class="label reveal d-2">Section 04</span>
+          <h2 class="reveal d-3">Consolidation and M&A Trends</h2>
+          <div class="reveal d-4">
+            <p>The market has reached a state of "industrial-scale execution" following a wave of consolidation.</p>
+            <ul>
+              <li><strong>The K-Shaped Market:</strong> Aggressive M&A has created a market split. Large firms have
+                swallowed mid-tier players to bridge talent gaps, leaving a landscape of massive global leaders and
+                small, nimble challengers, with very little "middle ground."</li>
+              <li><strong>Strategic Motivation:</strong> Acquisitions have shifted from "LLM experimentation" (2024
+                focus) to "Agentic Orchestration" and vertical-specific implementation (2026 focus).</li>
+              <li><strong>Key Risks:</strong> Consolidated firms face significant "integration debt," where fragmented
+                AI frameworks fail to interoperate. "Brain drain"—attrition of elite talent due to cultural clashes with
+                bureaucracy—remains a primary threat.</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- PANEL 6: Summary -->
+    <section class="panel" id="panel-6" style="display: block;">
+      <div
+        style="max-width: 1200px; margin: 0 auto; width: 100%; position: relative; height: 100%; display: flex; flex-direction: column; justify-content: center;">
+        <span class="label reveal d-1">Section 05</span>
+        <h2 class="reveal d-2">Summary of Key Insights</h2>
+
+        <div class="reveal d-3">
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th>Trend</th>
+                <th>2024 Status</th>
+                <th>2026 Reality</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><strong>Primary Goal</strong></td>
+                <td>Proof of Concept / Pilots</td>
+                <td>Scaled Production / Agent Orchestration</td>
+              </tr>
+              <tr>
+                <td><strong>Pricing</strong></td>
+                <td>Time & Materials (T&M)</td>
+                <td>Outcome-Based / Gain-Sharing</td>
+              </tr>
+              <tr>
+                <td><strong>Market Structure</strong></td>
+                <td>Fragmented</td>
+                <td>K-Shaped (Consolidated vs. Boutique)</td>
+              </tr>
+              <tr>
+                <td><strong>Success Metric</strong></td>
+                <td>Model Accuracy</td>
+                <td>Inference Optimization / ROI</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <div class="confidence-flag reveal d-4">
+          <strong>Confidence Flag:</strong> *All data points provided by workers were consistent. Market sizing ranges
+          ($11B–$30B) reflect the inherent volatility of the high-growth AI sector but align with broader industry
+          analyst projections for 2026.*
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <script>
+    // Custom Cursor Logic
+    const cursor = document.getElementById('cursor');
+    const interactives = document.querySelectorAll('.interactive, a, button');
+
+    document.addEventListener('mousemove', (e) => {
+      cursor.style.left = e.clientX + 'px';
+      cursor.style.top = e.clientY + 'px';
+    });
+
+    interactives.forEach(el => {
+      el.addEventListener('mouseenter', () => cursor.classList.add('active'));
+      el.addEventListener('mouseleave', () => cursor.classList.remove('active'));
+    });
+
+    // Scroll Observation Logic
+    const panels = document.querySelectorAll('.panel');
+    const currentPanelDisplay = document.getElementById('current-panel');
+    const progressBar = document.getElementById('p-bar');
+    const totalPanels = panels.length;
+
+    const observerOptions = {
+      root: document.getElementById('scroller'),
+      threshold: 0.5
+    };
+
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          // Add animation class
+          entry.target.classList.add('is-active');
+
+          // Update HUD
+          const index = Array.from(panels).indexOf(entry.target) + 1;
+          currentPanelDisplay.innerText = index.toString().padStart(2, '0');
+          progressBar.style.width = `${(index / totalPanels) * 100}%`;
+        }
+      });
+    }, observerOptions);
+
+    panels.forEach(panel => observer.observe(panel));
+  </script>
+
+</body>
+
+</html>

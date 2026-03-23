@@ -1,0 +1,619 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Domain Report 2026</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=JetBrains+Mono:wght@400;700;800&display=swap');
+
+    :root {
+      --bg: #030508;
+      --text: #a1a1aa;
+      --text-bright: #f4f4f5;
+      --accent: #00ffcc;
+      --accent-dim: rgba(0, 255, 204, 0.15);
+      --grid-line: rgba(255, 255, 255, 0.05);
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      cursor: none !important;
+    }
+
+    body {
+      background-color: var(--bg);
+      color: var(--text);
+      font-family: 'Inter', sans-serif;
+      overflow: hidden;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    /* SVG Filter Layer */
+    #noise-layer {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
+      pointer-events: none;
+      z-index: 9999;
+      opacity: 0.04;
+      mix-blend-mode: screen;
+    }
+
+    /* Custom Cursor */
+    .cursor {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 24px;
+      height: 24px;
+      border: 1px solid var(--accent);
+      border-radius: 50%;
+      transform: translate(-50%, -50%);
+      pointer-events: none;
+      z-index: 10000;
+      transition: width 0.2s, height 0.2s, background-color 0.2s;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .cursor::after {
+      content: '';
+      width: 4px;
+      height: 4px;
+      background: var(--accent);
+      border-radius: 50%;
+    }
+
+    .cursor.hovered {
+      width: 40px;
+      height: 40px;
+      background-color: var(--accent-dim);
+    }
+
+    /* Typography */
+    h1,
+    h2,
+    h3,
+    .mono {
+      font-family: 'JetBrains Mono', monospace;
+    }
+
+    h1 {
+      font-size: clamp(2rem, 5vw, 4.5rem);
+      color: var(--text-bright);
+      font-weight: 800;
+      line-height: 1.1;
+      letter-spacing: -0.02em;
+      text-transform: uppercase;
+    }
+
+    h2 {
+      font-size: clamp(1.5rem, 3vw, 2.5rem);
+      color: var(--text-bright);
+      font-weight: 700;
+      margin-bottom: 1.5rem;
+      letter-spacing: -0.01em;
+    }
+
+    h3 {
+      font-size: 1rem;
+      color: var(--accent);
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      margin-bottom: 1rem;
+    }
+
+    p {
+      font-size: clamp(0.9rem, 1.2vw, 1.1rem);
+      line-height: 1.6;
+      margin-bottom: 1.5rem;
+    }
+
+    strong {
+      color: var(--text-bright);
+      font-weight: 600;
+    }
+
+    /* UI Elements */
+    .progress-container {
+      position: fixed;
+      bottom: 2rem;
+      right: 3rem;
+      z-index: 100;
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.85rem;
+      color: var(--accent);
+      letter-spacing: 0.2em;
+    }
+
+    .progress-bar {
+      width: 100px;
+      height: 1px;
+      background: var(--grid-line);
+      position: relative;
+    }
+
+    .progress-fill {
+      position: absolute;
+      top: 0;
+      left: 0;
+      height: 100%;
+      background: var(--accent);
+      transition: width 0.6s cubic-bezier(0.25, 1, 0.5, 1);
+    }
+
+    .sys-label {
+      position: fixed;
+      top: 2rem;
+      left: 3rem;
+      z-index: 100;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.75rem;
+      color: var(--text);
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+    }
+
+    /* Carousel Layout */
+    .carousel {
+      display: flex;
+      overflow-x: auto;
+      overflow-y: hidden;
+      scroll-snap-type: x mandatory;
+      width: 100vw;
+      height: 100vh;
+      scrollbar-width: none;
+    }
+
+    .carousel::-webkit-scrollbar {
+      display: none;
+    }
+
+    .panel {
+      flex: 0 0 100vw;
+      height: 100vh;
+      scroll-snap-align: start;
+      position: relative;
+      display: flex;
+      padding: 6rem 3rem 4rem 3rem;
+      border-right: 1px solid var(--grid-line);
+    }
+
+    /* Panel Specific Grids */
+    .split-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 4rem;
+      width: 100%;
+      height: 100%;
+      align-items: center;
+    }
+
+    .content-col {
+      max-width: 600px;
+      z-index: 10;
+    }
+
+    .img-col {
+      height: 80%;
+      width: 100%;
+      position: relative;
+      overflow: hidden;
+      border: 1px solid var(--grid-line);
+    }
+
+    .img-col::after {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: mix-blend-mode(multiply);
+      background-color: rgba(3, 5, 8, 0.4);
+      border: 1px solid var(--accent-dim);
+      pointer-events: none;
+    }
+
+    img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      filter: grayscale(100%) contrast(120%) brightness(0.8);
+      transition: filter 1s ease;
+    }
+
+    .panel:hover img {
+      filter: grayscale(40%) contrast(110%) brightness(0.9);
+    }
+
+    /* Tech Lists */
+    .tech-list {
+      list-style: none;
+      display: flex;
+      flex-direction: column;
+      gap: 1.5rem;
+    }
+
+    .tech-list li {
+      position: relative;
+      padding-left: 1.5rem;
+      border-left: 1px solid var(--grid-line);
+      transition: border-color 0.3s ease;
+    }
+
+    .tech-list li:hover {
+      border-left-color: var(--accent);
+    }
+
+    .tech-list li::before {
+      content: '>';
+      position: absolute;
+      left: -0.5px;
+      top: 0;
+      font-family: 'JetBrains Mono', monospace;
+      color: var(--accent);
+      font-size: 0.8rem;
+      background: var(--bg);
+      transform: translateX(-50%);
+      padding: 0 4px;
+    }
+
+    /* Animations */
+    .reveal-wrap {
+      overflow: hidden;
+    }
+
+    .reveal-text {
+      transform: translateY(100%);
+      opacity: 0;
+      transition: transform 0.8s cubic-bezier(0.25, 1, 0.5, 1), opacity 0.8s ease;
+    }
+
+    .fade-in {
+      opacity: 0;
+      transform: translateY(20px);
+      transition: all 0.8s cubic-bezier(0.25, 1, 0.5, 1);
+    }
+
+    .is-active .reveal-text {
+      transform: translateY(0);
+      opacity: 1;
+    }
+
+    .is-active .fade-in {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    .d-1 {
+      transition-delay: 0.1s;
+    }
+
+    .d-2 {
+      transition-delay: 0.2s;
+    }
+
+    .d-3 {
+      transition-delay: 0.3s;
+    }
+
+    .d-4 {
+      transition-delay: 0.4s;
+    }
+
+    /* Flag box */
+    .confidence-flag {
+      margin-top: 3rem;
+      padding: 1rem;
+      border: 1px dashed var(--accent);
+      background: var(--accent-dim);
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.8rem;
+      color: var(--accent);
+    }
+
+    /* Background graphics */
+    .bg-grid {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-size: 50px 50px;
+      background-image:
+        linear-gradient(to right, rgba(255, 255, 255, 0.02) 1px, transparent 1px),
+        linear-gradient(to bottom, rgba(255, 255, 255, 0.02) 1px, transparent 1px);
+      pointer-events: none;
+      z-index: 0;
+    }
+  </style>
+</head>
+
+<body>
+
+  <svg id="noise-layer">
+    <filter id="noiseFilter">
+      <feTurbulence type="fractalNoise" baseFrequency="0.8" numOctaves="3" stitchTiles="stitch" />
+    </filter>
+    <rect width="100%" height="100%" filter="url(#noiseFilter)"></rect>
+  </svg>
+
+  <div class="cursor" id="cursor"></div>
+  <div class="sys-label">SYS.OP // 2026.Q4</div>
+
+  <div class="progress-container">
+    <span id="current-panel">01</span>
+    <div class="progress-bar">
+      <div class="progress-fill" id="progress-fill"></div>
+    </div>
+    <span>05</span>
+  </div>
+
+  <div class="carousel" id="carousel">
+
+    <!-- PANEL 1: Intro & Arch Shift -->
+    <section class="panel" data-index="1">
+      <div class="bg-grid"></div>
+      <div class="split-grid">
+        <div class="content-col">
+          <div class="reveal-wrap">
+            <h3 class="reveal-text">Domain Report</h3>
+          </div>
+          <div class="reveal-wrap">
+            <h1 class="reveal-text d-1">Technological and Operational Evolution</h1>
+          </div>
+          <p class="fade-in d-2 mt-4">
+            <span class="mono text-[var(--accent)]">**Goal:**</span> Analyze the shift in AI consulting delivery
+            methodologies and technology stacks in 2026, specifically detailing the transition from single-model pilot
+            wrappers to deploying complex, secure, and scaled multi-agent autonomous orchestration systems.
+          </p>
+          <p class="fade-in d-3">
+            In 2026, the AI consulting landscape has undergone a fundamental transformation, moving away from the "pilot
+            wrapper" era of 2023–2024 toward industrialized, multi-agent autonomous orchestration. This shift represents
+            a transition from simple prompt-response cycles to complex, stateful, and secure ecosystems capable of
+            enterprise-scale execution.
+          </p>
+          <h2 class="fade-in d-4" style="margin-top: 2rem; font-size: 1.5rem;">The Architectural Shift: From Wrappers to
+            Orchestration</h2>
+          <p class="fade-in d-4">
+            The primary evolution in 2026 is the abandonment of monolithic "wrapper" architectures—where a single model
+            was tasked with end-to-end logic—in favor of <strong>Multi-Agent Systems (MAS)</strong>. Consulting project
+            lifecycles are now defined by agentic workflows using graph-based reasoning (such as LangGraph) and the
+            <strong>Model Context Protocol (MCP)</strong>.
+          </p>
+        </div>
+        <div class="img-col fade-in d-2 interactive">
+          <img src="./images/scene-112(2).jpg" alt="Multi-Agent Orchestration Nodes" />
+        </div>
+      </div>
+    </section>
+
+    <!-- PANEL 2: Tech Stack -->
+    <section class="panel" data-index="2">
+      <div class="bg-grid"></div>
+      <div class="split-grid" style="grid-template-columns: 1.2fr 0.8fr;">
+        <div class="img-col fade-in interactive">
+          <img src="./images/scene-222(2).jpg" alt="Three-Tier Memory Architectures" style="object-position: left;" />
+        </div>
+        <div class="content-col">
+          <div class="reveal-wrap">
+            <h3 class="reveal-text">System Architecture</h3>
+          </div>
+          <div class="reveal-wrap">
+            <h2 class="reveal-text d-1">The 2026 Technology Stack: Memory and Execution</h2>
+          </div>
+          <p class="fade-in d-2">
+            The modern AI tech stack is now categorized into five distinct layers: Advanced Orchestration, Persistent
+            Memory, Heterogeneous Routing, Decentralized Execution, and Multimodal Interfaces.
+          </p>
+          <ul class="tech-list fade-in d-3">
+            <li>
+              <strong>Three-Tier Memory Architectures:</strong> To maintain context without performance degradation,
+              systems now employ a hierarchical memory structure consisting of <strong>Core, Recall, and
+                Archival</strong> tiers. This is supported by hierarchical compaction trees that ensure relevant
+              information is retained while pruning redundant data.
+            </li>
+            <li>
+              <strong>Heterogeneous Model Routing:</strong> Enterprise systems no longer rely on a single "best" model.
+              Instead, AI gateways perform two-level adaptive routing, sending sub-tasks to the most cost-effective and
+              performant model based on task complexity.
+            </li>
+            <li>
+              <strong>Decentralized Intelligence:</strong> To solve for latency and data privacy, there is a significant
+              movement toward <strong>Decentralized AI (DeAI)</strong> networks and edge intelligence, allowing agents
+              to execute tasks closer to the data source.
+            </li>
+          </ul>
+        </div>
+      </div>
+    </section>
+
+    <!-- PANEL 3: Security -->
+    <section class="panel" data-index="3">
+      <div class="bg-grid"></div>
+      <div class="split-grid">
+        <div class="content-col">
+          <div class="reveal-wrap">
+            <h3 class="reveal-text">Perimeter Defense</h3>
+          </div>
+          <div class="reveal-wrap">
+            <h2 class="reveal-text d-1">Security, Governance, and Compliance</h2>
+          </div>
+          <p class="fade-in d-2">
+            As agents gain more autonomy, the security perimeter has shifted to the agent-to-agent (A2A) level. The
+            "vibe checks" of 2024 have been replaced by rigorous <strong>Reasoning vs. Action audits</strong>.
+          </p>
+          <ul class="tech-list fade-in d-3">
+            <li>
+              <strong>Zero-Trust A2A Protocols:</strong> Security is now maintained via Decentralized Identifiers
+              (DIDs), mTLS, and continuous behavioral authentication.
+            </li>
+            <li>
+              <strong>Infinite Agency Prevention:</strong> To prevent recursive loop exploits or "infinite agency"
+              attacks (which can deplete budgets and crash systems), consultants implement <strong>Interaction Depth
+                Headers (IDH)</strong>, token budgeting, and edge-deployed semantic circuit breakers.
+            </li>
+            <li>
+              <strong>Memory Privacy:</strong> Shared agentic memory is secured using Attribute-Based Access Control
+              (ABAC) at the vector embedding level, coupled with automated PII scrubbing and differential privacy in
+              Retrieval-Augmented Generation (RAG) pipelines.
+            </li>
+            <li>
+              <strong>Immutable Ledgers:</strong> For auditability, enterprise governance mandates <strong>Immutable
+                Agent Ledgers</strong>. These provide a transparent, unalterable trail of every autonomous transaction
+              and tool execution.
+            </li>
+          </ul>
+        </div>
+        <div class="img-col fade-in d-2 interactive">
+          <img src="./images/scene-333(2).jpg" alt="Zero-Trust Agent Security Protocols" />
+        </div>
+      </div>
+    </section>
+
+    <!-- PANEL 4: AIOps -->
+    <section class="panel" data-index="4">
+      <div class="bg-grid"></div>
+      <div class="split-grid" style="grid-template-columns: 1fr 1.2fr;">
+        <div class="img-col fade-in interactive">
+          <img src="./images/scene-444(2).jpg" alt="DAG-Based Distributed Tracing" />
+        </div>
+        <div class="content-col">
+          <div class="reveal-wrap">
+            <h3 class="reveal-text">Observability</h3>
+          </div>
+          <div class="reveal-wrap">
+            <h2 class="reveal-text d-1">AIOps and Scaling Infrastructure</h2>
+          </div>
+          <p class="fade-in d-2">
+            Scaling multi-agent systems requires a departure from traditional Application Performance Monitoring (APM).
+            Linear tracing is insufficient for the branching paths of agentic reasoning.
+          </p>
+          <ul class="tech-list fade-in d-3">
+            <li>
+              <strong>DAG-Based Distributed Tracing:</strong> Modern observability utilizes Directed Acyclic Graph (DAG)
+              tracing to monitor non-linear agent paths, providing transparency into internal "thought processes" and
+              tool selections.
+            </li>
+            <li>
+              <strong>Time-Travel Debugging:</strong> Consultants now utilize "agent state replay" or time-travel
+              debugging to diagnose hallucinations or failures in reasoning by re-running specific agent states in a
+              sandbox.
+            </li>
+            <li>
+              <strong>Context-Aware Load Balancing:</strong> To minimize time-to-first-token (TTFT), infrastructure now
+              employs <strong>semantic stickiness</strong>, routing tasks to specialized agents that already hold the
+              necessary context, reducing redundant compute overhead.
+            </li>
+          </ul>
+          <p class="fade-in d-4 mt-4" style="margin-top: 2rem;">
+            The role of the AI consultant has consequently shifted from a "Prompt Engineer" to a <strong>"System
+              Architect."</strong> Their focus is no longer on individual model outputs but on the robustness of
+            distributed orchestration layers and the implementation of active, real-time guardrails to manage autonomous
+            agent behavior.
+          </p>
+        </div>
+      </div>
+    </section>
+
+    <!-- PANEL 5: Conclusion -->
+    <section class="panel" data-index="5">
+      <div class="bg-grid"></div>
+      <div class="split-grid" style="grid-template-columns: 1fr; text-align: center; justify-items: center;">
+        <div class="content-col" style="max-width: 800px;">
+          <div class="reveal-wrap">
+            <h3 class="reveal-text">Synthesis</h3>
+          </div>
+          <div class="reveal-wrap">
+            <h2 class="reveal-text d-1">Conclusion</h2>
+          </div>
+          <p class="fade-in d-2" style="font-size: 1.2rem;">
+            By 2026, AI delivery has matured into a disciplined engineering field. The transition from single-model
+            pilots to autonomous multi-agent systems has prioritized security, memory persistence, and complex
+            orchestration. For consultants, the value proposition has moved from "building a bot" to "architecting a
+            secure, self-optimizing agentic workforce."
+          </p>
+          <div class="confidence-flag fade-in d-3">
+            ***<br />
+            <strong>Worker Confidence Flag:</strong> <em>All worker results were provided with high confidence. No
+              low-confidence flags were noted in the source material.</em>
+          </div>
+        </div>
+        <div class="img-col fade-in d-4 interactive" style="height: 40vh; width: 80%; margin-top: -2rem;">
+          <img src="./images/scene-555(2).jpg" alt="Architecting a secure agentic workforce"
+            style="object-position: center bottom;" />
+        </div>
+      </div>
+    </section>
+
+  </div>
+
+  <script>
+    // Custom Cursor Logic
+    const cursor = document.getElementById('cursor');
+    const interactives = document.querySelectorAll('.interactive, a, button');
+
+    document.addEventListener('mousemove', (e) => {
+      cursor.style.left = e.clientX + 'px';
+      cursor.style.top = e.clientY + 'px';
+    });
+
+    interactives.forEach(el => {
+      el.addEventListener('mouseenter', () => cursor.classList.add('hovered'));
+      el.addEventListener('mouseleave', () => cursor.classList.remove('hovered'));
+    });
+
+    // Map Vertical Scroll to Horizontal Scroll
+    const carousel = document.getElementById('carousel');
+    carousel.addEventListener('wheel', (evt) => {
+      if (evt.deltaY !== 0) {
+        evt.preventDefault();
+        carousel.scrollBy({
+          left: evt.deltaY > 0 ? window.innerWidth : -window.innerWidth,
+          behavior: 'smooth'
+        });
+      }
+    }, { passive: false });
+
+    // Intersection Observer for Animations & Progress
+    const panels = document.querySelectorAll('.panel');
+    const currentPanelLabel = document.getElementById('current-panel');
+    const progressFill = document.getElementById('progress-fill');
+    const totalPanels = panels.length;
+
+    const observerOptions = {
+      root: carousel,
+      threshold: 0.5
+    };
+
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          entry.target.classList.add('is-active');
+
+          const index = parseInt(entry.target.getAttribute('data-index'));
+          currentPanelLabel.innerText = `0${index}`;
+          progressFill.style.width = `${(index / totalPanels) * 100}%`;
+        }
+      });
+    }, observerOptions);
+
+    panels.forEach(panel => observer.observe(panel));
+
+    // Trigger first panel on load
+    setTimeout(() => {
+      panels[0].classList.add('is-active');
+    }, 100);
+
+  </script>
+</body>
+
+</html>

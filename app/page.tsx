@@ -38,6 +38,15 @@ const hubs = [
     color: "from-red-600 to-rose-700",
     border: "hover:border-red-500/50",
     shadow: "hover:shadow-[0_0_40px_-10px_rgba(239,68,68,0.2)]"
+  },
+  {
+    title: "AI Consulting & Autonomous Enterprise",
+    description: "Investigation into 2026 enterprise buyer behavior, procurement evolution, and scaled autonomous transformation.",
+    href: "/ai-consulting",
+    icon: "🤖",
+    color: "from-cyan-600 to-blue-700",
+    border: "hover:border-cyan-500/50",
+    shadow: "hover:shadow-[0_0_40px_-10px_rgba(6,182,212,0.2)]"
   }
 ];
 
