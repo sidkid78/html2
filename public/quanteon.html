@@ -1,0 +1,397 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>The QUANTEON Manifesto</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;700&family=Inter:wght@300;400;600&display=swap');
+
+  :root {
+    --bg: #0a0a0c;
+    --text: #f4f4f5;
+    --accent: #ff3300;
+    --accent-tech: #00f0ff;
+    --font-hero: 'Space Grotesk', sans-serif;
+    --font-body: 'Inter', sans-serif;
+    --ease-out-expo: cubic-bezier(0.16, 1, 0.3, 1);
+    --ease-in-out-circ: cubic-bezier(0.85, 0, 0.15, 1);
+  }
+
+  * {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    cursor: none; /* Custom cursor */
+  }
+
+  body {
+    background-color: var(--bg);
+    color: var(--text);
+    font-family: var(--font-body);
+    overflow-x: hidden;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  /* --- SVG Filters & Overlays --- */
+  .noise-overlay {
+    position: fixed;
+    top: 0; left: 0; width: 100vw; height: 100vh;
+    pointer-events: none;
+    z-index: 50;
+    opacity: 0.4;
+    mix-blend-mode: overlay;
+  }
+
+  /* --- Custom Cursor --- */
+  #cursor {
+    position: fixed;
+    top: 0; left: 0;
+    width: 20px; height: 20px;
+    border: 1px solid rgba(255, 255, 255, 0.5);
+    border-radius: 50%;
+    transform: translate(-50%, -50%);
+    pointer-events: none;
+    z-index: 9999;
+    transition: width 0.3s var(--ease-out-expo), height 0.3s var(--ease-out-expo), background-color 0.3s;
+    mix-blend-mode: difference;
+  }
+  #cursor.hovered {
+    width: 60px; height: 60px;
+    background-color: rgba(255, 255, 255, 0.1);
+  }
+
+  /* --- Background System --- */
+  .bg-container {
+    position: fixed;
+    top: 0; left: 0; width: 100vw; height: 100vh;
+    z-index: 0;
+  }
+  .bg-img {
+    position: absolute;
+    top: 0; left: 0; width: 100%; height: 100%;
+    background-size: cover;
+    background-position: center;
+    opacity: 0;
+    transform: scale(1.05);
+    transition: opacity 1.2s var(--ease-in-out-circ), transform 4s var(--ease-out-expo);
+  }
+  .bg-img.active {
+    opacity: 1;
+    transform: scale(1);
+  }
+  .bg-gradient {
+    position: absolute;
+    top: 0; left: 0; width: 100%; height: 100%;
+    background: linear-gradient(90deg, rgba(10,10,12,0.95) 0%, rgba(10,10,12,0.7) 40%, rgba(10,10,12,0.1) 100%),
+                linear-gradient(0deg, rgba(10,10,12,0.9) 0%, rgba(10,10,12,0) 20%);
+    z-index: 1;
+  }
+
+  /* --- Layout & Typography --- */
+  .scroll-content {
+    position: relative;
+    z-index: 10;
+  }
+  
+  .section {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    padding: 10vh 10vw;
+    max-width: 1400px;
+    margin: 0 auto;
+  }
+
+  .meta-label {
+    font-family: var(--font-hero);
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    letter-spacing: 0.3em;
+    color: rgba(255,255,255,0.4);
+    margin-bottom: 2rem;
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+  }
+  .meta-label::before {
+    content: '';
+    display: block;
+    width: 30px; height: 1px;
+    background-color: var(--accent-tech);
+  }
+
+  .hero-text {
+    font-family: var(--font-hero);
+    font-size: clamp(2.5rem, 6vw, 5.5rem);
+    line-height: 1.05;
+    font-weight: 700;
+    margin-bottom: 2rem;
+    text-transform: uppercase;
+    max-width: 18ch;
+  }
+
+  .body-text {
+    font-size: clamp(1.1rem, 2vw, 1.5rem);
+    line-height: 1.6;
+    font-weight: 300;
+    max-width: 650px;
+    color: rgba(255,255,255,0.85);
+  }
+
+  p {
+    margin-bottom: 1.5em;
+  }
+
+  /* Thematic text styling */
+  strong {
+    font-weight: 600;
+    color: #fff;
+    position: relative;
+    display: inline-block;
+  }
+  
+  .glitch-text {
+    text-shadow: 2px 0 0 rgba(255,0,0,0.6), -2px 0 0 rgba(0,255,255,0.6);
+    animation: subtle-glitch 4s infinite alternate;
+  }
+
+  @keyframes subtle-glitch {
+    0%, 98% { text-shadow: 1px 0 0 rgba(255,0,0,0.4), -1px 0 0 rgba(0,255,255,0.4); }
+    99% { text-shadow: 3px 0 0 rgba(255,0,0,0.8), -3px 0 0 rgba(0,255,255,0.8); }
+    100% { text-shadow: -2px 0 0 rgba(255,0,0,0.6), 2px 0 0 rgba(0,255,255,0.6); }
+  }
+
+  /* --- Animations --- */
+  .reveal-wrap {
+    overflow: hidden;
+    display: block;
+  }
+  
+  .reveal-item {
+    transform: translateY(100%);
+    opacity: 0;
+    transition: transform 1s var(--ease-out-expo), opacity 1s var(--ease-out-expo);
+  }
+
+  .section.is-inview .reveal-item {
+    transform: translateY(0);
+    opacity: 1;
+  }
+
+  /* Staggering */
+  .section.is-inview .delay-1 { transition-delay: 0.1s; }
+  .section.is-inview .delay-2 { transition-delay: 0.2s; }
+  .section.is-inview .delay-3 { transition-delay: 0.3s; }
+  .section.is-inview .delay-4 { transition-delay: 0.4s; }
+
+  /* --- Progress Bar --- */
+  .progress-container {
+    position: fixed;
+    left: 4vw;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 2px;
+    height: 30vh;
+    background: rgba(255,255,255,0.1);
+    z-index: 100;
+    display: none;
+  }
+  @media (min-width: 1024px) {
+    .progress-container { display: block; }
+  }
+  .progress-bar {
+    width: 100%;
+    height: 100%;
+    background: var(--accent-tech);
+    transform-origin: top;
+    transform: scaleY(0);
+    transition: transform 0.1s linear;
+  }
+
+  .scroll-hint {
+    position: absolute;
+    bottom: 5vh;
+    left: 10vw;
+    font-family: var(--font-hero);
+    font-size: 0.7rem;
+    letter-spacing: 0.2em;
+    color: rgba(255,255,255,0.5);
+    animation: pulse 2s infinite;
+  }
+  @keyframes pulse { 0%, 100% { opacity: 0.3; } 50% { opacity: 1; } }
+
+</style>
+</head>
+<body>
+
+  <!-- SVG Filters -->
+  <svg width="0" height="0" style="position: absolute;">
+    <filter id="noise">
+      <feTurbulence type="fractalNoise" baseFrequency="0.8" numOctaves="3" stitchTiles="stitch">
+        <animate attributeName="seed" values="1;2;3;4;5;6;7;8;9;10" dur="1s" repeatCount="indefinite" />
+      </feTurbulence>
+      <feColorMatrix type="matrix" values="1 0 0 0 0, 0 1 0 0 0, 0 0 1 0 0, 0 0 0 0.15 0" />
+    </filter>
+  </svg>
+
+  <div class="noise-overlay" style="filter: url(#noise);"></div>
+  <div id="cursor"></div>
+
+  <div class="progress-container">
+    <div class="progress-bar" id="progressBar"></div>
+  </div>
+
+  <!-- Background Layers -->
+  <div class="bg-container">
+    <div class="bg-img active" data-index="0" style="background-image: url('./images/scene-11(5).jpg');"></div>
+    <div class="bg-img" data-index="1" style="background-image: url('./images/scene-21(5).jpg'); background-position: right center;"></div>
+    <div class="bg-img" data-index="2" style="background-image: url('./images/scene-31(5).jpg');"></div>
+    <div class="bg-img" data-index="3" style="background-image: url('./images/scene-41(5).jpg');"></div>
+    <div class="bg-img" data-index="4" style="background-image: url('./images/scene-51(5).jpg');"></div>
+    <div class="bg-gradient"></div>
+  </div>
+
+  <!-- Scroll Content -->
+  <main class="scroll-content">
+    
+    <!-- Section 1 -->
+    <section class="section" data-index="0">
+      <div class="meta-label reveal-wrap"><div class="reveal-item delay-1">01 // The Setup</div></div>
+      <h1 class="hero-text reveal-wrap">
+        <div class="reveal-item delay-2">The QUANTEON Manifesto:</div>
+        <div class="reveal-item delay-3" style="color: var(--accent-tech); font-size: 0.5em; margin-top: 1rem;">The Rescue Mission for the Modern Founder</div>
+      </h1>
+      <div class="body-text">
+        <p class="reveal-wrap"><span class="reveal-item delay-4 inline-block">You were sold a lie.</span></p>
+        <p class="reveal-wrap"><span class="reveal-item delay-4 inline-block">When you started your business, you didn't do it to become a glorified data-entry clerk. You did it for freedom. You did it to control your own destiny, build wealth, and provide a better life for your family.</span></p>
+        <p class="reveal-wrap"><span class="reveal-item delay-4 inline-block">But look at your life right now.</span></p>
+      </div>
+      <div class="scroll-hint">SCROLL TO DESCEND</div>
+    </section>
+
+    <!-- Section 2 -->
+    <section class="section" data-index="1">
+      <div class="meta-label reveal-wrap"><div class="reveal-item delay-1">02 // The Reality</div></div>
+      <h2 class="hero-text reveal-wrap">
+        <div class="reveal-item delay-2">Trapped in</div>
+        <div class="reveal-item delay-3">The Machine</div>
+      </h2>
+      <div class="body-text">
+        <p class="reveal-wrap"><span class="reveal-item delay-4 inline-block">Instead of owning a business, the business owns you. You are trapped in a self-made prison of endless follow-ups, lost leads, and manual busywork.</span></p>
+        <p class="reveal-wrap"><span class="reveal-item delay-4 inline-block">While you’re trying to have dinner with your family, your brain is chained to a buzzing phone, terrified that if you don't respond to a lead in 60 seconds, your competitor will steal the food off your table.</span></p>
+        <p class="reveal-wrap"><span class="reveal-item delay-4 inline-block">You are bleeding out—not just in lost revenue, but in lost time, lost sanity, and lost life.</span></p>
+      </div>
+    </section>
+
+    <!-- Section 3 -->
+    <section class="section" data-index="2">
+      <div class="meta-label reveal-wrap"><div class="reveal-item delay-1">03 // The Intervention</div></div>
+      <h2 class="hero-text reveal-wrap">
+        <div class="reveal-item delay-2">Pull You Out</div>
+      </h2>
+      <div class="body-text">
+        <p class="reveal-wrap"><span class="reveal-item delay-3 inline-block"><strong class="glitch-text">We are QUANTEON, and we are here to pull you out of the machine.</strong></span></p>
+        <p class="reveal-wrap"><span class="reveal-item delay-4 inline-block">We don't care about "AI" as a buzzword. We don't care about fancy dashboards. We care about one thing: <strong>Rescuing your human potential.</strong></span></p>
+        <p class="reveal-wrap"><span class="reveal-item delay-4 inline-block">Your competitors are using automation to become ruthless, sleepless, 24/7 predators. If you rely on human willpower to respond to leads and manage operations, you aren't just falling behind; you are walking into a gunfight with a butter knife. It is a matter of competitive survival.</span></p>
+      </div>
+    </section>
+
+    <!-- Section 4 -->
+    <section class="section" data-index="3">
+      <div class="meta-label reveal-wrap"><div class="reveal-item delay-1">04 // The System</div></div>
+      <h2 class="hero-text reveal-wrap">
+        <div class="reveal-item delay-2">Operational</div>
+        <div class="reveal-item delay-3" style="color: var(--accent-tech);">Surgery</div>
+      </h2>
+      <div class="body-text">
+        <p class="reveal-wrap"><span class="reveal-item delay-4 inline-block">Through our Revenue Performance Integrations, we don’t just tweak your business; we perform operational surgery.</span></p>
+        <p class="reveal-wrap"><span class="reveal-item delay-4 inline-block">We hunt down the bottlenecks that are stealing your weekends. We build autonomous, intelligent systems that respond to your leads in seconds, close gaps, and run your daily operations flawlessly—whether you are asleep, on vacation, or at your kid’s recital.</span></p>
+      </div>
+    </section>
+
+    <!-- Section 5 -->
+    <section class="section" data-index="4">
+      <div class="meta-label reveal-wrap"><div class="reveal-item delay-1">05 // The Freedom</div></div>
+      <h2 class="hero-text reveal-wrap">
+        <div class="reveal-item delay-2">Buy Your</div>
+        <div class="reveal-item delay-3">Life Back</div>
+      </h2>
+      <div class="body-text">
+        <p class="reveal-wrap"><span class="reveal-item delay-4 inline-block">When you partner with us, you aren't buying software. You are buying your life back.</span></p>
+        <p class="reveal-wrap"><span class="reveal-item delay-4 inline-block">We consider it our moral obligation to stop the bleeding in your business. Because when your operations are finally automated, you don’t just stop losing money. You finally get to be the CEO, the spouse, and the person you set out to be in the first place.</span></p>
+        <p class="reveal-wrap" style="margin-top: 3rem;"><span class="reveal-item delay-4 inline-block" style="font-family: var(--font-hero); font-size: 1.5em; text-transform: uppercase; letter-spacing: 0.05em; font-weight: 700; color: #fff;">The machine can do the heavy lifting.<br><span style="color: var(--accent-tech);">It's time for you to live.</span></span></p>
+      </div>
+    </section>
+
+  </main>
+
+  <script>
+    // --- Custom Cursor Logic ---
+    const cursor = document.getElementById('cursor');
+    let mouseX = 0, mouseY = 0;
+    let cursorX = 0, cursorY = 0;
+    
+    document.addEventListener('mousemove', (e) => {
+      mouseX = e.clientX;
+      mouseY = e.clientY;
+    });
+
+    function renderCursor() {
+      // Smooth interpolation
+      cursorX += (mouseX - cursorX) * 0.2;
+      cursorY += (mouseY - cursorY) * 0.2;
+      cursor.style.transform = `translate(${cursorX}px, ${cursorY}px)`;
+      requestAnimationFrame(renderCursor);
+    }
+    requestAnimationFrame(renderCursor);
+
+    // Hover state for interactive feel (applied globally to links/strong elements)
+    document.querySelectorAll('strong').forEach(el => {
+      el.addEventListener('mouseenter', () => cursor.classList.add('hovered'));
+      el.addEventListener('mouseleave', () => cursor.classList.remove('hovered'));
+    });
+
+    // --- Intersection Observer for Scrollytelling ---
+    const sections = document.querySelectorAll('.section');
+    const bgs = document.querySelectorAll('.bg-img');
+
+    const observerOptions = {
+      root: null,
+      rootMargin: '-20% 0px -20% 0px', // Triggers when element is well within viewport
+      threshold: 0.1
+    };
+
+    const sectionObserver = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          // Reveal text
+          entry.target.classList.add('is-inview');
+          
+          // Swap Background
+          const index = entry.target.getAttribute('data-index');
+          bgs.forEach(bg => {
+            if(bg.getAttribute('data-index') === index) {
+              bg.classList.add('active');
+            } else {
+              bg.classList.remove('active');
+            }
+          });
+        }
+      });
+    }, observerOptions);
+
+    sections.forEach(sec => sectionObserver.observe(sec));
+
+    // --- Scroll Progress Bar ---
+    const progressBar = document.getElementById('progressBar');
+    window.addEventListener('scroll', () => {
+      const scrollTop = window.scrollY;
+      const docHeight = document.body.scrollHeight - window.innerHeight;
+      const scrollPercent = scrollTop / docHeight;
+      progressBar.style.transform = `scaleY(${scrollPercent})`;
+    });
+  </script>
+</body>
+</html>

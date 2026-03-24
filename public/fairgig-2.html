@@ -1,0 +1,577 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>FairGig: The Arsenal</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;700&family=Oswald:wght@500;700&family=Space+Mono:ital,wght@0,400;0,700;1,400&display=swap');
+
+  :root {
+    --bg: #050505;
+    --text-main: #f4f4f5;
+    --text-muted: #a1a1aa;
+    --neon: #00ff66;
+    --neon-dim: rgba(0, 255, 102, 0.2);
+    --font-hero: 'Oswald', sans-serif;
+    --font-body: 'Inter', sans-serif;
+    --font-mono: 'Space Mono', monospace;
+    --ease-expo: cubic-bezier(0.16, 1, 0.3, 1);
+  }
+
+  * {
+    margin: 0; padding: 0;
+    box-sizing: border-box;
+    cursor: none;
+  }
+
+  body {
+    background-color: var(--bg);
+    color: var(--text-main);
+    font-family: var(--font-body);
+    overflow: hidden;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  /* ─── Custom Cursor ─── */
+  #cursor {
+    position: fixed;
+    top: 0; left: 0;
+    width: 20px; height: 20px;
+    border: 1px solid var(--neon);
+    border-radius: 50%;
+    transform: translate(-50%, -50%);
+    pointer-events: none;
+    z-index: 9999;
+    transition: width 0.3s var(--ease-expo), height 0.3s var(--ease-expo), background-color 0.3s;
+    mix-blend-mode: difference;
+  }
+  #cursor.active {
+    width: 60px; height: 60px;
+    background-color: rgba(0, 255, 102, 0.15);
+    border-color: transparent;
+  }
+
+  /* ─── Noise Overlay ─── */
+  .noise {
+    position: fixed;
+    inset: 0;
+    pointer-events: none;
+    z-index: 200;
+    opacity: 0.15;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 400 400' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.7' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+    mix-blend-mode: overlay;
+  }
+
+  /* ─── Top Nav ─── */
+  nav {
+    position: fixed;
+    top: 0; left: 0; right: 0;
+    padding: 30px 50px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    z-index: 100;
+  }
+  .nav-brand {
+    font-family: var(--font-hero);
+    font-size: 1.2rem;
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--neon);
+    text-shadow: 0 0 10px var(--neon-dim);
+  }
+  .nav-status {
+    font-family: var(--font-mono);
+    font-size: 0.75rem;
+    letter-spacing: 0.2em;
+    color: var(--text-muted);
+    text-transform: uppercase;
+  }
+  .panel-counter {
+    font-family: var(--font-mono);
+    font-size: 0.75rem;
+    letter-spacing: 0.2em;
+    color: var(--text-muted);
+  }
+
+  /* ─── Horizontal Carousel ─── */
+  .track {
+    display: flex;
+    width: 100vw;
+    height: 100vh;
+    overflow-x: auto;
+    overflow-y: hidden;
+    scroll-snap-type: x mandatory;
+    scroll-behavior: smooth;
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+  .track::-webkit-scrollbar { display: none; }
+
+  /* ─── Panel ─── */
+  .panel {
+    flex: 0 0 100vw;
+    height: 100vh;
+    scroll-snap-align: start;
+    position: relative;
+    display: flex;
+    align-items: center;
+    padding: 100px 80px 80px;
+    overflow: hidden;
+  }
+
+  /* ─── Panel BG ─── */
+  .panel-bg {
+    position: absolute;
+    inset: 0;
+    background-size: cover;
+    background-position: center;
+    filter: brightness(0.4) grayscale(0.5);
+    transform: scale(1.05);
+    transition: transform 5s var(--ease-expo), filter 1s ease;
+    z-index: 0;
+  }
+  .panel.active .panel-bg {
+    transform: scale(1);
+    filter: brightness(0.6) grayscale(0.2);
+  }
+
+  /* ─── Panel Overlay ─── */
+  .panel-overlay {
+    position: absolute;
+    inset: 0;
+    z-index: 1;
+    background: linear-gradient(135deg, rgba(5,5,5,0.95) 0%, rgba(5,5,5,0.7) 50%, rgba(0,255,102,0.05) 100%);
+  }
+
+  /* ─── Panel Content ─── */
+  .panel-content {
+    position: relative;
+    z-index: 10;
+    max-width: 800px;
+    display: flex;
+    flex-direction: column;
+    gap: 30px;
+    background: rgba(10, 10, 12, 0.6);
+    backdrop-filter: blur(12px);
+    padding: 3rem;
+    border-left: 2px solid transparent;
+    transition: border-color 0.5s var(--ease-expo) 0.5s;
+  }
+  .panel.active .panel-content {
+    border-left-color: var(--neon);
+  }
+
+  /* ─── Label ─── */
+  .label {
+    font-family: var(--font-mono);
+    font-size: 0.85rem;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--neon);
+    opacity: 0;
+    transform: translateY(20px);
+    transition: opacity 0.7s var(--ease-expo), transform 0.7s var(--ease-expo);
+  }
+  .panel.active .label { opacity: 1; transform: translateY(0); transition-delay: 0.1s; }
+
+  /* ─── Title ─── */
+  .panel-title {
+    font-family: var(--font-hero);
+    font-size: clamp(3rem, 6vw, 5.5rem);
+    font-weight: 700;
+    line-height: 1.05;
+    text-transform: uppercase;
+    letter-spacing: -0.02em;
+    opacity: 0;
+    transform: translateY(30px);
+    transition: opacity 0.85s var(--ease-expo), transform 0.85s var(--ease-expo);
+  }
+  .panel.active .panel-title { opacity: 1; transform: translateY(0); transition-delay: 0.2s; }
+  .neon-text {
+    color: var(--neon);
+    text-shadow: 0 0 20px var(--neon-dim);
+  }
+
+  /* ─── Body Text ─── */
+  .panel-body {
+    font-size: clamp(1rem, 1.5vw, 1.25rem);
+    line-height: 1.6;
+    color: var(--text-muted);
+    opacity: 0;
+    transform: translateY(20px);
+    transition: opacity 0.9s var(--ease-expo), transform 0.9s var(--ease-expo);
+  }
+  .panel.active .panel-body { opacity: 1; transform: translateY(0); transition-delay: 0.3s; }
+  .panel-body strong { color: var(--text-main); font-weight: 700; }
+
+  /* ─── Grid / Metrics ─── */
+  .metrics-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px;
+    opacity: 0;
+    transform: translateY(20px);
+    transition: opacity 0.9s var(--ease-expo), transform 0.9s var(--ease-expo);
+    margin-top: 10px;
+  }
+  .panel.active .metrics-grid { opacity: 1; transform: translateY(0); transition-delay: 0.4s; }
+  
+  .metric-item {
+    background: rgba(255,255,255,0.02);
+    border: 1px solid rgba(255,255,255,0.05);
+    border-left: 2px solid var(--neon);
+    padding: 20px;
+  }
+  .metric-label {
+    font-family: var(--font-mono);
+    font-size: 0.7rem;
+    text-transform: uppercase;
+    letter-spacing: 0.15em;
+    color: var(--neon);
+    margin-bottom: 8px;
+  }
+  .metric-desc {
+    font-family: var(--font-body);
+    font-size: 0.95rem;
+    line-height: 1.5;
+    color: var(--text-main);
+  }
+
+  /* ─── Panel Number Watermark ─── */
+  .panel-num {
+    position: absolute;
+    right: -2vw;
+    bottom: -5vh;
+    font-family: var(--font-hero);
+    font-size: clamp(15rem, 30vw, 25rem);
+    font-weight: 700;
+    line-height: 0.8;
+    color: rgba(255,255,255,0.02);
+    user-select: none;
+    pointer-events: none;
+    z-index: 2;
+  }
+
+  /* ─── Controls (Arrow Nav) ─── */
+  .controls {
+    position: fixed;
+    right: 50px;
+    bottom: 50px;
+    display: flex;
+    gap: 15px;
+    z-index: 100;
+  }
+  .control-btn {
+    width: 60px; height: 60px;
+    border: 1px solid rgba(0, 255, 102, 0.3);
+    background: rgba(5, 5, 5, 0.6);
+    backdrop-filter: blur(8px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: none;
+    transition: all 0.3s var(--ease-expo);
+  }
+  .hover-target:hover { border-color: var(--neon); background: rgba(0, 255, 102, 0.1); }
+  .control-btn svg { fill: none; stroke: var(--text-main); stroke-width: 2; transition: stroke 0.3s; }
+  .control-btn:hover svg { stroke: var(--neon); }
+
+  /* ─── CTA Button ─── */
+  .cta-btn {
+    display: inline-block;
+    padding: 18px 40px;
+    background: var(--neon);
+    color: #000;
+    font-family: var(--font-hero);
+    font-size: 1.1rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    text-decoration: none;
+    border: none;
+    box-shadow: 0 0 20px var(--neon-dim);
+    transition: transform 0.3s var(--ease-expo), box-shadow 0.3s;
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  .panel.active .cta-btn {
+    opacity: 1; transform: translateY(0); transition-delay: 0.4s;
+  }
+  .cta-btn:hover {
+    transform: translateY(-3px) !important;
+    box-shadow: 0 0 40px rgba(0, 255, 102, 0.4);
+  }
+
+  /* ─── Scroll Line ─── */
+  .scroll-line-container {
+    position: fixed;
+    left: 50px;
+    bottom: 50px;
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    z-index: 100;
+    opacity: 0;
+    transition: opacity 1s ease 1s;
+  }
+  .panel.active .scroll-line-container { opacity: 1; }
+  .scroll-text {
+    font-family: var(--font-mono);
+    font-size: 0.65rem;
+    letter-spacing: 0.2em;
+    color: var(--text-muted);
+    text-transform: uppercase;
+  }
+  .scroll-line {
+    width: 60px; height: 1px;
+    background: var(--neon);
+    position: relative;
+    overflow: hidden;
+  }
+  .scroll-line::after {
+    content: '';
+    position: absolute;
+    top: 0; left: -100%;
+    width: 100%; height: 100%;
+    background: #fff;
+    animation: scan 2s infinite linear;
+  }
+  @keyframes scan { to { left: 100%; } }
+
+  /* Responsive */
+  @media (max-width: 768px) {
+    .panel-content { padding: 2rem; margin: 0 20px; }
+    nav { padding: 20px; }
+    .controls { right: 20px; bottom: 20px; }
+    .metrics-grid { grid-template-columns: 1fr; }
+    .scroll-line-container { display: none; }
+  }
+</style>
+</head>
+<body>
+
+  <!-- Custom Cursor & Noise -->
+  <div id="cursor"></div>
+  <div class="noise"></div>
+
+  <!-- Nav -->
+  <nav>
+    <div class="nav-brand">FairGig</div>
+    <div class="nav-status" id="navLabel">01 // The Platform</div>
+    <div class="panel-counter" id="navFrac">01 / 05</div>
+  </nav>
+
+  <!-- Controls -->
+  <div class="controls">
+    <button class="control-btn hover-target" id="prevBtn" aria-label="Previous">
+      <svg width="24" height="24" viewBox="0 0 24 24"><path d="M15 18l-6-6 6-6"/></svg>
+    </button>
+    <button class="control-btn hover-target" id="nextBtn" aria-label="Next">
+      <svg width="24" height="24" viewBox="0 0 24 24"><path d="M9 18l6-6-6-6"/></svg>
+    </button>
+  </div>
+
+  <div class="scroll-line-container">
+    <div class="scroll-line"></div>
+    <div class="scroll-text">Scroll to explore</div>
+  </div>
+
+  <!-- ════════ CAROUSEL TRACK ════════ -->
+  <div class="track" id="track">
+
+    <!-- PANEL 1: PLATFORM OVERVIEW -->
+    <section class="panel active" data-i="0" data-label="01 // The Platform">
+      <div class="panel-bg" style="background-image:url('./images/scene-12(6).jpg');"></div>
+      <div class="panel-overlay"></div>
+      <div class="panel-num">01</div>
+      
+      <div class="panel-content hover-target">
+        <div class="label">The Arsenal</div>
+        <h1 class="panel-title">Weapons Against <span class="neon-text">Exploitation</span></h1>
+        <p class="panel-body">
+          We built FairGig because "exposure" doesn't pay for gas, strings, or rent. Artists have operated at an informational disadvantage for decades. 
+          <strong>We are giving the leverage back to the creators.</strong> Here are the tools systematically leveling the playing field.
+        </p>
+      </div>
+    </section>
+
+    <!-- PANEL 2: SHOW ECONOMICS SIMULATOR -->
+    <section class="panel" data-i="1" data-label="02 // Show Economics Simulator">
+      <div class="panel-bg" style="background-image:url('./images/scene-21(6).jpg');"></div>
+      <div class="panel-overlay"></div>
+      <div class="panel-num">02</div>
+      
+      <div class="panel-content hover-target">
+        <div class="label">Tool 01</div>
+        <h2 class="panel-title">Show <span class="neon-text">Economics</span> Simulator</h2>
+        <p class="panel-body">
+          Never sign blind again. Input the venue’s proposed deal—door split, guarantee, ticket price, estimated draw. The simulator generates an instantaneous projection of who makes exactly what at every capacity level.
+        </p>
+        <div class="metrics-grid">
+          <div class="metric-item">
+            <div class="metric-label">Break-Even Analysis</div>
+            <div class="metric-desc">Know exactly how many tickets you must sell just to cover the venue's "overhead" fees.</div>
+          </div>
+          <div class="metric-item">
+            <div class="metric-label">Hidden Fee Detection</div>
+            <div class="metric-desc">Flags suspicious or predatory production costs compared to historical city averages.</div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- PANEL 3: SETTLEMENT ENGINE -->
+    <section class="panel" data-i="2" data-label="03 // Settlement Ledger">
+      <div class="panel-bg" style="background-image:url('./images/scene-31(6).jpg');"></div>
+      <div class="panel-overlay"></div>
+      <div class="panel-num">03</div>
+      
+      <div class="panel-content hover-target">
+        <div class="label">Tool 02</div>
+        <h2 class="panel-title">The Settlement <span class="neon-text">Ledger</span></h2>
+        <p class="panel-body">
+          The days of getting handed crumpled cash and confusing math on a cocktail napkin are over. The Settlement Ledger tracks real-time box office numbers and applies agreed-upon terms immutably.
+        </p>
+        <div class="metrics-grid">
+          <div class="metric-item">
+            <div class="metric-label">Transparent Math</div>
+            <div class="metric-desc">Both artist and venue view the same interface, seeing payout models update live.</div>
+          </div>
+          <div class="metric-item">
+            <div class="metric-label">Instant Disbursements</div>
+            <div class="metric-desc">Automated split payments directly to band members' bank accounts the moment the show clears.</div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- PANEL 4: REPUTATION CORE -->
+    <section class="panel" data-i="3" data-label="04 // Reputation Profiles">
+      <div class="panel-bg" style="background-image:url('./images/scene-41(6).jpg');"></div>
+      <div class="panel-overlay"></div>
+      <div class="panel-num">04</div>
+      
+      <div class="panel-content hover-target">
+        <div class="label">Tool 03</div>
+        <h2 class="panel-title"><span class="neon-text">Reputation</span> Profiles</h2>
+        <p class="panel-body">
+          This is where the <strong>Truth Tax</strong> is enforced. Every gig booked and settled through FairGig builds a permanent public profile. Bad actors get exposed; ethical venues attract the best talent.
+        </p>
+        <div class="metrics-grid">
+          <div class="metric-item">
+            <div class="metric-label">Venue Fairness Score</div>
+            <div class="metric-desc">A composite 0-100 score based on historic payout reliability and artist reviews.</div>
+          </div>
+          <div class="metric-item">
+            <div class="metric-label">Artist Promotor Metric</div>
+            <div class="metric-desc">Help venues trust you by demonstrating an verified track record of high draw and professionalism.</div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- PANEL 5: CTA -->
+    <section class="panel" data-i="4" data-label="05 // Take Action">
+      <div class="panel-bg" style="background-image:url('./images/scene-51(6).jpg'); filter: brightness(0.2) grayscale(0.8);"></div>
+      <div class="panel-overlay"></div>
+      <div class="panel-num">05</div>
+      
+      <div class="panel-content hover-target" style="background: transparent; border-left: none; padding-left: 0; text-align: left;">
+        <h2 class="panel-title" style="font-size: clamp(4rem, 8vw, 7rem);">Time to <span class="neon-text">Collect</span>.</h2>
+        <p class="panel-body" style="font-size: 1.5rem; max-width: 600px; margin-bottom: 2rem;">
+          The system only works if we move together. We are starving the exploiters and feeding the honest operators.
+        </p>
+        <div>
+          <a href="#" class="cta-btn hover-target">Claim Your Profile</a>
+        </div>
+      </div>
+    </section>
+
+  </div><!-- end track -->
+
+  <script>
+    // ─── Cursor Logic ─── //
+    const cursor = document.getElementById('cursor');
+    const hoverTargets = document.querySelectorAll('.hover-target');
+    let mx = 0, my = 0, cx = 0, cy = 0;
+
+    document.addEventListener('mousemove', e => { mx = e.clientX; my = e.clientY; });
+
+    (function loop() {
+      cx += (mx - cx) * 0.2;
+      cy += (my - cy) * 0.2;
+      cursor.style.transform = `translate(calc(${cx}px - 50%), calc(${cy}px - 50%))`;
+      requestAnimationFrame(loop);
+    })();
+
+    hoverTargets.forEach(target => {
+      target.addEventListener('mouseenter', () => cursor.classList.add('active'));
+      target.addEventListener('mouseleave', () => cursor.classList.remove('active'));
+    });
+
+    // ─── Carousel Logic ─── //
+    const track = document.getElementById('track');
+    const panels = [...document.querySelectorAll('.panel')];
+    const navLabel = document.getElementById('navLabel');
+    const navFrac = document.getElementById('navFrac');
+    let current = 0;
+
+    function goTo(idx) {
+      if (idx < 0 || idx >= panels.length) return;
+      panels[current].classList.remove('active');
+      current = idx;
+      panels[current].classList.add('active');
+      navLabel.textContent = panels[current].dataset.label;
+      navFrac.textContent = `0${current + 1} / 0${panels.length}`;
+      track.scrollTo({ left: current * window.innerWidth, behavior: 'smooth' });
+    }
+
+    document.getElementById('nextBtn').addEventListener('click', () => goTo(current + 1));
+    document.getElementById('prevBtn').addEventListener('click', () => goTo(current - 1));
+
+    // Keyboard Navigation
+    document.addEventListener('keydown', e => {
+      if (e.key === 'ArrowRight' || e.key === 'ArrowDown' || e.key === ' ') { e.preventDefault(); goTo(current + 1); }
+      else if (e.key === 'ArrowLeft' || e.key === 'ArrowUp') { e.preventDefault(); goTo(current - 1); }
+    });
+
+    // Wheel Scrolling
+    let wheelLock = false;
+    track.addEventListener('wheel', e => {
+      e.preventDefault();
+      if (wheelLock) return;
+      wheelLock = true;
+      if (e.deltaY > 0 || e.deltaX > 0) goTo(current + 1);
+      else goTo(current - 1);
+      setTimeout(() => wheelLock = false, 900); // 900ms lock to prevent rapid scrolling
+    }, { passive: false });
+
+    // Touch Swipe
+    let touchX = 0;
+    track.addEventListener('touchstart', e => touchX = e.touches[0].clientX, { passive: true });
+    track.addEventListener('touchend', e => {
+      let dx = e.changedTouches[0].clientX - touchX;
+      if (Math.abs(dx) > 50) dx < 0 ? goTo(current + 1) : goTo(current - 1);
+    }, { passive: true });
+
+    // Observer fallback for snap
+    const obs = new IntersectionObserver(entries => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting && entry.intersectionRatio >= 0.5) {
+          const idx = parseInt(entry.target.getAttribute('data-i'));
+          panels.forEach(p => p.classList.remove('active'));
+          panels[idx].classList.add('active');
+          current = idx;
+          navLabel.textContent = panels[idx].dataset.label;
+          navFrac.textContent = `0${current + 1} / 0${panels.length}`;
+        }
+      });
+    }, { threshold: 0.5 });
+    panels.forEach(p => obs.observe(p));
+  </script>
+
+</body>
+</html>

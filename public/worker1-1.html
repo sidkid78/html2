@@ -1,0 +1,782 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>2026 Enterprise AI Procurement Criteria Evolution</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link
+    href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=JetBrains+Mono:wght@400;700&display=swap"
+    rel="stylesheet">
+  <style>
+    :root {
+      --bg: #05080f;
+      --surface: #0d121c;
+      --surface-hover: #161e2e;
+      --text-primary: #e2e8f0;
+      --text-secondary: #8b949e;
+      --accent: #00e5ff;
+      --accent-glow: rgba(0, 229, 255, 0.2);
+      --border: rgba(255, 255, 255, 0.1);
+      --font-sans: 'Inter', sans-serif;
+      --font-mono: 'JetBrains Mono', monospace;
+      --container-width: 1200px;
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      background-color: var(--bg);
+      color: var(--text-primary);
+      font-family: var(--font-sans);
+      line-height: 1.6;
+      overflow-x: hidden;
+      cursor: none;
+    }
+
+    ::selection {
+      background-color: var(--accent);
+      color: var(--bg);
+    }
+
+    /* Custom Cursor */
+    .cursor-dot {
+      position: fixed;
+      width: 6px;
+      height: 6px;
+      background-color: var(--accent);
+      border-radius: 50%;
+      pointer-events: none;
+      transform: translate(-50%, -50%);
+      z-index: 10000;
+      transition: width 0.2s, height 0.2s;
+    }
+
+    .cursor-ring {
+      position: fixed;
+      width: 30px;
+      height: 30px;
+      border: 1px solid var(--border);
+      border-radius: 50%;
+      pointer-events: none;
+      transform: translate(-50%, -50%);
+      z-index: 9999;
+      transition: transform 0.1s ease-out, border-color 0.3s;
+    }
+
+    body:hover .cursor-ring {
+      border-color: var(--accent);
+    }
+
+    /* Scroll Progress */
+    .progress-container {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 3px;
+      background: rgba(255, 255, 255, 0.05);
+      z-index: 9998;
+    }
+
+    .progress-bar {
+      height: 100%;
+      background: var(--accent);
+      width: 0%;
+      box-shadow: 0 0 10px var(--accent-glow);
+    }
+
+    /* Typography */
+    h1,
+    h2,
+    h3,
+    h4 {
+      font-weight: 500;
+      line-height: 1.2;
+    }
+
+    .mono {
+      font-family: var(--font-mono);
+    }
+
+    .text-accent {
+      color: var(--accent);
+    }
+
+    .text-muted {
+      color: var(--text-secondary);
+    }
+
+    .uppercase {
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+
+    .text-sm {
+      font-size: 0.875rem;
+    }
+
+    /* Layout Setup */
+    .container {
+      max-width: var(--container-width);
+      margin: 0 auto;
+      padding: 0 2rem;
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(12, 1fr);
+      gap: 2rem;
+    }
+
+    /* Animations */
+    .reveal {
+      opacity: 0;
+      transform: translateY(40px);
+      transition: opacity 1s cubic-bezier(0.16, 1, 0.3, 1), transform 1s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    .reveal.active {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    .delay-1 {
+      transition-delay: 0.1s;
+    }
+
+    .delay-2 {
+      transition-delay: 0.2s;
+    }
+
+    .delay-3 {
+      transition-delay: 0.3s;
+    }
+
+    /* Hero Section */
+    .hero {
+      position: relative;
+      height: 100vh;
+      display: flex;
+      align-items: flex-end;
+      padding-bottom: 4rem;
+      overflow: hidden;
+    }
+
+    .hero-bg {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 120%;
+      background-image: url('./images/scene-1(4).jpg');
+      background-size: cover;
+      background-position: center;
+      background-attachment: fixed;
+      z-index: -2;
+      filter: grayscale(80%) brightness(0.4) contrast(1.2);
+    }
+
+    .hero-overlay {
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(to bottom, transparent 0%, var(--bg) 100%);
+      z-index: -1;
+    }
+
+    .hero-content {
+      grid-column: 1 / -1;
+    }
+
+    .hero-label {
+      font-family: var(--font-mono);
+      color: var(--accent);
+      font-size: 0.875rem;
+      margin-bottom: 1rem;
+      display: block;
+      letter-spacing: 0.1em;
+    }
+
+    .hero-title {
+      font-size: clamp(3rem, 6vw, 6rem);
+      font-weight: 300;
+      letter-spacing: -0.02em;
+      max-width: 900px;
+    }
+
+    /* Executive Summary */
+    .exec-summary {
+      padding: 8rem 0;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .exec-summary .grid {
+      align-items: start;
+    }
+
+    .exec-label {
+      grid-column: 1 / 4;
+    }
+
+    .exec-content {
+      grid-column: 4 / -1;
+      font-size: 1.5rem;
+      color: var(--text-secondary);
+      font-weight: 300;
+    }
+
+    .exec-content strong {
+      color: var(--text-primary);
+      font-weight: 500;
+    }
+
+    /* Criteria List */
+    .criteria-section {
+      padding: 8rem 0;
+    }
+
+    .section-header {
+      font-family: var(--font-mono);
+      font-size: 0.875rem;
+      color: var(--text-secondary);
+      margin-bottom: 4rem;
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+    }
+
+    .section-header::after {
+      content: '';
+      flex-grow: 1;
+      height: 1px;
+      background: var(--border);
+    }
+
+    .criterion {
+      padding: 4rem 0;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+    }
+
+    .crit-num {
+      grid-column: 1 / 2;
+      font-family: var(--font-mono);
+      font-size: 1.5rem;
+      color: var(--text-secondary);
+    }
+
+    .crit-content {
+      grid-column: 2 / 13;
+    }
+
+    @media (min-width: 768px) {
+      .crit-num {
+        grid-column: 1 / 3;
+        font-size: 2rem;
+      }
+
+      .crit-content {
+        grid-column: 3 / -1;
+      }
+    }
+
+    .crit-title {
+      font-size: 2rem;
+      margin-bottom: 2rem;
+    }
+
+    .comparison-grid {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 2rem;
+      margin-top: 2rem;
+    }
+
+    @media (min-width: 1024px) {
+      .comparison-grid {
+        grid-template-columns: 1fr 1fr;
+      }
+    }
+
+    .box-2026 {
+      background: var(--surface);
+      border-left: 2px solid var(--accent);
+      padding: 2rem;
+      position: relative;
+    }
+
+    .box-2026::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(90deg, var(--accent-glow) 0%, transparent 100%);
+      opacity: 0.1;
+      pointer-events: none;
+    }
+
+    .box-2024 {
+      padding: 2rem;
+      border: 1px solid var(--border);
+      color: var(--text-secondary);
+    }
+
+    /* Image Containers */
+    .img-container {
+      grid-column: 1 / -1;
+      margin: 4rem 0;
+      position: relative;
+      overflow: hidden;
+      border: 1px solid var(--border);
+      aspect-ratio: 16 / 9;
+    }
+
+    .img-container img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      filter: grayscale(100%) contrast(120%) brightness(0.7);
+      transition: filter 0.8s ease, transform 10s ease;
+    }
+
+    .img-container:hover img {
+      filter: grayscale(0%) contrast(100%) brightness(1);
+      transform: scale(1.05);
+    }
+
+    .img-caption {
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      background: var(--bg);
+      padding: 0.5rem 1rem;
+      font-family: var(--font-mono);
+      font-size: 0.75rem;
+      color: var(--accent);
+      border-top: 1px solid var(--border);
+      border-right: 1px solid var(--border);
+    }
+
+    /* Data Table */
+    .summary-table-section {
+      padding: 8rem 0 12rem;
+    }
+
+    .data-grid {
+      border: 1px solid var(--border);
+      font-family: var(--font-sans);
+    }
+
+    .data-row {
+      display: grid;
+      grid-template-columns: 1fr;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .data-row:last-child {
+      border-bottom: none;
+    }
+
+    @media (min-width: 768px) {
+      .data-row {
+        grid-template-columns: 1.5fr 2fr 2fr;
+      }
+    }
+
+    .data-cell {
+      padding: 1.5rem;
+      border-right: 1px solid var(--border);
+    }
+
+    .data-cell:last-child {
+      border-right: none;
+    }
+
+    .data-header {
+      background: var(--surface);
+      font-family: var(--font-mono);
+      font-size: 0.875rem;
+      color: var(--accent);
+      text-transform: uppercase;
+    }
+
+    .cell-label {
+      font-weight: 500;
+    }
+
+    .cell-2024 {
+      color: var(--text-secondary);
+    }
+
+    .cell-2026 {
+      color: var(--text-primary);
+    }
+
+    .footer-note {
+      margin-top: 2rem;
+      font-family: var(--font-mono);
+      font-size: 0.875rem;
+      color: var(--text-secondary);
+      text-align: right;
+      font-style: italic;
+    }
+
+    /* SVG Noise Overlay */
+    .noise-layer {
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      z-index: 9997;
+      opacity: 0.4;
+      mix-blend-mode: overlay;
+    }
+  </style>
+</head>
+
+<body>
+
+  <!-- Interactive Elements -->
+  <div class="cursor-dot"></div>
+  <div class="cursor-ring"></div>
+  <div class="progress-container">
+    <div class="progress-bar" id="progressBar"></div>
+  </div>
+
+  <!-- SVG Filters -->
+  <svg style="display:none;">
+    <filter id="noiseFilter">
+      <feTurbulence type="fractalNoise" baseFrequency="0.8" numOctaves="3" stitchTiles="stitch" />
+      <feColorMatrix type="matrix" values="1 0 0 0 0, 0 1 0 0 0, 0 0 1 0 0, 0 0 0 0.15 0" />
+    </filter>
+  </svg>
+  <div class="noise-layer" style="filter:url(#noiseFilter);"></div>
+
+  <!-- Hero -->
+  <header class="hero">
+    <div class="hero-bg"></div>
+    <div class="hero-overlay"></div>
+    <div class="container grid">
+      <div class="hero-content reveal">
+        <span class="hero-label">REPORT // STRATEGIC PROCUREMENT</span>
+        <h1 class="hero-title">
+          Analysis of 2026<br>
+          <span class="text-muted">Enterprise AI Procurement</span><br>
+          Criteria Evolution
+        </h1>
+      </div>
+    </div>
+  </header>
+
+  <!-- Executive Summary -->
+  <section class="exec-summary container grid">
+    <div class="exec-label reveal">
+      <h2 class="mono text-sm uppercase text-accent">Executive Summary</h2>
+    </div>
+    <div class="exec-content reveal delay-1">
+      By 2026, the landscape for enterprise AI procurement has undergone a fundamental transformation. The industry has
+      shifted from <strong>"Innovation Theater"</strong> characterized by experimental pilots to a
+      <strong>"Production-Grade Scaling"</strong> era focused on operational resilience, measurable ROI, and
+      standardized interoperability. This report outlines the top 7 procurement criteria for 2026 and compares them to
+      the standards of 2024/2025.
+    </div>
+  </section>
+
+  <!-- Top 7 Criteria -->
+  <section class="criteria-section container">
+    <div class="section-header reveal">TOP 7 AI PROCUREMENT CRITERIA FOR 2026</div>
+
+    <!-- Criterion 1 -->
+    <article class="criterion grid reveal">
+      <div class="crit-num">01</div>
+      <div class="crit-content">
+        <h3 class="crit-title">Demonstrable ROI & Operational Resilience <span
+            class="text-muted text-sm mono">(Production-Grade Scaling)</span></h3>
+        <div class="comparison-grid">
+          <div class="box-2026">
+            <div class="mono text-sm uppercase text-accent mb-2">2026 Standard</div>
+            <p>Procurement now requires a rigorous "Proof of Value" (PoV) rather than a simple "Proof of Concept" (PoC).
+              Selection is driven by impact on core business metrics (e.g., cycle time reduction, cost-per-token
+              efficiency).</p>
+          </div>
+          <div class="box-2024">
+            <div class="mono text-sm uppercase mb-2">Difference from 2024</div>
+            <p>In 2024, "proving the possible" was enough to secure funding. By 2026, AI must compete with enterprise
+              software for operational budget, necessitating a roadmap for "Day 2" operations, including monitoring for
+              model drift and automated retraining.</p>
+          </div>
+        </div>
+      </div>
+    </article>
+
+    <!-- Image 2 insertion for Security context -->
+    <div class="img-container reveal">
+      <img src="./images/scene-2 (4).jpg" alt="Security & Compliance Dashboard">
+      <div class="img-caption">FIG 1: ISO 42001 COMPLIANCE VERIFICATION</div>
+    </div>
+
+    <!-- Criterion 2 -->
+    <article class="criterion grid reveal">
+      <div class="crit-num">02</div>
+      <div class="crit-content">
+        <h3 class="crit-title">Security & Compliance <span class="text-muted text-sm mono">(SOC 2 Type 2 & ISO
+            42001)</span></h3>
+        <div class="comparison-grid">
+          <div class="box-2026">
+            <div class="mono text-sm uppercase text-accent mb-2">2026 Standard</div>
+            <p>Security certifications are non-negotiable table stakes. Over 90% of Fortune 500 firms refuse to sign AI
+              vendor contracts without SOC 2 Type 2 and ISO 42001 (the global standard for AI management systems).</p>
+          </div>
+          <div class="box-2024">
+            <div class="mono text-sm uppercase mb-2">Difference from 2024</div>
+            <p>In 2024, many enterprises accepted "self-attestation" or basic security checklists. 2026 demands
+              third-party verification and alignment with the EU AI Act's transparency and logging requirements for
+              high-risk systems.</p>
+          </div>
+        </div>
+      </div>
+    </article>
+
+    <!-- Criterion 3 -->
+    <article class="criterion grid reveal">
+      <div class="crit-num">03</div>
+      <div class="crit-content">
+        <h3 class="crit-title">Model & Data Provenance <span class="text-muted text-sm mono">(Tamper-Evident Audit
+            Trails)</span></h3>
+        <div class="comparison-grid">
+          <div class="box-2026">
+            <div class="mono text-sm uppercase text-accent mb-2">2026 Standard</div>
+            <p>Procurement teams demand detailed audit trails for model inputs, training data origins, and fine-tuning
+              processes. This includes the vetting of "Shadow AI" within the consultant's own organization.</p>
+          </div>
+          <div class="box-2024">
+            <div class="mono text-sm uppercase mb-2">Difference from 2024</div>
+            <p>2024 focused on model performance (accuracy/latency). 2026 focuses on the legal and ethical "cleanliness"
+              of the data used, ensuring no copyright infringement or biased datasets are baked into the solution.</p>
+          </div>
+        </div>
+      </div>
+    </article>
+
+    <!-- Image 3 insertion for Interoperability -->
+    <div class="img-container reveal">
+      <img src="./images/scene-31(4).jpg" alt="Vendor Interoperability Stack">
+      <div class="img-caption">FIG 2: THE COMPOSABLE MCP STACK</div>
+    </div>
+
+    <!-- Criterion 4 -->
+    <article class="criterion grid reveal">
+      <div class="crit-num">04</div>
+      <div class="crit-content">
+        <h3 class="crit-title">Vendor Interoperability & The Composable Stack <span class="text-muted text-sm mono">(MCP
+            Compliance)</span></h3>
+        <div class="comparison-grid">
+          <div class="box-2026">
+            <div class="mono text-sm uppercase text-accent mb-2">2026 Standard</div>
+            <p>Enterprises avoid "black box" monoliths. Procurement favors vendors whose systems utilize the
+              <strong>Model Context Protocol (MCP)</strong>, allowing AI agents to communicate across diverse platforms
+              (e.g., SAP, Salesforce, and custom LLMs).
+            </p>
+          </div>
+          <div class="box-2024">
+            <div class="mono text-sm uppercase mb-2">Difference from 2024</div>
+            <p>2024 was the era of proprietary ecosystems. By 2026, the mandate is "Agentic Readiness," where components
+              of the AI stack are interchangeable to prevent vendor lock-in.</p>
+          </div>
+        </div>
+      </div>
+    </article>
+
+    <!-- Criterion 5 -->
+    <article class="criterion grid reveal">
+      <div class="crit-num">05</div>
+      <div class="crit-content">
+        <h3 class="crit-title">Open Data Standards <span class="text-muted text-sm mono">(Apache Iceberg & Open
+            APIs)</span></h3>
+        <div class="comparison-grid">
+          <div class="box-2026">
+            <div class="mono text-sm uppercase text-accent mb-2">2026 Standard</div>
+            <p>To ensure long-term data portability, procurement requires compatibility with open formats like
+              <strong>Apache Iceberg</strong>. This ensures that data generated or processed by AI remains accessible to
+              other enterprise systems without expensive egress fees.
+            </p>
+          </div>
+          <div class="box-2024">
+            <div class="mono text-sm uppercase mb-2">Difference from 2024</div>
+            <p>Earlier standards often allowed vendors to store data in proprietary formats, making migration difficult.
+              2026 standards prioritize data sovereignty.</p>
+          </div>
+        </div>
+      </div>
+    </article>
+
+    <!-- Image 4 insertion for Benchmarking -->
+    <div class="img-container reveal">
+      <img src="./images/scene-41(4).jpg" alt="Performance Benchmarking Dashboard">
+      <div class="img-caption">FIG 3: PERFORMANCE & LATENCY METRICS</div>
+    </div>
+
+    <!-- Criterion 6 -->
+    <article class="criterion grid reveal">
+      <div class="crit-num">06</div>
+      <div class="crit-content">
+        <h3 class="crit-title">Performance Benchmarking & "Should-Cost" Analysis</h3>
+        <div class="comparison-grid">
+          <div class="box-2026">
+            <div class="mono text-sm uppercase text-accent mb-2">2026 Standard</div>
+            <p>Procurement requires standardized testing on latency, inference costs at scale, and a "should-cost"
+              analysis to avoid predatory pricing as usage grows. This includes monitoring for "Inference Inflation."
+            </p>
+          </div>
+          <div class="box-2024">
+            <div class="mono text-sm uppercase mb-2">Difference from 2024</div>
+            <p>2024 pricing was often speculative or based on flat pilot fees. 2026 contracts are unit-cost driven, with
+              built-in clauses for cost reductions as hardware and model efficiencies improve.</p>
+          </div>
+        </div>
+      </div>
+    </article>
+
+    <!-- Image 5 insertion for Risk Management -->
+    <div class="img-container reveal">
+      <img src="./images/scene-51(4).jpg" alt="Continuous Risk Management Map">
+      <div class="img-caption">FIG 4: GLOBAL AI LIABILITY FLOW-DOWN</div>
+    </div>
+
+    <!-- Criterion 7 -->
+    <article class="criterion grid reveal">
+      <div class="crit-num">07</div>
+      <div class="crit-content">
+        <h3 class="crit-title">Continuous Risk Management & Liability Flow-down</h3>
+        <div class="comparison-grid">
+          <div class="box-2026">
+            <div class="mono text-sm uppercase text-accent mb-2">2026 Standard</div>
+            <p>Risk management is 24/7. Contracts explicitly state that prime consultants are directly liable for the
+              compliance and performance of any third-party LLM providers or service providers they integrate.</p>
+          </div>
+          <div class="box-2024">
+            <div class="mono text-sm uppercase mb-2">Difference from 2024</div>
+            <p>2024 risk assessments were periodic (often annual). 2026 requires real-time monitoring of supplier
+              financial health and geopolitical risks via AI-driven digital twins of the supply chain.</p>
+          </div>
+        </div>
+      </div>
+    </article>
+  </section>
+
+  <!-- Summary Table -->
+  <section class="summary-table-section container">
+    <div class="section-header reveal">SUMMARY: SELECTION CRITERIA EVOLUTION</div>
+    <div class="data-grid reveal">
+      <!-- Header Row -->
+      <div class="data-row data-header">
+        <div class="data-cell">Criteria</div>
+        <div class="data-cell">2024/2025 (Pilot Phase)</div>
+        <div class="data-cell">2026 (Production Phase)</div>
+      </div>
+      <!-- Row 1 -->
+      <div class="data-row">
+        <div class="data-cell cell-label">Primary Goal</div>
+        <div class="data-cell cell-2024">Proof of Concept (PoC)</div>
+        <div class="data-cell cell-2026">Production at Scale / ROI</div>
+      </div>
+      <!-- Row 2 -->
+      <div class="data-row">
+        <div class="data-cell cell-label">Trust Factor</div>
+        <div class="data-cell cell-2024">Brand Name / Novelty</div>
+        <div class="data-cell cell-2026">SOC 2 / ISO 42001 / Audit Trails</div>
+      </div>
+      <!-- Row 3 -->
+      <div class="data-row">
+        <div class="data-cell cell-label">Architecture</div>
+        <div class="data-cell cell-2024">Proprietary Monoliths</div>
+        <div class="data-cell cell-2026">Composable Stacks (MCP, Iceberg)</div>
+      </div>
+      <!-- Row 4 -->
+      <div class="data-row">
+        <div class="data-cell cell-label">Success Metric</div>
+        <div class="data-cell cell-2024">"Wow" Factor / Accuracy</div>
+        <div class="data-cell cell-2026">Latency / Unit Cost / Reliability</div>
+      </div>
+      <!-- Row 5 -->
+      <div class="data-row">
+        <div class="data-cell cell-label">Risk Management</div>
+        <div class="data-cell cell-2024">Periodic Audit</div>
+        <div class="data-cell cell-2026">24/7 Real-time Monitoring</div>
+      </div>
+      <!-- Row 6 -->
+      <div class="data-row">
+        <div class="data-cell cell-label">Ownership</div>
+        <div class="data-cell cell-2024">R&D / Innovation Lab</div>
+        <div class="data-cell cell-2026">IT / Business Unit Operations</div>
+      </div>
+    </div>
+    <div class="footer-note reveal">*Findings prepared for the Strategic Procurement Office.*</div>
+  </section>
+
+  <script>
+    // Custom Cursor Logic
+    const dot = document.querySelector('.cursor-dot');
+    const ring = document.querySelector('.cursor-ring');
+
+    window.addEventListener('mousemove', (e) => {
+      const x = e.clientX;
+      const y = e.clientY;
+
+      dot.style.left = `${x}px`;
+      dot.style.top = `${y}px`;
+
+      // Add a slight delay to the ring for a smooth trailing effect
+      setTimeout(() => {
+        ring.style.left = `${x}px`;
+        ring.style.top = `${y}px`;
+      }, 50);
+    });
+
+    // Click feedback
+    window.addEventListener('mousedown', () => {
+      ring.style.transform = 'translate(-50%, -50%) scale(0.8)';
+      dot.style.transform = 'translate(-50%, -50%) scale(1.5)';
+    });
+    window.addEventListener('mouseup', () => {
+      ring.style.transform = 'translate(-50%, -50%) scale(1)';
+      dot.style.transform = 'translate(-50%, -50%) scale(1)';
+    });
+
+    // Scroll Progress Logic
+    const progressBar = document.getElementById('progressBar');
+    window.addEventListener('scroll', () => {
+      const scrollTotal = document.documentElement.scrollHeight - window.innerHeight;
+      const scrollPercentage = (window.scrollY / scrollTotal) * 100;
+      progressBar.style.width = `${scrollPercentage}%`;
+    });
+
+    // Intersection Observer for Scroll Reveals
+    const observerOptions = {
+      root: null,
+      rootMargin: '0px',
+      threshold: 0.15
+    };
+
+    const observer = new IntersectionObserver((entries, observer) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          entry.target.classList.add('active');
+          observer.unobserve(entry.target); // Only animate once
+        }
+      });
+    }, observerOptions);
+
+    document.querySelectorAll('.reveal').forEach(el => {
+      observer.observe(el);
+    });
+  </script>
+</body>
+
+</html>
