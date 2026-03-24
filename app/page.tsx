@@ -47,6 +47,24 @@ const hubs = [
     color: "from-cyan-600 to-blue-700",
     border: "hover:border-cyan-500/50",
     shadow: "hover:shadow-[0_0_40px_-10px_rgba(6,182,212,0.2)]"
+  },
+  {
+    title: "The QUANTEON System",
+    description: "Autonomous revenue performance integrations performing operational surgery to buy your life back.",
+    href: "/quanteon",
+    icon: "⟁",
+    color: "from-red-600 to-rose-700",
+    border: "hover:border-red-500/50",
+    shadow: "hover:shadow-[0_0_40px_-10px_rgba(225,29,72,0.2)]"
+  },
+  {
+    title: "FairGig: The Truth Tax",
+    description: "Exposing the lie of the live music industry with break-even simulators, transparent ledgers, and venue reputation profiles.",
+    href: "/fairgig",
+    icon: "⚖️",
+    color: "from-emerald-600 to-green-700",
+    border: "hover:border-emerald-500/50",
+    shadow: "hover:shadow-[0_0_40px_-10px_rgba(16,185,129,0.2)]"
   }
 ];
 
