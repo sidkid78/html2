@@ -1,0 +1,585 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Listen & Fix: The End of Mechanical Helplessness</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;500;700&family=Inter:wght@300;400;600&family=JetBrains+Mono:wght@100;400;700&display=swap');
+
+    :root {
+      --bg: #030407;
+      --text: #e2e8f0;
+      --muted: #8492a6;
+      --accent-cyan: #00f0ff;
+      --accent-red: #ff2a2a;
+      --accent-green: #00ff66;
+      --grid-color: rgba(255, 255, 255, 0.05);
+      --font-hero: 'Space Grotesk', sans-serif;
+      --font-body: 'Inter', sans-serif;
+      --font-mono: 'JetBrains Mono', monospace;
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      background-color: var(--bg);
+      color: var(--text);
+      font-family: var(--font-body);
+      overflow: hidden;
+      cursor: none;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    /* Custom Cursor */
+    .cursor-dot,
+    .cursor-ring {
+      position: fixed;
+      top: 0;
+      left: 0;
+      pointer-events: none;
+      z-index: 9999;
+      transform: translate(-50%, -50%);
+    }
+
+    .cursor-dot {
+      width: 4px;
+      height: 4px;
+      background: var(--accent-cyan);
+      border-radius: 50%;
+    }
+
+    .cursor-ring {
+      width: 30px;
+      height: 30px;
+      border: 1px solid rgba(0, 240, 255, 0.5);
+      border-radius: 50%;
+      transition: width 0.2s, height 0.2s, border-color 0.2s;
+    }
+
+    body:active .cursor-ring {
+      width: 20px;
+      height: 20px;
+      border-color: var(--accent-red);
+    }
+
+    /* HUD Elements */
+    .hud {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
+      pointer-events: none;
+      z-index: 100;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      padding: 2rem;
+      font-family: var(--font-mono);
+      font-size: 0.75rem;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+    }
+
+    .hud-top,
+    .hud-bottom {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      width: 100%;
+    }
+
+    .hud-line {
+      height: 1px;
+      background: var(--grid-color);
+      flex-grow: 1;
+      margin: 0 1rem;
+    }
+
+    .hud-accent {
+      color: var(--accent-cyan);
+    }
+
+    .progress-container {
+      position: absolute;
+      bottom: 2rem;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 200px;
+      height: 2px;
+      background: var(--grid-color);
+    }
+
+    .progress-bar {
+      height: 100%;
+      background: var(--accent-cyan);
+      width: 20%;
+      transition: width 0.5s cubic-bezier(0.77, 0, 0.175, 1);
+    }
+
+    /* Carousel Container */
+    .carousel {
+      display: flex;
+      width: 100vw;
+      height: 100vh;
+      overflow-x: auto;
+      overflow-y: hidden;
+      scroll-snap-type: x mandatory;
+      scrollbar-width: none;
+    }
+
+    .carousel::-webkit-scrollbar {
+      display: none;
+    }
+
+    /* Panel Structure */
+    .panel {
+      flex: 0 0 100vw;
+      height: 100vh;
+      scroll-snap-align: start;
+      position: relative;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      overflow: hidden;
+    }
+
+    /* Image Backgrounds & Overlays */
+    .panel-img {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-size: cover;
+      background-position: center;
+      z-index: -2;
+      transform: scale(1.05);
+      transition: transform 10s linear;
+    }
+
+    .panel.active .panel-img {
+      transform: scale(1);
+    }
+
+    .overlay {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(90deg, var(--bg) 0%, rgba(3, 4, 7, 0.85) 40%, rgba(3, 4, 7, 0.4) 100%);
+      z-index: -1;
+    }
+
+    .scanlines {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(to bottom, rgba(255, 255, 255, 0), rgba(255, 255, 255, 0) 50%, rgba(0, 0, 0, 0.1) 50%, rgba(0, 0, 0, 0.1));
+      background-size: 100% 4px;
+      z-index: 10;
+      pointer-events: none;
+      opacity: 0.3;
+    }
+
+    /* Content Layout */
+    .content-col {
+      padding: 15vh 4rem 4rem 10vw;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      z-index: 1;
+      max-width: 800px;
+    }
+
+    /* Typography */
+    .label {
+      font-family: var(--font-mono);
+      color: var(--accent-cyan);
+      font-size: 0.85rem;
+      margin-bottom: 1rem;
+      display: inline-block;
+      border: 1px solid var(--accent-cyan);
+      padding: 0.2rem 0.5rem;
+    }
+
+    h1 {
+      font-family: var(--font-hero);
+      font-size: clamp(3rem, 6vw, 6rem);
+      font-weight: 700;
+      line-height: 1.05;
+      letter-spacing: -0.03em;
+      margin-bottom: 2rem;
+      text-transform: uppercase;
+    }
+
+    h2 {
+      font-family: var(--font-hero);
+      font-size: clamp(2rem, 3.5vw, 3.5rem);
+      font-weight: 500;
+      line-height: 1.1;
+      letter-spacing: -0.02em;
+      margin-bottom: 1.5rem;
+      color: #fff;
+    }
+
+    h3 {
+      font-family: var(--font-hero);
+      font-size: clamp(1.2rem, 1.5vw, 1.8rem);
+      font-weight: 700;
+      color: var(--text);
+      margin: 2rem 0 1rem 0;
+    }
+
+    p {
+      font-size: clamp(1rem, 1.1vw, 1.25rem);
+      line-height: 1.6;
+      color: var(--muted);
+      margin-bottom: 1.5rem;
+      max-width: 55ch;
+    }
+
+    strong {
+      color: #fff;
+      font-weight: 600;
+    }
+
+    .italic-quote {
+      font-style: italic;
+      color: var(--accent-cyan);
+      border-left: 2px solid var(--accent-cyan);
+      padding-left: 1rem;
+    }
+
+    /* Animations */
+    .reveal {
+      opacity: 0;
+      transform: translateY(30px);
+      transition: opacity 1s cubic-bezier(0.25, 1, 0.5, 1), transform 1s cubic-bezier(0.25, 1, 0.5, 1);
+    }
+
+    .panel.active .reveal {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    .d-1 {
+      transition-delay: 0.1s;
+    }
+
+    .d-2 {
+      transition-delay: 0.2s;
+    }
+
+    .d-3 {
+      transition-delay: 0.3s;
+    }
+
+    .d-4 {
+      transition-delay: 0.4s;
+    }
+
+    /* Panel Specifics */
+    #p1 .overlay {
+      background: linear-gradient(90deg, var(--bg) 0%, rgba(3, 4, 7, 0.9) 60%, rgba(3, 4, 7, 0.6) 100%);
+    }
+
+    #p1 .panel-img {
+      filter: url(#noise-filter) grayscale(0.8) contrast(1.2);
+    }
+
+    #p2 .panel-img {
+      opacity: 0.6;
+      filter: hue-rotate(180deg) saturate(1.5);
+    }
+
+    #p2 .overlay {
+      background: linear-gradient(90deg, var(--bg) 0%, rgba(3, 4, 7, 0.9) 50%, rgba(3, 4, 7, 0.2) 100%);
+    }
+
+    #p3 .label {
+      color: var(--accent-red);
+      border-color: var(--accent-red);
+    }
+
+    #p3 .hud-accent {
+      color: var(--accent-red);
+    }
+
+    #p3 .panel-img {
+      filter: url(#chromatic-aberration) sepia(1) hue-rotate(-50deg) saturate(3);
+      opacity: 0.5;
+    }
+
+    #p3 .overlay {
+      background: linear-gradient(90deg, var(--bg) 0%, rgba(20, 0, 0, 0.9) 50%, rgba(20, 0, 0, 0.5) 100%);
+    }
+
+    #p4 .label {
+      color: var(--accent-green);
+      border-color: var(--accent-green);
+    }
+
+    #p4 .panel-img {
+      filter: contrast(1.1) brightness(0.8);
+    }
+
+    #p4 .overlay {
+      background: linear-gradient(90deg, var(--bg) 0%, rgba(3, 4, 7, 0.95) 45%, rgba(3, 4, 7, 0.1) 100%);
+    }
+
+    #p5 .panel-img {
+      opacity: 0.5;
+      filter: contrast(1.2);
+    }
+
+    #p5 .overlay {
+      background: linear-gradient(180deg, var(--bg) 0%, rgba(3, 4, 7, 0.7) 100%);
+    }
+
+    #p5 .content-col {
+      grid-column: 1 / -1;
+      align-items: center;
+      text-align: center;
+      padding: 0 2rem;
+    }
+
+    #p5 p {
+      max-width: 70ch;
+    }
+
+    @media (max-width: 1024px) {
+      .panel {
+        grid-template-columns: 1fr;
+      }
+
+      .content-col {
+        padding: 6rem 2rem;
+        background: linear-gradient(to top, var(--bg) 60%, transparent);
+        justify-content: flex-end;
+      }
+
+      .overlay {
+        background: rgba(3, 4, 7, 0.7);
+      }
+    }
+  </style>
+</head>
+
+<body>
+
+  <!-- SVG Filters -->
+  <svg style="display: none;">
+    <defs>
+      <filter id="noise-filter">
+        <feTurbulence type="fractalNoise" baseFrequency="0.8" numOctaves="3" stitchTiles="stitch">
+          <animate attributeName="seed" from="0" to="100" dur="5s" repeatCount="indefinite" />
+        </feTurbulence>
+        <feColorMatrix type="matrix" values="1 0 0 0 0, 0 1 0 0 0, 0 0 1 0 0, 0 0 0 0.15 0" result="noise" />
+        <feComposite operator="in" in="noise" in2="SourceGraphic" result="composite" />
+        <feBlend mode="screen" in="composite" in2="SourceGraphic" />
+      </filter>
+      <filter id="chromatic-aberration">
+        <feColorMatrix type="matrix" values="1 0 0 0 0  0 0 0 0 0  0 0 0 0 0  0 0 0 1 0" in="SourceGraphic"
+          result="red" />
+        <feOffset dx="4" dy="0" in="red" result="red_shifted" />
+        <feColorMatrix type="matrix" values="0 0 0 0 0  0 1 0 0 0  0 0 1 0 0  0 0 0 1 0" in="SourceGraphic"
+          result="cyan" />
+        <feOffset dx="-4" dy="0" in="cyan" result="cyan_shifted" />
+        <feBlend mode="screen" in="red_shifted" in2="cyan_shifted" />
+      </filter>
+    </defs>
+  </svg>
+
+  <!-- Custom Cursor -->
+  <div class="cursor-dot"></div>
+  <div class="cursor-ring"></div>
+
+  <!-- Static HUD -->
+  <div class="scanlines"></div>
+  <nav class="hud">
+    <div class="hud-top">
+      <div>SYS.DIAGNOSTIC <span class="hud-accent">// ONLINE</span></div>
+      <div class="hud-line"></div>
+      <div id="counter">[01/05]</div>
+    </div>
+    <div class="progress-container">
+      <div class="progress-bar" id="progress"></div>
+    </div>
+    <div class="hud-bottom">
+      <div>SCROLL TO NAVIGATE -></div>
+      <div class="hud-line"></div>
+      <div>SECURE CONNECTION</div>
+    </div>
+  </nav>
+
+  <!-- Main Content Carousel -->
+  <main class="carousel" id="carousel">
+
+    <!-- Panel 1 -->
+    <section class="panel" id="p1">
+      <div class="panel-img" style="background-image: url('./images/scene-11(8).jpg')"></div>
+      <div class="overlay"></div>
+      <div class="content-col">
+        <div class="label reveal">SYS.ERR_DETECTED</div>
+        <h1 class="reveal d-1">Listen & Fix</h1>
+        <h2 class="reveal d-2">The End of Mechanical Helplessness</h2>
+        <h3 class="reveal d-3">**The Crisis**</h3>
+        <p class="reveal d-3">A rhythmic metallic tapping under the hood. A sudden, acrid smell of ozone from the
+          furnace. A puddle forming under the washing machine.</p>
+        <p class="reveal d-4">In that split second, a mechanical failure isn't just an inconvenience. It’s a crisis. It
+          triggers a deep, visceral spike of financial dread and helplessness. We live in a physical world that we no
+          longer know how to fix. We are at the mercy of expensive experts, confusing manuals, and dangerous, unverified
+          internet advice that can turn a simple weekend repair into a lethal disaster.</p>
+      </div>
+    </section>
+
+    <!-- Panel 2 -->
+    <section class="panel" id="p2">
+      <div class="panel-img" style="background-image: url('./images/scene-12(8).jpg')"></div>
+      <div class="overlay"></div>
+      <div class="content-col">
+        <div class="label reveal">INITIATIVE_PRIME</div>
+        <h2 class="reveal d-1">The Mission</h2>
+        <p class="reveal d-2">"Listen & Fix" was born from a singular obsession: to give people their power back.</p>
+        <p class="reveal d-3">We are building the ultimate "Cognitive Mirror" for the physical world—an AI that sees the
+          fracture, hears the failing bearing, and guides your hands to fix it. We are not just building a diagnostic
+          tool; we are democratizing the tribal knowledge of master mechanics and engineering an <strong>Immutable
+            Safety Ledger</strong> for everyday life.</p>
+
+        <h3 class="reveal d-4">**How We Fight for You**<br>1. Empathy in the Panic (The Observation Stream)</h3>
+        <p class="reveal d-4">When your machine breaks, the clock starts on your anxiety. You don't have time to wait.
+          Within seconds of hearing your engine or seeing your appliance, our system speaks to you. It narrates exactly
+          what it senses in real-time—<span class="italic-quote">"I hear the belt slipping; I see the corrosion."</span>
+          It acts as a master mechanic standing right beside you, instantly replacing your panic with clarity and
+          cognitive empathy.</p>
+      </div>
+    </section>
+
+    <!-- Panel 3 -->
+    <section class="panel" id="p3">
+      <div class="panel-img" style="background-image: url('./images/scene-13(8).jpg')"></div>
+      <div class="overlay"></div>
+      <div class="content-col">
+        <div class="label reveal">PROTOCOL.OVERRIDE_ACTIVE</div>
+        <h2 class="reveal d-1">2. The Ironclad Vow of Safety</h2>
+        <h3 class="reveal d-2">(The Governor)</h3>
+        <p class="reveal d-3">The internet will gladly tell you how to tinker with a high-voltage capacitor or a
+          pressurized gas line—and it will let you die doing it. <em>We will not.</em></p>
+        <p class="reveal d-4">Before we ever give you a single instruction, our deterministic safety firewall goes to
+          work. Behind the scenes, we cross-reference every mechanical signature against a proprietary vault of
+          catastrophic failure modes. Our promise is absolute: <strong>We protect you before we instruct you.</strong>
+          If a repair is lethal, the system locks down. No guesses. No probabilistic risks. Just an immediate, safe
+          handoff to a verified professional.</p>
+      </div>
+    </section>
+
+    <!-- Panel 4 -->
+    <section class="panel" id="p4">
+      <div class="panel-img" style="background-image: url('./images/scene-14(8).jpg')"></div>
+      <div class="overlay"></div>
+      <div class="content-col">
+        <div class="label reveal">EXECUTE.REPAIR_SEQUENCE</div>
+        <h2 class="reveal d-1">3. The Master Mechanic in Your Hands</h2>
+        <h3 class="reveal d-2">(Actionable Intelligence)</h3>
+        <p class="reveal d-3">Once a repair is certified completely safe, the vault opens. You aren't just given a
+          manual; you are given a customized battle plan tailored to your exact skill level, the tools you actually own,
+          and your budget.</p>
+        <p class="reveal d-4">We instantly source the exact parts you need from local shelves, turning a weekend-ruining
+          disaster into a one-click resolution.</p>
+      </div>
+    </section>
+
+    <!-- Panel 5 -->
+    <section class="panel" id="p5">
+      <div class="panel-img" style="background-image: url('./images/scene-15(8).jpg')"></div>
+      <div class="overlay"></div>
+      <div class="content-col">
+        <div class="label reveal">END_STATE.PROJECTION</div>
+        <h1 class="reveal d-1">Our Ultimate Vision</h1>
+        <p class="reveal d-2">We refuse to live in a world where a broken machine means a broken budget, or where a lack
+          of knowledge puts lives at risk.</p>
+        <p class="reveal d-3">Competitors are racing to build fast, generic AI wrappers. We are building the
+          <strong>Global Standard for Mechanical Truth.</strong></p>
+        <p class="reveal d-4"
+          style="color: #fff; font-size: 1.5rem; border-top: 1px solid var(--grid-color); padding-top: 2rem; margin-top: 2rem;">
+          We are engineering a future where nothing stays broken, no one gets hurt, and the physical world bends to the
+          capability of anyone willing to pick up a wrench.</p>
+      </div>
+    </section>
+
+  </main>
+
+  <script>
+    // Custom Cursor Logic
+    const dot = document.querySelector('.cursor-dot');
+    const ring = document.querySelector('.cursor-ring');
+
+    document.addEventListener('mousemove', (e) => {
+      dot.style.transform = `translate(${e.clientX}px, ${e.clientY}px)`;
+      // Slight delay on ring for organic feel
+      setTimeout(() => {
+        ring.style.transform = `translate(${e.clientX}px, ${e.clientY}px)`;
+      }, 50);
+    });
+
+    // Intersection Observer for Panels & HUD Updates
+    const panels = document.querySelectorAll('.panel');
+    const counter = document.getElementById('counter');
+    const progressBar = document.getElementById('progress');
+    const carousel = document.getElementById('carousel');
+
+    const observerOptions = {
+      root: carousel,
+      threshold: 0.5
+    };
+
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          // Trigger CSS animations
+          entry.target.classList.add('active');
+
+          // Update HUD Counter
+          const index = Array.from(panels).indexOf(entry.target) + 1;
+          counter.textContent = `[0${index}/05]`;
+
+          // Update Progress Bar
+          progressBar.style.width = `${(index / 5) * 100}%`;
+
+          // Change cursor ring color based on panel warning level
+          if (index === 3) {
+            ring.style.borderColor = 'rgba(255, 42, 42, 0.5)'; // Red
+          } else if (index === 4) {
+            ring.style.borderColor = 'rgba(0, 255, 102, 0.5)'; // Green
+          } else {
+            ring.style.borderColor = 'rgba(0, 240, 255, 0.5)'; // Cyan
+          }
+        }
+      });
+    }, observerOptions);
+
+    panels.forEach(panel => observer.observe(panel));
+
+    // Horizontal Scroll with Mouse Wheel mapping
+    carousel.addEventListener('wheel', (evt) => {
+      if (evt.deltaY !== 0) {
+        evt.preventDefault();
+        carousel.scrollBy({
+          left: evt.deltaY > 0 ? window.innerWidth : -window.innerWidth,
+          behavior: 'smooth'
+        });
+      }
+    }, { passive: false });
+  </script>
+</body>
+
+</html>
