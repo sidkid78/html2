@@ -65,6 +65,15 @@ const hubs = [
     color: "from-emerald-600 to-green-700",
     border: "hover:border-emerald-500/50",
     shadow: "hover:shadow-[0_0_40px_-10px_rgba(16,185,129,0.2)]"
+  },
+  {
+    title: "Listen & Fix",
+    description: "Shazam for broken machines. An AI-powered diagnostic platform ending the monopoly on technical knowledge.",
+    href: "/listen-and-fix",
+    icon: "🔧",
+    color: "from-red-600 to-orange-600",
+    border: "hover:border-red-500/50",
+    shadow: "hover:shadow-[0_0_40px_-10px_rgba(255,51,51,0.2)]"
   }
 ];
 

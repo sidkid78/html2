@@ -1,0 +1,589 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Listen & Fix: The Mission</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;500;700&family=Inter:wght@300;400;600&display=swap');
+
+    :root {
+      --c-bg: #050505;
+      --c-text: #f4f4f5;
+      --accent: #ff3333;
+      /* Default, overridden per panel */
+      --ease-spring: cubic-bezier(0.175, 0.885, 0.32, 1.05);
+      --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      background-color: var(--c-bg);
+      color: var(--c-text);
+      font-family: 'Inter', sans-serif;
+      overflow: hidden;
+      /* Hide body scroll */
+      cursor: none;
+      /* Custom cursor */
+    }
+
+    /* Custom Cursor */
+    #cursor {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 20px;
+      height: 20px;
+      border: 2px solid var(--accent);
+      border-radius: 50%;
+      transform: translate(-50%, -50%);
+      pointer-events: none;
+      z-index: 9999;
+      transition: width 0.2s, height 0.2s, background-color 0.2s, border-color 0.3s ease;
+      mix-blend-mode: difference;
+    }
+
+    #cursor::after {
+      content: '';
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      width: 4px;
+      height: 4px;
+      background: var(--accent);
+      border-radius: 50%;
+      transform: translate(-50%, -50%);
+      transition: background-color 0.3s ease;
+    }
+
+    /* Carousel Container */
+    .carousel {
+      display: flex;
+      width: 100vw;
+      height: 100vh;
+      overflow-x: scroll;
+      overflow-y: hidden;
+      scroll-snap-type: x mandatory;
+      scrollbar-width: none;
+      /* Firefox */
+      -ms-overflow-style: none;
+      /* IE/Edge */
+    }
+
+    .carousel::-webkit-scrollbar {
+      display: none;
+      /* Chrome/Safari */
+    }
+
+    /* Panel Styles */
+    .panel {
+      flex: 0 0 100vw;
+      height: 100vh;
+      scroll-snap-align: start;
+      position: relative;
+      overflow: hidden;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 5vw;
+    }
+
+    /* Background Images with Zoom Effect */
+    .bg-img {
+      position: absolute;
+      top: -5%;
+      left: -5%;
+      width: 110%;
+      height: 110%;
+      background-size: cover;
+      background-position: center;
+      z-index: 0;
+      transform: scale(1.05);
+      transition: transform 10s ease-out;
+      filter: grayscale(80%) contrast(1.2) brightness(0.4);
+    }
+
+    .panel.is-active .bg-img {
+      transform: scale(1);
+    }
+
+    /* Grain Overlay */
+    .grain {
+      position: absolute;
+      inset: 0;
+      z-index: 1;
+      pointer-events: none;
+      opacity: 0.15;
+      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E");
+    }
+
+    /* Vignette / Gradient Overlay */
+    .overlay {
+      position: absolute;
+      inset: 0;
+      z-index: 2;
+      background: linear-gradient(to top, rgba(5, 5, 5, 0.9) 0%, rgba(5, 5, 5, 0.4) 50%, rgba(5, 5, 5, 0.8) 100%);
+    }
+
+    /* Content Layout */
+    .content-wrapper {
+      position: relative;
+      z-index: 10;
+      width: 100%;
+      max-width: 1400px;
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 2rem;
+    }
+
+    @media (min-width: 1024px) {
+      .content-wrapper {
+        grid-template-columns: 1fr 1fr;
+        align-items: end;
+        padding-bottom: 5vh;
+      }
+
+      .content-wrapper.centered {
+        grid-template-columns: 1fr;
+        text-align: center;
+        place-items: center;
+      }
+    }
+
+    /* Typography Hierarchy */
+    .font-hero {
+      font-family: 'Space Grotesk', sans-serif;
+    }
+
+    .label {
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: clamp(0.75rem, 1vw, 1rem);
+      text-transform: uppercase;
+      letter-spacing: 0.2em;
+      color: var(--accent);
+      margin-bottom: 1rem;
+      display: inline-block;
+    }
+
+    .headline {
+      font-size: clamp(3rem, 8vw, 7rem);
+      line-height: 0.9;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: -0.04em;
+      margin-bottom: 1.5rem;
+      color: #fff;
+      /* Text shadow for subtle chromatic aberration feel */
+      text-shadow: 2px 0px 0px rgba(255, 0, 0, 0.3), -2px 0px 0px rgba(0, 255, 255, 0.3);
+    }
+
+    .headline strong {
+      color: var(--accent);
+      font-weight: 700;
+    }
+
+    .body-text {
+      font-size: clamp(1rem, 1.5vw, 1.5rem);
+      line-height: 1.5;
+      font-weight: 300;
+      color: #d1d1d6;
+      max-width: 600px;
+    }
+
+    .body-text p {
+      margin-bottom: 1rem;
+    }
+
+    .body-text em {
+      font-style: italic;
+      color: #fff;
+    }
+
+    .list-item {
+      margin-bottom: 1.5rem;
+      padding-left: 1.5rem;
+      position: relative;
+      border-left: 2px solid var(--accent);
+    }
+
+    .list-item strong {
+      display: block;
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: 1.2em;
+      color: #fff;
+      margin-bottom: 0.25rem;
+      text-transform: uppercase;
+      letter-spacing: -0.02em;
+    }
+
+    /* Animation Classes (Triggered via JS) */
+    .reveal-wrap {
+      overflow: hidden;
+      display: inline-block;
+      vertical-align: top;
+    }
+
+    .reveal-text,
+    .reveal-fade,
+    .reveal-line {
+      opacity: 0;
+      transform: translateY(40px) scale(0.95);
+      filter: blur(10px);
+      transition: opacity 1.2s var(--ease-out), transform 1.2s var(--ease-out), filter 1.2s var(--ease-out);
+      will-change: transform, opacity, filter;
+    }
+
+    .panel.is-active .reveal-text,
+    .panel.is-active .reveal-fade,
+    .panel.is-active .reveal-line {
+      opacity: 1;
+      transform: translateY(0) scale(1);
+      filter: blur(0);
+    }
+
+    /* Staggering */
+    .delay-1 {
+      transition-delay: 0.1s;
+    }
+
+    .delay-2 {
+      transition-delay: 0.25s;
+    }
+
+    .delay-3 {
+      transition-delay: 0.4s;
+    }
+
+    .delay-4 {
+      transition-delay: 0.55s;
+    }
+
+    .delay-5 {
+      transition-delay: 0.7s;
+    }
+
+    /* Progress Bar */
+    .progress-container {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      width: 100%;
+      height: 4px;
+      background: rgba(255, 255, 255, 0.1);
+      z-index: 100;
+    }
+
+    .progress-bar {
+      height: 100%;
+      width: 0%;
+      background: var(--accent);
+      transition: background-color 0.5s ease;
+    }
+
+    /* Navigation Indicators */
+    .nav-dots {
+      position: fixed;
+      right: 2rem;
+      top: 50%;
+      transform: translateY(-50%);
+      display: flex;
+      flex-direction: column;
+      gap: 1rem;
+      z-index: 100;
+    }
+
+    .dot {
+      width: 4px;
+      height: 32px;
+      background: rgba(255, 255, 255, 0.2);
+      transition: all 0.4s var(--ease-spring);
+    }
+
+    .dot.active {
+      background: var(--accent);
+      height: 64px;
+    }
+
+    /* Specific Panel Data Colors */
+    #panel-1 {
+      --accent: #ff3333;
+    }
+
+    /* Red - Warning/Problem */
+    #panel-2 {
+      --accent: #00f0ff;
+    }
+
+    /* Cyan - Tech Solution */
+    #panel-3 {
+      --accent: #7b61ff;
+    }
+
+    /* Purple - AI/Deep Tech */
+    #panel-4 {
+      --accent: #00ff88;
+    }
+
+    /* Green - Action/Success */
+    #panel-5 {
+      --accent: #facc15;
+    }
+
+    /* Yellow - Revolution/Celebration */
+  </style>
+</head>
+
+<body>
+
+  <!-- Custom Cursor -->
+  <div id="cursor"></div>
+
+  <!-- Progress UI -->
+  <div class="progress-container">
+    <div class="progress-bar" id="progress-bar"></div>
+  </div>
+  <div class="nav-dots" id="nav-dots">
+    <div class="dot active"></div>
+    <div class="dot"></div>
+    <div class="dot"></div>
+    <div class="dot"></div>
+    <div class="dot"></div>
+  </div>
+
+  <!-- SVG Filters Definition -->
+  <svg width="0" height="0" style="position:absolute;">
+    <filter id="chromatic">
+      <feOffset dx="4" dy="0" in="SourceGraphic" result="red-shift" />
+      <feOffset dx="-4" dy="0" in="SourceGraphic" result="blue-shift" />
+      <!-- Simple approximation via text-shadow in CSS used instead for better performance, keeping this tag structure for complex future use -->
+    </filter>
+  </svg>
+
+  <div class="carousel" id="carousel">
+
+    <!-- PANEL 1: The Problem -->
+    <section class="panel" id="panel-1">
+      <div class="bg-img" style="background-image: url('./images/scene-11(7).jpg');"></div>
+      <div class="grain"></div>
+      <div class="overlay"></div>
+
+      <div class="content-wrapper">
+        <div class="col-left">
+          <span class="label reveal-fade delay-1">Listen & Fix</span>
+          <h1 class="headline font-hero reveal-text delay-2">
+            The <br />Extortion <br />of the <br /><strong>Helpless</strong>
+          </h1>
+        </div>
+        <div class="col-right body-text">
+          <p class="reveal-fade delay-3">
+            The Extortion of the Helpless Consumer<br><br>
+            You know the feeling. You’re driving down the highway, and suddenly, your engine starts making a rhythmic
+            <em>clacking</em> noise. Or your refrigerator hums loudly, and the freezer stops freezing.
+          </p>
+          <p class="reveal-fade delay-4">
+            Instantly, the anxiety hits. It’s not just the stress of a broken machine; it’s the dread of what comes
+            next. It’s the $150 diagnostic fee just to look at it. It’s the fear of a mechanic throwing big words at
+            you—<em>alternator, compressor, torque specs</em>—knowing you have no choice but to hand over your credit
+            card.
+          </p>
+          <p class="reveal-fade delay-5"
+            style="border-left: 2px solid var(--accent); padding-left: 1rem; margin-top: 1.5rem; color: #fff;">
+            For decades, manufacturers and repair shops have held a monopoly on technical knowledge. They hide the
+            manuals. They obscure the symptoms. They weaponize your lack of knowledge against your wallet.
+            <br><br><strong>We are ending that today.</strong>
+          </p>
+        </div>
+      </div>
+    </section>
+
+    <!-- PANEL 2: The Solution -->
+    <section class="panel" id="panel-2">
+      <div class="bg-img" style="background-image: url('./images/scene-12(7).jpg');"></div>
+      <div class="grain"></div>
+      <div class="overlay"></div>
+
+      <div class="content-wrapper">
+        <div class="col-left">
+          <span class="label reveal-fade delay-1">The Solution</span>
+          <h1 class="headline font-hero reveal-text delay-2">
+            <strong>Shazam</strong><br />For<br />Broken<br />Machines
+          </h1>
+        </div>
+        <div class="col-right body-text">
+          <p class="reveal-fade delay-3" style="font-size: 1.25em; color: #fff;">
+            Listen & Fix is an AI-powered diagnostic and repair platform that gives you the knowledge of a master
+            mechanic, right in your pocket.
+          </p>
+          <p class="reveal-fade delay-4">
+            We’ve built a system that fundamentally changes the power dynamic of ownership. When a machine breaks, you
+            don't call a repairman.
+          </p>
+          <p class="reveal-fade delay-5 font-hero"
+            style="font-size: 2em; line-height: 1.1; color: var(--accent); margin-top: 2rem;">
+            You pull out your phone, point the camera, and let our system <em>listen</em> and <em>look</em>.
+          </p>
+        </div>
+      </div>
+    </section>
+
+    <!-- PANEL 3: The Brain (AI) -->
+    <section class="panel" id="panel-3">
+      <div class="bg-img" style="background-image: url('./images/scene-13(7).jpg');"></div>
+      <div class="grain"></div>
+      <div class="overlay" style="background: linear-gradient(to right, rgba(5,5,5,0.95) 0%, rgba(5,5,5,0.6) 100%);">
+      </div>
+
+      <div class="content-wrapper">
+        <div class="col-left body-text">
+          <p class="reveal-fade delay-1" style="margin-bottom: 3rem; font-size: 1.2em;">
+            Powered by advanced multimodal AI, Listen & Fix doesn't just guess. It acts:
+          </p>
+          <div class="list-item reveal-fade delay-2">
+            <strong>* It Hears and Sees the Invisible:</strong>
+            Whether it's a rattling fan belt or a buzzing circuit breaker, the AI analyzes the raw audio and video of
+            your malfunctioning equipment, instantly matching the exact sound and vibration to the root cause.
+          </div>
+          <div class="list-item reveal-fade delay-3">
+            <strong>* It Steals Back the Manuals:</strong>
+            While you’re holding your phone, our system goes to work in the background, aggressively hunting down and
+            reading the exact, obscure 500-page manufacturer technical manual for your specific make and model.
+          </div>
+        </div>
+        <div class="col-right hidden lg:block">
+          <!-- Visual balance, letting the background shine -->
+        </div>
+      </div>
+    </section>
+
+    <!-- PANEL 4: The Execution -->
+    <section class="panel" id="panel-4">
+      <div class="bg-img" style="background-image: url('./images/scene-14(7).jpg');"></div>
+      <div class="grain"></div>
+      <div class="overlay" style="background: linear-gradient(to left, rgba(5,5,5,0.95) 0%, rgba(5,5,5,0.6) 100%);">
+      </div>
+
+      <div class="content-wrapper">
+        <div class="col-left hidden lg:block">
+          <!-- Visual balance -->
+        </div>
+        <div class="col-right body-text">
+          <div class="list-item reveal-fade delay-1">
+            <strong>* It Guides Your Hands:</strong>
+            It doesn't just tell you what's wrong. It generates a custom, step-by-step repair guide tailored strictly to
+            your skill level, the tools you actually own, and your budget.
+          </div>
+          <div class="list-item reveal-fade delay-2">
+            <strong>* It Sources the Parts:</strong>
+            Before you even put your phone down, it has already pinged your local AutoZone or Grainger, telling you
+            exactly which $30 part you need to buy to avoid the $800 repair bill.
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- PANEL 5: The Revolution -->
+    <section class="panel" id="panel-5">
+      <div class="bg-img"
+        style="background-image: url('./images/scene-15\(7\).jpg'); filter: grayscale(40%) contrast(1.1) brightness(0.6);"></div>
+      <div class="grain"></div>
+      <div class="overlay"
+        style="background: radial-gradient(circle at center, rgba(5,5,5,0.4) 0%, rgba(5,5,5,0.95) 100%);"></div>
+
+      <div class="content-wrapper centered">
+        <span class="label reveal-fade delay-1"></span>
+        <h1 class="headline font-hero reveal-text delay-2" style="font-size: clamp(2.5rem, 6vw, 6rem);">
+          A Right-To-Repair<br /><strong>Revolution</strong>
+        </h1>
+        <p class="body-text reveal-fade delay-3" style="text-align: center; max-width: 800px; margin-top: 2rem;">
+          We are not just building an app. We are tearing down the walls of technical gatekeeping. Whether it's a car,
+          an HVAC system, or a dishwasher, if you bought it, you should be able to fix it.
+        </p>
+        <p class="body-text reveal-fade delay-4"
+          style="text-align: center; max-width: 800px; color: #fff; font-weight: 600; font-size: 1.5em; margin-top: 2rem;">
+          Listen & Fix is here to turn intimidated consumers into empowered owners, one broken machine at a time.
+        </p>
+      </div>
+    </section>
+
+  </div>
+
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      const carousel = document.getElementById('carousel');
+      const panels = document.querySelectorAll('.panel');
+      const progressBar = document.getElementById('progress-bar');
+      const dots = document.querySelectorAll('.dot');
+      const cursor = document.getElementById('cursor');
+
+      // Custom Cursor Logic
+      window.addEventListener('mousemove', (e) => {
+        cursor.style.left = e.clientX + 'px';
+        cursor.style.top = e.clientY + 'px';
+      });
+
+      // Add hover effects for cursor on text
+      document.querySelectorAll('h1, p, strong').forEach(el => {
+        el.addEventListener('mouseenter', () => {
+          cursor.style.transform = 'translate(-50%, -50%) scale(2)';
+          cursor.style.backgroundColor = 'rgba(255,255,255,0.1)';
+        });
+        el.addEventListener('mouseleave', () => {
+          cursor.style.transform = 'translate(-50%, -50%) scale(1)';
+          cursor.style.backgroundColor = 'transparent';
+        });
+      });
+
+      // Scroll Progress & Dynamic Colors
+      carousel.addEventListener('scroll', () => {
+        const scrollLeft = carousel.scrollLeft;
+        const maxScroll = carousel.scrollWidth - carousel.clientWidth;
+        const progress = (scrollLeft / maxScroll) * 100;
+        progressBar.style.width = progress + '%';
+      });
+
+      // Intersection Observer for Animations and Navigation Sync
+      const observerOptions = {
+        root: carousel,
+        threshold: 0.5 // Trigger when 50% of panel is visible
+      };
+
+      const observer = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+          if (entry.isIntersecting) {
+            // Add active class to trigger CSS animations
+            entry.target.classList.add('is-active');
+
+            // Sync Navigation Dots
+            const index = Array.from(panels).indexOf(entry.target);
+            dots.forEach(d => d.classList.remove('active'));
+            if (dots[index]) dots[index].classList.add('active');
+
+            // Sync global accent color based on active panel's CSS var
+            const panelAccent = getComputedStyle(entry.target).getPropertyValue('--accent').trim();
+            document.documentElement.style.setProperty('--accent', panelAccent);
+
+          } else {
+            // Optional: Remove active class when out of view to replay animations on scroll back
+            // entry.target.classList.remove('is-active');
+          }
+        });
+      }, observerOptions);
+
+      panels.forEach(panel => observer.observe(panel));
+
+      // Trigger first panel immediately in case observer delay
+      setTimeout(() => {
+        panels[0].classList.add('is-active');
+      }, 100);
+    });
+  </script>
+</body>
+
+</html>
