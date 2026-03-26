@@ -10,6 +10,20 @@ const articles = [
     href: "/listen-&-fix.html",
     icon: "🔧",
     accent: "from-red-500/20 to-orange-500/20"
+  },
+  {
+    title: "The End of Mechanical Helplessness",
+    description: "A rhythmic metallic tapping under the hood. A sudden, acrid smell of ozone. Our cognitive mirror for the physical world ends the panic.",
+    href: "/listen-&-fix2.html",
+    icon: "⚡",
+    accent: "from-cyan-500/20 to-blue-500/20"
+  },
+  {
+    title: "Shazam for Engines (v2.4)",
+    description: "Upload audio, video, or images of any mechanical failure. Our AI diagnoses the issue, cross-references service manuals, and delivers safety-verified repair instructions.",
+    href: "/listen-&-fix3.html",
+    icon: "🎙️",
+    accent: "from-amber-500/20 to-green-500/20"
   }
 ];
 

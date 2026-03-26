@@ -1,0 +1,768 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>Listen & Fix — AI Mechanical Diagnostics</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+<link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Barlow+Condensed:wght@300;400;500;600;700;800&family=Barlow:wght@300;400;500&display=swap" rel="stylesheet"/>
+
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+:root{
+  --bg:         #06080A;
+  --bg2:        #0C0F12;
+  --bg3:        #111419;
+  --amber:      #F59E0B;
+  --amber-dim:  rgba(245,158,11,0.12);
+  --amber-glow: rgba(245,158,11,0.35);
+  --green:      #22C55E;
+  --green-dim:  rgba(34,197,94,0.10);
+  --green-glow: rgba(34,197,94,0.3);
+  --red:        #EF4444;
+  --red-dim:    rgba(239,68,68,0.12);
+  --text:       #E8EAE6;
+  --text-muted: rgba(232,234,230,0.45);
+  --border:     rgba(245,158,11,0.14);
+  --mono:       'Share Tech Mono', monospace;
+  --display:    'Barlow Condensed', sans-serif;
+  --body:       'Barlow', sans-serif;
+}
+
+html{scroll-behavior:smooth;}
+body{
+  background:var(--bg);
+  color:var(--text);
+  font-family:var(--body);
+  overflow-x:hidden;
+  cursor:none;
+}
+
+/* SCANLINE OVERLAY */
+body::after{
+  content:'';
+  position:fixed;inset:0;
+  background:repeating-linear-gradient(0deg,transparent,transparent 2px,rgba(0,0,0,0.07) 2px,rgba(0,0,0,0.07) 4px);
+  pointer-events:none;z-index:9990;
+}
+
+/* CURSOR */
+#cur{position:fixed;width:8px;height:8px;background:var(--amber);border-radius:50%;pointer-events:none;z-index:9999;transform:translate(-50%,-50%);mix-blend-mode:screen;}
+#cur-ring{position:fixed;width:32px;height:32px;border:1px solid rgba(245,158,11,0.6);border-radius:50%;pointer-events:none;z-index:9998;transform:translate(-50%,-50%);transition:transform .15s,width .2s,height .2s,border-color .2s;}
+body:has(.cta-btn:hover) #cur-ring,body:has(.card:hover) #cur-ring{width:52px;height:52px;border-color:var(--green);}
+
+/* BG CANVAS */
+#bg-canvas{position:fixed;inset:0;width:100%;height:100%;z-index:0;pointer-events:none;}
+
+/* CONTENT */
+#content{position:relative;z-index:10;}
+
+/* ── NAV ── */
+nav{
+  display:flex;align-items:center;justify-content:space-between;
+  padding:1rem 3rem;
+  position:sticky;top:0;z-index:100;
+  background:rgba(6,8,10,0.75);
+  backdrop-filter:blur(20px);
+  border-bottom:1px solid var(--border);
+}
+.logo{
+  font-family:var(--display);font-size:1.5rem;font-weight:800;
+  letter-spacing:.1em;text-transform:uppercase;
+  color:var(--amber);
+}
+.logo span{color:var(--text-muted);font-weight:300;}
+nav ul{list-style:none;display:flex;gap:2rem;}
+nav a{color:var(--text-muted);text-decoration:none;font-family:var(--mono);font-size:.78rem;letter-spacing:.08em;transition:color .2s;}
+nav a:hover{color:var(--amber);}
+.nav-status{display:flex;align-items:center;gap:.5rem;font-family:var(--mono);font-size:.72rem;color:var(--green);}
+.status-dot{width:7px;height:7px;border-radius:50%;background:var(--green);box-shadow:0 0 8px var(--green);animation:blink 1.8s ease infinite;}
+@keyframes blink{0%,100%{opacity:1;}50%{opacity:.3;}}
+.cta-btn{
+  background:var(--amber);color:#000;
+  font-family:var(--mono);font-size:.78rem;font-weight:700;letter-spacing:.1em;
+  padding:.55rem 1.4rem;border-radius:2px;border:none;
+  cursor:none;text-decoration:none;
+  transition:box-shadow .25s,transform .15s;
+  text-transform:uppercase;
+}
+.cta-btn:hover{box-shadow:0 0 28px var(--amber-glow);transform:translateY(-1px);}
+
+/* ── HERO ── */
+.hero{
+  min-height:100vh;display:flex;flex-direction:column;
+  align-items:center;justify-content:center;
+  text-align:center;padding:5rem 2rem 4rem;position:relative;
+}
+.hero-tag{
+  font-family:var(--mono);font-size:.72rem;letter-spacing:.2em;
+  text-transform:uppercase;color:var(--amber);
+  border:1px solid var(--border);padding:.3rem .9rem;
+  border-radius:1px;margin-bottom:2rem;
+  background:var(--amber-dim);
+  animation:fadeUp .7s ease both;
+}
+.hero h1{
+  font-family:var(--display);font-size:clamp(3.2rem,8vw,6.5rem);
+  font-weight:800;line-height:.95;letter-spacing:-.01em;
+  text-transform:uppercase;max-width:900px;
+  animation:fadeUp .8s .1s ease both;
+}
+.hero h1 em{
+  font-style:normal;
+  -webkit-text-stroke:2px var(--amber);
+  color:transparent;
+  display:block;
+}
+.hero-sub{
+  color:var(--text-muted);font-size:1rem;line-height:1.7;
+  max-width:480px;margin:1.8rem auto 2.4rem;font-weight:300;
+  animation:fadeUp .9s .2s ease both;
+}
+.hero-actions{
+  display:flex;gap:1rem;justify-content:center;flex-wrap:wrap;
+  animation:fadeUp .9s .3s ease both;
+  margin-bottom:4rem;
+}
+.btn-outline{
+  font-family:var(--mono);font-size:.78rem;letter-spacing:.08em;
+  color:var(--amber);border:1px solid rgba(245,158,11,0.4);
+  padding:.55rem 1.4rem;border-radius:2px;
+  background:var(--amber-dim);cursor:none;text-decoration:none;
+  transition:background .2s,border-color .2s,box-shadow .2s;text-transform:uppercase;
+}
+.btn-outline:hover{background:rgba(245,158,11,0.2);border-color:var(--amber);box-shadow:0 0 18px var(--amber-glow);}
+
+/* ── DUAL-TRACK DEMO ── */
+.demo-wrap{
+  width:min(920px,95vw);
+  border:1px solid var(--border);
+  border-radius:4px;
+  background:var(--bg2);
+  overflow:hidden;
+  box-shadow:0 0 80px rgba(245,158,11,0.06),0 40px 100px rgba(0,0,0,0.6);
+  animation:fadeUp 1s .45s ease both;
+}
+.demo-bar{
+  display:flex;align-items:center;justify-content:space-between;
+  padding:.75rem 1.2rem;
+  background:var(--bg3);
+  border-bottom:1px solid var(--border);
+  font-family:var(--mono);font-size:.7rem;color:var(--text-muted);letter-spacing:.06em;
+}
+.demo-bar .left{display:flex;align-items:center;gap:.6rem;}
+.demo-bar .bar-dot{width:9px;height:9px;border-radius:50%;}
+.demo-bar .bar-dot.r{background:#555;}
+.demo-bar .bar-dot.a{background:#555;}
+.demo-bar .bar-dot.g{background:var(--green);box-shadow:0 0 6px var(--green);}
+.demo-tracks{display:grid;grid-template-columns:1fr 1fr;}
+.track{padding:1.4rem 1.6rem;min-height:240px;}
+.track:first-child{border-right:1px solid var(--border);}
+.track-label{
+  font-family:var(--mono);font-size:.65rem;letter-spacing:.16em;
+  text-transform:uppercase;margin-bottom:1rem;
+  display:flex;align-items:center;gap:.5rem;
+}
+.track-label.obs{color:var(--amber);}
+.track-label.act{color:var(--green);}
+.track-label::before{
+  content:'';width:6px;height:6px;border-radius:50%;
+  background:currentColor;box-shadow:0 0 6px currentColor;
+}
+#obs-output{
+  font-family:var(--mono);font-size:.75rem;color:var(--text);
+  line-height:1.8;min-height:140px;
+}
+.obs-line{opacity:0;animation:lineIn .3s ease forwards;}
+@keyframes lineIn{from{opacity:0;transform:translateX(-6px);}to{opacity:1;transform:translateX(0);}}
+
+#act-output{min-height:140px;position:relative;}
+.lock-state{
+  display:flex;flex-direction:column;align-items:center;justify-content:center;
+  height:140px;gap:.7rem;
+  font-family:var(--mono);font-size:.72rem;color:var(--text-muted);letter-spacing:.08em;
+  text-align:center;
+}
+.lock-icon{font-size:1.8rem;opacity:.4;animation:lockPulse 2s ease infinite;}
+@keyframes lockPulse{0%,100%{transform:scale(1);}50%{transform:scale(1.08);}}
+.progress-bar{
+  width:80%;height:2px;background:rgba(255,255,255,0.08);
+  border-radius:2px;overflow:hidden;margin-top:.4rem;
+}
+.progress-fill{height:100%;background:linear-gradient(90deg,var(--amber),var(--green));width:0%;transition:width .4s ease;}
+
+.act-card{
+  background:rgba(34,197,94,0.07);
+  border:1px solid rgba(34,197,94,0.25);
+  border-radius:3px;padding:.9rem 1rem;margin-top:.5rem;
+  font-family:var(--mono);font-size:.72rem;line-height:1.8;
+  opacity:0;transform:translateY(8px);
+  transition:opacity .4s,transform .4s;
+}
+.act-card.show{opacity:1;transform:translateY(0);}
+.act-step{display:flex;gap:.7rem;margin-bottom:.4rem;align-items:flex-start;}
+.step-num{color:var(--green);min-width:18px;font-weight:700;}
+.verified-badge{
+  display:inline-flex;align-items:center;gap:.35rem;
+  font-family:var(--mono);font-size:.65rem;letter-spacing:.1em;
+  color:var(--green);border:1px solid rgba(34,197,94,0.3);
+  padding:.2rem .6rem;border-radius:1px;margin-top:.6rem;
+  background:var(--green-dim);
+}
+
+/* ── SECTION COMMON ── */
+.section{padding:7rem 2rem;max-width:1100px;margin:0 auto;}
+.s-label{
+  font-family:var(--mono);font-size:.7rem;letter-spacing:.2em;text-transform:uppercase;
+  color:var(--amber);margin-bottom:1rem;
+  opacity:0;transform:translateY(14px);transition:opacity .5s,transform .5s;
+}
+.s-label.v{opacity:1;transform:none;}
+.s-title{
+  font-family:var(--display);font-size:clamp(2rem,4.5vw,3.2rem);
+  font-weight:800;text-transform:uppercase;letter-spacing:-.01em;
+  line-height:1.05;margin-bottom:1rem;
+  opacity:0;transform:translateY(18px);transition:opacity .6s .08s,transform .6s .08s;
+}
+.s-title.v{opacity:1;transform:none;}
+.s-sub{
+  color:var(--text-muted);font-size:.95rem;line-height:1.7;font-weight:300;
+  max-width:480px;
+  opacity:0;transform:translateY(14px);transition:opacity .6s .16s,transform .6s .16s;
+}
+.s-sub.v{opacity:1;transform:none;}
+
+/* ── HOW IT WORKS ── */
+.steps{display:grid;grid-template-columns:repeat(3,1fr);gap:1.5rem;margin-top:4rem;}
+.step-card{
+  position:relative;
+  border:1px solid var(--border);border-radius:3px;
+  padding:2rem 1.6rem 2.2rem;background:var(--bg2);
+  overflow:hidden;
+  opacity:0;transform:translateY(24px);
+  transition:opacity .5s,transform .5s,border-color .3s,box-shadow .3s;
+}
+.step-card.v{opacity:1;transform:none;}
+.step-card:hover{border-color:rgba(245,158,11,0.4);box-shadow:0 0 30px rgba(245,158,11,0.08);}
+.step-card::before{
+  content:attr(data-n);
+  position:absolute;top:-1rem;right:1.2rem;
+  font-family:var(--display);font-size:6rem;font-weight:800;
+  color:rgba(245,158,11,0.05);line-height:1;pointer-events:none;
+}
+.step-icon{font-size:1.8rem;margin-bottom:1.2rem;}
+.step-card h3{font-family:var(--display);font-size:1.3rem;font-weight:700;text-transform:uppercase;letter-spacing:.04em;margin-bottom:.6rem;}
+.step-card p{color:var(--text-muted);font-size:.87rem;line-height:1.65;font-weight:300;}
+.step-card:nth-child(2){transition-delay:.12s,.12s,0s,0s;}
+.step-card:nth-child(3){transition-delay:.24s,.24s,0s,0s;}
+
+/* ── FEATURES ── */
+.feat-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:1.2rem;margin-top:4rem;}
+.feat-card{
+  border:1px solid var(--border);border-radius:3px;
+  padding:1.6rem 1.4rem;background:var(--bg2);
+  opacity:0;transform:translateY(24px);
+  transition:opacity .5s,transform .5s,border-color .3s,box-shadow .3s;
+  cursor:none;
+}
+.feat-card.v{opacity:1;transform:none;}
+.feat-card:hover{border-color:rgba(245,158,11,0.35);box-shadow:0 0 24px rgba(245,158,11,0.07);}
+.feat-tag{
+  font-family:var(--mono);font-size:.65rem;letter-spacing:.14em;text-transform:uppercase;
+  margin-bottom:1rem;
+}
+.feat-tag.amber{color:var(--amber);}
+.feat-tag.green{color:var(--green);}
+.feat-tag.red  {color:var(--red);}
+.feat-card h3{font-family:var(--display);font-size:1.1rem;font-weight:700;text-transform:uppercase;letter-spacing:.04em;margin-bottom:.5rem;}
+.feat-card p{color:var(--text-muted);font-size:.84rem;line-height:1.65;font-weight:300;}
+.feat-card:nth-child(n+2){transition-delay:.08s;}
+.feat-card:nth-child(n+3){transition-delay:.16s;}
+.feat-card:nth-child(n+4){transition-delay:.1s;}
+.feat-card:nth-child(n+5){transition-delay:.2s;}
+.feat-card:nth-child(n+6){transition-delay:.28s;}
+
+/* ── TRUST SECTION ── */
+.trust-wrap{
+  border:1px solid var(--border);border-radius:3px;
+  background:var(--bg2);padding:3rem;
+  display:grid;grid-template-columns:1fr 1fr;gap:3rem;align-items:center;
+  margin-top:4rem;
+  opacity:0;transform:translateY(20px);transition:opacity .6s,transform .6s;
+}
+.trust-wrap.v{opacity:1;transform:none;}
+.trust-quote{
+  font-family:var(--display);font-size:1.4rem;font-weight:600;
+  line-height:1.35;letter-spacing:.01em;text-transform:uppercase;
+  border-left:3px solid var(--amber);padding-left:1.4rem;
+  color:var(--text);
+}
+.trust-quote span{color:var(--amber);}
+.trust-stats{display:flex;flex-direction:column;gap:1.4rem;}
+.stat{display:flex;flex-direction:column;gap:.3rem;}
+.stat-val{font-family:var(--display);font-size:2.8rem;font-weight:800;color:var(--amber);line-height:1;}
+.stat-label{font-family:var(--mono);font-size:.72rem;letter-spacing:.1em;text-transform:uppercase;color:var(--text-muted);}
+.stat-bar{height:2px;background:rgba(255,255,255,0.07);border-radius:2px;margin-top:.3rem;overflow:hidden;}
+.stat-fill{height:100%;border-radius:2px;background:var(--amber);width:0;transition:width 1.2s ease;}
+.trust-wrap.v .stat-fill{width:var(--w);}
+
+/* ── CTA BANNER ── */
+.cta-banner{
+  max-width:1100px;margin:0 auto;padding:0 2rem 7rem;
+}
+.cta-inner{
+  border:1px solid var(--border);border-radius:3px;
+  background:var(--bg2);padding:4rem;
+  display:flex;align-items:center;justify-content:space-between;gap:2rem;
+  position:relative;overflow:hidden;
+  opacity:0;transform:translateY(20px);transition:opacity .6s,transform .6s;
+}
+.cta-inner.v{opacity:1;transform:none;}
+.cta-inner::before{
+  content:'';position:absolute;inset:0;
+  background:radial-gradient(ellipse 70% 80% at 10% 50%,rgba(245,158,11,0.05),transparent 60%);
+  pointer-events:none;
+}
+.cta-inner h2{
+  font-family:var(--display);font-size:clamp(1.8rem,3.5vw,2.8rem);
+  font-weight:800;text-transform:uppercase;letter-spacing:-.01em;
+  line-height:1.1;max-width:480px;
+}
+.cta-inner h2 span{color:var(--amber);}
+.cta-inner p{color:var(--text-muted);font-size:.88rem;margin-top:.7rem;line-height:1.6;max-width:420px;}
+.cta-actions{display:flex;flex-direction:column;gap:.8rem;align-items:center;min-width:200px;}
+.cta-actions .cta-btn{text-align:center;padding:.85rem 2.2rem;font-size:.85rem;}
+.cta-note{font-family:var(--mono);font-size:.65rem;color:var(--text-muted);letter-spacing:.06em;}
+
+/* ── FOOTER ── */
+footer{
+  border-top:1px solid var(--border);
+  padding:2rem 3rem;display:flex;align-items:center;justify-content:space-between;
+  font-family:var(--mono);font-size:.7rem;color:var(--text-muted);letter-spacing:.06em;
+}
+footer .logo{font-size:1rem;color:var(--amber);}
+
+/* ── ANIMATIONS ── */
+@keyframes fadeUp{from{opacity:0;transform:translateY(24px);}to{opacity:1;transform:translateY(0);}}
+
+@media(max-width:768px){
+  .demo-tracks,.steps,.feat-grid,.trust-wrap{grid-template-columns:1fr;}
+  .track:first-child{border-right:none;border-bottom:1px solid var(--border);}
+  nav ul{display:none;}
+  .cta-inner{flex-direction:column;}
+}
+</style>
+</head>
+<body>
+<div id="cur"></div>
+<div id="cur-ring"></div>
+<canvas id="bg-canvas"></canvas>
+
+<div id="content">
+
+<!-- NAV -->
+<nav>
+  <div class="logo">Listen<span>&</span>Fix</div>
+  <ul>
+    <li><a href="#">How It Works</a></li>
+    <li><a href="#">Features</a></li>
+    <li><a href="#">Pricing</a></li>
+    <li><a href="#">API</a></li>
+  </ul>
+  <div style="display:flex;align-items:center;gap:1.5rem;">
+    <div class="nav-status"><div class="status-dot"></div>SYSTEM ONLINE</div>
+    <a href="#" class="cta-btn">Start Diagnosing</a>
+  </div>
+</nav>
+
+<!-- HERO -->
+<section class="hero">
+  <div class="hero-tag">/// Multimodal AI Diagnostic System v2.4</div>
+  <h1>Shazam<br/><em>for Engines</em></h1>
+  <p class="hero-sub">Upload audio, video, or images of any mechanical failure. Our AI diagnoses the issue, cross-references service manuals, and delivers safety-verified repair instructions — in under 120 seconds.</p>
+  <div class="hero-actions">
+    <a href="#" class="cta-btn">Upload Diagnostic →</a>
+    <a href="#" class="btn-outline">▷ Live Demo</a>
+  </div>
+
+  <!-- DUAL-TRACK DEMO WIDGET -->
+  <div class="demo-wrap">
+    <div class="demo-bar">
+      <div class="left">
+        <div class="bar-dot r"></div><div class="bar-dot a"></div><div class="bar-dot g"></div>
+        <span style="margin-left:.4rem;">LISTEN-FIX DIAGNOSTIC TERMINAL — 2006 Honda Civic 1.8L i-VTEC</span>
+      </div>
+      <span id="demo-timer" style="color:var(--green);">● ANALYZING…</span>
+    </div>
+
+    <div class="demo-tracks">
+      <!-- Track 1: Observation Stream -->
+      <div class="track">
+        <div class="track-label obs">TRACK 1 — OBSERVATION STREAM (SSE)</div>
+        <div id="obs-output"></div>
+      </div>
+
+      <!-- Track 2: Safety-Gated Actions -->
+      <div class="track">
+        <div class="track-label act">TRACK 2 — SAFETY-GATED INSTRUCTIONS</div>
+        <div id="act-output">
+          <div class="lock-state" id="lock-state">
+            <div class="lock-icon">🔒</div>
+            <div>SAFETY VERIFICATION IN PROGRESS</div>
+            <div class="progress-bar"><div class="progress-fill" id="prog-fill"></div></div>
+            <div id="prog-label" style="font-family:var(--mono);font-size:.64rem;color:var(--text-muted);margin-top:.2rem;">Checking RAG index… 0%</div>
+          </div>
+          <div class="act-card" id="act-card" style="display:none;">
+            <div class="act-step"><span class="step-num">01.</span><span>Ensure engine is COLD and ignition is OFF. Disconnect negative battery terminal.</span></div>
+            <div class="act-step"><span class="step-num">02.</span><span>Locate valve cover — top of engine, secured by 8×10mm bolts. Torque spec: <strong style="color:var(--amber);">11 N·m</strong>.</span></div>
+            <div class="act-step"><span class="step-num">03.</span><span>Inspect rocker arm follower at cylinder #2. Shim clearance should be <strong style="color:var(--amber);">0.18–0.22mm</strong>.</span></div>
+            <div class="act-step"><span class="step-num">04.</span><span>Replace defective hydraulic lash adjuster (OEM: Honda 14820-R40-A01). ~$18 at AutoZone.</span></div>
+            <div class="verified-badge">✓ SAFETY CHECKSUM PASSED — iFixit + NHTSA TSB-06-045 VERIFIED</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- HOW IT WORKS -->
+<div class="section" id="how">
+  <p class="s-label">// Protocol</p>
+  <h2 class="s-title">Three Steps.<br/>Zero Guesswork.</h2>
+  <p class="s-sub">From upload to verified repair guide in under 120 seconds. Every step is deterministic, every instruction is cross-referenced.</p>
+
+  <div class="steps">
+    <div class="step-card" data-n="01">
+      <div class="step-icon">🎙️</div>
+      <h3>Capture the Signature</h3>
+      <p>Upload audio, video, or images up to 2GB via the Gemini File API. The system processes native audio waveforms, visual artifacts, and raw mechanical signatures simultaneously.</p>
+    </div>
+    <div class="step-card" data-n="02">
+      <div class="step-icon">🔍</div>
+      <h3>AI Cross-Reference</h3>
+      <p>Gemini 2.5 Flash generates a real-time observation stream while a parallel RAG pipeline cross-references 40,000+ pre-indexed manuals from iFixit, NHTSA, and OEM databases.</p>
+    </div>
+    <div class="step-card" data-n="03">
+      <div class="step-icon">✅</div>
+      <h3>Verified Instructions</h3>
+      <p>Only after a deterministic safety checksum passes does the UI unlock. You get torque specs, part numbers, and step-by-step guides tailored to your skill level and tool set.</p>
+    </div>
+  </div>
+</div>
+
+<!-- FEATURES -->
+<div class="section" style="padding-top:0;">
+  <p class="s-label">// Capabilities</p>
+  <h2 class="s-title">Built for the<br/>Zero-Downtime Economy</h2>
+  <p class="s-sub">Every feature was architected around a single constraint: no instruction that could kill you reaches you without passing a deterministic safety check.</p>
+
+  <div class="feat-grid">
+    <div class="feat-card">
+      <div class="feat-tag amber">// Multimodal Ingestion</div>
+      <h3>Audio + Video + Image</h3>
+      <p>Native audio understanding processes valve-train knocking, bearing resonance, and electrical hum patterns without conversion lossy pre-processing.</p>
+    </div>
+    <div class="feat-card">
+      <div class="feat-tag green">// Safety Architecture</div>
+      <h3>Dual-Track SSE UI</h3>
+      <p>Observations stream immediately via SSE. Actionable instructions are hard-locked in the UI until the full safety JSON payload is parsed and verified.</p>
+    </div>
+    <div class="feat-card">
+      <div class="feat-tag red">// Lethal Flag System</div>
+      <h3>Professional Pivot</h3>
+      <p>If a pressurized gas line, high-voltage capacitor, or "Do Not Repair" flag is detected, the system immediately pivots to a certified professional referral.</p>
+    </div>
+    <div class="feat-card">
+      <div class="feat-tag amber">// Knowledge Graph</div>
+      <h3>40K+ Pre-Indexed Manuals</h3>
+      <p>A proprietary Trust Moat of iFixit guides, NHTSA TSBs, and OEM service manuals — curated, version-locked, and verified against catastrophic failure libraries.</p>
+    </div>
+    <div class="feat-card">
+      <div class="feat-tag green">// Personalization</div>
+      <h3>Skill-Adaptive Guides</h3>
+      <p>Generate repair instructions calibrated to Beginner through Professional skill levels, available tools, and budget — right down to alternative part sourcing.</p>
+    </div>
+    <div class="feat-card">
+      <div class="feat-tag amber">// Parts & Sourcing</div>
+      <h3>Real-Time Parts Intel</h3>
+      <p>Cross-reference OEM part numbers against AutoZone, O'Reilly, and RockAuto in real time. One-click purchase integration with local availability mapping.</p>
+    </div>
+  </div>
+</div>
+
+<!-- TRUST -->
+<div class="section" style="padding-top:0;">
+  <p class="s-label">// Trust Architecture</p>
+  <h2 class="s-title">The Immutable<br/>Safety Ledger</h2>
+  <div class="trust-wrap">
+    <div class="trust-quote">
+      "We are not building a tool — we are building an <span>Immutable Safety Ledger.</span> In five years, competitors will have speed. We will have the only platform trusted by insurance providers."
+      <div style="font-family:var(--mono);font-size:.65rem;color:var(--text-muted);margin-top:1rem;letter-spacing:.08em;font-weight:400;text-transform:uppercase;">— Board Deliberation Insight</div>
+    </div>
+    <div class="trust-stats">
+      <div class="stat">
+        <div class="stat-val">120s</div>
+        <div class="stat-label">Hard Latency Ceiling</div>
+        <div class="stat-bar"><div class="stat-fill" style="--w:92%;background:var(--amber);"></div></div>
+      </div>
+      <div class="stat">
+        <div class="stat-val">40K+</div>
+        <div class="stat-label">Pre-Indexed Manuals</div>
+        <div class="stat-bar"><div class="stat-fill" style="--w:78%;background:var(--green);"></div></div>
+      </div>
+      <div class="stat">
+        <div class="stat-val">0</div>
+        <div class="stat-label">Unverified Instructions Served</div>
+        <div class="stat-bar"><div class="stat-fill" style="--w:100%;background:var(--green);"></div></div>
+      </div>
+      <div class="stat">
+        <div class="stat-val">2GB</div>
+        <div class="stat-label">Max File Ingestion (File API)</div>
+        <div class="stat-bar"><div class="stat-fill" style="--w:65%;background:var(--amber);"></div></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- CTA -->
+<div class="cta-banner">
+  <div class="cta-inner">
+    <div>
+      <h2>Start Your First<br/><span>Diagnosis Free</span></h2>
+      <p>Upload any audio, video, or image of a mechanical issue and get a full diagnostic report — no credit card required. First 3 diagnoses on us.</p>
+    </div>
+    <div class="cta-actions">
+      <a href="#" class="cta-btn">Upload Diagnostic →</a>
+      <span class="cta-note">↳ SUPPORTS MP3 / MP4 / JPG / PDF — UP TO 2GB</span>
+    </div>
+  </div>
+</div>
+
+<!-- FOOTER -->
+<footer>
+  <div class="logo">L&F</div>
+  <span>© 2026 Listen & Fix, Inc. — AI Mechanical Diagnostics Platform</span>
+  <span>SYSTEM STATUS: <span style="color:var(--green);">OPERATIONAL</span></span>
+</footer>
+</div>
+
+<!-- THREE.JS -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script>
+// ═══════════════════════════════════════════
+//  CURSOR
+// ═══════════════════════════════════════════
+const cur = document.getElementById('cur');
+const curRing = document.getElementById('cur-ring');
+let mx=0,my=0,rx=0,ry=0;
+document.addEventListener('mousemove',e=>{
+  mx=e.clientX; my=e.clientY;
+  cur.style.left=mx+'px'; cur.style.top=my+'px';
+});
+(function rl(){rx+=(mx-rx)*.1;ry+=(my-ry)*.1;
+  curRing.style.left=rx+'px';curRing.style.top=ry+'px';
+  requestAnimationFrame(rl);})();
+
+// ═══════════════════════════════════════════
+//  THREE.JS — RADAR / OSCILLOSCOPE BG
+// ═══════════════════════════════════════════
+const bgC = document.getElementById('bg-canvas');
+const bgR = new THREE.WebGLRenderer({canvas:bgC,antialias:true,alpha:false});
+bgR.setPixelRatio(Math.min(devicePixelRatio,2));
+bgR.setSize(innerWidth,innerHeight);
+bgR.setClearColor(0x06080A,1);
+
+const scene = new THREE.Scene();
+const cam   = new THREE.OrthographicCamera(-1,1,1,-1,0,1);
+
+// ─── Full-screen quad shader (radar + oscilloscope) ───
+const vert = `
+  varying vec2 vUv;
+  void main(){vUv=uv;gl_Position=projectionMatrix*modelViewMatrix*vec4(position,1.);}
+`;
+
+const frag = `
+  uniform float uT;
+  uniform float uAR;
+  uniform vec2  uMouse;
+  varying vec2  vUv;
+
+  float hash21(vec2 p){return fract(sin(dot(p,vec2(127.1,311.7)))*43758.5453);}
+
+  void main(){
+    vec2 uv = vUv;
+    uv.x *= uAR;
+    vec2 center = vec2(uAR*.5, .5);
+
+    // ─ Background grid ─
+    float gx = abs(sin(uv.x * 28.0)) * 0.03;
+    float gy = abs(sin(uv.y * 28.0)) * 0.03;
+    float grid = max(gx,gy);
+    vec3 col = vec3(0.02 + grid * 0.3, 0.025 + grid * 0.22, 0.012 + grid * 0.06);
+
+    // ─ Radar ring pulses (center-left) ─
+    vec2 rc = vec2(uAR * .18, .5);
+    float dist = length(uv - rc);
+    float ring1 = smoothstep(.002,0.,abs(dist - mod(uT*.12, .55) - .05)) * .7;
+    float ring2 = smoothstep(.002,0.,abs(dist - mod(uT*.12+.2, .55) - .05)) * .4;
+    float ring3 = smoothstep(.002,0.,abs(dist - mod(uT*.12+.38, .55) - .05)) * .25;
+    float rings = ring1+ring2+ring3;
+    col += vec3(rings*.7, rings*.35, rings*.0);
+
+    // ─ Radar sweep ─
+    vec2 dr = uv - rc;
+    float angle = atan(dr.y, dr.x);
+    float sweep = mod(uT * .9, 6.2832);
+    float da = mod(angle - sweep + 6.2832, 6.2832);
+    float sweepLine = smoothstep(.06,0.,da) * smoothstep(.6,.0,dist) * 0.7;
+    float trail = smoothstep(1.8,0.,da) * .2 * smoothstep(.55,.0,dist);
+    col += vec3(sweepLine*.8+trail*.3, (sweepLine*.4+trail*.1), 0.);
+
+    // ─ Oscilloscope waveform (horizontal, center) ─
+    float wx = (uv.x / uAR);
+    float wave  = sin(wx * 22.0 + uT * 3.5) * 0.04
+                + sin(wx * 9.0  - uT * 2.1) * 0.025
+                + sin(wx * 40.0 + uT * 5.0) * 0.012
+                + (hash21(vec2(wx*80.,floor(uT*8.))) - .5) * 0.008;
+    float wy    = .5 + wave;
+    float wDist = abs(uv.y - wy);
+    float wLine = smoothstep(.007, 0., wDist);
+    float wGlow = smoothstep(.06,  0., wDist) * .3;
+    col += vec3(0., (wLine*.85+wGlow)*.7, (wLine*.7+wGlow)*.2);
+
+    // ─ Second waveform (upper) ─
+    float wave2 = sin(wx * 14.0 - uT * 2.8) * 0.03
+                + sin(wx * 31.0 + uT * 4.2) * 0.015;
+    float wy2   = .3 + wave2;
+    float wDist2 = abs(uv.y - wy2);
+    float wLine2 = smoothstep(.005,0.,wDist2) * .5;
+    col += vec3(wLine2*.5, wLine2*.2, 0.);
+
+    // ─ Vertical crosshair faint ─
+    float vline = smoothstep(.0015,0.,abs(uv.x - uMouse.x*uAR)) * .15;
+    float hline = smoothstep(.0015,0.,abs(uv.y - (1.-uMouse.y))) * .15;
+    col += vec3(0., vline+hline, vline+hline) * .5;
+
+    // ─ Vignette ─
+    vec2 vig = vUv * 2. - 1.;
+    float v = 1. - dot(vig,vig) * .38;
+    col *= v;
+
+    gl_FragColor = vec4(col, 1.);
+  }
+`;
+
+const quad = new THREE.Mesh(
+  new THREE.PlaneGeometry(2,2),
+  new THREE.ShaderMaterial({
+    uniforms:{
+      uT:     {value:0},
+      uAR:    {value:innerWidth/innerHeight},
+      uMouse: {value:new THREE.Vector2(.5,.5)},
+    },
+    vertexShader:vert,fragmentShader:frag,
+  })
+);
+scene.add(quad);
+
+document.addEventListener('mousemove',e=>{
+  quad.material.uniforms.uMouse.value.set(e.clientX/innerWidth, e.clientY/innerHeight);
+});
+
+let bgT=0;
+(function loop(){
+  requestAnimationFrame(loop);
+  bgT += .016;
+  quad.material.uniforms.uT.value = bgT;
+  bgR.render(scene,cam);
+})();
+
+window.addEventListener('resize',()=>{
+  bgR.setSize(innerWidth,innerHeight);
+  quad.material.uniforms.uAR.value = innerWidth/innerHeight;
+});
+
+// ═══════════════════════════════════════════
+//  DUAL-TRACK DEMO ANIMATION
+// ═══════════════════════════════════════════
+const obsLines = [
+  "[ 00.0s ] Audio signature acquired — 44.1kHz, 8.3s sample.",
+  "[ 02.1s ] Detected: rhythmic metallic tapping @ ~900 RPM interval.",
+  "[ 04.3s ] Pattern consistent with valve-train or HLA (hydraulic lash adj.) fault.",
+  "[ 06.8s ] Frequency analysis: 14.8Hz fundamental, harmonic distortion +22dB.",
+  "[ 09.2s ] Cross-referencing iFixit + NHTSA bulletin library…",
+  "[ 11.7s ] NHTSA TSB-06-045 match: Honda 1.8L i-VTEC HLA degradation.",
+  "[ 14.0s ] Risk classification: MEDIUM — no high-voltage / pressurized lines.",
+  "[ 16.4s ] Confidence score: 0.91 — safety checksum initiating…",
+];
+
+const obsEl  = document.getElementById('obs-output');
+const progFill = document.getElementById('prog-fill');
+const progLabel= document.getElementById('prog-label');
+const lockState= document.getElementById('lock-state');
+const actCard  = document.getElementById('act-card');
+let lineIdx = 0;
+
+function addLine(){
+  if(lineIdx >= obsLines.length) return;
+  const div = document.createElement('div');
+  div.classList.add('obs-line');
+  div.innerHTML = `<span style="color:var(--amber);margin-right:.5rem;">›</span>${obsLines[lineIdx]}`;
+  obsEl.appendChild(div);
+  lineIdx++;
+  // Scroll to bottom
+  obsEl.scrollTop = obsEl.scrollHeight;
+}
+
+// Progress bar animation
+let prog = 0;
+const progSteps = [
+  [20,'Matching failure signature…'],
+  [45,'Querying RAG index (iFixit)…'],
+  [62,'Cross-ref NHTSA TSB library…'],
+  [78,'Validating torque specs…'],
+  [91,'Running safety checksum…'],
+  [100,'VERIFICATION COMPLETE ✓'],
+];
+let pIdx = 0;
+
+function runDemo(){
+  addLine();
+  // Progress
+  if(pIdx < progSteps.length){
+    const [w,label] = progSteps[pIdx];
+    progFill.style.width = w + '%';
+    progLabel.textContent = label + ' ' + w + '%';
+    pIdx++;
+  }
+  if(lineIdx < obsLines.length){
+    setTimeout(runDemo, 1800 + Math.random()*600);
+  } else {
+    // Unlock actions
+    setTimeout(()=>{
+      lockState.style.display='none';
+      actCard.style.display='block';
+      setTimeout(()=>actCard.classList.add('show'),50);
+      document.getElementById('demo-timer').textContent = '✓ COMPLETE — 18.3s';
+      document.getElementById('demo-timer').style.color = 'var(--green)';
+    }, 1200);
+  }
+}
+
+// Start demo when hero is visible
+setTimeout(runDemo, 1200);
+
+// ═══════════════════════════════════════════
+//  SCROLL REVEAL
+// ═══════════════════════════════════════════
+const revEls = document.querySelectorAll(
+  '.s-label,.s-title,.s-sub,.step-card,.feat-card,.trust-wrap,.cta-inner'
+);
+const io = new IntersectionObserver(entries=>{
+  entries.forEach(e=>{if(e.isIntersecting) e.target.classList.add('v');});
+},{threshold:.1});
+revEls.forEach(el=>io.observe(el));
+</script>
+</body>
+</html>
