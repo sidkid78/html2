@@ -1,0 +1,139 @@
+<head>
+  <!-- ═══════════════════════════════════════════
+       CORE META
+  ═══════════════════════════════════════════ -->
+  <meta charset="UTF-8"/>
+  <meta http-equiv="X-UA-Compatible" content="IE=edge"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+
+  <!-- Primary SEO -->
+  <title>Listen & Fix — AI Mechanical Diagnostics | Shazam for Engines</title>
+  <meta name="description" content="Upload audio, video, or images of any mechanical failure. AI diagnoses the issue, cross-references 40,000+ service manuals, and delivers safety-verified repair instructions in under 120 seconds."/>
+  <meta name="keywords" content="AI mechanic, engine diagnostic tool, car sound diagnosis, mechanical fault detection, AI repair guide, audio diagnostic tool, vehicle troubleshooting AI, engine knocking diagnosis, appliance repair AI, Gemini AI diagnostics"/>
+  <meta name="author" content="Listen & Fix, Inc."/>
+  <meta name="robots" content="index, follow, max-snippet:-1, max-image-preview:large, max-video-preview:-1"/>
+  <link rel="canonical" href="https://listenandfix.com/"/>
+
+  <!-- ═══════════════════════════════════════════
+       OPEN GRAPH (Facebook, LinkedIn, Slack, etc.)
+  ═══════════════════════════════════════════ -->
+  <meta property="og:type"        content="website"/>
+  <meta property="og:site_name"   content="Listen & Fix"/>
+  <meta property="og:url"         content="https://listenandfix.com/"/>
+  <meta property="og:title"       content="Listen & Fix — Shazam for Engines & Appliances"/>
+  <meta property="og:description" content="AI-powered mechanical diagnostics. Upload any audio, video, or image — get a safety-verified repair guide in under 120 seconds."/>
+  <meta property="og:image"       content="https://listenandfix.com/og-image.png"/>
+  <meta property="og:image:width" content="1200"/>
+  <meta property="og:image:height"content="630"/>
+  <meta property="og:image:alt"   content="Listen & Fix diagnostic terminal interface"/>
+  <meta property="og:locale"      content="en_US"/>
+
+  <!-- ═══════════════════════════════════════════
+       TWITTER / X CARD
+  ═══════════════════════════════════════════ -->
+  <meta name="twitter:card"        content="summary_large_image"/>
+  <meta name="twitter:site"        content="@listenandfix"/>
+  <meta name="twitter:creator"     content="@listenandfix"/>
+  <meta name="twitter:title"       content="Listen & Fix — AI Mechanical Diagnostics"/>
+  <meta name="twitter:description" content="Upload engine sounds, appliance noises, or photos — AI diagnoses the fault and delivers verified repair steps in &lt;120s."/>
+  <meta name="twitter:image"       content="https://listenandfix.com/twitter-card.png"/>
+  <meta name="twitter:image:alt"   content="Listen & Fix oscilloscope diagnostic UI"/>
+
+  <!-- ═══════════════════════════════════════════
+       TECHNICAL / PWA
+  ═══════════════════════════════════════════ -->
+  <meta name="theme-color"          content="#F59E0B"/>
+  <meta name="color-scheme"         content="dark"/>
+  <meta name="application-name"     content="Listen & Fix"/>
+  <meta name="generator"            content="Listen & Fix Platform v2.4"/>
+  <link rel="manifest"              href="/manifest.json"/>
+
+  <!-- Icons -->
+  <link rel="icon"             type="image/png" sizes="32x32" href="/favicon-32x32.png"/>
+  <link rel="icon"             type="image/png" sizes="16x16" href="/favicon-16x16.png"/>
+  <link rel="apple-touch-icon" sizes="180x180"               href="/apple-touch-icon.png"/>
+  <link rel="mask-icon"        href="/safari-pinned-tab.svg" color="#F59E0B"/>
+  <meta name="msapplication-TileColor" content="#06080A"/>
+  <meta name="msapplication-config"    content="/browserconfig.xml"/>
+
+  <!-- ═══════════════════════════════════════════
+       STRUCTURED DATA — JSON-LD
+  ═══════════════════════════════════════════ -->
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@graph": [
+      {
+        "@type": "WebApplication",
+        "@id": "https://listenandfix.com/#app",
+        "name": "Listen & Fix",
+        "url": "https://listenandfix.com",
+        "description": "AI-powered multimodal mechanical diagnostic system. Analyzes audio, video, and images of mechanical failures and generates safety-verified repair guides.",
+        "applicationCategory": "UtilitiesApplication",
+        "operatingSystem": "Web",
+        "offers": {
+          "@type": "Offer",
+          "price": "0",
+          "priceCurrency": "USD",
+          "description": "First 3 diagnoses free"
+        },
+        "featureList": [
+          "Multimodal audio and video analysis",
+          "AI fault diagnosis",
+          "Safety-verified repair guides",
+          "Real-time parts sourcing",
+          "Skill-adaptive instructions"
+        ]
+      },
+      {
+        "@type": "Organization",
+        "@id": "https://listenandfix.com/#org",
+        "name": "Listen & Fix, Inc.",
+        "url": "https://listenandfix.com",
+        "logo": "https://listenandfix.com/logo.png",
+        "sameAs": [
+          "https://twitter.com/listenandfix",
+          "https://linkedin.com/company/listenandfix"
+        ]
+      },
+      {
+        "@type": "FAQPage",
+        "mainEntity": [
+          {
+            "@type": "Question",
+            "name": "What file types does Listen & Fix support?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "Listen & Fix supports audio (MP3, WAV, OGG), video (MP4, MOV), and images (JPG, PNG, WEBP) up to 2GB via the Gemini File API."
+            }
+          },
+          {
+            "@type": "Question",
+            "name": "How accurate is the AI diagnosis?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "Each diagnosis includes a confidence score (0–1). All repair instructions are cross-referenced against 40,000+ pre-indexed manuals from iFixit, NHTSA, and OEM databases before being unlocked in the UI."
+            }
+          },
+          {
+            "@type": "Question",
+            "name": "Is it safe to follow the repair instructions?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "All actionable instructions are locked behind a deterministic safety checksum. High-risk repairs (pressurized lines, high-voltage components) automatically trigger a professional referral instead of DIY steps."
+            }
+          }
+        ]
+      }
+    ]
+  }
+  </script>
+
+  <!-- ═══════════════════════════════════════════
+       PERFORMANCE HINTS
+  ═══════════════════════════════════════════ -->
+  <link rel="preconnect"    href="https://fonts.googleapis.com"/>
+  <link rel="preconnect"    href="https://fonts.gstatic.com" crossorigin/>
+  <link rel="dns-prefetch"  href="https://generativelanguage.googleapis.com"/>
+  <link rel="preconnect"    href="https://generativelanguage.googleapis.com"/>
+</head>

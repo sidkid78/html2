@@ -1,0 +1,368 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>The FairGig Manifesto</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Anton&family=Space+Grotesk:wght@300;400;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --accent: #FF1E1E;
+    --bg: #050505;
+    --text: #F4F4F5;
+  }
+  body {
+    background-color: var(--bg);
+    color: var(--text);
+    font-family: 'Space Grotesk', sans-serif;
+    cursor: none;
+    overflow-x: hidden;
+    margin: 0;
+    -webkit-font-smoothing: antialiased;
+  }
+  h1, h2, h3, .font-anton {
+    font-family: 'Anton', sans-serif;
+    letter-spacing: 0.02em;
+    text-transform: uppercase;
+  }
+  
+  /* Typography Scale */
+  .hero-title { font-size: clamp(3rem, 8vw, 7rem); line-height: 1; }
+  .section-title { font-size: clamp(2.5rem, 5vw, 4.5rem); line-height: 1.05; }
+  .body-text { font-size: clamp(1.1rem, 1.5vw, 1.5rem); line-height: 1.6; max-width: 60ch; }
+  .meta-label { font-size: 0.85rem; letter-spacing: 0.3em; text-transform: uppercase; color: var(--accent); }
+
+  /* Custom Cursor */
+  #cursor {
+    position: fixed;
+    top: 0; left: 0;
+    width: 12px; height: 12px;
+    background-color: var(--accent);
+    border-radius: 50%;
+    pointer-events: none;
+    z-index: 100;
+    transform: translate(-50%, -50%);
+    transition: width 0.2s, height 0.2s, background-color 0.2s;
+    mix-blend-mode: screen;
+    box-shadow: 0 0 15px var(--accent);
+  }
+  #cursor.hover {
+    width: 40px; height: 40px;
+    background-color: transparent;
+    border: 2px solid var(--accent);
+    box-shadow: none;
+  }
+
+  /* Background Layers */
+  .bg-layer {
+    position: fixed;
+    inset: -5%; /* slightly larger for parallax */
+    z-index: -1;
+    opacity: 0;
+    background-size: cover;
+    background-position: center;
+    transition: opacity 1.2s cubic-bezier(0.4, 0, 0.2, 1), transform 10s ease-out;
+  }
+  .bg-layer.active {
+    opacity: 1;
+    transform: scale(1.05);
+  }
+  .bg-layer::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(90deg, rgba(5,5,5,0.95) 0%, rgba(5,5,5,0.85) 40%, rgba(5,5,5,0.2) 100%);
+  }
+
+  /* Scroll Progress */
+  .progress-container {
+    position: fixed;
+    left: 2rem;
+    top: 25%;
+    bottom: 25%;
+    width: 1px;
+    background: rgba(255,255,255,0.1);
+    z-index: 40;
+  }
+  .progress-bar {
+    width: 3px;
+    background: var(--accent);
+    height: 100%;
+    transform-origin: top;
+    transform: scaleY(0);
+    margin-left: -1px;
+    box-shadow: 0 0 10px var(--accent);
+  }
+
+  /* Entrance Animations */
+  .reveal {
+    opacity: 0;
+    transform: translateY(40px) skewY(1deg);
+    transition: all 1s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+  .reveal.active {
+    opacity: 1;
+    transform: translateY(0) skewY(0);
+  }
+  .delay-1 { transition-delay: 0.1s; }
+  .delay-2 { transition-delay: 0.2s; }
+  .delay-3 { transition-delay: 0.3s; }
+  .delay-4 { transition-delay: 0.4s; }
+
+  /* SVG Filters applied via CSS */
+  .chromatic-text { filter: url(#chromatic); }
+  .noise-overlay {
+    position: fixed;
+    inset: 0;
+    z-index: 50;
+    pointer-events: none;
+    mix-blend-mode: overlay;
+    filter: url(#animatedNoise);
+    opacity: 0.3;
+  }
+
+  /* Section Spacing */
+  section {
+    min-height: 130vh;
+    padding: 10vh 5vw;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+  }
+  @media (max-width: 768px) {
+    .bg-layer::after { background: linear-gradient(0deg, rgba(5,5,5,0.95) 0%, rgba(5,5,5,0.7) 100%); }
+    .progress-container { display: none; }
+  }
+</style>
+</head>
+<body>
+
+<!-- SVG Filters -->
+<svg class="hidden" style="display:none;">
+  <defs>
+    <!-- Animated Grain -->
+    <filter id="animatedNoise">
+      <feTurbulence type="fractalNoise" baseFrequency="0.75" numOctaves="2" result="noise">
+        <animate attributeName="baseFrequency" values="0.75;0.8;0.75" dur="0.15s" repeatCount="indefinite" />
+      </feTurbulence>
+      <feColorMatrix type="saturate" values="0" />
+      <feComponentTransfer><feFuncA type="linear" slope="1.5"/></feComponentTransfer>
+    </filter>
+    <!-- Chromatic Aberration -->
+    <filter id="chromatic">
+      <feColorMatrix type="matrix" result="red" values="1 0 0 0 0  0 0 0 0 0  0 0 0 0 0  0 0 0 1 0"/>
+      <feColorMatrix type="matrix" in="SourceGraphic" result="blue" values="0 0 0 0 0  0 1 0 0 0  0 0 1 0 0  0 0 0 1 0"/>
+      <feOffset in="red" dx="3" dy="0" result="redShift">
+         <animate attributeName="dx" values="3;5;2;4;3" dur="4s" repeatCount="indefinite"/>
+      </feOffset>
+      <feOffset in="blue" dx="-3" dy="0" result="blueShift">
+         <animate attributeName="dx" values="-3;-5;-2;-4;-3" dur="4s" repeatCount="indefinite"/>
+      </feOffset>
+      <feBlend mode="screen" in="redShift" in2="blueShift" result="blend"/>
+      <feBlend mode="screen" in="blend" in2="SourceGraphic"/>
+    </filter>
+  </defs>
+</svg>
+
+<div class="noise-overlay"></div>
+<div id="cursor"></div>
+
+<!-- Progress Bar -->
+<div class="progress-container hidden md:block">
+  <div id="progress-bar" class="progress-bar"></div>
+</div>
+
+<!-- Fixed Background Layers -->
+<div id="bg-0" class="bg-layer active" style="background-image: url('./images/scene-11(9).jpg');"></div>
+<div id="bg-1" class="bg-layer" style="background-image: url('./images/scene-12(9).jpg');"></div>
+<div id="bg-2" class="bg-layer" style="background-image: url('./images/scene-13(9).jpg');"></div>
+<div id="bg-3" class="bg-layer" style="background-image: url('./images/scene-14(9).jpg');"></div>
+<div id="bg-4" class="bg-layer" style="background-image: url('./images/scene-15(9).jpg');"></div>
+
+<!-- Main Content -->
+<main class="relative z-10 w-full max-w-7xl mx-auto md:pl-24">
+
+  <!-- Section 1 -->
+  <section id="sec-0">
+    <div class="max-w-3xl">
+      <p class="meta-label mb-6 reveal">01 // The Reality</p>
+      <h1 class="hero-title mb-10 reveal delay-1 chromatic-text">
+        The FairGig Manifesto:<br>
+        <span class="text-[#FF1E1E]">The End of the "Pay-to-Play" Era</span>
+      </h1>
+      <div class="space-y-6 text-zinc-300">
+        <p class="body-text reveal delay-2">Every gigging musician knows the feeling.</p>
+        <p class="body-text reveal delay-3">It’s 2:00 AM. Your ears are ringing, your gear is packed in the van, and you just played your heart out to a packed room. You walk up to the venue owner or promoter to settle up, expecting the payoff for weeks of rehearsal and promotion.</p>
+        <p class="body-text reveal delay-4 font-bold text-white">Instead, you get a story.</p>
+        <p class="body-text reveal delay-4">You get hit with "unforeseen production costs." You get charged a "sound guy fee." You’re handed a sweaty envelope with a fraction of what you were promised, and told to be grateful for the "exposure."</p>
+        <p class="body-text reveal delay-4">For decades, the live music industry has operated on a rigged system. It thrives on dark alleys, handshake deals, and blind hope. Venues shift all the financial risk onto the artists, relying on the fact that musicians love their craft too much to walk away.</p>
+        <div class="mt-12 p-6 border-l-4 border-[#FF1E1E] bg-black/40 reveal">
+          <p class="text-2xl md:text-3xl font-anton tracking-wide text-white">
+            They call it "paying your dues." <br><span class="text-[#FF1E1E]">We call it theft.</span>
+          </p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Section 2 -->
+  <section id="sec-1">
+    <div class="max-w-3xl">
+      <p class="meta-label mb-6 reveal">02 // The Weapon</p>
+      <h2 class="section-title mb-10 reveal delay-1 text-white">
+        Enter FairGig:<br>
+        <span class="text-zinc-500">The Lie Detector for Live Music.</span>
+      </h2>
+      <div class="space-y-6 text-zinc-300">
+        <p class="body-text reveal delay-2">FairGig wasn’t built by tech bros in Silicon Valley looking for a market to disrupt. It was built by Cliff Franco, a musician who spent 15 years in the trenches—fronting bands, hauling gear, playing tribute shows, and getting burned by the exact same opaque, exploitative deals you have.</p>
+        <p class="body-text reveal delay-3">After thousands of hours on stage, Cliff realized the industry didn’t need another "venue discovery app." <strong class="text-white font-bold">It needed a weapon.</strong></p>
+        <p class="body-text reveal delay-4 text-xl md:text-2xl text-white font-light">
+          FairGig is that weapon. We are the financial truth layer for the live music economy.
+        </p>
+      </div>
+    </div>
+  </section>
+
+  <!-- Section 3 -->
+  <section id="sec-2">
+    <div class="max-w-3xl">
+      <p class="meta-label mb-6 reveal">03 // The Simulator</p>
+      <h2 class="section-title mb-10 reveal delay-1 chromatic-text">
+        Before You Guess.<br>
+        <span class="text-[#FF1E1E]">Now You Know.</span>
+      </h2>
+      <div class="space-y-6 text-zinc-300">
+        <p class="body-text reveal delay-2">Our core innovation is the <strong class="text-white">Show Economics Simulator</strong>. We are replacing shady verbal agreements with cold, hard math. Before you ever load your amp into a venue, FairGig allows you to instantly project exactly what you will make.</p>
+        
+        <ul class="space-y-6 my-10 border-l-2 border-zinc-800 pl-6">
+          <li class="reveal delay-3">
+            <span class="block font-anton text-[#FF1E1E] text-2xl tracking-wide">EMPTY ROOM?</span>
+            <span class="body-text block mt-1">Know your exact break-even point.</span>
+          </li>
+          <li class="reveal delay-4">
+            <span class="block font-anton text-[#FF1E1E] text-2xl tracking-wide">LIKELY CROWD?</span>
+            <span class="body-text block mt-1">Lock in your guaranteed split.</span>
+          </li>
+          <li class="reveal delay-4">
+            <span class="block font-anton text-[#FF1E1E] text-2xl tracking-wide">SOLD OUT?</span>
+            <span class="body-text block mt-1">Watch the math prove exactly what you are owed, down to the dollar.</span>
+          </li>
+        </ul>
+
+        <p class="body-text reveal delay-4">By calculating ticket prices, production fees, and deal structures <em>before</em> the show, we give artists the ultimate leverage: <strong class="text-white uppercase tracking-wider">Proof.</strong></p>
+        <p class="body-text reveal delay-4">You are no longer asking for a fair cut; you are demanding it based on mathematical reality. When the show is over, our automated Settlement System creates a permanent digital receipt. No more disputes. No more missing cash.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- Section 4 -->
+  <section id="sec-3">
+    <div class="max-w-3xl">
+      <p class="meta-label mb-6 reveal">04 // The Shift</p>
+      <h2 class="section-title mb-10 reveal delay-1">
+        The Truth Tax:<br>
+        <span class="text-[#FF1E1E] text-4xl md:text-5xl">Forcing the Industry into the Light</span>
+      </h2>
+      <div class="space-y-6 text-zinc-300">
+        <p class="body-text reveal delay-2">We are arming artists with FairGig for free, and it is going to fundamentally shift the power dynamic of local music.</p>
+        <p class="body-text reveal delay-3">We are creating a world where transparency is the baseline. When a venue or promoter refuses to use FairGig to outline their deals, it sends a massive, glaring red flag to every artist in town.</p>
+        <p class="body-text reveal delay-4">We call it the "Truth Tax."</p>
+        <p class="body-text reveal delay-4">Venues have a choice: adopt transparent, fair math, or lose access to the best talent in the city because their rating on our Reputation Layer exposes them as bad actors.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- Section 5 -->
+  <section id="sec-4">
+    <div class="max-w-3xl">
+      <p class="meta-label mb-6 reveal">05 // The Future</p>
+      <div class="space-y-8 text-zinc-300">
+        <p class="body-text text-xl md:text-2xl reveal delay-1 font-light">
+          Good promoters—the ones who already treat artists right—will thrive on FairGig. <br>
+          <span class="text-[#FF1E1E] font-bold">The exploiters will be starved out.</span>
+        </p>
+        
+        <div class="pt-12 reveal delay-2">
+          <p class="font-anton text-4xl md:text-6xl uppercase leading-tight text-white">
+            The era of blind hope is over.<br>
+            The era of the informed, empowered artist is here.
+          </p>
+        </div>
+
+        <div class="pt-16 pb-32 reveal delay-3">
+          <h3 class="font-anton text-7xl md:text-9xl text-[#FF1E1E] chromatic-text">
+            LET'S PLAY.
+          </h3>
+        </div>
+      </div>
+    </div>
+  </section>
+
+</main>
+
+<script>
+  // Custom Cursor Logic
+  const cursor = document.getElementById('cursor');
+  document.addEventListener('mousemove', (e) => {
+    cursor.style.transform = `translate(${e.clientX}px, ${e.clientY}px)`;
+  });
+
+  // Add hover effect for interactive text/areas (conceptual)
+  document.querySelectorAll('h1, h2, h3, strong').forEach(el => {
+    el.addEventListener('mouseenter', () => cursor.classList.add('hover'));
+    el.addEventListener('mouseleave', () => cursor.classList.remove('hover'));
+  });
+
+  // Scroll Progress Bar
+  const progressBar = document.getElementById('progress-bar');
+  window.addEventListener('scroll', () => {
+    const scrollPx = document.documentElement.scrollTop;
+    const winHeightPx = document.documentElement.scrollHeight - document.documentElement.clientHeight;
+    const scrolled = scrollPx / winHeightPx;
+    progressBar.style.transform = `scaleY(${scrolled})`;
+  });
+
+  // Intersection Observer for Reveals & Background Swapping
+  const sections = document.querySelectorAll('section');
+  const bgLayers = document.querySelectorAll('.bg-layer');
+
+  const observerOptions = {
+    root: null,
+    rootMargin: '-30% 0px -30% 0px',
+    threshold: 0
+  };
+
+  const sectionObserver = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        // Trigger text reveals
+        const reveals = entry.target.querySelectorAll('.reveal');
+        reveals.forEach(r => r.classList.add('active'));
+
+        // Crossfade Backgrounds
+        const index = Array.from(sections).indexOf(entry.target);
+        bgLayers.forEach((bg, i) => {
+          if (i === index) {
+            bg.classList.add('active');
+          } else {
+            bg.classList.remove('active');
+          }
+        });
+      }
+    });
+  }, observerOptions);
+
+  sections.forEach(sec => sectionObserver.observe(sec));
+
+  // Trigger initial reveals if already in viewport on load
+  setTimeout(() => {
+    const reveals = sections[0].querySelectorAll('.reveal');
+    reveals.forEach(r => r.classList.add('active'));
+  }, 100);
+
+</script>
+</body>
+</html>
