@@ -5,10 +5,17 @@ import Link from 'next/link';
 
 const articles = [
   {
-    title: "FairGig: The Truth Tax",
-    description: "The core manifesto on destroying the opaque and exploitative practices of the live music industry using transparent math and reputation profiles.",
-    href: "/fairgig.html",
+    title: "The FairGig Manifesto (v2.0)",
+    description: "The End of the 'Pay-to-Play' Era. Cliff Franco's core doctrine on destroying the opaque and exploitative practices of the live music industry.",
+    href: "/fairgig1.html",
     icon: "⚖️",
+    accent: "from-red-500/20 to-rose-500/20"
+  },
+  {
+    title: "FairGig: The Truth Tax (Legacy)",
+    description: "The original manifesto on using transparent math and reputation profiles to expose industry gatekeepers.",
+    href: "/fairgig.html",
+    icon: "📜",
     accent: "from-green-500/20 to-emerald-500/20"
   },
   {
@@ -56,7 +63,8 @@ export default function FairGigHub() {
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-6">
           {articles.map((article, idx) => {
-            const isManifesto = article.href.includes('fairgig.html');
+            const isManifesto = article.href.includes('fairgig1.html');
+            const isLegacy = article.href.includes('fairgig.html');
             const isArsenal = article.href.includes('fairgig-2');
             const isHighlighted = isManifesto || isArsenal;
             
@@ -72,8 +80,13 @@ export default function FairGigHub() {
                   }`}
               >
                 {isManifesto && (
-                  <div className="absolute top-4 right-4 z-20 px-3 py-1 rounded-full bg-[#00ff66] text-slate-950 text-[10px] font-black tracking-tighter uppercase shadow-[0_0_15px_rgba(0,255,102,0.5)]">
+                  <div className="absolute top-4 right-4 z-20 px-3 py-1 rounded-full bg-[#ff1e1e] text-white text-[10px] font-black tracking-tighter uppercase shadow-[0_0_15px_rgba(255,30,30,0.5)]">
                     Primary Doctrine
+                  </div>
+                )}
+                {isLegacy && (
+                  <div className="absolute top-4 right-4 z-20 px-3 py-1 rounded-full bg-slate-800 text-slate-400 text-[10px] font-black tracking-tighter uppercase border border-slate-700">
+                    Legacy File
                   </div>
                 )}
                 {isArsenal && (
@@ -87,17 +100,17 @@ export default function FairGigHub() {
                 <div className="relative z-10 h-full flex flex-col">
                   <div className="flex items-start justify-between mb-6">
                     <div className="text-4xl">{article.icon}</div>
-                    {isHighlighted && <div className="text-[#00ff66]/60 font-mono text-xs tracking-widest">SEQ: {isManifesto ? 'FG-BASE-01' : 'FG-TOOL-02'}</div>}
+                    {isHighlighted && <div className={`${isManifesto ? 'text-[#ff1e1e]/60' : 'text-[#00ff66]/60'} font-mono text-xs tracking-widest`}>SEQ: {isManifesto ? 'FG-BASE-01' : 'FG-TOOL-02'}</div>}
                   </div>
                   
-                  <h2 className={`font-bold text-white mb-3 group-hover:text-[#00ff66] transition-colors font-(family-name:--font-oswald) uppercase tracking-wide ${isHighlighted ? 'text-4xl leading-tight' : 'text-2xl'}`}>
+                  <h2 className={`font-bold text-white mb-3 group-hover:text-[#00ff66] transition-colors font-(family-name:--font-oswald) uppercase tracking-wide ${isHighlighted ? 'text-4xl leading-tight' : 'text-2xl'} ${isManifesto ? 'group-hover:text-[#ff1e1e]' : ''}`}>
                     {article.title}
                   </h2>
                   <p className={`text-slate-400 leading-relaxed grow ${isHighlighted ? 'text-lg max-w-xl' : 'text-base'}`}>
                     {article.description}
                   </p>
                   
-                  <div className="mt-8 flex items-center text-sm font-bold text-[#00ff66] group-hover:text-emerald-400 transition-colors uppercase tracking-widest font-mono">
+                  <div className={`mt-8 flex items-center text-sm font-bold uppercase tracking-widest font-mono transition-colors ${isManifesto ? 'text-[#ff1e1e] group-hover:text-red-400' : 'text-[#00ff66] group-hover:text-emerald-400'}`}>
                     {isHighlighted ? 'INITIALIZE PROTOCOL' : 'ACCESS FILE'}
                     <span className="ml-2 transform group-hover:translate-x-1 transition-transform">→</span>
                   </div>

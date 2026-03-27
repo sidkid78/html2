@@ -12,11 +12,25 @@ const articles = [
     accent: "from-red-500/20 to-rose-500/20"
   },
   {
+    title: "The End of Friction",
+    description: "Manifesto Expansion: Moving from manual exhaustion to automated domination. A deep dive into Revenue Surgery.",
+    href: "/end-of-friction.html",
+    icon: "⚡",
+    accent: "from-amber-500/20 to-orange-500/20"
+  },
+  {
     title: "The QUANTEON System & RPIs",
     description: "Explore the unified algorithmic architecture and the five core Revenue Performance Integrations designed for operational surgery.",
     href: "/quanteon-2.html",
     icon: "⚙️",
     accent: "from-cyan-600/20 to-blue-400/20"
+  },
+  {
+    title: "Policy Stabilization Framework",
+    description: "Economic & Energy core: Mitigating Middle East conflict impact through predictive reserves and trade route security.",
+    href: "/economic-framework.html",
+    icon: "🌍",
+    accent: "from-indigo-500/20 to-blue-500/20"
   }
 ];
 
@@ -56,9 +70,10 @@ export default function QuanteonHub() {
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-6">
           {articles.map((article, idx) => {
-            const isManifesto = article.href.includes('quanteon.html');
+            const isManifesto = article.href.includes('quanteon.html') || article.href.includes('end-of-friction.html');
             const isSystem = article.href.includes('quanteon-2');
-            const isHighlighted = isManifesto || isSystem;
+            const isFramework = article.href.includes('economic-framework.html');
+            const isHighlighted = isManifesto || isSystem || isFramework;
             
             return (
               <a
@@ -82,23 +97,28 @@ export default function QuanteonHub() {
                     System Blueprint
                   </div>
                 )}
+                {isFramework && (
+                  <div className="absolute top-4 right-4 z-20 px-3 py-1 rounded-full bg-indigo-500 text-white text-[10px] font-black tracking-tighter uppercase shadow-[0_0_15px_rgba(99,102,241,0.5)]">
+                    Policy Module
+                  </div>
+                )}
                 
                 <div className={`absolute inset-0 rounded-3xl bg-linear-to-br ${article.accent} opacity-0 group-hover:opacity-100 transition-opacity duration-500`} />
                 
                 <div className="relative z-10 h-full flex flex-col">
                   <div className="flex items-start justify-between mb-6">
                     <div className="text-4xl">{article.icon}</div>
-                    {isHighlighted && <div className={`${isManifesto ? 'text-[#ff3300]/60' : 'text-[#00f0ff]/60'} font-mono text-xs tracking-widest`}>OP: {isManifesto ? 'QNT-INIT-00' : 'QNT-SYS-01'}</div>}
+                    {isHighlighted && <div className={`${isManifesto ? 'text-[#ff3300]/60' : isFramework ? 'text-indigo-400/60' : 'text-[#00f0ff]/60'} font-mono text-xs tracking-widest`}>OP: {isManifesto ? 'QNT-INIT-00' : isFramework ? 'QNT-ECON-02' : 'QNT-SYS-01'}</div>}
                   </div>
                   
-                  <h2 className={`font-bold text-white mb-3 transition-colors font-(family-name:--font-space-grotesk) uppercase tracking-wide ${isHighlighted ? 'text-4xl leading-tight' : 'text-2xl'} ${isManifesto ? 'group-hover:text-[#ff3300]' : 'group-hover:text-[#00f0ff]'}`}>
+                  <h2 className={`font-bold text-white mb-3 transition-colors font-(family-name:--font-space-grotesk) uppercase tracking-wide ${isHighlighted ? 'text-4xl leading-tight' : 'text-2xl'} ${isManifesto ? 'group-hover:text-[#ff3300]' : isFramework ? 'group-hover:text-indigo-400' : 'group-hover:text-[#00f0ff]'}`}>
                     {article.title}
                   </h2>
                   <p className={`text-slate-400 leading-relaxed grow ${isHighlighted ? 'text-lg max-w-xl font-light' : 'text-base'}`}>
                     {article.description}
                   </p>
                   
-                  <div className={`mt-8 flex items-center text-sm font-bold uppercase tracking-widest font-mono transition-colors ${isManifesto ? 'text-[#ff3300] group-hover:text-red-400' : 'text-[#00f0ff] group-hover:text-cyan-400'}`}>
+                  <div className={`mt-8 flex items-center text-sm font-bold uppercase tracking-widest font-mono transition-colors ${isManifesto ? 'text-[#ff3300] group-hover:text-red-400' : isFramework ? 'text-indigo-400 group-hover:text-indigo-300' : 'text-[#00f0ff] group-hover:text-cyan-400'}`}>
                     {isHighlighted ? 'INITIATE EXTRACTION' : 'VIEW DOCUMENT'}
                     <span className="ml-2 transform group-hover:translate-x-1 transition-transform">→</span>
                   </div>
