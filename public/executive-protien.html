@@ -1,0 +1,546 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CAFA 6 Pipeline Strategy</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link
+    href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@100;400;700;800&family=Inter:wght@300;400;600&display=swap"
+    rel="stylesheet">
+  <style>
+    :root {
+      --bg-color: #030712;
+      --accent: #06b6d4;
+      --text-main: #f8fafc;
+      --text-muted: #94a3b8;
+      --grid-line: rgba(6, 182, 212, 0.15);
+    }
+
+    body {
+      background-color: var(--bg-color);
+      color: var(--text-main);
+      font-family: 'Inter', sans-serif;
+      overflow: hidden;
+      margin: 0;
+      cursor: none;
+    }
+
+    h1,
+    h2,
+    h3,
+    .mono {
+      font-family: 'JetBrains Mono', monospace;
+    }
+
+    /* Custom Cursor */
+    #cursor {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 20px;
+      height: 20px;
+      border: 1px solid var(--accent);
+      border-radius: 50%;
+      transform: translate(-50%, -50%);
+      pointer-events: none;
+      z-index: 9999;
+      transition: width 0.2s, height 0.2s, background 0.2s;
+      mix-blend-mode: difference;
+    }
+
+    #cursor::after {
+      content: '';
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      width: 4px;
+      height: 4px;
+      background: var(--accent);
+      border-radius: 50%;
+      transform: translate(-50%, -50%);
+    }
+
+    body:active #cursor {
+      width: 10px;
+      height: 10px;
+      background: var(--accent);
+    }
+
+    /* Scroll Snapping */
+    .carousel-container {
+      display: flex;
+      overflow-x: auto;
+      overflow-y: hidden;
+      scroll-snap-type: x mandatory;
+      width: 100vw;
+      height: 100vh;
+      scrollbar-width: none;
+      -ms-overflow-style: none;
+    }
+
+    .carousel-container::-webkit-scrollbar {
+      display: none;
+    }
+
+    .panel {
+      width: 100vw;
+      height: 100vh;
+      flex-shrink: 0;
+      scroll-snap-align: start;
+      position: relative;
+      display: grid;
+      grid-template-columns: repeat(12, 1fr);
+      grid-template-rows: repeat(12, 1fr);
+    }
+
+    /* Grid Design System */
+    .grid-bg {
+      position: absolute;
+      inset: 0;
+      background-image:
+        linear-gradient(to right, var(--grid-line) 1px, transparent 1px),
+        linear-gradient(to bottom, var(--grid-line) 1px, transparent 1px);
+      background-size: 5vw 5vh;
+      z-index: 0;
+      pointer-events: none;
+    }
+
+    .panel-content {
+      position: relative;
+      z-index: 10;
+    }
+
+    /* Animation States */
+    .reveal {
+      opacity: 0;
+      transform: translateY(20px);
+      filter: blur(4px);
+      transition: all 0.8s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    .reveal.active {
+      opacity: 1;
+      transform: translateY(0);
+      filter: blur(0);
+    }
+
+    .delay-1 {
+      transition-delay: 100ms;
+    }
+
+    .delay-2 {
+      transition-delay: 200ms;
+    }
+
+    .delay-3 {
+      transition-delay: 300ms;
+    }
+
+    .delay-4 {
+      transition-delay: 400ms;
+    }
+
+    .delay-5 {
+      transition-delay: 500ms;
+    }
+
+    /* Image Treatments */
+    .tech-image {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      filter: url(#cyan-tint) brightness(0.8) contrast(1.2);
+      transition: filter 0.5s ease;
+    }
+
+    .tech-image:hover {
+      filter: url(#cyan-tint) brightness(1) contrast(1.3);
+    }
+
+    /* Decorative Elements */
+    .bracket-list li {
+      position: relative;
+      padding-left: 1.5rem;
+      margin-bottom: 1.5rem;
+    }
+
+    .bracket-list li::before {
+      content: '>';
+      position: absolute;
+      left: 0;
+      color: var(--accent);
+      font-family: 'JetBrains Mono', monospace;
+      font-weight: bold;
+    }
+
+    .hud-box {
+      border: 1px solid var(--grid-line);
+      background: rgba(3, 7, 18, 0.8);
+      backdrop-filter: blur(12px);
+    }
+  </style>
+</head>
+
+<body>
+
+  <!-- SVG Filters -->
+  <svg class="hidden" width="0" height="0">
+    <defs>
+      <filter id="grain">
+        <feTurbulence type="fractalNoise" baseFrequency="0.65" numOctaves="3" stitchTiles="stitch" result="noise" />
+        <feColorMatrix type="matrix" values="1 0 0 0 0, 0 1 0 0 0, 0 0 1 0 0, 0 0 0 0.05 0" in="noise"
+          result="coloredNoise" />
+        <feComposite operator="in" in="coloredNoise" in2="SourceGraphic" result="composite" />
+        <feBlend mode="screen" in="composite" in2="SourceGraphic" />
+      </filter>
+      <filter id="cyan-tint">
+        <feColorMatrix type="matrix" values="
+          0.1 0   0   0   0
+          0   0.8 0   0   0
+          0   0   1.2 0   0
+          0   0   0   1   0" />
+      </filter>
+    </defs>
+  </svg>
+
+  <!-- Global Grain Overlay -->
+  <div class="fixed inset-0 pointer-events-none z-50 mix-blend-overlay" style="filter: url(#grain); opacity: 0.5;">
+  </div>
+
+  <!-- Custom Cursor -->
+  <div id="cursor"></div>
+
+  <!-- Fixed UI Chrome -->
+  <header
+    class="fixed top-0 left-0 w-full p-6 flex justify-between items-start z-40 pointer-events-none mix-blend-screen">
+    <div class="mono text-xs tracking-[0.2em] text-cyan-400 font-bold uppercase flex flex-col gap-1">
+      <span>[SYS.INIT]</span>
+      <span>CAFA6_PIPELINE_V1.0</span>
+    </div>
+    <div class="mono text-xs tracking-widest text-slate-400 flex flex-col items-end gap-1">
+      <span>STATUS: <span class="text-cyan-400 animate-pulse">ACTIVE</span></span>
+      <span id="progress-indicator">SEQ: 01 // 05</span>
+    </div>
+  </header>
+
+  <div class="fixed bottom-0 left-0 w-full p-6 flex justify-between items-end z-40 pointer-events-none">
+    <div class="mono text-[10px] text-slate-500 tracking-widest">
+      ENCRYPTION: NONE<br>CLASSIFICATION: STRATEGIC
+    </div>
+    <div class="mono text-[10px] text-cyan-400 tracking-widest flex items-center gap-2">
+      <span>SCROLL TO ADVANCE</span>
+      <span class="block w-8 h-[1px] bg-cyan-400"></span>
+    </div>
+  </div>
+
+  <!-- Main Carousel -->
+  <main class="carousel-container" id="scroll-track">
+
+    <!-- PANEL 1: Executive Summary -->
+    <section class="panel" data-index="1">
+      <div class="grid-bg"></div>
+
+      <div
+        class="panel-content col-span-12 md:col-span-6 flex flex-col justify-center p-12 md:p-24 border-r border-[rgba(6,182,212,0.2)]">
+        <div class="mono text-cyan-400 text-sm mb-4 tracking-widest reveal delay-1"># EXECUTIVE STRATEGY BRIEF</div>
+        <h1
+          class="text-4xl md:text-5xl lg:text-6xl font-extrabold uppercase tracking-tight leading-none mb-12 reveal delay-2">
+          CAFA 6 <br>
+          <span class="text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 to-blue-600">Protein Function</span>
+          <br>
+          Prediction Pipeline
+        </h1>
+
+        <h2 class="mono text-xl text-white mb-6 border-b border-slate-800 pb-2 reveal delay-3">## Executive Summary</h2>
+        <p class="text-slate-300 leading-relaxed mb-6 font-light text-sm md:text-base reveal delay-4">
+          To achieve state-of-the-art performance in the CAFA 6 Protein Function Prediction competition, our overall
+          objective is to maximize the <strong class="text-cyan-400 font-medium">Information-Accretion (IA) weighted
+            F1-measure ($F_{max}$)</strong> across three subontologies: Molecular Function (MF), Biological Process
+          (BP), and Cellular Component (CC).
+        </p>
+        <p class="text-slate-300 leading-relaxed font-light text-sm md:text-base reveal delay-5">
+          Synthesis of our parallel research domains reveals that standard classification metrics (like unweighted F1)
+          are biologically fundamentally flawed. Success requires heavily prioritizing rare, highly specific Gene
+          Ontology (GO) terms over generic ones. We will deploy a unified pipeline built on a shared Protein Language
+          Model (PLM) backbone, utilizing dynamically weighted loss functions, and strictly enforcing the biological
+          "True Path Rule" via hierarchical decoding.
+        </p>
+      </div>
+
+      <div class="panel-content hidden md:block col-span-6 p-12 relative">
+        <div class="absolute inset-12 hud-box p-2 reveal delay-3">
+          <div class="w-full h-full relative overflow-hidden">
+            <img src="./images/scene1(1).jpg" alt="Protein Visualization" class="tech-image">
+            <div
+              class="absolute top-4 left-4 mono text-[10px] bg-black/50 px-2 py-1 text-cyan-400 border border-cyan-400/30">
+              FIG.1_STRUCTURAL_OVERVIEW</div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- PANEL 2: Strategic Insights -->
+    <section class="panel" data-index="2">
+      <div class="grid-bg"></div>
+      <div class="absolute inset-0 z-0 opacity-20">
+        <img src="./images/scene4(2).jpg" alt="DAG Graph" class="w-full h-full object-cover filter grayscale blur-sm">
+      </div>
+
+      <div class="panel-content col-span-12 flex flex-col justify-center p-12 md:p-24 max-w-6xl mx-auto">
+        <h2 class="mono text-2xl md:text-3xl text-cyan-400 mb-12 reveal delay-1">## 1. High-Impact Strategic Insights
+        </h2>
+
+        <ul class="bracket-list space-y-8">
+          <li class="reveal delay-2">
+            <h3 class="text-white font-semibold text-lg mb-2 inline-block bg-slate-800 px-2 py-1">Target the CAFA 6
+              Scoring Metric Directly:</h3>
+            <p class="text-slate-400 font-light leading-relaxed">
+              The competition evaluates on IA-weighted $F_{max}$. All three domains independently confirmed the
+              necessity of mapping the GO Directed Acyclic Graph (DAG) to calculate Information Content ($IC =
+              -\log(P(v|pa(v)))$. We will prioritize models that dynamically adjust probability thresholds to maximize
+              this specific score across all three subontologies.
+            </p>
+          </li>
+          <li class="reveal delay-3">
+            <h3 class="text-white font-semibold text-lg mb-2 inline-block bg-slate-800 px-2 py-1">Knowledge-Tiered
+              Evaluation is Critical:</h3>
+            <p class="text-slate-400 font-light leading-relaxed">
+              The test set heavily penalizes generalization failure on "dark matter" proteins. Our evaluation framework
+              must universally categorize targets into <span class="text-cyan-300">No-Knowledge (NK), Limited-Knowledge
+                (LK), and Partial-Knowledge (PK)</span> to simulate the future evaluation phases of CAFA 6 accurately.
+            </p>
+          </li>
+          <li class="reveal delay-4">
+            <h3 class="text-white font-semibold text-lg mb-2 inline-block bg-slate-800 px-2 py-1">Parameter-Free True
+              Path Enforcement:</h3>
+            <p class="text-slate-400 font-light leading-relaxed">
+              Instead of merely penalizing invalid hierarchical predictions during training, we must guarantee them at
+              inference. The CC domain's proposed <strong class="text-white">Hierarchical Max-Pooling Decoder</strong>
+              will be adopted globally to ensure predictions logically flow down the GO DAG without biological
+              contradictions.
+            </p>
+          </li>
+        </ul>
+      </div>
+    </section>
+
+    <!-- PANEL 3: Unified Architecture -->
+    <section class="panel" data-index="3">
+      <div class="grid-bg"></div>
+
+      <div class="panel-content hidden md:block col-span-5 p-12 relative border-r border-[rgba(6,182,212,0.2)]">
+        <div class="absolute inset-12 hud-box p-2 reveal delay-2">
+          <img src="./images/scene2(2).jpg" alt="Supercomputer ESM-2" class="tech-image">
+          <div
+            class="absolute bottom-4 right-4 mono text-[10px] bg-black/50 px-2 py-1 text-cyan-400 border border-cyan-400/30">
+            ESM-2_650M_CORE</div>
+        </div>
+      </div>
+
+      <div class="panel-content col-span-12 md:col-span-7 flex flex-col justify-center p-12 md:p-20">
+        <h2 class="mono text-2xl md:text-3xl text-cyan-400 mb-6 reveal delay-1">## 2. Unified Architecture Strategy</h2>
+        <p class="text-sm text-cyan-200 mb-10 mono uppercase tracking-widest reveal delay-1 opacity-70">(Cross-Domain
+          Integration)</p>
+
+        <p class="text-slate-300 mb-8 font-light text-lg reveal delay-2">
+          Rather than building three siloed models, we will consolidate the pipeline to optimize compute and structural
+          coherence:
+        </p>
+
+        <div class="space-y-8">
+          <div
+            class="reveal delay-3 p-6 border border-slate-700 bg-slate-900/50 hover:border-cyan-500/50 transition-colors">
+            <h3 class="mono text-white text-lg mb-3 flex items-center gap-2">
+              <span class="w-2 h-2 bg-cyan-400 inline-block"></span> Unified Shared Backbone:
+            </h3>
+            <p class="text-slate-400 font-light text-sm">
+              All domains are currently experimenting with different sizes of the ESM-2 Evolutionary Scale Model (8M,
+              35M, and 650M/ProtT5). We will standardize on a single <strong class="text-cyan-300">ESM-2 650M shared
+                encoder</strong> using Global Average Pooling. This eliminates redundant feature extraction, manages
+              VRAM constraints (fitting within 16-24GB limits), and provides a sufficiently deep semantic baseline for
+              all three classification heads.
+            </p>
+          </div>
+
+          <div
+            class="reveal delay-4 p-6 border border-slate-700 bg-slate-900/50 hover:border-cyan-500/50 transition-colors">
+            <h3 class="mono text-white text-lg mb-3 flex items-center gap-2">
+              <span class="w-2 h-2 bg-cyan-400 inline-block"></span> Subontology-Specific Heads:
+            </h3>
+            <p class="text-slate-400 font-light text-sm mb-4">
+              The shared ESM-2 embeddings will feed into three specialized Multi-Layer Perceptron (MLP) classification
+              heads:
+            </p>
+            <ul class="font-mono text-xs text-slate-300 space-y-2 pl-4 border-l border-slate-600">
+              <li><span class="text-cyan-500">MF Head:</span> PLM-GCN Hybrid (integrating structure where available).
+              </li>
+              <li><span class="text-cyan-500">BP Head:</span> MLP with BatchNorm1d and specialized IA Loss.</li>
+              <li><span class="text-cyan-500">CC Head:</span> HMM-ResNet (Hierarchical Multi-Modal Residual Network).
+              </li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- PANEL 4: Critical Tensions -->
+    <section class="panel" data-index="4">
+      <div class="grid-bg"></div>
+
+      <div class="panel-content col-span-12 md:col-span-7 flex flex-col justify-center p-12 md:p-24">
+        <h2 class="mono text-2xl md:text-3xl text-cyan-400 mb-12 reveal delay-1">## 3. Critical Tensions &
+          Contradictions to Resolve</h2>
+
+        <div class="space-y-10">
+          <div class="reveal delay-2">
+            <h3
+              class="text-xl font-bold text-white mb-4 border-l-4 border-red-500 pl-4 bg-gradient-to-r from-red-500/10 to-transparent py-2">
+              Tension 1: Compute Fragmentation vs. Representation Depth.
+            </h3>
+            <div class="pl-5 space-y-3 font-light text-sm">
+              <p class="text-slate-300"><span class="text-red-400 font-mono">Issue:</span> The MF team recommends the
+                massive 3B-parameter ProtT5-XL, while BP and CC built pipelines on highly constrained 8M and 35M ESM-2
+                variants.</p>
+              <p class="text-slate-300"><span class="text-green-400 font-mono">Resolution:</span> We will split the
+                difference. A 3B-parameter model requires exorbitant scaling costs for multi-label tasks, while 8M is
+                too shallow to capture deep evolutionary context. We will lock the pipeline to <strong
+                  class="text-white">ESM-2 650M</strong> as our global standard, enabling rapid iteration while
+                maintaining high representation capacity.</p>
+            </div>
+          </div>
+
+          <div class="reveal delay-3">
+            <h3
+              class="text-xl font-bold text-white mb-4 border-l-4 border-orange-500 pl-4 bg-gradient-to-r from-orange-500/10 to-transparent py-2">
+              Tension 2: Missing Modalities (3D Structure Data).
+            </h3>
+            <div class="pl-5 space-y-3 font-light text-sm">
+              <p class="text-slate-300"><span class="text-orange-400 font-mono">Issue:</span> The MF domain utilizes a
+                Graph Convolutional Network (GCN) relying on 3D structural contact maps. However, CAFA 6 "No-Knowledge"
+                targets frequently lack corresponding 3D structural data, which would typically crash a GCN pipeline.
+              </p>
+              <p class="text-slate-300"><span class="text-green-400 font-mono">Resolution:</span> We will adopt the CC
+                domain’s <strong class="text-white">Modality Attention Module and Modality Dropout</strong> techniques
+                across the entire network. This allows the MF head to ingest 3D structural data when available, but
+                gracefully fallback to pure sequence embeddings via self-attention when structural inputs are missing.
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="panel-content hidden md:block col-span-5 relative bg-slate-900 border-l border-slate-800">
+        <img src="./images/scene3(2).jpg" alt="Modality Attention Diagram"
+          class="absolute inset-0 w-full h-full object-cover opacity-60 mix-blend-luminosity filter contrast-125">
+        <div class="absolute inset-0 bg-gradient-to-t from-[#030712] via-transparent to-transparent"></div>
+      </div>
+    </section>
+
+    <!-- PANEL 5: Next Steps -->
+    <section class="panel relative" data-index="5">
+      <div class="absolute inset-0 z-0">
+        <img src="./images/scene5(2).jpg" alt="Team at Dashboard"
+          class="w-full h-full object-cover opacity-30 mix-blend-screen">
+        <div class="absolute inset-0 bg-[#030712]/80"></div>
+      </div>
+      <div class="grid-bg"></div>
+
+      <div class="panel-content col-span-12 flex items-center justify-center p-6">
+        <div class="hud-box w-full max-w-4xl p-10 md:p-16 relative overflow-hidden">
+          <div class="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-cyan-600 via-cyan-400 to-transparent">
+          </div>
+
+          <h2 class="mono text-3xl md:text-4xl text-white mb-6 reveal delay-1">## 4. Prioritized Next Steps</h2>
+          <p class="text-cyan-400 mb-10 font-mono text-sm uppercase tracking-widest reveal delay-2">
+            > Operationalizing findings ahead of CAFA 6 deadline
+          </p>
+
+          <ol
+            class="space-y-6 list-decimal list-inside text-slate-300 marker:text-cyan-500 marker:font-mono font-light text-sm md:text-base">
+            <li class="reveal delay-3 pl-2 py-2 hover:bg-slate-800/50 transition-colors rounded">
+              <strong class="text-white">Consolidate the Data Pipeline:</strong> Centralize the calculation of IA
+              weights and the GO DAG relationships into a single master configuration file (<code
+                class="text-cyan-300 bg-black/50 px-1">ia_weights_master.json</code>) that all three domain heads
+              reference.
+            </li>
+            <li class="reveal delay-4 pl-2 py-2 hover:bg-slate-800/50 transition-colors rounded">
+              <strong class="text-white">Standardize the Embedding Engine:</strong> Deploy a unified ESM-2 (650M
+              parameter) feature extraction microservice. Ensure variable-length sequences >1024 residues are handled
+              via the MF domain's proposed sliding window strategy.
+            </li>
+            <li class="reveal delay-5 pl-2 py-2 hover:bg-slate-800/50 transition-colors rounded">
+              <strong class="text-white">Implement the Hierarchical Decoder:</strong> Port the CC domain's "Hierarchical
+              Max-Pooling Decoder" to the MF and BP heads to strictly enforce the True Path Rule across the entire model
+              output.
+            </li>
+            <li class="reveal delay-5 pl-2 py-2 hover:bg-slate-800/50 transition-colors rounded"
+              style="transition-delay: 600ms">
+              <strong class="text-white">Execute Tiered Validation:</strong> Run a temporal split (T0/T1) evaluation
+              mimicking the CAFA 6 leaderboard logic. Generate automated performance reports specifically segmented by
+              NK, LK, and PK target groups to pinpoint accuracy degradation on dark matter proteins.
+            </li>
+          </ol>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <script>
+    // Custom Cursor Logic
+    const cursor = document.getElementById('cursor');
+    document.addEventListener('mousemove', (e) => {
+      cursor.style.left = e.clientX + 'px';
+      cursor.style.top = e.clientY + 'px';
+    });
+
+    // Scroll tracking & animations
+    const progressIndicator = document.getElementById('progress-indicator');
+    const panels = document.querySelectorAll('.panel');
+
+    const observerOptions = {
+      root: document.getElementById('scroll-track'),
+      threshold: 0.5
+    };
+
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          // Update Progress Indicator
+          const index = entry.target.getAttribute('data-index');
+          progressIndicator.innerHTML = `SEQ: 0${index} // 05`;
+
+          // Trigger Reveals
+          const reveals = entry.target.querySelectorAll('.reveal');
+          reveals.forEach(el => {
+            el.classList.add('active');
+          });
+        } else {
+          // Reset Reveals (optional: remove to only animate once)
+          const reveals = entry.target.querySelectorAll('.reveal');
+          reveals.forEach(el => {
+            el.classList.remove('active');
+          });
+        }
+      });
+    }, observerOptions);
+
+    panels.forEach(panel => observer.observe(panel));
+
+    // Horizontal Scroll with Mouse Wheel (for easier desktop navigation)
+    const scrollTrack = document.getElementById('scroll-track');
+    scrollTrack.addEventListener('wheel', (evt) => {
+      evt.preventDefault();
+      scrollTrack.scrollBy({
+        left: evt.deltaY < 0 ? -window.innerWidth : window.innerWidth,
+        behavior: 'smooth'
+      });
+    });
+  </script>
+</body>
+
+</html>

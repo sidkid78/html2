@@ -1,0 +1,653 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>FairGig Strategic Briefing</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500&family=Inter:wght@300;400;600&family=Space+Grotesk:wght@300;500;700&display=swap');
+
+    :root {
+      --bg: #05070a;
+      --surface: #0d1117;
+      --text-main: #e2e8f0;
+      --text-muted: #8b949e;
+      --accent: #00e5ff;
+      --accent-glow: rgba(0, 229, 255, 0.2);
+      --border: #30363d;
+
+      --font-hero: 'Space Grotesk', sans-serif;
+      --font-body: 'Inter', sans-serif;
+      --font-mono: 'Fira Code', monospace;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      cursor: none !important;
+    }
+
+    body {
+      background-color: var(--bg);
+      color: var(--text-main);
+      font-family: var(--font-body);
+      line-height: 1.6;
+      overflow-x: hidden;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    /* Custom Cursor */
+    #cursor {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 12px;
+      height: 12px;
+      background: var(--accent);
+      border-radius: 50%;
+      pointer-events: none;
+      z-index: 9999;
+      transform: translate(-50%, -50%);
+      transition: width 0.3s, height 0.3s, background 0.3s, mix-blend-mode 0.3s;
+      mix-blend-mode: exclusion;
+    }
+
+    #cursor.hovered {
+      width: 60px;
+      height: 60px;
+      background: rgba(255, 255, 255, 1);
+      mix-blend-mode: difference;
+    }
+
+    /* Scroll Progress */
+    #progress-container {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 3px;
+      background: transparent;
+      z-index: 1000;
+    }
+
+    #progress-bar {
+      height: 100%;
+      background: var(--accent);
+      width: 0%;
+      box-shadow: 0 0 10px var(--accent-glow);
+    }
+
+    /* Noise Overlay */
+    .noise-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
+      pointer-events: none;
+      z-index: 9000;
+      opacity: 0.04;
+      background: url('data:image/svg+xml;utf8,%3Csvg viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg"%3E%3Cfilter id="noiseFilter"%3E%3CfeTurbulence type="fractalNoise" baseFrequency="0.8" numOctaves="3" stitchTiles="stitch"/%3E%3C/filter%3E%3Crect width="100%25" height="100%25" filter="url(%23noiseFilter)"/%3E%3C/svg%3E');
+    }
+
+    /* Typography */
+    h1,
+    h2,
+    h3,
+    .hero-text {
+      font-family: var(--font-hero);
+      font-weight: 500;
+      letter-spacing: -0.02em;
+      line-height: 1.1;
+    }
+
+    .mono-label {
+      font-family: var(--font-mono);
+      font-size: 0.75rem;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      color: var(--accent);
+    }
+
+    .highlight {
+      color: var(--accent);
+    }
+
+    /* Reveal Animation Logic */
+    .reveal {
+      opacity: 0;
+      transform: translateY(30px);
+      transition: opacity 1.2s cubic-bezier(0.16, 1, 0.3, 1), transform 1.2s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    .reveal.active {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    .delay-1 {
+      transition-delay: 0.1s;
+    }
+
+    .delay-2 {
+      transition-delay: 0.2s;
+    }
+
+    .delay-3 {
+      transition-delay: 0.3s;
+    }
+
+    /* Layouts */
+    .container {
+      max-width: 1400px;
+      margin: 0 auto;
+      padding: 0 5vw;
+    }
+
+    /* Hero Section */
+    .hero {
+      height: 100vh;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      position: relative;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .hero-bg {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-image: url('./images/visual-1(2).png');
+      background-size: cover;
+      background-position: center;
+      opacity: 0.2;
+      z-index: -1;
+      filter: grayscale(100%) contrast(1.2);
+    }
+
+    .hero-tags {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 1rem;
+      margin-bottom: 2rem;
+      font-family: var(--font-mono);
+      font-size: 0.8rem;
+      color: var(--text-muted);
+    }
+
+    .hero-tags span {
+      border: 1px solid var(--border);
+      padding: 0.25rem 0.75rem;
+      border-radius: 20px;
+    }
+
+    .hero h1 {
+      font-size: clamp(2.5rem, 6vw, 6rem);
+      max-width: 20ch;
+      margin-bottom: 1.5rem;
+    }
+
+    .hero p.meta {
+      font-size: clamp(1rem, 1.5vw, 1.25rem);
+      color: var(--text-muted);
+      max-width: 60ch;
+      border-left: 2px solid var(--accent);
+      padding-left: 1.5rem;
+    }
+
+    /* Scrollytelling Split Section */
+    .split-section {
+      display: flex;
+      flex-direction: column;
+      border-bottom: 1px solid var(--border);
+    }
+
+    @media(min-width: 1024px) {
+      .split-section {
+        flex-direction: row;
+      }
+    }
+
+    .split-sticky {
+      flex: 1;
+      position: relative;
+      padding: 4rem 5vw;
+      border-right: 1px solid var(--border);
+      background: var(--surface);
+    }
+
+    @media(min-width: 1024px) {
+      .split-sticky {
+        position: sticky;
+        top: 0;
+        height: 100vh;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+      }
+    }
+
+    .split-content {
+      flex: 1.5;
+      padding: 6rem 5vw;
+    }
+
+    .sticky-image {
+      width: 100%;
+      height: 60vh;
+      object-fit: cover;
+      filter: grayscale(80%);
+      transition: filter 0.5s ease;
+    }
+
+    .sticky-image:hover {
+      filter: grayscale(0%);
+    }
+
+    /* Text blocks */
+    .text-block {
+      margin-bottom: 4rem;
+    }
+
+    .text-block h2 {
+      font-size: clamp(2rem, 3vw, 3rem);
+      margin-bottom: 1.5rem;
+      color: #fff;
+    }
+
+    .text-block p {
+      font-size: 1.125rem;
+      color: var(--text-muted);
+      margin-bottom: 1.5rem;
+    }
+
+    .text-block ul {
+      list-style: none;
+      margin-top: 2rem;
+    }
+
+    .text-block li {
+      position: relative;
+      padding-left: 2rem;
+      margin-bottom: 1.5rem;
+      font-size: 1.125rem;
+      color: var(--text-main);
+    }
+
+    .text-block li::before {
+      content: '0' counter(list-counter);
+      counter-increment: list-counter;
+      position: absolute;
+      left: 0;
+      top: 2px;
+      font-family: var(--font-mono);
+      font-size: 0.8rem;
+      color: var(--accent);
+    }
+
+    .text-block ul {
+      counter-reset: list-counter;
+    }
+
+    /* Code Block */
+    .code-window {
+      background: #010409;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      overflow: hidden;
+      margin: 3rem 0;
+      font-family: var(--font-mono);
+    }
+
+    .code-header {
+      background: #161b22;
+      padding: 0.75rem 1.5rem;
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      gap: 0.5rem;
+      align-items: center;
+    }
+
+    .code-dot {
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      background: #30363d;
+    }
+
+    .code-dot:nth-child(1) {
+      background: #ff5f56;
+    }
+
+    .code-dot:nth-child(2) {
+      background: #ffbd2e;
+    }
+
+    .code-dot:nth-child(3) {
+      background: #27c93f;
+    }
+
+    pre {
+      padding: 2rem;
+      overflow-x: auto;
+      font-size: 0.9rem;
+      color: #e2e8f0;
+    }
+
+    .syntax-comment {
+      color: #8b949e;
+    }
+
+    .syntax-keyword {
+      color: #ff7b72;
+    }
+
+    .syntax-function {
+      color: #d2a8ff;
+    }
+
+    .syntax-string {
+      color: #a5d6ff;
+    }
+
+    /* Conclusion */
+    .conclusion {
+      min-height: 80vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      padding: 5vw;
+      background: var(--bg);
+    }
+
+    .conclusion h2 {
+      font-size: clamp(2rem, 4vw, 4rem);
+      max-width: 25ch;
+      margin: 0 auto;
+    }
+
+    /* SVG Filter Data */
+    svg.filters {
+      display: none;
+    }
+  </style>
+</head>
+
+<body>
+
+  <svg class="filters">
+    <filter id="glitch">
+      <feTurbulence type="fractalNoise" baseFrequency="0.05" numOctaves="2" result="noise" />
+      <feDisplacementMap in="SourceGraphic" in2="noise" scale="5" xChannelSelector="R" yChannelSelector="G" />
+    </filter>
+  </svg>
+
+  <div class="noise-overlay"></div>
+  <div id="cursor"></div>
+  <div id="progress-container">
+    <div id="progress-bar"></div>
+  </div>
+
+  <main>
+    <!-- SECTION 1: HERO -->
+    <section class="hero container interactive">
+      <div class="hero-bg"></div>
+      <div class="reveal">
+        <div class="mono-label"></div>
+        <h1>FairGig and the Evolution of Live Music Economics</h1>
+      </div>
+      <div class="reveal delay-1">
+        <p class="meta">A strategic analysis of how FairGig is dismantling the Discovery Fallacy in live music through
+          financial transparency, data-driven simulators, and audited settlements.</p>
+      </div>
+      <div class="hero-tags reveal delay-2">
+        <span>#Live Music Economics</span>
+        <span>#FairGig</span>
+        <span>#Music Industry Strategy</span>
+        <span>#Artist Solvency</span>
+        <span>#FinTech</span>
+        <span>#Music Technology</span>
+      </div>
+    </section>
+
+    <!-- INTRO TEXT -->
+    <section class="container text-block" style="padding-top: 6rem; padding-bottom: 6rem; max-width: 900px;">
+      <p class="reveal interactive">For decades, the live music industry has operated under the shadow of "The Discovery
+        Fallacy." This pervasive misconception suggests that the primary hurdle for independent artists is discovery—the
+        idea that if only more fans could find them, their financial woes would vanish. However, industry veterans and
+        data-driven analysts are beginning to expose a much darker reality: the actual crisis is one of economic opacity
+        and a systemic lack of standardized financial tools.</p>
+      <p class="reveal delay-1 interactive">While platforms like Bandsintown and Eventbrite focus on marketing and
+        ticketing, they leave the underlying economic settlement—the actual flow of money between venue and artist—in a
+        state of primitive chaos. The current live music economy is characterized by fragmented communication,
+        "handshake" deals made via text or email, and a total absence of an immutable audit trail. This environment
+        allows for a predatory <span class="highlight">"Risk Shift,"</span> where venues insulate themselves from loss
+        by pushing 100% of the financial downside onto the talent. FairGig emerges not as another discovery tool, but as
+        a <span class="highlight">"Financial Truth Layer"</span>—a strategic operating system designed to replace blind
+        hope with mathematical certainty.</p>
+    </section>
+
+    <!-- SECTION 2: OPACITY -->
+    <section class="split-section">
+      <div class="split-sticky">
+        <div class="mono-label reveal"></div>
+        <h2 class="hero-text reveal delay-1" style="font-size: 4rem; margin-top: 1rem;">The Anatomy of<br>Market Opacity
+          and<br><span class="highlight">Risk Displacement</span></h2>
+      </div>
+      <div class="split-content">
+        <div class="text-block reveal interactive">
+          <p>The traditional live music industry is built on a foundation of information asymmetry. Venues and promoters
+            often maintain dominance by obscuring the financial realities of a show until after the performance is over.
+            This lack of transparency manifests in several destructive ways:</p>
+          <ul>
+            <li class="reveal"><strong>Hidden Production Fees:</strong> Frequently clawed back from gross earnings
+              without prior itemization, covering venue overhead like sound, lighting, and security.</li>
+            <li class="reveal"><strong>Pay-to-Play Models:</strong> Forcing artists to act as the venue's primary sales
+              force, requiring upfront ticket purchases or minimum guarantees that ensure the house wins even if the
+              room is empty.</li>
+            <li class="reveal"><strong>Opaque Settlement:</strong> Final payouts are often calculated in informal
+              settings—frequently at 2 AM in a loud club—making it nearly impossible for an artist to audit the math or
+              dispute a discrepancy.</li>
+          </ul>
+          <p class="reveal mt-8">This "Risk Shift" model treats artist-borne fees as a guaranteed revenue floor for the
+            venue. When a show underperforms, the artist absorbs the debt while the venue remains protected. FairGig’s
+            mission is to penetrate this settlement layer and replace these predatory practices with a structured,
+            data-driven framework.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- SECTION 3: FIVE PILLARS -->
+    <section class="split-section">
+      <div class="split-sticky" style="padding: 0;">
+        <img src="./images/visual-2(2).png" alt="FairGig App in Venue" class="sticky-image interactive"
+          style="height: 100vh;">
+      </div>
+      <div class="split-content">
+        <div class="text-block">
+          <div class="mono-label reveal"></div>
+          <h2 class="reveal delay-1 interactive">The Five Pillars of the Financial Operating System</h2>
+          <p class="reveal delay-2 interactive">To address these systemic failures, FairGig has developed a "Strategic
+            Wedge" in the form of a Financial Operating System. Unlike generic solutions that focus on the "fan
+            experience," FairGig focuses on artist solvency. The platform is built on five functional pillars designed
+            to provide measurable trust:</p>
+
+          <ul>
+            <li class="reveal interactive"><strong>Home Dashboard:</strong> A centralized command center that tracks key
+              performance metrics and historical financial health.</li>
+            <li class="reveal interactive"><strong>Deal Engine:</strong> A tool using standardized input parameters to
+              turn vague verbal promises into structured financial data.</li>
+            <li class="reveal interactive"><strong>Show Simulator:</strong> The core differentiator that allows artists
+              to model payouts before signing a contract.</li>
+            <li class="reveal interactive"><strong>Settlement System:</strong> An automated post-show financial
+              waterfall that removes human error and disputes.</li>
+            <li class="reveal interactive"><strong>Reputation Layer:</strong> A system of fairness scores and artist
+              ratings that makes venue behavior measurable and public.</li>
+          </ul>
+          <p class="reveal interactive">By integrating these pillars, FairGig transforms the live music deal from a
+            risky gamble into a professional, audited transaction.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- SECTION 4: MATH -->
+    <section class="split-section" style="flex-direction: row-reverse;">
+      <div class="split-sticky" style="padding: 0;">
+        <img src="./images/visual-3(2).png" alt="Data Processing Simulator" class="sticky-image interactive"
+          style="height: 100vh;">
+      </div>
+      <div class="split-content">
+        <div class="text-block">
+          <div class="mono-label reveal"></div>
+          <h2 class="reveal delay-1 interactive">Weaponizing the Math:<br>The Show Economics Simulator</h2>
+          <p class="reveal delay-2 interactive">The Show Economics Simulator is the primary tool for mitigating
+            financial ambiguity. It allows artists to replace "blind hope" with a mathematical proof of a show’s
+            reality. By inputting variables such as ticket price, deal type (guarantee vs. split), and exact production
+            fees, the engine runs instant calculations for three scenarios: the Empty Room, the Likely Crowd, and the
+            Sold Out show.</p>
+
+          <div class="code-window reveal delay-3 interactive">
+            <div class="code-header">
+              <div class="code-dot"></div>
+              <div class="code-dot"></div>
+              <div class="code-dot"></div>
+              <span class="mono-label" style="margin-left:auto; font-size: 0.6rem; color: #8b949e;">python</span>
+            </div>
+            <pre><code>
+<span class="syntax-comment"># The FairGig Break-Even Logic</span>
+<span class="syntax-keyword">def</span> <span class="syntax-function">calculate_break_even</span>(fees, production_cost, ticket_price):
+    <span class="syntax-string">"""
+    Calculates the number of tickets required to cover all costs.
+    """</span>
+    total_overhead = fees + production_cost
+    break_even_tickets = total_overhead / ticket_price
+    <span class="syntax-keyword">return</span> break_even_tickets
+
+<span class="syntax-comment"># Example: $400 venue fee + $400 marketing cost at a $10 ticket price</span>
+<span class="syntax-comment"># Result: 80 tickets required just to reach $0 net profit.</span>
+          </code></pre>
+          </div>
+
+          <p class="reveal interactive">By using this simulator, artists can "weaponize" their known audience draw. If
+            an artist can prove a consistent draw of 200 fans, they no longer have to accept opaque club rates; they can
+            demand higher percentage splits or upfront guarantees based on projected revenue data. This shifts the
+            negotiation from a plea for opportunity to a data-backed business proposal.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- SECTION 5: SCALING -->
+    <section class="split-section">
+      <div class="split-sticky">
+        <div class="mono-label reveal"></div>
+        <h2 class="hero-text reveal delay-1" style="font-size: 3rem; margin-top: 1rem;">The Reputational Premium &
+          Market Adoption</h2>
+      </div>
+      <div class="split-content">
+        <div class="text-block interactive">
+          <p class="reveal">FairGig employs a unique market mechanism to overcome the hurdle of venue adoption. The
+            strategy is built on a growth flywheel that starts with the artists. By offering the simulation and
+            deal-tracking tools to artists for free, FairGig builds a massive supply-side user base.</p>
+          <p class="reveal delay-1">Once a significant portion of the talent pool expects financial transparency, a
+            venue’s absence from the platform becomes a reputational cost—a signal to artists that the venue may be
+            hiding costs or providing unreliable payouts. This creates a forced choice for venues: adopt the platform to
+            attract high-quality talent, or remain opaque and lose their supply of artists to competitors who prove
+            their deals are fair. The Reputation Layer further enforces this by tracking "Fairness Scores" and "Payout
+            Reliability." Promoters who are honest about their costs actually benefit from this system, as it builds
+            long-term trust and loyalty with the artists they book.</p>
+        </div>
+
+        <div class="text-block interactive">
+          <h3 class="reveal highlight" style="margin-bottom: 1rem;">Strategic Scaling: From Utility to Enterprise SaaS
+          </h3>
+          <p class="reveal">The FairGig business model is designed for scalable monetization across three distinct
+            phases:</p>
+          <ul>
+            <li class="reveal"><strong>Phase 1 (User Acquisition):</strong> Offering the MVP as a free utility for
+              artists, seeding the ecosystem with informed talent.</li>
+            <li class="reveal"><strong>Phase 2 (Platform Monetization):</strong> Introducing a 2-5% per-show settlement
+              fee and premium venue profiles for those looking to attract top-tier acts.</li>
+            <li class="reveal"><strong>Phase 3 (Enterprise SaaS):</strong> Expanding into a full model for promoters and
+              venues, offering advanced financial reporting, CRM tools, and fan monetization features.</li>
+          </ul>
+          <p class="reveal">This roadmap ensures that FairGig doesn't just solve a temporary problem, but becomes the
+            permanent infrastructure for the live music economy. The platform’s development is guided by industry
+            veterans like Cliff Franco, whose 15+ years of experience fronting bands like The Pursuit and The Struggs
+            provide the necessary "on-the-ground" context to ensure the software solves real-world pain points.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- SECTION 6: CONCLUSION -->
+    <section class="conclusion relative interactive">
+      <div class="absolute inset-0 z-0 opacity-10">
+        <img src="./images/visual-4(2).png" alt="New Infrastructure"
+          style="width:100%; height:100%; object-fit:cover; filter: grayscale(100%);">
+      </div>
+      <div class="relative z-10">
+        <div class="mono-label reveal mb-4"></div>
+        <h2 class="hero-text reveal delay-1">The era of the "handshake deal" is coming to an end.</h2>
+        <p class="reveal delay-2 mt-8 mx-auto text-muted" style="max-width: 800px; font-size: 1.25rem;">
+          FairGig represents a fundamental shift in the live music industry—a move away from the vanity metrics of
+          discovery and toward the essential metrics of solvency. By creating a <span class="highlight">"Financial Truth
+            Layer,"</span> the platform empowers artists to protect their livelihoods through mathematical rigor and
+          transparency. In the new landscape established by FairGig, the industry standard is simple: <strong
+            style="color:#fff;">before you guessed, now you know.</strong>
+        </p>
+      </div>
+    </section>
+  </main>
+
+  <script>
+    // Custom Cursor Logic
+    const cursor = document.getElementById('cursor');
+    const interactives = document.querySelectorAll('.interactive, a, button');
+
+    document.addEventListener('mousemove', (e) => {
+      cursor.style.left = e.clientX + 'px';
+      cursor.style.top = e.clientY + 'px';
+    });
+
+    interactives.forEach(el => {
+      el.addEventListener('mouseenter', () => cursor.classList.add('hovered'));
+      el.addEventListener('mouseleave', () => cursor.classList.remove('hovered'));
+    });
+
+    // Scroll Progress Bar
+    window.addEventListener('scroll', () => {
+      const winScroll = document.body.scrollTop || document.documentElement.scrollTop;
+      const height = document.documentElement.scrollHeight - document.documentElement.clientHeight;
+      const scrolled = (winScroll / height) * 100;
+      document.getElementById('progress-bar').style.width = scrolled + '%';
+    });
+
+    // Intersection Observer for Reveal Animations
+    const observerOptions = {
+      root: null,
+      rootMargin: '0px',
+      threshold: 0.15
+    };
+
+    const observer = new IntersectionObserver((entries, observer) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          entry.target.classList.add('active');
+          // Optional: Stop observing once revealed
+          // observer.unobserve(entry.target);
+        }
+      });
+    }, observerOptions);
+
+    document.querySelectorAll('.reveal').forEach(el => {
+      observer.observe(el);
+    });
+  </script>
+</body>
+
+</html>

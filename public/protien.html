@@ -1,0 +1,692 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Protein Sequence Preprocessing</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:ital,wght@0,100..800;1,100..800&family=Space+Grotesk:wght@300..700&display=swap');
+
+    :root {
+      --bg-color: #030712;
+      --text-primary: #f3f4f6;
+      --text-secondary: #9ca3af;
+      --accent: #06b6d4;
+      --accent-dim: rgba(6, 182, 212, 0.2);
+      --grid-line: rgba(255, 255, 255, 0.05);
+      --font-head: 'Space Grotesk', sans-serif;
+      --font-mono: 'JetBrains Mono', monospace;
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      cursor: none;
+    }
+
+    body {
+      background-color: var(--bg-color);
+      color: var(--text-primary);
+      font-family: var(--font-mono);
+      overflow-x: hidden;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    /* Custom Cursor */
+    #cursor {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 24px;
+      height: 24px;
+      border: 1px solid var(--accent);
+      transform: translate(-50%, -50%);
+      pointer-events: none;
+      z-index: 9999;
+      transition: width 0.2s, height 0.2s, background-color 0.2s;
+      mix-blend-mode: difference;
+    }
+
+    #cursor::before,
+    #cursor::after {
+      content: '';
+      position: absolute;
+      background: var(--accent);
+    }
+
+    #cursor::before {
+      top: 50%;
+      left: -4px;
+      right: -4px;
+      height: 1px;
+    }
+
+    #cursor::after {
+      left: 50%;
+      top: -4px;
+      bottom: -4px;
+      width: 1px;
+    }
+
+    /* Grid Background */
+    .bg-grid {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
+      background-image: linear-gradient(var(--grid-line) 1px, transparent 1px),
+        linear-gradient(90deg, var(--grid-line) 1px, transparent 1px);
+      background-size: 40px 40px;
+      z-index: -2;
+    }
+
+    /* Noise Overlay */
+    .noise-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+      z-index: -1;
+      opacity: 0.4;
+      filter: url(#noiseFilter);
+    }
+
+    /* Scroll Progress */
+    .progress-container {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 2px;
+      background: rgba(255, 255, 255, 0.1);
+      z-index: 1000;
+    }
+
+    .progress-bar {
+      height: 100%;
+      background: var(--accent);
+      width: 0%;
+      box-shadow: 0 0 10px var(--accent);
+    }
+
+    /* Typography */
+    h1,
+    h2,
+    h3 {
+      font-family: var(--font-head);
+      text-transform: uppercase;
+      letter-spacing: -0.02em;
+    }
+
+    h1 {
+      font-size: clamp(3rem, 6vw, 7rem);
+      line-height: 0.9;
+      font-weight: 700;
+      margin-bottom: 2rem;
+    }
+
+    h2 {
+      font-size: clamp(1.5rem, 3vw, 2.5rem);
+      font-weight: 500;
+      color: var(--accent);
+      margin-bottom: 1.5rem;
+      border-bottom: 1px solid var(--accent-dim);
+      padding-bottom: 0.5rem;
+      display: inline-block;
+    }
+
+    h3 {
+      font-size: 1.2rem;
+      color: var(--text-primary);
+      margin: 2rem 0 1rem 0;
+      position: relative;
+      padding-left: 1rem;
+    }
+
+    h3::before {
+      content: '>';
+      position: absolute;
+      left: 0;
+      color: var(--accent);
+    }
+
+    p,
+    li {
+      font-size: 0.9rem;
+      line-height: 1.6;
+      color: var(--text-secondary);
+      margin-bottom: 1rem;
+    }
+
+    ul {
+      list-style-type: none;
+    }
+
+    li {
+      position: relative;
+      padding-left: 1.5rem;
+    }
+
+    li::before {
+      content: '-';
+      position: absolute;
+      left: 0;
+      color: var(--accent);
+    }
+
+    strong {
+      color: var(--text-primary);
+      font-weight: 700;
+    }
+
+    code {
+      background: rgba(255, 255, 255, 0.05);
+      padding: 0.2em 0.4em;
+      color: var(--accent);
+      font-family: var(--font-mono);
+      font-size: 0.85em;
+      border: 1px solid rgba(255, 255, 255, 0.1);
+    }
+
+    /* Layout */
+    .container {
+      max-width: 1440px;
+      margin: 0 auto;
+      padding: 0 2rem;
+    }
+
+    .section {
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      padding: 6rem 0;
+      border-bottom: 1px solid var(--grid-line);
+    }
+
+    .grid-2 {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 4rem;
+      align-items: center;
+    }
+
+    @media (max-width: 900px) {
+      .grid-2 {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    /* UI Elements */
+    .spec-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-end;
+      border-bottom: 1px solid var(--accent);
+      padding-bottom: 1rem;
+      margin-bottom: 4rem;
+      font-size: 0.8rem;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      color: var(--accent);
+    }
+
+    /* Table Design */
+    .tech-table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 2rem 0;
+      font-size: 0.85rem;
+    }
+
+    .tech-table th,
+    .tech-table td {
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      padding: 1rem;
+      text-align: left;
+    }
+
+    .tech-table th {
+      background: rgba(255, 255, 255, 0.02);
+      color: var(--accent);
+      font-family: var(--font-head);
+      font-weight: 500;
+    }
+
+    /* Image Treatment */
+    .img-container {
+      position: relative;
+      overflow: hidden;
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      background: #000;
+    }
+
+    .img-container::after {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: var(--accent);
+      mix-blend-mode: overlay;
+      opacity: 0.3;
+      pointer-events: none;
+    }
+
+    .img-container img {
+      width: 100%;
+      height: auto;
+      display: block;
+      filter: grayscale(100%) contrast(1.2);
+      transition: transform 0.5s cubic-bezier(0.2, 0.8, 0.2, 1);
+    }
+
+    .img-container:hover img {
+      transform: scale(1.05);
+    }
+
+    .scanner-line {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 2px;
+      background: var(--accent);
+      box-shadow: 0 0 10px var(--accent);
+      opacity: 0.5;
+      animation: scan 4s linear infinite;
+      pointer-events: none;
+      z-index: 2;
+    }
+
+    @keyframes scan {
+      0% {
+        top: -10%;
+      }
+
+      100% {
+        top: 110%;
+      }
+    }
+
+    /* Animations */
+    .reveal {
+      opacity: 0;
+      transform: translateY(30px);
+      transition: opacity 0.8s cubic-bezier(0.2, 0.8, 0.2, 1), transform 0.8s cubic-bezier(0.2, 0.8, 0.2, 1);
+    }
+
+    .reveal.active {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    .stagger-1 {
+      transition-delay: 0.1s;
+    }
+
+    .stagger-2 {
+      transition-delay: 0.2s;
+    }
+
+    .stagger-3 {
+      transition-delay: 0.3s;
+    }
+
+    .glitch-text {
+      position: relative;
+    }
+
+    .glitch-text::before,
+    .glitch-text::after {
+      content: attr(data-text);
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      opacity: 0;
+    }
+
+    .glitch-text:hover::before {
+      left: 2px;
+      text-shadow: -2px 0 red;
+      animation: glitch-anim-1 2s infinite linear alternate-reverse;
+      opacity: 1;
+    }
+
+    .glitch-text:hover::after {
+      left: -2px;
+      text-shadow: -2px 0 blue;
+      animation: glitch-anim-2 3s infinite linear alternate-reverse;
+      opacity: 1;
+    }
+
+    @keyframes glitch-anim-1 {
+      0% {
+        clip-path: inset(20% 0 80% 0);
+      }
+
+      20% {
+        clip-path: inset(60% 0 10% 0);
+      }
+
+      40% {
+        clip-path: inset(40% 0 50% 0);
+      }
+
+      60% {
+        clip-path: inset(80% 0 5% 0);
+      }
+
+      80% {
+        clip-path: inset(10% 0 70% 0);
+      }
+
+      100% {
+        clip-path: inset(30% 0 20% 0);
+      }
+    }
+
+    @keyframes glitch-anim-2 {
+      0% {
+        clip-path: inset(10% 0 60% 0);
+      }
+
+      20% {
+        clip-path: inset(30% 0 20% 0);
+      }
+
+      40% {
+        clip-path: inset(70% 0 10% 0);
+      }
+
+      60% {
+        clip-path: inset(20% 0 50% 0);
+      }
+
+      80% {
+        clip-path: inset(50% 0 30% 0);
+      }
+
+      100% {
+        clip-path: inset(5% 0 80% 0);
+      }
+    }
+
+    .footer-meta {
+      display: flex;
+      justify-content: space-between;
+      padding: 2rem 0;
+      font-size: 0.75rem;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: var(--text-secondary);
+      border-top: 1px solid var(--grid-line);
+    }
+  </style>
+</head>
+
+<body>
+
+  <svg width="0" height="0" style="position:absolute;z-index:-1;">
+    <defs>
+      <filter id="noiseFilter">
+        <feTurbulence type="fractalNoise" baseFrequency="0.8" numOctaves="3" stitchTiles="stitch">
+          <animate attributeName="seed" from="0" to="100" dur="5s" repeatCount="indefinite" />
+        </feTurbulence>
+        <feColorMatrix type="matrix" values="1 0 0 0 0, 0 1 0 0 0, 0 0 1 0 0, 0 0 0 0.1 0" />
+      </filter>
+    </defs>
+  </svg>
+
+  <div id="cursor"></div>
+  <div class="bg-grid"></div>
+  <div class="noise-overlay"></div>
+
+  <div class="progress-container">
+    <div class="progress-bar" id="progress-bar"></div>
+  </div>
+
+  <div class="container">
+
+    <!-- HERO SECTION -->
+    <section class="section">
+      <div class="spec-header reveal">
+        <span>Technical Specification</span>
+        <span>v_1.0.0</span>
+      </div>
+      <h1 class="glitch-text reveal stagger-1" data-text="Protein Sequence Preprocessing">Protein Sequence Preprocessing
+      </h1>
+      <h1 class="reveal stagger-2" style="color: var(--accent);">and Feature Extraction Layer</h1>
+    </section>
+
+    <!-- SECTION 1 & 2 -->
+    <section class="section grid-2">
+      <div class="content-block">
+        <div class="reveal">
+          <h2>1. Scope</h2>
+          <p>This specification details the design and implementation of the sequence preprocessing and feature
+            extraction layer optimized for predicting Gene Ontology Molecular Function (MF) terms.</p>
+        </div>
+        <div class="reveal stagger-1" style="margin-top: 3rem;">
+          <h2>2. Selected Embedding Strategy</h2>
+          <p>Following a comparative analysis of One-hot+CNN, ESM-2, and ProtT5, the <strong>ProtT5-XL</strong>
+            (encoder-only) architecture is selected as the primary feature extractor for maximum predictive accuracy in
+            multi-label classification. <strong>ESM-2 (t33_650M_UR50D)</strong> is designated as the fallback for
+            environments with constrained computational resources.</p>
+        </div>
+      </div>
+      <div class="img-container reveal stagger-2">
+        <div class="scanner-line"></div>
+        <img src="./images/scene-11.jpg" alt="Protein Neural Network Analytics Interface">
+      </div>
+    </section>
+
+    <!-- SECTION 3: Workflow P1 -->
+    <section class="section grid-2">
+      <div class="img-container reveal">
+        <div class="scanner-line" style="animation-delay: -1s;"></div>
+        <img src="./images/scene12.jpg" alt="Data Sanitization in Progress">
+      </div>
+      <div class="content-block">
+        <h2 class="reveal stagger-1">3. Sequence Preprocessing Workflow</h2>
+
+        <div class="reveal stagger-2">
+          <h3>3.1 Data Sanitization</h3>
+          <ul>
+            <li><strong>Canonicalization:</strong> Map non-standard amino acids (U, Z, B, O) to 'X'.</li>
+            <li><strong>Filtering:</strong> Remove sequences shorter than 30 residues to avoid noise from fragments.
+            </li>
+            <li><strong>Format:</strong> Input strings in FASTA or direct sequence arrays.</li>
+          </ul>
+        </div>
+
+        <div class="reveal stagger-3">
+          <h3>3.2 Tokenization</h3>
+          <ul>
+            <li>Use model-specific tokenizers (<code>T5Tokenizer</code> for ProtT5; <code>EsmTokenizer</code> for
+              ESM-2).</li>
+            <li>Add specific tokens: <code>&lt;cls&gt;</code> or <code>&lt;s&gt;</code> for start-of-sequence and
+              <code>&lt;/s&gt;</code> or <code>&lt;eos&gt;</code> for end-of-sequence as required by the model.</li>
+            <li>Spaces: For ProtT5, add a space between each amino acid residue (e.g., "M E T...").</li>
+          </ul>
+        </div>
+      </div>
+    </section>
+
+    <!-- SECTION 3: Workflow P2 -->
+    <section class="section grid-2">
+      <div class="content-block reveal">
+        <h3>3.3 Batching and Padding</h3>
+        <ul>
+          <li><strong>Dynamic Padding:</strong> Pad sequences within a batch to the length of the longest sequence in
+            that batch using zero-padding.</li>
+          <li><strong>Max Length Handling:</strong> Hard limit at <strong>1024 residues</strong> for standard inference.
+            For sequences >1024, apply a sliding window (1024 window, 512 stride) and average the resulting embeddings.
+          </li>
+        </ul>
+      </div>
+      <div class="img-container reveal stagger-1">
+        <div class="scanner-line" style="animation-delay: -2s;"></div>
+        <img src="./images/scene13.jpg" alt="Sliding Window Mechanism">
+      </div>
+    </section>
+
+    <!-- SECTION 4: Feature Extraction -->
+    <section class="section">
+      <h2 class="reveal">4. Feature Extraction (Embedding Layer)</h2>
+      <div class="grid-2" style="margin-top: 2rem;">
+        <div class="reveal stagger-1">
+          <h3>4.1 Model Configurations</h3>
+          <table class="tech-table">
+            <thead>
+              <tr>
+                <th>Parameter</th>
+                <th>Primary Model (ProtT5-XL)</th>
+                <th>Efficient Model (ESM-2 650M)</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><strong>Model ID</strong></td>
+                <td><code>Rostlab/prot_t5_xl_uniref50</code></td>
+                <td><code>facebook/esm2_t33_650M_UR50D</code></td>
+              </tr>
+              <tr>
+                <td><strong>Architecture</strong></td>
+                <td>Transformer (Encoder-only)</td>
+                <td>Transformer (Encoder-only)</td>
+              </tr>
+              <tr>
+                <td><strong>Output Dim</strong></td>
+                <td>1024</td>
+                <td>1280</td>
+              </tr>
+              <tr>
+                <td><strong>Precision</strong></td>
+                <td>float16 / bfloat16</td>
+                <td>float16 / float32</td>
+              </tr>
+            </tbody>
+          </table>
+
+          <h3 style="margin-top: 3rem;">4.2 Layer Selection & Pooling</h3>
+          <ul>
+            <li><strong>Extraction Layer:</strong> Extract representations from the <strong>last hidden layer</strong>.
+            </li>
+            <li><strong>Pooling Strategy:</strong> <strong>Global Average Pooling (Mean Pooling)</strong> across the
+              residue dimension (ignoring pad/special tokens).</li>
+            <li><strong>Resulting Vector:</strong> A single fixed-size dense vector representing the global functional
+              context of the protein.</li>
+          </ul>
+        </div>
+        <div class="img-container reveal stagger-2">
+          <div class="scanner-line" style="animation-delay: -0.5s;"></div>
+          <img src="./images/scene-14.jpg" alt="Transformer Layers Visualization">
+        </div>
+      </div>
+    </section>
+
+    <!-- SECTION 5 & 6 -->
+    <section class="section grid-2">
+      <div class="content-block reveal">
+        <h2>5. Implementation Requirements</h2>
+        <h3>5.1 Software Dependencies</h3>
+        <ul>
+          <li><code>python &gt;= 3.8</code></li>
+          <li><code>pytorch &gt;= 1.12</code></li>
+          <li><code>transformers &gt;= 4.20</code></li>
+          <li><code>fair-esm</code> (for ESM-2 support)</li>
+        </ul>
+
+        <h3 style="margin-top: 2rem;">5.2 Hardware Targets</h3>
+        <ul>
+          <li><strong>Inference (ProtT5-XL):</strong> NVIDIA A100 (40GB/80GB) or RTX 3090/4090 (24GB) using
+            <code>half()</code> precision.</li>
+          <li><strong>Inference (ESM-2 650M):</strong> NVIDIA RTX 3060 (12GB) or higher.</li>
+          <li><strong>Latency Target:</strong> &lt; 50ms per protein (batched) on modern GPUs.</li>
+        </ul>
+      </div>
+
+      <div class="content-block reveal stagger-1">
+        <h2>6. Efficiency vs. Performance</h2>
+        <div class="img-container" style="margin-bottom: 2rem;">
+          <div class="scanner-line" style="animation-delay: -1.5s;"></div>
+          <img src="./images/scene15.jpg" alt="NVIDIA A100 GPU Performance Metrics">
+        </div>
+        <ul>
+          <li><strong>ProtT5-XL:</strong> ~0.80 Fmax (MF); Highest memory requirement.</li>
+          <li><strong>ESM-2 (650M):</strong> ~0.76 Fmax (MF); High efficiency, compatible with standard workstations.
+          </li>
+          <li><strong>CNN (One-hot):</strong> ~0.50 Fmax (MF); Baseline performance, only suitable for ultra-low latency
+            requirements.</li>
+        </ul>
+      </div>
+    </section>
+
+    <footer class="footer-meta reveal">
+      <span>Date of Specification: 2024-05-22</span>
+      <span>Category: Molecular Function Prediction Pipeline</span>
+    </footer>
+
+  </div>
+
+  <script>
+    // Custom Cursor Interaction
+    const cursor = document.getElementById('cursor');
+
+    document.addEventListener('mousemove', (e) => {
+      cursor.style.left = e.clientX + 'px';
+      cursor.style.top = e.clientY + 'px';
+    });
+
+    document.querySelectorAll('a, button, code, img').forEach(el => {
+      el.addEventListener('mouseenter', () => {
+        cursor.style.transform = 'translate(-50%, -50%) scale(1.5)';
+        cursor.style.backgroundColor = 'rgba(6, 182, 212, 0.2)';
+      });
+      el.addEventListener('mouseleave', () => {
+        cursor.style.transform = 'translate(-50%, -50%) scale(1)';
+        cursor.style.backgroundColor = 'transparent';
+      });
+    });
+
+    // Scroll Progress
+    window.addEventListener('scroll', () => {
+      const winScroll = document.body.scrollTop || document.documentElement.scrollTop;
+      const height = document.documentElement.scrollHeight - document.documentElement.clientHeight;
+      const scrolled = (winScroll / height) * 100;
+      document.getElementById('progress-bar').style.width = scrolled + "%";
+    });
+
+    // Intersection Observer for Scroll Reveals
+    const observerOptions = {
+      root: null,
+      rootMargin: '0px 0px -15% 0px',
+      threshold: 0.1
+    };
+
+    const observer = new IntersectionObserver((entries, observer) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          entry.target.classList.add('active');
+          observer.unobserve(entry.target); // Only animate once
+        }
+      });
+    }, observerOptions);
+
+    document.querySelectorAll('.reveal').forEach((el) => {
+      observer.observe(el);
+    });
+  </script>
+
+</body>
+
+</html>

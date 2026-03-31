@@ -5,6 +5,13 @@ import Link from 'next/link';
 
 const articles = [
   {
+    title: "Multimodal Diagnostic Briefing (v7)",
+    description: "The complete technical blueprint. Acoustic fingerprinting, RAG-grounded repairs, and the future of mechanical agency.",
+    href: "/listen-and-fix7.html",
+    icon: "📡",
+    accent: "from-blue-500/20 to-indigo-500/20"
+  },
+  {
     title: "Listen & Fix: The Mission",
     description: "Shazam for broken machines. An AI-powered diagnostic and repair platform ending the monopoly on technical knowledge.",
     href: "/listen-&-fix.html",
@@ -17,13 +24,6 @@ const articles = [
     href: "/listen-&-fix2.html",
     icon: "⚡",
     accent: "from-cyan-500/20 to-blue-500/20"
-  },
-  {
-    title: "Shazam for Engines (v2.4)",
-    description: "Upload audio, video, or images of any mechanical failure. Our AI diagnoses the issue, cross-references service manuals, and delivers safety-verified repair instructions.",
-    href: "/listen-&-fix3.html",
-    icon: "🎙️",
-    accent: "from-amber-500/20 to-green-500/20"
   }
 ];
 

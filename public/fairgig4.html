@@ -1,0 +1,714 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>The Artist's Guide to the Fight</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&family=Oswald:wght@500;700&display=swap');
+
+    :root {
+      --bg: #050505;
+      --fg: #F4F4F4;
+      --accent: #E63946;
+      --muted: #444444;
+      --hero-font: 'Oswald', sans-serif;
+      --body-font: 'Inter', sans-serif;
+      --spacing: clamp(1rem, 4vw, 3rem);
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      cursor: none !important;
+    }
+
+    body {
+      background-color: var(--bg);
+      color: var(--fg);
+      font-family: var(--body-font);
+      overflow: hidden;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    /* SVG Filter Overlay */
+    .noise-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
+      pointer-events: none;
+      z-index: 9999;
+      opacity: 0.35;
+      mix-blend-mode: overlay;
+    }
+
+    /* Custom Cursor */
+    .cursor {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 20px;
+      height: 20px;
+      background: var(--accent);
+      border-radius: 50%;
+      pointer-events: none;
+      z-index: 10000;
+      transform: translate(-50%, -50%);
+      transition: width 0.2s, height 0.2s, background 0.2s;
+      mix-blend-mode: difference;
+    }
+
+    body:active .cursor {
+      width: 40px;
+      height: 40px;
+      background: #fff;
+    }
+
+    /* UI Chrome / Navigation */
+    .tracker {
+      position: fixed;
+      top: var(--spacing);
+      right: var(--spacing);
+      font-family: var(--hero-font);
+      font-size: 1.5rem;
+      letter-spacing: 0.1em;
+      z-index: 100;
+      mix-blend-mode: difference;
+    }
+
+    .scroll-prompt {
+      position: fixed;
+      bottom: var(--spacing);
+      left: var(--spacing);
+      font-size: 0.75rem;
+      text-transform: uppercase;
+      letter-spacing: 0.2em;
+      color: var(--muted);
+      z-index: 100;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .scroll-line {
+      width: 40px;
+      height: 1px;
+      background: var(--muted);
+      overflow: hidden;
+      position: relative;
+    }
+
+    .scroll-line::after {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: var(--accent);
+      animation: scroll-hint 2s cubic-bezier(0.77, 0, 0.175, 1) infinite;
+    }
+
+    @keyframes scroll-hint {
+      0% {
+        transform: translateX(-100%);
+      }
+
+      100% {
+        transform: translateX(100%);
+      }
+    }
+
+    /* Carousel Container */
+    .carousel {
+      display: flex;
+      width: 100vw;
+      height: 100vh;
+      overflow-x: auto;
+      overflow-y: hidden;
+      scroll-snap-type: x mandatory;
+      scrollbar-width: none;
+      -ms-overflow-style: none;
+    }
+
+    .carousel::-webkit-scrollbar {
+      display: none;
+    }
+
+    /* Panel Base */
+    .panel {
+      flex: 0 0 100vw;
+      width: 100vw;
+      height: 100vh;
+      scroll-snap-align: start;
+      position: relative;
+      padding: var(--spacing);
+      padding-top: calc(var(--spacing) * 3);
+      display: grid;
+      grid-template-columns: repeat(12, 1fr);
+      grid-template-rows: auto 1fr;
+      gap: 20px;
+      overflow: hidden;
+    }
+
+    /* Typography Hierarchy */
+    .label {
+      font-size: 0.75rem;
+      text-transform: uppercase;
+      letter-spacing: 0.15em;
+      color: var(--accent);
+      grid-column: 1 / -1;
+    }
+
+    h1,
+    h2 {
+      font-family: var(--hero-font);
+      text-transform: uppercase;
+      line-height: 0.85;
+      grid-column: 1 / -1;
+      margin-bottom: 2rem;
+      color: var(--fg);
+    }
+
+    h1 {
+      font-size: clamp(3rem, 7vw, 8rem);
+      letter-spacing: -0.02em;
+    }
+
+    h2 {
+      font-size: clamp(2rem, 5vw, 5rem);
+      letter-spacing: -0.01em;
+      max-width: 14ch;
+    }
+
+    .body-text {
+      grid-column: 1 / 7;
+      font-size: clamp(1rem, 1.2vw, 1.25rem);
+      line-height: 1.6;
+      color: #ccc;
+      display: flex;
+      flex-direction: column;
+      gap: 1.5rem;
+      max-width: 50ch;
+      align-self: end;
+      padding-bottom: calc(var(--spacing) * 2);
+    }
+
+    .body-text strong,
+    .body-text em {
+      color: var(--accent);
+      font-style: normal;
+      font-weight: 700;
+    }
+
+    /* Animation Classes */
+    .reveal-wrap {
+      overflow: hidden;
+      display: block;
+    }
+
+    .reveal-text {
+      display: block;
+      transform: translateY(100%);
+      transition: transform 0.8s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    .fade-up {
+      opacity: 0;
+      transform: translateY(20px);
+      transition: opacity 0.8s ease, transform 0.8s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    .panel.is-active .reveal-text {
+      transform: translateY(0);
+    }
+
+    .panel.is-active .fade-up {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    .stagger-1 {
+      transition-delay: 0.1s;
+    }
+
+    .stagger-2 {
+      transition-delay: 0.2s;
+    }
+
+    .stagger-3 {
+      transition-delay: 0.3s;
+    }
+
+    .stagger-4 {
+      transition-delay: 0.4s;
+    }
+
+    /* Panel Specifics */
+
+    /* Panel 1: The Delusion */
+    .p1-bg {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-image: url('./images/scene-11(10).jpg');
+      background-size: cover;
+      background-position: center;
+      opacity: 0.15;
+      filter: grayscale(100%) contrast(150%);
+      z-index: -1;
+    }
+
+    .panel-1 h1 {
+      color: var(--accent);
+    }
+
+    .panel-1 .title-white {
+      color: var(--fg);
+    }
+
+    /* Panel 2: Settlement Waterfall */
+    .panel-2 {
+      /* Background removed to allow z-index: -1 images to show */
+    }
+
+    .p2-bg {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-color: #0A0A0A;
+      z-index: -2;
+    }
+
+    .panel-2 h2 {
+      filter: url(#liquid);
+    }
+
+    .p2-img-wrap {
+      position: absolute;
+      top: 0;
+      right: 0;
+      width: 45vw;
+      height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: -1;
+    }
+
+    .p2-img {
+      width: 100%;
+      height: 80%;
+      background-image: url('./images/scene-12(10).jpg');
+      background-size: cover;
+      background-position: center;
+      border: 1px solid var(--accent);
+      filter: grayscale(100%) sepia(100%) hue-rotate(-50deg) saturate(400%) contrast(1.2);
+    }
+
+    /* Panel 3: Weaponizing Math */
+    .panel-3 {
+      border-left: 1px solid var(--muted);
+    }
+
+    .panel-3 .body-text {
+      grid-column: 6 / 12;
+      align-self: center;
+    }
+
+    .panel-3 h2 {
+      grid-column: 1 / 6;
+      writing-mode: vertical-rl;
+      transform: scale(-1);
+      font-size: clamp(4rem, 10vw, 12rem);
+      margin: 0;
+      line-height: 0.8;
+      opacity: 0.1;
+      position: absolute;
+      left: 0;
+      top: 0;
+      height: 100vh;
+    }
+
+    .p3-img {
+      position: absolute;
+      top: 10%;
+      left: 5%;
+      width: 40vw;
+      height: 50vh;
+      background-image: url('./images/scene-13(10).jpg');
+      background-size: cover;
+      background-position: center;
+      mix-blend-mode: luminosity;
+      opacity: 0.4;
+      z-index: -1;
+    }
+
+    /* Panel 4: Commanding */
+    .panel-4 {
+      /* Background removed/moved to .p4-bg layer */
+      color: var(--bg);
+    }
+
+    .p4-bg {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: var(--fg);
+      z-index: -2;
+    }
+
+    .panel-4 h2 {
+      color: var(--bg);
+    }
+
+    .panel-4 .body-text {
+      color: #222;
+      grid-column: 1 / 7;
+    }
+
+    .panel-4 .label {
+      color: var(--accent);
+    }
+
+    .p4-img {
+      position: absolute;
+      top: 0;
+      right: 0;
+      width: 50vw;
+      height: 100vh;
+      background-image: url('./images/scene-14(10).jpg');
+      background-size: cover;
+      background-position: center;
+      filter: grayscale(100%);
+      z-index: -1;
+      opacity: 0.8;
+    }
+
+    /* Panel 5: Truth Tax (Pure Typography) */
+    .panel-5 {
+      background: var(--accent);
+      color: var(--bg);
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+    }
+
+    .panel-5 h2 {
+      font-size: clamp(4rem, 12vw, 15rem);
+      color: var(--bg);
+      line-height: 0.8;
+      max-width: 100%;
+      text-align: center;
+      margin: 0;
+    }
+
+    .panel-5 .body-text {
+      color: var(--bg);
+      max-width: 800px;
+      margin: 2rem auto 0;
+      font-weight: 500;
+      font-size: 1.5rem;
+      text-align: center;
+      align-self: center;
+    }
+
+    /* Panel 6: Sanctuary */
+    .p6-bg {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-image: url('./images/scene-15(10).jpg');
+      background-size: cover;
+      background-position: center;
+      z-index: -2;
+    }
+
+    .p6-overlay {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(to top, rgba(5, 5, 5, 1) 0%, rgba(5, 5, 5, 0.4) 100%);
+      z-index: -1;
+    }
+
+    .panel-6 {
+      align-items: end;
+      padding-bottom: calc(var(--spacing) * 4);
+    }
+
+    .panel-6 .body-text {
+      grid-column: 1 / 8;
+      text-shadow: 0 2px 10px rgba(0, 0, 0, 0.8);
+    }
+
+    .finale {
+      grid-column: 1 / -1;
+      font-family: var(--hero-font);
+      font-size: clamp(2rem, 5vw, 6rem);
+      line-height: 1;
+      text-transform: uppercase;
+      color: var(--fg);
+      margin-top: 2rem;
+    }
+
+    .finale span {
+      color: var(--accent);
+    }
+
+    /* Responsive adjustments */
+    @media (max-width: 900px) {
+      .panel {
+        grid-template-columns: 1fr;
+        display: flex;
+        flex-direction: column;
+      }
+
+      .body-text {
+        grid-column: 1 / -1;
+        align-self: flex-start;
+        max-width: 100%;
+        padding-bottom: 4rem;
+      }
+
+      .p2-img-wrap,
+      .p4-img {
+        display: none;
+      }
+
+      /* Simplify on mobile to keep focus on text */
+      .panel-3 h2 {
+        writing-mode: horizontal-tb;
+        transform: none;
+        position: relative;
+        height: auto;
+        font-size: 3rem;
+        opacity: 1;
+      }
+    }
+  </style>
+</head>
+
+<body>
+
+  <!-- SVG Filters -->
+  <svg width="0" height="0" style="position:absolute; z-index:-1;">
+    <defs>
+      <filter id="film-noise">
+        <feTurbulence type="fractalNoise" baseFrequency="0.7" numOctaves="3" stitchTiles="stitch">
+          <animate attributeName="seed" values="0;10;0" dur="0.5s" repeatCount="indefinite" />
+        </feTurbulence>
+        <feColorMatrix type="matrix" values="1 0 0 0 0, 0 1 0 0 0, 0 0 1 0 0, 0 0 0 0.15 0" />
+      </filter>
+      <filter id="liquid">
+        <feTurbulence type="fractalNoise" baseFrequency="0.01 0.05" numOctaves="2" result="noise">
+          <animate attributeName="baseFrequency" values="0.01 0.05; 0.01 0.15; 0.01 0.05" dur="6s"
+            repeatCount="indefinite" />
+        </feTurbulence>
+        <feDisplacementMap in="SourceGraphic" in2="noise" scale="15" xChannelSelector="R" yChannelSelector="G" />
+      </filter>
+    </defs>
+  </svg>
+
+  <div class="noise-overlay" style="filter: url(#film-noise);"></div>
+  <div class="cursor"></div>
+
+  <nav class="tracker">[ <span class="tracker-current">01</span> / 06 ]</nav>
+  <div class="scroll-prompt">
+    <span>Scroll / Swipe</span>
+    <div class="scroll-line"></div>
+  </div>
+
+  <main class="carousel">
+
+    <!-- PANEL 1 -->
+    <section class="panel panel-1 is-active">
+      <div class="p1-bg"></div>
+      <div class="label reveal-wrap"><span class="reveal-text">Title:</span></div>
+      <h1>
+        <span class="reveal-wrap"><span class="reveal-text title-white">The Artist’s Guide</span></span>
+        <span class="reveal-wrap"><span class="reveal-text title-white">to the Fight:</span></span>
+        <span class="reveal-wrap"><span class="reveal-text">Killing the "Big Lie"</span></span>
+        <span class="reveal-wrap"><span class="reveal-text">of Live Music</span></span>
+      </h1>
+      <div class="body-text">
+        <p class="fade-up stagger-1"><strong>1. The Big Lie and The Bleed-Out</strong><br><br>You know the feeling. It’s
+          2:00 AM. You’ve just played your heart out. You loaded the van, you packed the room, your fans drank the bar
+          dry. But when you walk into the back office to get paid, the promoter hands you $40 and a bullshit excuse.</p>
+        <p class="fade-up stagger-2">Welcome to the "Big Lie" of live music: the delusion that just because you booked a
+          gig, you’re going to get a fair deal.</p>
+        <p class="fade-up stagger-3">For decades, the live music industry has operated on a predatory model called the
+          Risk Shift. Venues and promoters protect themselves by pushing all the financial danger—hidden sound fees,
+          phantom marketing costs, room rentals—onto your shoulders. You aren’t treated as a partner. You are treated as
+          an unpaid laborer funding their overhead.</p>
+        <p class="fade-up stagger-4">You’ve been operating on "blind hope" because the industry kept you in the dark.
+          It’s time to turn the lights on.</p>
+      </div>
+    </section>
+
+    <!-- PANEL 2 -->
+    <section class="panel panel-2">
+      <div class="p2-bg"></div>
+      <h2>
+        <span class="reveal-wrap"><span class="reveal-text">2. The Settlement</span></span>
+        <span class="reveal-wrap"><span class="reveal-text">Waterfall</span></span>
+      </h2>
+      <div class="body-text">
+        <div class="label fade-up">(Or: How Your Money is Stolen)</div>
+        <p class="fade-up stagger-1">When a fan buys a $15 ticket to see <em>you</em>, that money doesn't go to you. It
+          gets dropped into what the industry calls the "Settlement Waterfall." We call it the Bleed-Out.</p>
+        <p class="fade-up stagger-2">Before you see a single dime, the platform takes a cut. Then the house takes a cut
+          for the sound guy. Then the door guy. Then the lights. Suddenly, a packed room yields exactly zero profit.</p>
+        <p class="fade-up stagger-3">They inflate their costs because they know you can’t verify them. They hide behind
+          vague "Production Fees" so they never have to show you the math. But the moment you demand to see where every
+          single dollar goes, their scam collapses.</p>
+      </div>
+      <div class="p2-img-wrap fade-up stagger-2">
+        <div class="p2-img"></div>
+      </div>
+    </section>
+
+    <!-- PANEL 3 -->
+    <section class="panel panel-3">
+      <div class="p3-img fade-up"></div>
+      <h2>Weaponizing the Math</h2>
+      <div class="body-text">
+        <div class="label fade-up">3. Your Ultimate Bullshit Detector</div>
+        <p class="fade-up stagger-1">You didn't get into music to be an accountant. You got into it to make art. But in
+          this industry, if you don't know your math, your art will be bled dry.</p>
+        <p class="fade-up stagger-2">Before you ever load a single amp, you need to know your Break-Even Point. It’s the
+          exact number of tickets required to cover the house costs. If you bring 50 fans, but the venue’s hidden fees
+          require 80 tickets just to break even, <em>you are paying them to play.</em></p>
+        <p class="fade-up stagger-3">Math is your ultimate bullshit detector. When you use a transparent partner—like
+          Jonathan Kruse, who shares daily operating costs upfront—the risk is shared. When a venue refuses to show you
+          an itemized bill, they are planning to rob you. It’s that simple. Walk away.</p>
+      </div>
+    </section>
+
+    <!-- PANEL 4 -->
+    <section class="panel panel-4">
+      <div class="p4-bg"></div>
+      <div class="label reveal-wrap"><span class="reveal-text">4. Evolution</span></div>
+      <h2>
+        <span class="reveal-wrap"><span class="reveal-text">From Begging</span></span>
+        <span class="reveal-wrap"><span class="reveal-text">To Commanding</span></span>
+      </h2>
+      <div class="body-text">
+        <p class="fade-up stagger-1">Stop asking for permission to play. You are the one generating the revenue.</p>
+        <p class="fade-up stagger-2">When you use the FairGig data to model your shows, you transform from a desperate
+          artist into a dangerous negotiator. You don't guess; you <em>know</em>. You know exactly what happens to your
+          payout if the room is empty, if it's typical, or if it sells out.</p>
+        <p class="fade-up stagger-3">If you know you bring 200 fans to a room, you aren't just "booking a date." You are
+          bringing a stack of cash to their bar. You use that data as a weapon to demand a higher split or a guaranteed
+          payout. You stop being the venue's victim and become the CEO of your own stage.</p>
+      </div>
+      <div class="p4-img fade-up stagger-2"></div>
+    </section>
+
+    <!-- PANEL 5 -->
+    <section class="panel panel-5">
+      <div class="label reveal-wrap" style="text-align: center; color: var(--bg);"><span class="reveal-text">5. The
+          Ecosystem</span></div>
+      <h2>
+        <span class="reveal-wrap"><span class="reveal-text">THE TRUTH TAX</span></span>
+      </h2>
+      <div class="body-text">
+        <p class="fade-up stagger-1"><strong>Starving the Predators</strong><br><br>For too long, bad venues have
+          survived because bands didn't talk to each other. We are changing that. We are building the Reputation Layer.
+        </p>
+        <p class="fade-up stagger-2">We are enforcing a "Truth Tax" on the industry. If a venue hides their fees, rips
+          off bands, or changes the deal at the end of the night, it becomes a permanent, flashing red flag in the
+          FairGig ecosystem. We will starve opaque venues of the one thing they need to survive: top-tier talent.</p>
+      </div>
+    </section>
+
+    <!-- PANEL 6 -->
+    <section class="panel panel-6">
+      <div class="p6-bg"></div>
+      <div class="p6-overlay"></div>
+      <div class="label reveal-wrap"><span class="reveal-text">6. Conclusion</span></div>
+      <div class="body-text">
+        <h2>
+          <span class="reveal-wrap"><span class="reveal-text">Protect Your</span></span>
+          <span class="reveal-wrap"><span class="reveal-text">Sanctuary</span></span>
+        </h2>
+        <p class="fade-up stagger-1">Cliff Franco spent 15 years fronting bands like The Pursuit and The Struggs. He
+          learned the hardest lesson of the industry: Music is a sacred, personal sanctuary. It is your craft, your
+          soul, and your voice.</p>
+        <p class="fade-up stagger-2">But if you don't defend the business side with cold, hard data, the industry will
+          crush your sanctuary.</p>
+        <p class="fade-up stagger-3">FairGig exists for one reason: to protect the art. When you master the math of show
+          economics, you spend zero time worrying about scams, and 100% of your time destroying the stage.</p>
+      </div>
+      <div class="finale fade-up stagger-4">
+        No more blind hope.<br>
+        No more hidden fees.<br>
+        <span>Real Gigs. Real Pay.</span><br>
+        Take back your stage.
+      </div>
+    </section>
+
+  </main>
+
+  <script>
+    // Custom Cursor
+    const cursor = document.querySelector('.cursor');
+    document.addEventListener('mousemove', (e) => {
+      cursor.style.transform = `translate(${e.clientX}px, ${e.clientY}px)`;
+    });
+
+    // Intersection Observer for Scroll Tracking & Animation Triggering
+    const panels = document.querySelectorAll('.panel');
+    const counter = document.querySelector('.tracker-current');
+
+    const observerOptions = {
+      root: document.querySelector('.carousel'),
+      threshold: 0.5
+    };
+
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          // Add active class to trigger CSS animations
+          entry.target.classList.add('is-active');
+
+          // Update Counter
+          const index = Array.from(panels).indexOf(entry.target) + 1;
+          counter.textContent = '0' + index;
+        }
+      });
+    }, observerOptions);
+
+    panels.forEach(panel => {
+      observer.observe(panel);
+    });
+
+    // Horizontal Scroll with Mouse Wheel (for desktop usability without horizontal trackpad)
+    const carousel = document.querySelector('.carousel');
+    carousel.addEventListener('wheel', (evt) => {
+      if (evt.deltaY != 0) {
+        evt.preventDefault();
+        carousel.scrollBy({
+          left: evt.deltaY * 3,
+          behavior: 'smooth'
+        });
+      }
+    });
+  </script>
+</body>
+
+</html>

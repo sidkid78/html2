@@ -5,6 +5,13 @@ import Link from 'next/link';
 
 const articles = [
   {
+    title: "FairGig Strategic Briefing (v6)",
+    description: "The complete tactical and financial truth layer. Correlating venue math with artist survival metrics in a single scrollytelling experience.",
+    href: "/fairgig6.html",
+    icon: "📊",
+    accent: "from-cyan-500/20 to-blue-500/20"
+  },
+  {
     title: "The FairGig Manifesto (v2.0)",
     description: "The End of the 'Pay-to-Play' Era. Cliff Franco's core doctrine on destroying the opaque and exploitative practices of the live music industry.",
     href: "/fairgig1.html",
@@ -17,6 +24,13 @@ const articles = [
     href: "/fairgig.html",
     icon: "📜",
     accent: "from-green-500/20 to-emerald-500/20"
+  },
+  {
+    title: "Guide: The Artist's Fight",
+    description: "Killing the 'Big Lie' of Live Music. How to identify risk-shifts, analyze settlement waterfalls, and weaponize math against predators.",
+    href: "/fairgig4.html",
+    icon: "🥊",
+    accent: "from-red-600/20 to-orange-500/20"
   },
   {
     title: "FairGig: The Arsenal",
@@ -64,9 +78,10 @@ export default function FairGigHub() {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-6">
           {articles.map((article, idx) => {
             const isManifesto = article.href.includes('fairgig1.html');
+            const isGuide = article.href.includes('fairgig4.html');
             const isLegacy = article.href.includes('fairgig.html');
             const isArsenal = article.href.includes('fairgig-2');
-            const isHighlighted = isManifesto || isArsenal;
+            const isHighlighted = isManifesto || isArsenal || isGuide;
             
             return (
               <a
@@ -82,6 +97,11 @@ export default function FairGigHub() {
                 {isManifesto && (
                   <div className="absolute top-4 right-4 z-20 px-3 py-1 rounded-full bg-[#ff1e1e] text-white text-[10px] font-black tracking-tighter uppercase shadow-[0_0_15px_rgba(255,30,30,0.5)]">
                     Primary Doctrine
+                  </div>
+                )}
+                {isGuide && (
+                  <div className="absolute top-4 right-4 z-20 px-3 py-1 rounded-full bg-[#E63946] text-white text-[10px] font-black tracking-tighter uppercase shadow-[0_0_15px_rgba(230,57,70,0.5)]">
+                    Strategic Guide
                   </div>
                 )}
                 {isLegacy && (
@@ -100,17 +120,17 @@ export default function FairGigHub() {
                 <div className="relative z-10 h-full flex flex-col">
                   <div className="flex items-start justify-between mb-6">
                     <div className="text-4xl">{article.icon}</div>
-                    {isHighlighted && <div className={`${isManifesto ? 'text-[#ff1e1e]/60' : 'text-[#00ff66]/60'} font-mono text-xs tracking-widest`}>SEQ: {isManifesto ? 'FG-BASE-01' : 'FG-TOOL-02'}</div>}
+                    {isHighlighted && <div className={`${isManifesto || isGuide ? 'text-[#ff1e1e]/60' : 'text-[#00ff66]/60'} font-mono text-xs tracking-widest`}>SEQ: {isManifesto ? 'FG-BASE-01' : isGuide ? 'FG-TACT-03' : 'FG-TOOL-02'}</div>}
                   </div>
                   
-                  <h2 className={`font-bold text-white mb-3 group-hover:text-[#00ff66] transition-colors font-(family-name:--font-oswald) uppercase tracking-wide ${isHighlighted ? 'text-4xl leading-tight' : 'text-2xl'} ${isManifesto ? 'group-hover:text-[#ff1e1e]' : ''}`}>
+                  <h2 className={`font-bold text-white mb-3 group-hover:text-[#00ff66] transition-colors font-(family-name:--font-oswald) uppercase tracking-wide ${isHighlighted ? 'text-4xl leading-tight' : 'text-2xl'} ${isManifesto || isGuide ? 'group-hover:text-[#ff1e1e]' : ''}`}>
                     {article.title}
                   </h2>
                   <p className={`text-slate-400 leading-relaxed grow ${isHighlighted ? 'text-lg max-w-xl' : 'text-base'}`}>
                     {article.description}
                   </p>
                   
-                  <div className={`mt-8 flex items-center text-sm font-bold uppercase tracking-widest font-mono transition-colors ${isManifesto ? 'text-[#ff1e1e] group-hover:text-red-400' : 'text-[#00ff66] group-hover:text-emerald-400'}`}>
+                  <div className={`mt-8 flex items-center text-sm font-bold uppercase tracking-widest font-mono transition-colors ${isManifesto || isGuide ? 'text-[#ff1e1e] group-hover:text-red-400' : 'text-[#00ff66] group-hover:text-emerald-400'}`}>
                     {isHighlighted ? 'INITIALIZE PROTOCOL' : 'ACCESS FILE'}
                     <span className="ml-2 transform group-hover:translate-x-1 transition-transform">→</span>
                   </div>

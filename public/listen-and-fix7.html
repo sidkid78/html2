@@ -1,0 +1,636 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Listen & Fix: The Multimodal AI Revolution in Mechanical Diagnostics</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&family=JetBrains+Mono:wght@400;700&family=Public+Sans:wght@300;400;600&display=swap');
+
+    :root {
+      --bg-base: #0b0f19;
+      --bg-surface: #131b2c;
+      --bg-surface-alt: #1c263b;
+      --text-main: #f8fafc;
+      --text-muted: #94a3b8;
+      --text-dark: #64748b;
+      --accent-orange: #ea580c;
+      --accent-blue: #38bdf8;
+      --ease-out-expo: cubic-bezier(0.16, 1, 0.3, 1);
+      --ease-in-out-circ: cubic-bezier(0.85, 0, 0.15, 1);
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      cursor: none;
+    }
+
+    body {
+      background-color: var(--bg-base);
+      color: var(--text-main);
+      font-family: 'Public Sans', sans-serif;
+      overflow-x: hidden;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    /* Custom Cursor */
+    #cursor {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 8px;
+      height: 8px;
+      background-color: var(--accent-orange);
+      border-radius: 50%;
+      transform: translate(-50%, -50%);
+      pointer-events: none;
+      z-index: 9999;
+      transition: width 0.3s var(--ease-out-expo), height 0.3s var(--ease-out-expo), background-color 0.3s;
+      mix-blend-mode: screen;
+    }
+
+    body:hover #cursor {
+      width: 40px;
+      height: 40px;
+      background-color: transparent;
+      border: 1px solid var(--accent-orange);
+    }
+
+    /* Typography System */
+    h1,
+    h2,
+    h3,
+    .font-inter {
+      font-family: 'Inter', sans-serif;
+      letter-spacing: -0.02em;
+    }
+
+    .font-mono {
+      font-family: 'JetBrains Mono', monospace;
+    }
+
+    .hero-title {
+      font-size: clamp(3rem, 8vw, 7rem);
+      font-weight: 800;
+      line-height: 1;
+      text-transform: uppercase;
+      color: var(--text-main);
+    }
+
+    .section-title {
+      font-size: clamp(1.5rem, 4vw, 3rem);
+      font-weight: 600;
+      margin-bottom: 2rem;
+      color: var(--text-main);
+      position: relative;
+      display: inline-block;
+    }
+
+    .body-text {
+      font-size: clamp(1rem, 1.2vw, 1.25rem);
+      line-height: 1.7;
+      font-weight: 300;
+      color: var(--text-muted);
+      max-width: 65ch;
+    }
+
+    .label {
+      font-size: 0.75rem;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      font-weight: 700;
+      color: var(--accent-blue);
+    }
+
+    /* Layout Archetypes */
+    .container {
+      width: 100%;
+      padding: 4rem 2rem;
+      display: grid;
+      grid-template-columns: repeat(12, 1fr);
+      gap: 2rem;
+    }
+
+    @media (min-width: 1024px) {
+      .container {
+        padding: 8rem 4rem;
+      }
+    }
+
+    .col-full {
+      grid-column: 1 / -1;
+    }
+
+    .col-left {
+      grid-column: 1 / -1;
+    }
+
+    .col-right {
+      grid-column: 1 / -1;
+    }
+
+    @media (min-width: 768px) {
+      .col-left {
+        grid-column: 1 / 7;
+      }
+
+      .col-right {
+        grid-column: 7 / 13;
+      }
+
+      .col-center {
+        grid-column: 3 / 11;
+      }
+    }
+
+    .bg-surface {
+      background-color: var(--bg-surface);
+    }
+
+    .bg-surface-alt {
+      background-color: var(--bg-surface-alt);
+    }
+
+    /* Image Treatments */
+    .img-wrapper {
+      position: relative;
+      width: 100%;
+      height: 100%;
+      overflow: hidden;
+      background: var(--bg-surface-alt);
+    }
+
+    .img-wrapper img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
+      transform: scale(1.1);
+      transition: transform 1.5s var(--ease-out-expo);
+      opacity: 1;
+      mix-blend-mode: normal;
+      z-index: 10;
+    }
+
+    .img-wrapper:hover img {
+      transform: scale(1);
+      opacity: 1;
+      mix-blend-mode: normal;
+    }
+
+    /* Animations */
+    .reveal {
+      opacity: 0;
+      transform: translateY(40px);
+      transition: opacity 1s var(--ease-out-expo), transform 1s var(--ease-out-expo);
+    }
+
+    .reveal.is-visible {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    .reveal-delay-1 {
+      transition-delay: 0.1s;
+    }
+
+    .reveal-delay-2 {
+      transition-delay: 0.2s;
+    }
+
+    .reveal-delay-3 {
+      transition-delay: 0.3s;
+    }
+
+    .clip-reveal {
+      clip-path: inset(100% 0 0 0);
+      transition: clip-path 1.2s var(--ease-in-out-circ);
+    }
+
+    .clip-reveal.is-visible {
+      clip-path: inset(0 0 0 0);
+    }
+
+    .noise-overlay {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+      filter: url(#noise);
+      opacity: 0.2;
+      z-index: 2;
+    }
+
+    /* Specific Components */
+    .tags-container {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.5rem;
+      margin: 2rem 0;
+    }
+
+    .tag {
+      padding: 0.25rem 0.75rem;
+      background: rgba(56, 189, 248, 0.1);
+      color: var(--accent-blue);
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.8rem;
+    }
+
+    .workflow-list {
+      list-style: none;
+      counter-reset: workflow-counter;
+    }
+
+    .workflow-item {
+      position: relative;
+      padding-left: 3rem;
+      margin-bottom: 2rem;
+    }
+
+    .workflow-item::before {
+      counter-increment: workflow-counter;
+      content: "0" counter(workflow-counter);
+      position: absolute;
+      left: 0;
+      top: 0;
+      font-family: 'JetBrains Mono', monospace;
+      color: var(--accent-orange);
+      font-weight: 700;
+    }
+
+    .workflow-item strong {
+      color: var(--text-main);
+      font-family: 'Inter', sans-serif;
+      display: block;
+      margin-bottom: 0.25rem;
+    }
+
+    .code-block {
+      background: #050505;
+      padding: 2rem;
+      border-left: 4px solid var(--accent-orange);
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.85rem;
+      color: var(--text-muted);
+      overflow-x: auto;
+    }
+
+    .code-block span.keyword {
+      color: #c678dd;
+    }
+
+    .code-block span.string {
+      color: #98c379;
+    }
+
+    .code-block span.function {
+      color: #61afef;
+    }
+
+    .code-block span.type {
+      color: #e5c07b;
+    }
+
+    /* SVG Filters */
+    .glitch-text {
+      filter: url(#chromatic-aberration);
+    }
+
+    .meta-desc {
+      border-left: 2px solid var(--text-dark);
+      padding-left: 1rem;
+      margin-bottom: 2rem;
+      font-style: italic;
+    }
+  </style>
+</head>
+
+<body>
+
+  <!-- Custom Cursor -->
+  <div id="cursor"></div>
+
+  <!-- SVG Filters definition -->
+  <svg style="width:0;height:0;position:absolute;z-index:-1;pointer-events:none;" aria-hidden="true">
+    <filter id="chromatic-aberration">
+      <feColorMatrix in="SourceGraphic" type="matrix" values="1 0 0 0 0  0 0 0 0 0  0 0 0 0 0  0 0 0 1 0"
+        result="red" />
+      <feColorMatrix in="SourceGraphic" type="matrix" values="0 0 0 0 0  0 1 0 0 0  0 0 0 0 0  0 0 0 1 0"
+        result="green" />
+      <feColorMatrix in="SourceGraphic" type="matrix" values="0 0 0 0 0  0 0 0 0 0  0 0 1 0 0  0 0 0 1 0"
+        result="blue" />
+      <feOffset in="red" dx="-2" dy="0" result="red_offset" />
+      <feOffset in="blue" dx="2" dy="0" result="blue_offset" />
+      <feBlend mode="screen" in="red_offset" in2="green" result="blend1" />
+      <feBlend mode="screen" in="blend1" in2="blue_offset" result="final" />
+    </filter>
+    <filter id="noise">
+      <feTurbulence type="fractalNoise" baseFrequency="0.8" numOctaves="3" stitchTiles="stitch" />
+      <feColorMatrix type="matrix" values="1 0 0 0 0, 0 1 0 0 0, 0 0 1 0 0, 0 0 0 0.2 0" />
+    </filter>
+  </svg>
+
+  <main id="scroller">
+
+    <!-- Section: HERO -->
+    <section class="container">
+      <div class="col-full">
+        <div class="label reveal"></div>
+        <h1 class="hero-title reveal reveal-delay-1 glitch-text">Listen & Fix</h1>
+        <h2 class="section-title reveal reveal-delay-2" style="color: var(--accent-blue);">The Multimodal AI Revolution
+          in Mechanical Diagnostics</h2>
+
+        <div class="tags-container reveal reveal-delay-3">
+          <span class="tag">#Multimodal AI</span>
+          <span class="tag">#Mechanical Diagnostics</span>
+          <span class="tag">#Google Gemini</span>
+          <span class="tag">#Predictive Maintenance</span>
+          <span class="tag">#RAG Technology</span>
+          <span class="tag">#Digital Foreman</span>
+        </div>
+
+        <div class="meta-desc body-text reveal reveal-delay-3">
+          Explore how the 'Digital Foreman' uses multimodal AI and acoustic fingerprinting to revolutionize mechanical
+          diagnostics and precision repair for DIY and pros.
+        </div>
+      </div>
+
+      <div class="col-full img-wrapper clip-reveal" style="height: 60vh;">
+        <img src="./images/visual-1(1).png" alt="Diagnostic Equipment">
+        <div class="noise-overlay"></div>
+      </div>
+    </section>
+
+    <!-- Section: INTRO -->
+    <section class="container bg-surface">
+      <div class="col-left">
+        <h3 class="section-title reveal">From Diagnostic Guesswork to Data-Driven Authority: How the 'Digital Foreman'
+          is Revolutionizing Mechanical Repair</h3>
+      </div>
+      <div class="col-right">
+        <p class="body-text reveal reveal-delay-1">
+          Imagine standing in your driveway at 7:00 AM, confronted by a rhythmic, metallic clicking emanating from your
+          car's engine bay. In the past, this sound represented a descent into uncertainty—a frantic search through
+          forums, a costly tow, and the anxiety of potential exploitation at a repair shop. Today, the 'Listen & Fix'
+          ecosystem transforms that acoustic signature into an actionable blueprint for repair.
+        </p>
+        <br>
+        <p class="body-text reveal reveal-delay-2">
+          By leveraging the Google Gemini 3 Flash model, this platform transcends the limitations of traditional
+          diagnostic tools. It doesn't just provide a list of possibilities; it 'hears' the specific frequency of a
+          failing bearing, 'sees' the subtle discoloration of a leaking gasket through your smartphone camera, and
+          cross-references these inputs with real-time technical manuals.
+        </p>
+        <br>
+        <p class="body-text reveal reveal-delay-3">
+          This is a high-performance, multimodal diagnostic platform—utilizing acoustic fingerprinting for mechanical
+          systems—designed to bridge the gap between complex mechanical failure and precise, data-driven resolution. By
+          integrating 'Just-in-Time' Retrieval-Augmented Generation (RAG) with a sophisticated 'Digital Foreman' design
+          philosophy, Listen & Fix empowers both DIY enthusiasts and professional technicians with the sensory
+          perception and technical authority of a master mechanic.
+        </p>
+      </div>
+    </section>
+
+    <!-- Section: MULTIMODAL ENGINE -->
+    <section class="container">
+      <div class="col-left img-wrapper clip-reveal" style="min-height: 50vh;">
+        <img src="./images/visual-2(1).png" alt="Acoustic Signature Analysis">
+        <div class="noise-overlay"></div>
+      </div>
+      <div class="col-right">
+        <div class="label reveal"></div>
+        <h3 class="section-title reveal reveal-delay-1 glitch-text">The Multimodal Diagnostic Engine: Sensory Perception
+          Reimagined</h3>
+        <p class="body-text reveal reveal-delay-2">
+          At the heart of the Listen & Fix ecosystem lies a diagnostic pipeline that rejects the limitations of
+          traditional signal processing. While legacy systems rely on manual feature extraction—such as Mel-frequency
+          cepstral coefficients (MFCC) or complex spectral analysis—Listen & Fix utilizes the native multimodal
+          capabilities of Gemini 3 Flash. This allows the system to process raw acoustic signatures (44.1 kHz / 24-bit)
+          directly, identifying squeals, knocks, and clicks with unprecedented accuracy.
+        </p>
+        <br>
+        <p class="body-text reveal reveal-delay-3">
+          The integration of visual telemetry further refines this process. When a user records a video of a
+          malfunctioning HVAC compressor, the AI synchronizes the audio spikes with visual anomalies like excessive
+          vibration or frost accumulation. This multimodal fusion enables the detection of micro-fractures or bearing
+          wear long before they lead to catastrophic failure. Every diagnosis is accompanied by a confidence score (0.0
+          to 1.0) and a severity rating, ensuring that users understand the urgency of the issue.
+        </p>
+      </div>
+    </section>
+
+    <!-- Section: WORKFLOW -->
+    <section class="container bg-surface-alt">
+      <div class="col-left img-wrapper clip-reveal" style="min-height: 50vh;">
+        <img src="./images/visual-2.png" alt="Workflow Interface">
+        <div class="noise-overlay"></div>
+      </div>
+      <div class="col-right">
+        <div class="label reveal"></div>
+        <h3 class="section-title reveal reveal-delay-1">The Four-Step Diagnostic Workflow: Precision in the Palm of Your
+          Hand</h3>
+        <p class="body-text reveal reveal-delay-2" style="margin-bottom: 3rem;">
+          The user experience is anchored by the ListenFixAssistant, a React-based wizard designed to minimize cognitive
+          load while maximizing data accuracy. The workflow follows a structured four-stage progression:
+        </p>
+
+        <ul class="workflow-list">
+          <li class="workflow-item reveal reveal-delay-1">
+            <strong>Capture</strong>
+            <span class="body-text">Users provide the 'sensory' data by recording audio/video or uploading
+              high-resolution photos.</span>
+          </li>
+          <li class="workflow-item reveal reveal-delay-2">
+            <strong>Details</strong>
+            <span class="body-text">A 6-step context wizard gathers essential metadata, including equipment type
+              (vehicle, appliance, HVAC), make, model, year, and the user’s DIY skill level.</span>
+          </li>
+          <li class="workflow-item reveal reveal-delay-3">
+            <strong>Analyzing</strong>
+            <span class="body-text">As data streams to the backend, the UI provides real-time progress updates via an
+              NDJSON stream, keeping the user informed with statuses like 'Analyzing engine harmonics...' or 'Querying
+              service bulletins.'</span>
+          </li>
+          <li class="workflow-item reveal">
+            <strong>Results</strong>
+            <span class="body-text">The final output is an interactive RepairGuide dashboard. This is a localized,
+              equipment-specific protocol containing tool lists, parts sourcing, and step-by-step instructions.</span>
+          </li>
+        </ul>
+      </div>
+    </section>
+
+    <!-- Section: RAG & ARCHITECTURE -->
+    <section class="container">
+      <div class="col-left">
+        <div class="label reveal">Data Flow</div>
+        <h3 class="section-title reveal reveal-delay-1">Just-in-Time RAG: Grounding AI in Verified Technical Authority
+        </h3>
+        <p class="body-text reveal reveal-delay-2">
+          To eliminate the 'hallucinations' often associated with large language models, Listen & Fix employs a
+          'Just-in-Time' Retrieval-Augmented Generation (RAG) pipeline. When a piece of equipment is identified, the
+          DocumentCrawlerService immediately initiates a targeted search for official service manuals and technical
+          bulletins from trusted sources like iFixit, NHTSA, and RepairPal.
+        </p>
+        <br>
+        <p class="body-text reveal reveal-delay-3">
+          The system cleans these documents, using Gemini to strip away advertisements and navigation menus to extract
+          only critical technical specifications, torque settings, and wiring diagrams. These segments are then
+          converted into high-dimensional vector embeddings using the gemini-embedding-2-preview model. This dual-path
+          RAG implementation guarantees that every piece of advice provided by the 'Digital Foreman' is anchored in
+          verified engineering reality.
+        </p>
+      </div>
+      <div class="col-right img-wrapper clip-reveal" style="min-height: 40vh;">
+        <img src="./images/visual-3(1).png" alt="RAG Data Pipeline">
+        <div class="noise-overlay"></div>
+      </div>
+
+      <div class="col-full" style="margin-top: 4rem;">
+        <h3 class="section-title reveal">Technical Architecture: Built for Performance and Scale</h3>
+        <p class="body-text reveal reveal-delay-1" style="margin-bottom: 2rem;">
+          To translate these advanced diagnostic concepts into a functional reality, the platform relies on a modern
+          full-stack implementation. The ecosystem is built on a robust Next.js framework, utilizing the @google/genai
+          SDK to orchestrate complex AI pipelines. The backend architecture is designed to handle high-stakes data and
+          is optimized for serverless environments to ensure rapid response times. Key services include the
+          DiagnosisService, a TypeScript library that processes multimodal inputs, and the DocumentCrawlerService, which
+          handles background ingestion. For large media files, the system employs a resumable upload protocol via the
+          Gemini Files API, supporting assets up to 2GB.
+        </p>
+
+        <div class="code-block reveal reveal-delay-2">
+          <pre><code><span class="keyword">interface</span> <span class="type">DiagnosisRequest</span> {
+  media: <span class="type">File</span>[];
+  equipmentInfo: {
+    make: <span class="type">string</span>;
+    model: <span class="type">string</span>;
+    year: <span class="type">number</span>;
+    type: <span class="type">string</span>;
+  };
+  userSkillLevel: <span class="string">'beginner'</span> | <span class="string">'intermediate'</span> | <span class="string">'professional'</span>;
+}
+
+<span class="keyword">async function</span> <span class="function">analyzeRepair</span>(req: <span class="type">DiagnosisRequest</span>): <span class="type">Promise&lt;RepairGuide&gt;</span> {
+  <span class="keyword">const</span> mediaUris = <span class="keyword">await</span> <span class="function">uploadToGemini</span>(req.media);
+  <span class="keyword">const</span> diagnosis = <span class="keyword">await</span> gemini.<span class="function">generateContent</span>([
+    ...mediaUris,
+    req.equipmentInfo
+  ]);
+  <span class="keyword">return</span> <span class="function">formatRepairGuide</span>(diagnosis);
+}</code></pre>
+        </div>
+        <p class="body-text reveal" style="margin-top: 1.5rem; font-size: 0.9rem; font-style: italic;">
+          This architecture ensures that even complex diagnostic tasks, involving multiple video frames and large
+          technical manuals, are processed with industry-leading latency and precision.
+        </p>
+      </div>
+    </section>
+
+    <!-- Section: DESIGN & SAFETY -->
+    <section class="container bg-surface">
+      <div class="col-full img-wrapper clip-reveal" style="height: 50vh; margin-bottom: 3rem;">
+        <img src="./images/visual-4(1).png" alt="Digital Foreman UI">
+        <div class="noise-overlay"></div>
+      </div>
+
+      <div class="col-left">
+        <div class="label reveal">UX/UI</div>
+        <h3 class="section-title reveal reveal-delay-1">The 'Digital Foreman' Design System: Authority Through Design
+        </h3>
+        <p class="body-text reveal reveal-delay-2">
+          While the backend handles the technical heavy lifting, the user interface must function as a calibrated
+          instrument to maintain professional trust. The 'Digital Foreman' design system prioritizes a 'Technical
+          Editorial' aesthetic that emphasizes clarity. A central tenet is the 'No-Line Rule,' which prohibits the use
+          of 1px solid borders. Instead, space and hierarchy are defined through tonal shifts in background colors.
+        </p>
+        <br>
+        <p class="body-text reveal reveal-delay-3">
+          The typography utilizes a dual-typeface system: Inter for authoritative headlines and Public Sans for
+          high-legibility body text, essential for reading in dimly lit garages. The color palette is rooted in stable
+          blues and charcoals, with a sophisticated burnt orange reserved for critical warning states. These visual
+          principles create a UI that feels as sturdy and reliable as the physical tools in a technician's chest.
+        </p>
+      </div>
+
+      <div class="col-right">
+        <div class="label reveal" style="color: var(--accent-orange);">Critical</div>
+        <h3 class="section-title reveal reveal-delay-1">Safety Protocols and Automated Parts Sourcing</h3>
+        <p class="body-text reveal reveal-delay-2">
+          Safety is the primary architectural constraint of the Listen & Fix ecosystem. The system injects dynamic,
+          equipment-specific safety protocols into every repair guide. For vehicle repairs, it mandates warnings
+          regarding jack stands and hazardous fluids; for electrical work, it emphasizes Lock-Out/Tag-Out (LOTO)
+          procedures.
+        </p>
+        <br>
+        <p class="body-text reveal reveal-delay-3">
+          Furthermore, any diagnosis with a confidence score below 89% or a 'Critical' severity rating automatically
+          triggers a 'Human-in-the-Loop' (HITL) flag, recommending professional intervention. To close the loop, the
+          system includes automated parts sourcing, identifying exact part numbers and executing parallel queries to
+          local retailers. By providing a 'Supplier Matrix' with live availability, Listen & Fix ensures users have the
+          exact components and safety knowledge required to fix it correctly the first time.
+        </p>
+      </div>
+    </section>
+
+    <!-- Section: CONCLUSION -->
+    <section class="container" style="padding-bottom: 8rem;">
+      <div class="col-full img-wrapper clip-reveal" style="height: 50vh; margin-bottom: 4rem;">
+        <img src="./images/visual-4(2).png" alt="System Conclusion Visual">
+        <div class="noise-overlay"></div>
+      </div>
+      <div class="col-center">
+        <h3 class="section-title reveal glitch-text" style="text-align: center; width: 100%;">Conclusion</h3>
+        <p class="body-text reveal reveal-delay-1"
+          style="margin: 0 auto; text-align: center; font-size: clamp(1.1rem, 1.5vw, 1.5rem);">
+          The Listen & Fix ecosystem represents a paradigm shift in how we interact with the mechanical world. By
+          synthesizing multimodal AI, real-time technical retrieval, and an authoritative design philosophy, it
+          transforms the solitary frustration of mechanical failure into a guided, data-driven journey. Whether it is a
+          homeowner fixing a dishwasher or a technician diagnosing a complex drivetrain issue, the 'Digital Foreman'
+          provides the clarity and precision needed to maintain operational continuity. As AI continues to evolve,
+          systems like Listen & Fix will become indispensable, turning every user into a master of their own
+          environment.
+        </p>
+      </div>
+    </section>
+
+  </main>
+
+  <script>
+    // Custom Cursor Logic
+    const cursor = document.getElementById('cursor');
+    document.addEventListener('mousemove', (e) => {
+      cursor.style.left = e.clientX + 'px';
+      cursor.style.top = e.clientY + 'px';
+    });
+
+    // Intersection Observer for Scroll Reveals
+    const observerOptions = {
+      root: null,
+      rootMargin: '0px',
+      threshold: 0.05
+    };
+
+    const observer = new IntersectionObserver((entries, observer) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          entry.target.classList.add('is-visible');
+          // Optional: Stop observing once revealed
+          // observer.unobserve(entry.target);
+        }
+      });
+    }, observerOptions);
+
+    document.querySelectorAll('.reveal, .clip-reveal').forEach(el => {
+      observer.observe(el);
+    });
+  </script>
+</body>
+
+</html>

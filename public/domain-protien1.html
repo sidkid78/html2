@@ -1,0 +1,514 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Domain Report: Biological Process Prediction</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:ital,wght@0,100..800;1,100..800&family=Space+Grotesk:wght@300..700&display=swap');
+
+        :root {
+            --bg: #030712;
+            --bg-panel: #0f172a;
+            --text-main: #f8fafc;
+            --text-dim: #94a3b8;
+            --accent: #00e5ff;
+            --accent-glow: rgba(0, 229, 255, 0.3);
+            --grid-color: rgba(255, 255, 255, 0.05);
+            --border-ui: rgba(0, 229, 255, 0.2);
+            --font-head: 'Space Grotesk', sans-serif;
+            --font-mono: 'JetBrains Mono', monospace;
+            --ease: cubic-bezier(0.16, 1, 0.3, 1)
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            cursor: none
+        }
+
+        body {
+            background-color: var(--bg);
+            color: var(--text-main);
+            font-family: var(--font-mono);
+            overflow: hidden;
+            line-height: 1.6;
+            font-size: 14px
+        }
+
+        h1,
+        h2,
+        h3 {
+            font-family: var(--font-head);
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            font-weight: 600;
+            line-height: 1.2
+        }
+
+        h1 {
+            font-size: clamp(2rem, 6vw, 5rem);
+            color: var(--text-main);
+            margin-bottom: 1rem
+        }
+
+        h2 {
+            font-size: clamp(1.2rem, 2vw, 1.5rem);
+            color: var(--accent);
+            margin-bottom: 1.5rem;
+            border-bottom: 1px solid var(--border-ui);
+            padding-bottom: 0.5rem;
+            display: inline-block
+        }
+
+        p {
+            color: var(--text-dim);
+            margin-bottom: 1.5rem;
+            font-weight: 300
+        }
+
+        strong {
+            color: var(--text-main);
+            font-weight: 600
+        }
+
+        code {
+            background: rgba(0, 229, 255, 0.1);
+            color: var(--accent);
+            padding: 0.2em 0.4em;
+            border-radius: 2px;
+            font-size: 0.9em
+        }
+
+        ul {
+            list-style: none;
+            margin-bottom: 1.5rem
+        }
+
+        li {
+            position: relative;
+            padding-left: 1.5rem;
+            margin-bottom: 0.75rem;
+            color: var(--text-dim)
+        }
+
+        li::before {
+            content: '>>';
+            position: absolute;
+            left: 0;
+            color: var(--accent);
+            font-size: 0.8em;
+            top: 0.2em
+        }
+
+        #cursor {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 20px;
+            height: 20px;
+            border: 1px solid var(--accent);
+            border-radius: 50%;
+            pointer-events: none;
+            transform: translate(-50%, -50%);
+            z-index: 9999;
+            transition: width 0.2s, height 0.2s, background-color 0.2s;
+            mix-blend-mode: difference
+        }
+
+        #cursor::after {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 4px;
+            height: 4px;
+            background: var(--accent);
+            transform: translate(-50%, -50%);
+            border-radius: 50%
+        }
+
+        #noise-overlay {
+            position: fixed;
+            inset: 0;
+            pointer-events: none;
+            z-index: 9998;
+            opacity: 0.25;
+            mix-blend-mode: overlay
+        }
+
+        .hud {
+            position: fixed;
+            z-index: 50;
+            pointer-events: none;
+            font-family: var(--font-mono);
+            font-size: 0.75rem;
+            color: var(--accent);
+            letter-spacing: 0.1em;
+            text-transform: uppercase
+        }
+
+        .hud-top-left {
+            top: 2rem;
+            left: 2rem
+        }
+
+        .hud-top-right {
+            top: 2rem;
+            right: 2rem
+        }
+
+        .hud-bottom-left {
+            bottom: 2rem;
+            left: 2rem
+        }
+
+        .hud-bottom-right {
+            bottom: 2rem;
+            right: 2rem
+        }
+
+        .progress-container {
+            position: fixed;
+            bottom: 2rem;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 200px;
+            height: 2px;
+            background: var(--grid-color);
+            z-index: 50;
+            display: flex
+        }
+
+        .progress-bar {
+            height: 100%;
+            background: var(--accent);
+            width: 0%;
+            transition: width 0.3s var(--ease);
+            box-shadow: 0 0 10px var(--accent-glow)
+        }
+
+        .carousel-wrapper {
+            display: flex;
+            width: 100vw;
+            height: 100vh;
+            overflow-x: auto;
+            scroll-snap-type: x mandatory;
+            scroll-behavior: smooth;
+            scrollbar-width: none
+        }
+
+        .carousel-wrapper::-webkit-scrollbar {
+            display: none
+        }
+
+        .panel {
+            flex: 0 0 100vw;
+            height: 100vh;
+            scroll-snap-align: start;
+            display: grid;
+            grid-template-columns: repeat(12, 1fr);
+            grid-template-rows: 1fr;
+            position: relative;
+            background-size: 20px 20px;
+            background-image: linear-gradient(to right, var(--grid-color) 1px, transparent 1px), linear-gradient(to bottom, var(--grid-color) 1px, transparent 1px)
+        }
+
+        .panel-content {
+            grid-column: 2 / 12;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            height: 100%;
+            z-index: 10;
+            padding-top: 4rem
+        }
+
+        .split-panel {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 4rem;
+            height: 100%;
+            align-items: center
+        }
+
+        .image-bg {
+            position: absolute;
+            inset: 0;
+            background-size: cover;
+            background-position: center;
+            opacity: 0.15;
+            mix-blend-mode: luminosity;
+            z-index: 0;
+            filter: grayscale(100%) sepia(20%) hue-rotate(180deg) contrast(150%)
+        }
+
+        .image-bg::after {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(to right, var(--bg) 0%, transparent 50%, var(--bg) 100%), linear-gradient(to bottom, var(--bg) 0%, transparent 50%, var(--bg) 100%)
+        }
+
+        .glass-box {
+            background: rgba(15, 23, 42, 0.7);
+            backdrop-filter: blur(10px);
+            border: 1px solid var(--border-ui);
+            padding: 2.5rem;
+            border-left: 4px solid var(--accent)
+        }
+
+        .reveal {
+            opacity: 0;
+            transform: translateY(20px);
+            transition: opacity 0.8s var(--ease), transform 0.8s var(--ease)
+        }
+
+        .reveal.active {
+            opacity: 1;
+            transform: translateY(0)
+        }
+
+        .delay-1 {
+            transition-delay: 0.1s
+        }
+
+        .delay-2 {
+            transition-delay: 0.2s
+        }
+
+        .delay-3 {
+            transition-delay: 0.3s
+        }
+
+        .math-formula {
+            display: block;
+            padding: 1rem;
+            background: rgba(0, 0, 0, 0.5);
+            border: 1px dashed var(--text-dim);
+            color: var(--accent);
+            text-align: center;
+            margin: 1rem 0;
+            font-size: 1.1rem;
+            letter-spacing: 0.1em
+        }
+
+        .tier-list {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 1.5rem;
+            margin-top: 2rem
+        }
+
+        .tier-item {
+            border: 1px solid var(--grid-color);
+            padding: 1.5rem;
+            position: relative;
+            background: rgba(255, 255, 255, 0.02)
+        }
+
+        .tier-item::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 20px;
+            height: 2px;
+            background: var(--accent)
+        }
+
+        .status-terminal {
+            background: #000;
+            border: 1px solid var(--border-ui);
+            padding: 2rem;
+            font-size: 0.9rem;
+            box-shadow: inset 0 0 20px rgba(0, 229, 255, 0.05)
+        }
+
+        .terminal-line {
+            display: block;
+            margin-bottom: 0.5rem
+        }
+
+        .terminal-line::before {
+            content: '$ ';
+            color: var(--accent)
+        }
+
+        @media(max-width:1024px) {
+            .split-panel {
+                grid-template-columns: 1fr;
+                gap: 2rem
+            }
+
+            .tier-list {
+                grid-template-columns: 1fr
+            }
+
+            .panel-content {
+                grid-column: 1 / 13;
+                padding: 2rem
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div id="cursor"></div><svg id="noise-overlay">
+        <filter id="noiseFilter">
+            <feTurbulence type="fractalNoise" baseFrequency="0.8" numOctaves="3" stitchTiles="stitch" />
+        </filter>
+        <rect width="100%" height="100%" filter="url(#noiseFilter)" />
+    </svg>
+    <div class="hud hud-top-left">SYS.OP // BIOL.PROCESS</div>
+    <div class="hud hud-top-right" id="panel-indicator">SEC [ 1 / 5 ]</div>
+    <div class="hud hud-bottom-left">DATA: VERIFIED</div>
+    <div class="hud hud-bottom-right">ML_PIPELINE_READY</div>
+    <div class="progress-container">
+        <div class="progress-bar" id="progress"></div>
+    </div>
+    <div class="carousel-wrapper" id="carousel">
+        <section class="panel" data-index="1">
+            <div class="image-bg" style="background-image: url('./images/scene1.jpg')"></div>
+            <div class="panel-content">
+                <div class="reveal">
+                    <h1 style="max-width: 1000px">Domain Report:<br><span style="color:var(--accent)">Biological Process
+                            Prediction</span></h1>
+                </div>
+                <div class="glass-box reveal delay-1" style="max-width: 800px; margin-top: 2rem">
+                    <h2>Mission Directive</h2>
+                    <p><strong>Goal:</strong> Build a self-contained machine learning pipeline to predict Biological
+                        Process (BP) Gene Ontology terms for proteins based strictly on their amino acid sequences. You
+                        will use the provided training set of experimentally determined GO terms to train your model.
+                        Your ultimate objective is to optimize the maximum information-accretion weighted F1-measure
+                        specifically for the BP subontology across no-knowledge, limited-knowledge, and
+                        partial-knowledge protein targets. You do not need to consider Molecular Function or Cellular
+                        Component targets.</p>
+                </div>
+            </div>
+        </section>
+        <section class="panel" data-index="2">
+            <div class="image-bg" style="background-image: url('./images/scene2.jpg')"></div>
+            <div class="panel-content split-panel">
+                <div>
+                    <div class="reveal">
+                        <h2>Executive Summary</h2>
+                        <p>This report synthesizes the development of a self-contained machine learning pipeline
+                            designed to predict Biological Process (BP) Gene Ontology (GO) terms from amino acid
+                            sequences. The pipeline integrates state-of-the-art protein language models with a
+                            specialized evaluation framework designed to optimize the maximum information-accretion
+                            weighted F1-measure (wFmax).</p>
+                        <p>Key components include ESM-2 sequence embeddings, a hierarchical Information Content (IC)
+                            weighting system, a custom multi-label neural network architecture, and a knowledge-tiered
+                            evaluation module.</p>
+                    </div>
+                </div>
+                <div>
+                    <div class="glass-box reveal delay-1">
+                        <h2>1. Information Content and Semantic Weighting</h2>
+                        <p>The foundation of the pipeline lies in its ability to handle the hierarchical and non-uniform
+                            nature of Gene Ontology terms. Worker-Biol-1 implemented a frequency-based calculation for
+                            Information Content (IC), defined as:</p><span class="math-formula">IC = -log10(p(t))</span>
+                        <p>Crucially, the system implements hierarchical propagation, ensuring that the frequency of a
+                            specific term includes the counts of all its descendant terms in the GO graph. This
+                            methodology ensures that rare, highly specific biological processes are assigned higher
+                            weights than generic, high-level terms.</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+        <section class="panel" data-index="3">
+            <div class="image-bg" style="background-image: url('./images/scene3.jpg')"></div>
+            <div class="panel-content split-panel">
+                <div>
+                    <div class="glass-box reveal">
+                        <h2>2. Sequence Feature Engineering via ESM-2</h2>
+                        <p>To bridge the gap between raw amino acid sequences and numerical machine learning inputs, the
+                            pipeline utilizes Meta AI’s <strong>ESM-2</strong> (Evolutionary Scale Modeling) transformer
+                            model. Specifically, the <code>facebook/esm2_t6_8M_UR50D</code> model was selected to
+                            generate context-aware embeddings.</p>
+                        <p>The feature extraction process transforms variable-length sequences into fixed-length
+                            <strong>320-dimensional vectors</strong> using mean pooling across residue-level hidden
+                            states. This approach captures the biochemical and evolutionary context of the sequence
+                            while ensuring a uniform input space for the downstream classifier.</p>
+                    </div>
+                </div>
+                <div>
+                    <div class="glass-box reveal delay-1">
+                        <h2>3. Model Architecture & Loss</h2>
+                        <p>The core predictive engine, developed by Worker-Biol-3, is a Multi-Layer Perceptron (MLP)
+                            specifically optimized for high-dimensional sequence embeddings.</p>
+                        <ul>
+                            <li><strong>BPClassifier Architecture:</strong> Incorporates <strong>BatchNorm1d</strong>
+                                and <strong>Dropout</strong> layers to mitigate overfitting given high dimensionality.
+                            </li>
+                            <li><strong>Information-Accretion Loss:</strong> Replaces standard BCE. Scales
+                                misclassification penalty based on Information Accretion (IA) weights of BP nodes.</li>
+                            <li><strong>Threshold Optimization:</strong> Iterates through dynamic decision thresholds to
+                                maximize wFmax and minimize Semantic Distance (Smin).</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </section>
+        <section class="panel" data-index="4">
+            <div class="image-bg" style="background-image: url('./images/scene4.jpg')"></div>
+            <div class="panel-content">
+                <div class="reveal text-center" style="max-width: 800px; margin: 0 auto; text-align: center">
+                    <h2>4. Multi-Tiered Evaluation Framework</h2>
+                    <p>To ensure the model is robust across different levels of biological understanding, Worker-Biol-4
+                        implemented a validation framework that categorizes protein targets based on existing knowledge
+                        levels. This segmentation is critical for assessing generalization to "dark matter" proteins,
+                        mirroring CAFA competition challenges.</p>
+                </div>
+                <div class="tier-list">
+                    <div class="tier-item reveal delay-1">
+                        <h3>Tier 01: No-Knowledge</h3>
+                        <p style="margin-top:1rem; font-size:0.9rem">Targets with 0 existing annotations. Represents
+                            true "dark matter" proteins.</p>
+                    </div>
+                    <div class="tier-item reveal delay-2">
+                        <h3>Tier 02: Limited-Knowledge</h3>
+                        <p style="margin-top:1rem; font-size:0.9rem">Targets with 1-3 existing annotations. Tests
+                            augmentation capabilities.</p>
+                    </div>
+                    <div class="tier-item reveal delay-3">
+                        <h3>Tier 03: Partial-Knowledge</h3>
+                        <p style="margin-top:1rem; font-size:0.9rem">Targets with more than 3 existing annotations.
+                            Baseline performance metric.</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+        <section class="panel" data-index="5">
+            <div class="image-bg" style="background-image: url('./images/scene5.jpg')"></div>
+            <div class="panel-content split-panel">
+                <div>
+                    <div class="reveal">
+                        <h2>5. Implementation Status</h2>
+                        <p>All modules are currently functional and saved within the <code>workers/</code> directory. No
+                            worker results were marked with low confidence. For higher accuracy, larger ESM-2 variants
+                            can be dropped into the existing module with minimal configuration.</p>
+                    </div>
+                    <div class="status-terminal reveal delay-1"><span class="terminal-line">[OK] compute_ic.py :
+                            Semantic weights</span><span class="terminal-line">[OK] sequence_feature_engineering.py :
+                            ESM-2 embeddings</span><span class="terminal-line">[OK] bp_term_prediction.py : MLP
+                            architecture & loss</span><span class="terminal-line">[OK] evaluation_framework.py : Tiered
+                            reporting</span></div>
+                </div>
+                <div>
+                    <div class="glass-box reveal delay-2" style="border-color: var(--accent)">
+                        <h3 style="color: var(--text-main); margin-bottom: 1rem">SYSTEM NOTE</h3>
+                        <p style="margin:0">The complete synthesized pipeline is ready for integration, with all
+                            components communicating via standardized JSON and CSV formats.</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </div>
+    <script>const cursor = document.getElementById('cursor'); document.addEventListener('mousemove', e => { cursor.style.left = e.clientX + 'px'; cursor.style.top = e.clientY + 'px' }); document.querySelectorAll('a, button, .glass-box, .tier-item').forEach(el => { el.addEventListener('mouseenter', () => cursor.style.transform = 'translate(-50%, -50%) scale(1.5)'); el.addEventListener('mouseleave', () => cursor.style.transform = 'translate(-50%, -50%) scale(1)') }); const observer = new IntersectionObserver(entries => { entries.forEach(entry => { if (entry.isIntersecting) { entry.target.classList.add('active') } else { entry.target.classList.remove('active') } }) }, { threshold: 0.1, rootMargin: "0px -50px -100px -50px" }); document.querySelectorAll('.reveal').forEach(el => observer.observe(el)); const carousel = document.getElementById('carousel'); const progressBar = document.getElementById('progress'); const indicator = document.getElementById('panel-indicator'); const totalPanels = 5; carousel.addEventListener('scroll', () => { const maxScroll = carousel.scrollWidth - carousel.clientWidth; const scrollPercentage = (carousel.scrollLeft / maxScroll) * 100; progressBar.style.width = `${scrollPercentage}%`; const currentPanel = Math.round(carousel.scrollLeft / carousel.clientWidth) + 1; indicator.textContent = `SEC [ ${currentPanel} / ${totalPanels} ]` }); window.addEventListener('load', () => { setTimeout(() => document.querySelectorAll('.panel:first-child .reveal').forEach(el => el.classList.add('active')), 300) });</script>
+</body>
+
+</html>

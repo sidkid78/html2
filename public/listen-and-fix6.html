@@ -1,0 +1,483 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Listen & Fix</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700;900&family=Public+Sans:wght@300;400;600&family=JetBrains+Mono:wght@400;700&display=swap"
+        rel="stylesheet">
+    <style>
+        :root {
+            --bg: #050608;
+            --surface: rgba(255, 255, 255, 0.03);
+            --surface-hover: rgba(255, 255, 255, 0.06);
+            --text-main: #e2e8f0;
+            --text-muted: #94a3b8;
+            --accent: #ff5a00;
+            --accent-dark: #5f2200;
+            --tech-blue: #00f0ff;
+            --font-hero: 'Inter', sans-serif;
+            --font-body: 'Public Sans', sans-serif;
+            --font-mono: 'JetBrains Mono', monospace;
+        }
+
+        *,
+        *::before,
+        *::after {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            background-color: var(--bg);
+            color: var(--text-main);
+            font-family: var(--font-body);
+            line-height: 1.6;
+            overflow-x: hidden;
+            cursor: none;
+            scrollbar-width: none;
+        }
+
+        body::-webkit-scrollbar {
+            display: none;
+        }
+
+        h1,
+        h2,
+        h3,
+        h4 {
+            font-family: var(--font-hero);
+            font-weight: 700;
+            line-height: 1.1;
+            letter-spacing: -0.02em;
+        }
+
+        p {
+            margin-bottom: 1.5rem;
+            font-weight: 300;
+        }
+
+        a {
+            color: var(--accent);
+            text-decoration: none;
+        }
+
+        .cursor-crosshair {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            pointer-events: none;
+            z-index: 9999;
+            mix-blend-mode: difference;
+        }
+
+        .cursor-x,
+        .cursor-y {
+            position: absolute;
+            background: rgba(255, 255, 255, 0.2);
+        }
+
+        .cursor-x {
+            width: 100%;
+            height: 1px;
+            top: 50%;
+            left: 0;
+            transform: translateY(-50%);
+        }
+
+        .cursor-y {
+            height: 100%;
+            width: 1px;
+            left: 50%;
+            top: 0;
+            transform: translateX(-50%);
+        }
+
+        .cursor-dot {
+            position: absolute;
+            width: 4px;
+            height: 4px;
+            background: var(--accent);
+            border-radius: 50%;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            transition: transform 0.1s ease;
+        }
+
+        .noise-overlay {
+            position: fixed;
+            inset: 0;
+            pointer-events: none;
+            z-index: 9998;
+            opacity: 0.04;
+        }
+
+        .layout-grid {
+            display: flex;
+            flex-direction: column;
+            width: 100%;
+        }
+
+        @media(min-width:1024px) {
+            .layout-grid {
+                flex-direction: row;
+            }
+        }
+
+        .visual-pane {
+            position: relative;
+            width: 100%;
+            height: 50vh;
+            overflow: hidden;
+            background: #000;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        @media(min-width:1024px) {
+            .visual-pane {
+                position: sticky;
+                top: 0;
+                height: 100vh;
+                width: 50vw;
+                border-bottom: none;
+                border-right: 1px solid rgba(255, 255, 255, 0.1);
+            }
+        }
+
+        .img-layer {
+            position: absolute;
+            inset: 0;
+            opacity: 0;
+            transition: opacity 1.2s cubic-bezier(0.4, 0, 0.2, 1), transform 1.2s cubic-bezier(0.4, 0, 0.2, 1);
+            transform: scale(1.05);
+        }
+
+        .img-layer.active {
+            opacity: 1;
+            transform: scale(1);
+        }
+
+        .img-layer img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            filter: brightness(0.8) contrast(1.1);
+        }
+
+        .content-pane {
+            width: 100%;
+            padding: 2rem 1.5rem;
+            z-index: 10;
+        }
+
+        @media(min-width:1024px) {
+            .content-pane {
+                width: 50vw;
+                padding: 6rem 4rem 10rem 4rem;
+            }
+        }
+
+        .section-block {
+            margin-bottom: 15vh;
+            opacity: 0;
+            transform: translateY(30px);
+            transition: opacity 0.8s ease, transform 0.8s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        .section-block.is-visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        .meta-tag {
+            display: inline-block;
+            font-family: var(--font-mono);
+            font-size: 0.75rem;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            color: var(--text-muted);
+            margin-bottom: 0.5rem;
+        }
+
+        .title {
+            font-size: clamp(2.5rem, 5vw, 4.5rem);
+            margin-bottom: 1.5rem;
+            color: #fff;
+        }
+
+        .subtitle {
+            font-size: 1.25rem;
+            color: var(--text-muted);
+            margin-bottom: 3rem;
+            font-weight: 400;
+        }
+
+        .tags {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+            margin-bottom: 3rem;
+        }
+
+        .tag {
+            font-family: var(--font-mono);
+            font-size: 0.7rem;
+            padding: 0.4rem 0.8rem;
+            background: var(--surface);
+            border-radius: 2px;
+            color: var(--tech-blue);
+        }
+
+        .panel {
+            background: var(--surface);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            padding: 2rem;
+            border-radius: 4px;
+            margin-bottom: 2rem;
+            transition: background 0.3s ease;
+        }
+
+        .panel:hover {
+            background: var(--surface-hover);
+        }
+
+        .step-list {
+            list-style: none;
+            counter-reset: step-counter;
+        }
+
+        .step-item {
+            position: relative;
+            padding-left: 3rem;
+            margin-bottom: 2rem;
+        }
+
+        .step-item::before {
+            counter-increment: step-counter;
+            content: "0" counter(step-counter);
+            position: absolute;
+            left: 0;
+            top: 0.2rem;
+            font-family: var(--font-mono);
+            font-size: 0.85rem;
+            color: var(--accent);
+        }
+
+        .step-item strong {
+            font-family: var(--font-hero);
+            color: #fff;
+            display: block;
+            margin-bottom: 0.25rem;
+        }
+
+        .code-block {
+            font-family: var(--font-mono);
+            font-size: 0.85rem;
+            background: rgba(0, 0, 0, 0.5);
+            padding: 2rem;
+            border-radius: 4px;
+            overflow-x: auto;
+            color: #a6accd;
+            line-height: 1.7;
+            margin: 2rem 0;
+            box-shadow: inset 0 0 20px rgba(0, 0, 0, 0.8);
+            border-left: 2px solid var(--accent);
+        }
+
+        .code-keyword {
+            color: #89ddff;
+        }
+
+        .code-string {
+            color: #c3e88d;
+        }
+
+        .code-comment {
+            color: #546e7a;
+            font-style: italic;
+        }
+
+        .warning-panel {
+            background: linear-gradient(135deg, rgba(95, 34, 0, 0.4) 0%, rgba(0, 0, 0, 0) 100%);
+            border-left: 4px solid var(--accent);
+        }
+
+        .warning-panel h3 {
+            color: var(--accent);
+        }
+
+        .hud-overlay {
+            position: absolute;
+            inset: 0;
+            pointer-events: none;
+            background: linear-gradient(rgba(0, 240, 255, 0.03) 1px, transparent 1px), linear-gradient(90deg, rgba(0, 240, 255, 0.03) 1px, transparent 1px);
+            background-size: 40px 40px;
+            z-index: 2;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="cursor-crosshair">
+        <div class="cursor-x"></div>
+        <div class="cursor-y"></div>
+        <div class="cursor-dot"></div>
+    </div><svg class="noise-overlay">
+        <filter id="noiseFilter">
+            <feTurbulence type="fractalNoise" baseFrequency="0.8" numOctaves="3" stitchTiles="stitch" />
+        </filter>
+        <rect width="100%" height="100%" filter="url(#noiseFilter)" />
+    </svg>
+    <div class="layout-grid">
+        <div class="visual-pane">
+            <div class="hud-overlay"></div>
+            <div class="img-layer active" data-img="0"><img src="./images/visual1(3).png" alt="Diagnostic Visualization">
+            </div>
+            <div class="img-layer" data-img="1"><img src="./images/visual-2.png" alt="Multimodal Tablet Interface"></div>
+            <div class="img-layer" data-img="2"><img src="./images/visual-3.png" alt="RAG Data Structure"></div>
+            <div class="img-layer" data-img="3"><img src="./images/visual-4.png" alt="Digital Foreman Interface"></div>
+        </div>
+        <div class="content-pane">
+            <section class="section-block" data-target="0">
+                <div class="meta-tag"></div>
+                <h1 class="title">Listen &amp; Fix: Empowering the Digital Mechanic with Multimodal AI and Just-in-Time
+                    RAG</h1>
+                <div class="meta-tag"></div>
+                <p class="subtitle">Explore Listen &amp; Fix: a diagnostic platform using Gemini 3 Flash and
+                    Just-in-Time RAG to provide real-time audio/visual repair guidance for DIY mechanics.</p>
+                <div class="tags"><span class="tag">#Multimodal AI</span><span class="tag">#Gemini 3 Flash</span><span
+                        class="tag">#RAG</span><span class="tag">#Predictive Maintenance</span><span
+                        class="tag">#Technical Architecture</span><span class="tag">#DIY Repair</span></div>
+                <div class="panel">
+                    <h3>Bridging the Gap Between Technical Uncertainty and Mechanical Authority with Gemini-Powered
+                        Multimodal AI</h3><br>
+                    <p>Every homeowner and amateur mechanic has experienced the "Mechanic’s Dilemma": that sinking
+                        feeling when a mysterious knock emanates from under the hood or a high-pitched whine signals the
+                        impending failure of a washing machine. Traditionally, the gap between identifying a symptom and
+                        executing a repair was filled with hours of scouring dense manuals or watching generic YouTube
+                        videos that never quite match your specific model.</p>
+                    <p>The Listen &amp; Fix ecosystem changes this paradigm. By leveraging the state-of-the-art Google
+                        Gemini 3 Flash model, we have developed a high-performance, multimodal diagnostic platform
+                        that acts as a "Shazam for Engines and Appliances." This system does more than just guess; it
+                        integrates real-time audio, video, and image analysis with a "just-in-time" Retrieval-Augmented
+                        Generation (RAG) pipeline. By grounding AI insights in crawled technical manuals and service
+                        bulletins, Listen &amp; Fix transforms the user from a frustrated bystander into a confident
+                        technician.</p>
+                </div>
+            </section>
+            <section class="section-block" data-target="1">
+                <h2 style="margin-bottom:2rem;">The ListenFixAssistant: A Structured Path to Resolution</h2>
+                <p>At the heart of the ecosystem is the ListenFixAssistant, a high-performance React-based wizard
+                    designed to manage the transition from uncertainty to authority. The workflow is divided into four
+                    distinct phases:</p>
+                <ul class="step-list">
+                    <li class="step-item"><strong>Capture Step:</strong> Users provide the "raw
+                        evidence"—high-resolution photos of worn components or audio recordings of mechanical failure.
+                    </li>
+                    <li class="step-item"><strong>Details Step:</strong> A 6-step context wizard gathers equipment
+                        metadata such as make, model, year, and the user's specific DIY skill level.</li>
+                    <li class="step-item"><strong>Analyzing Step:</strong> Data is streamed to the backend via an NDJSON
+                        stream, providing the user with real-time progress updates like "Analyzing engine harmonics..."
+                        or "Cross-referencing thermal signatures."</li>
+                    <li class="step-item"><strong>Results Step:</strong> The system renders a comprehensive RepairGuide,
+                        an interactive dashboard providing a diagnosis, a curated list of necessary tools, and
+                        step-by-step instructions tailored to the user's expertise.</li>
+                </ul>
+            </section>
+            <section class="section-block" data-target="1">
+                <h2 style="margin-bottom:1.5rem;">Multimodal Analysis: Seeing and Hearing the Problem</h2>
+                <div class="panel">
+                    <p>Unlike traditional diagnostic tools that rely on manual feature extraction (such as MFCC or
+                        spectral analysis), the Listen &amp; Fix diagnostic engine utilizes Gemini’s native multimodal
+                        capabilities. This allows for "Multimodal Fusion," where the AI correlates disparate data
+                        streams simultaneously.</p>
+                    <p>For instance, the system can sync a 44.1 kHz audio recording of a squealing belt with a video
+                        frame showing a misaligned pulley. By identifying high-frequency audio spikes alongside visual
+                        wear patterns, the system can detect micro-fractures or bearing wear before catastrophic failure
+                        occurs. Every diagnosis is accompanied by a confidence score (0.0 to 1.0) and a severity rating
+                        (low, medium, high, or critical), ensuring the user understands the urgency and reliability of
+                        the AI’s findings.</p>
+                </div>
+            </section>
+            <section class="section-block" data-target="2">
+                <h2 style="margin-bottom:1.5rem;">Just-in-Time RAG: The Scout and the Librarian</h2>
+                <p>To ensure technical accuracy, the system employs a dual-path Retrieval-Augmented Generation (RAG)
+                    infrastructure.</p>
+                <div class="panel"><strong>The Shop Scout (DocumentCrawlerService):</strong><br>This service searches
+                    for and ingests technical documentation in real-time based on the specific equipment metadata
+                    provided. It fetches data from trusted sources like iFixit, RepairPal, and the NHTSA, using Gemini
+                    to strip away "workshop noise" like ads and navigation.</div>
+                <div class="panel"><strong>The Technical Librarian (RAGService):</strong><br>Once the data is cleaned,
+                    the Librarian chunks the data into manageable segments, ensuring safety warnings and torque specs
+                    remain intact. These chunks are converted into vector embeddings using the gemini-text-embedding model.
+                </div>
+                <p>This allows the AI to find the "right page at the right time," linking a user’s description of an
+                    "engine knock" to a manual’s "connecting rod clearance" through mathematical similarity, even if the
+                    user lacks the professional terminology.</p>
+            </section>
+            <section class="section-block" data-target="2">
+                <h2 style="margin-bottom:1.5rem;">Technical Architecture and Backend Integration</h2>
+                <p>The ecosystem is built on a Next.js framework using the @google/genai SDK. The backend is
+                    orchestrated by the DiagnosisService, a TypeScript library that processes multimodal inputs and
+                    returns structured JSON responses. Large file handling is managed through a dedicated Gemini API
+                    Route, which utilizes resumable upload protocols for files up to 2GB.</p>
+                <pre
+                    class="code-block"><code><span class="code-keyword">async function</span> analyzeDiagnostic(media: FileData, metadata: EquipmentContext) {<br>  <span class="code-keyword">const</span> prompt = <span class="code-string">`Perform a technical diagnosis for this ${metadata.make} ${metadata.model}.<br>  Analyze the provided audio/visual data for mechanical anomalies.<br>  Cross-reference with ingested RAG context for specific torque specs and part numbers.`</span>;<br><br>  <span class="code-keyword">try</span> {<br>    <span class="code-keyword">const</span> result = <span class="code-keyword">await</span> model.generateContent([prompt, ...media.parts]);<br>    <span class="code-keyword">const</span> responseText = result.response.text();<br>    <span class="code-comment">// Ensure the response is valid JSON before returning to the UI</span><br>    <span class="code-keyword">return</span> JSON.parse(responseText);<br>  } <span class="code-keyword">catch</span> (error) {<br>    console.error(<span class="code-string">"Failed to parse diagnostic response:"</span>, error);<br>    <span class="code-keyword">throw new</span> Error(<span class="code-string">"The diagnostic engine returned an unreadable format. Please try again."</span>);<br>  }<br>}</code></pre>
+                <p>While the backend handles the heavy lifting of high-bandwidth data transfers, the interface must
+                    translate this complexity into an intuitive, high-trust experience that guides the user through the
+                    physical repair.</p>
+            </section>
+            <section class="section-block" data-target="3">
+                <h2 style="margin-bottom:1.5rem;">The Digital Foreman: Design for High-Trust Environments</h2>
+                <div class="panel">
+                    <p>In a repair scenario, the user interface must convey authority and calm. Our "Digital Foreman"
+                        design system rejects the clutter of traditional apps. It adheres to the "No-Line Rule," where
+                        space is defined through background tonal shifts rather than 1px borders. This reduces visual
+                        noise, which is critical in high-stress environments where a user might be working in a cramped,
+                        oily, or dimly lit space.</p>
+                    <p>We use a dual-typeface system: Inter for headlines to project authority, and Public Sans for
+                        technical instructions to ensure legibility. The color palette is rooted in stable blues and
+                        charcoals, while critical warnings use a sophisticated burnt orange (#5f2200). Snappy,
+                        mechanical animations and glassmorphism overlays keep the user grounded in the physical context
+                        of their repair, ensuring the technology feels like a professional tool rather than a toy.</p>
+                </div>
+            </section>
+            <section class="section-block" data-target="3">
+                <div class="panel warning-panel">
+                    <h3 style="margin-bottom:1rem;">Safety Protocols and Automated Parts Sourcing</h3>
+                    <p>Safety is the highest priority in the Listen &amp; Fix ecosystem. The system identifies high-risk
+                        equipment and injects mandatory, domain-specific safety protocols into the RepairGuide. For
+                        vehicles, this includes warnings about jack stands and hazardous fluids; for HVAC, it covers EPA
+                        certifications for refrigerant handling.</p>
+                </div>
+                <p>Additionally, the system automates the "what now?" phase through a Parts &amp; Inventory Sourcing
+                    module. It identifies exact part numbers and queries live search results for local availability at
+                    retailers like AutoZone or Home Depot. A "Supplier Matrix" provides average delivery times and
+                    compliance scores, allowing the user to move immediately from diagnosis to procurement without
+                    leaving the platform.</p>
+            </section>
+            <section class="section-block" data-target="3">
+                <h2 style="margin-bottom:1.5rem;">Conclusion</h2>
+                <p>The Listen &amp; Fix ecosystem represents a significant leap forward in DIY maintenance. By combining
+                    the multimodal intelligence of Gemini 3 Flash with a robust, just-in-time RAG pipeline, we have
+                    eliminated the guesswork that defines modern repair. Whether you are a beginner looking for a simple
+                    fix or a professional seeking exact torque specifications, the system provides the right information
+                    at the precise moment it is needed. Through the "Digital Foreman" design system and a commitment to
+                    safety, Listen &amp; Fix doesn't just tell you what is wrong—it gives you the authority and the
+                    tools to make it right.</p>
+            </section>
+        </div>
+    </div>
+    <script>document.addEventListener('DOMContentLoaded', () => { const cursorX = document.querySelector('.cursor-x'); const cursorY = document.querySelector('.cursor-y'); const cursorDot = document.querySelector('.cursor-dot'); document.addEventListener('mousemove', (e) => { cursorX.style.top = e.clientY + 'px'; cursorY.style.left = e.clientX + 'px'; cursorDot.style.left = e.clientX + 'px'; cursorDot.style.top = e.clientY + 'px'; }); document.body.addEventListener('mousedown', () => cursorDot.style.transform = 'translate(-50%, -50%) scale(0.5)'); document.body.addEventListener('mouseup', () => cursorDot.style.transform = 'translate(-50%, -50%) scale(1)'); const sections = document.querySelectorAll('.section-block'); const imgLayers = document.querySelectorAll('.img-layer'); const observerOptions = { root: null, rootMargin: '-20% 0px -40% 0px', threshold: 0 }; const observer = new IntersectionObserver((entries) => { entries.forEach(entry => { if (entry.isIntersecting) { entry.target.classList.add('is-visible'); const targetImgIndex = entry.target.getAttribute('data-target'); if (targetImgIndex !== null) { imgLayers.forEach((layer, idx) => { if (idx == targetImgIndex) { layer.classList.add('active'); } else { layer.classList.remove('active'); } }); } } }); }, observerOptions); sections.forEach(sec => observer.observe(sec)); });</script>
+</body>
+
+</html>
