@@ -708,6 +708,10 @@
           if (video) {
             const playbackRate = entry.target.getAttribute('data-playback-rate') || 1;
             video.playbackRate = parseFloat(playbackRate);
+            if (sessionStarted) {
+              video.muted = false;
+              video.volume = 0.5;
+            }
             video.play();
           }
           if (audio && sessionStarted) {
@@ -736,12 +740,21 @@
     initOverlay.addEventListener('click', () => {
       sessionStarted = true;
       initOverlay.classList.add('hidden');
+      setTimeout(() => initOverlay.style.display = 'none', 500);
 
-      // Auto-trigger the first panel's audio if it's already in view
-      const firstPanel = document.querySelector('.panel[data-index="1"]');
-      const firstAudio = firstPanel.querySelector('.narration');
-      if (firstAudio) {
-        firstAudio.play();
+      // Auto-trigger the current panel's audio and unmuted video
+      const activePanel = document.querySelector('.panel.in-view') || document.querySelector('.panel[data-index="1"]');
+      if (activePanel) {
+        const video = activePanel.querySelector('video');
+        const audio = activePanel.querySelector('.narration');
+        if (video) {
+          video.muted = false;
+          video.volume = 0.5;
+          video.play();
+        }
+        if (audio) {
+          audio.play();
+        }
       }
     });
 
