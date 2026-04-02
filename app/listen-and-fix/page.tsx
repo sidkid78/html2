@@ -5,9 +5,9 @@ import Link from 'next/link';
 
 const articles = [
   {
-    title: "Multimodal Diagnostic Briefing (v7)",
+    title: "Cinematic Multimodal Briefing (v8)",
     description: "The complete technical blueprint. Acoustic fingerprinting, RAG-grounded repairs, and the future of mechanical agency.",
-    href: "/listen-and-fix7.html",
+    href: "/listenandfix8.html",
     icon: "📡",
     accent: "from-blue-500/20 to-indigo-500/20"
   },
