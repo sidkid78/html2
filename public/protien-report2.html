@@ -1,0 +1,638 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Domain Report: Cellular Component Prediction</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600&family=JetBrains+Mono:wght@400;700&family=Space+Grotesk:wght@500;700&display=swap');
+
+  :root {
+    --bg: #030406;
+    --surface: #0a0e14;
+    --border: rgba(0, 240, 255, 0.15);
+    --accent: #00f0ff;
+    --text-main: #e2e8f0;
+    --text-muted: #8b9eb3;
+    --font-sans: 'Inter', sans-serif;
+    --font-mono: 'JetBrains Mono', monospace;
+    --font-display: 'Space Grotesk', sans-serif;
+  }
+
+  * {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+  }
+
+  body {
+    background-color: var(--bg);
+    color: var(--text-main);
+    font-family: var(--font-sans);
+    overflow: hidden; /* Hide main scrollbar, rely on container */
+    -webkit-font-smoothing: antialiased;
+    cursor: crosshair;
+  }
+
+  /* Custom Scrollbar for inner text blocks */
+  ::-webkit-scrollbar {
+    width: 4px;
+  }
+  ::-webkit-scrollbar-track {
+    background: var(--bg);
+  }
+  ::-webkit-scrollbar-thumb {
+    background: var(--border);
+  }
+  ::-webkit-scrollbar-thumb:hover {
+    background: var(--accent);
+  }
+
+  .carousel-container {
+    display: flex;
+    width: 100vw;
+    height: 100vh;
+    overflow-x: auto;
+    overflow-y: hidden;
+    scroll-snap-type: x mandatory;
+    scroll-behavior: smooth;
+    scrollbar-width: none; /* Firefox */
+  }
+  .carousel-container::-webkit-scrollbar {
+    display: none; /* Chrome */
+  }
+
+  .panel {
+    flex: 0 0 100vw;
+    height: 100vh;
+    scroll-snap-align: start;
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 2rem;
+  }
+
+  .grid-layout {
+    width: 100%;
+    height: 100%;
+    max-width: 1600px;
+    display: grid;
+    grid-template-columns: 1fr;
+    grid-template-rows: auto 1fr;
+    gap: 1.5rem;
+    position: relative;
+  }
+
+  @media (min-width: 1024px) {
+    .grid-layout {
+      grid-template-columns: 5fr 7fr;
+      grid-template-rows: 1fr;
+    }
+    .reverse-layout {
+      grid-template-columns: 7fr 5fr;
+    }
+    .reverse-layout .text-content {
+      order: 2;
+    }
+    .reverse-layout .visual-content {
+      order: 1;
+    }
+  }
+
+  /* UI Chrome & Borders */
+  .tech-border {
+    border: 1px solid var(--border);
+    background: var(--surface);
+    position: relative;
+  }
+  
+  .corner-mark {
+    position: absolute;
+    width: 8px;
+    height: 8px;
+    border-color: var(--accent);
+    border-style: solid;
+    z-index: 10;
+  }
+  .tl { top: -1px; left: -1px; border-width: 1px 0 0 1px; }
+  .tr { top: -1px; right: -1px; border-width: 1px 1px 0 0; }
+  .bl { bottom: -1px; left: -1px; border-width: 0 0 1px 1px; }
+  .br { bottom: -1px; right: -1px; border-width: 0 1px 1px 0; }
+
+  /* Typography */
+  h1, h2, h3 {
+    font-family: var(--font-display);
+    text-transform: uppercase;
+    line-height: 1.1;
+  }
+  h1 {
+    font-size: clamp(2.5rem, 5vw, 5rem);
+    font-weight: 700;
+    letter-spacing: -0.03em;
+    margin-bottom: 1rem;
+  }
+  h2 {
+    font-size: clamp(1.2rem, 2vw, 2rem);
+    color: var(--accent);
+    margin-bottom: 1.5rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+  h2::before {
+    content: '';
+    display: block;
+    width: 12px;
+    height: 12px;
+    background: var(--accent);
+  }
+  h3 {
+    font-size: 1.1rem;
+    color: #fff;
+    margin: 1.5rem 0 0.5rem 0;
+  }
+  p, li {
+    font-size: clamp(0.875rem, 1vw, 1.125rem);
+    line-height: 1.6;
+    color: var(--text-muted);
+    margin-bottom: 1rem;
+  }
+  ul {
+    list-style: none;
+    padding-left: 1rem;
+  }
+  li::before {
+    content: '>';
+    color: var(--accent);
+    font-family: var(--font-mono);
+    margin-right: 0.5rem;
+    position: absolute;
+    left: 1rem;
+  }
+  li {
+    position: relative;
+    padding-left: 1rem;
+  }
+  strong {
+    color: var(--text-main);
+    font-weight: 600;
+  }
+  code {
+    font-family: var(--font-mono);
+    background: rgba(0, 240, 255, 0.1);
+    color: var(--accent);
+    padding: 0.1em 0.3em;
+    font-size: 0.9em;
+    border: 1px solid rgba(0, 240, 255, 0.2);
+  }
+
+  .text-content {
+    padding: 2rem;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    height: 100%;
+    overflow-y: auto;
+  }
+
+  .visual-content {
+    position: relative;
+    height: 100%;
+    min-height: 40vh;
+    overflow: hidden;
+    background-color: #000;
+  }
+
+  .image-layer {
+    position: absolute;
+    inset: 0;
+    background-size: cover;
+    background-position: center;
+    filter: grayscale(80%) contrast(1.2) brightness(0.8);
+    transition: filter 0.8s cubic-bezier(0.16, 1, 0.3, 1), transform 10s linear;
+  }
+  
+  .visual-content:hover .image-layer {
+    filter: grayscale(0%) contrast(1) brightness(1);
+    transform: scale(1.05);
+  }
+
+  .scanline-overlay {
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(
+      to bottom,
+      transparent 50%,
+      rgba(0, 0, 0, 0.3) 51%
+    );
+    background-size: 100% 4px;
+    pointer-events: none;
+    z-index: 2;
+  }
+
+  /* Meta Bar */
+  .meta-bar {
+    position: fixed;
+    bottom: 2rem;
+    left: 2rem;
+    right: 2rem;
+    display: flex;
+    justify-content: space-between;
+    font-family: var(--font-mono);
+    font-size: 0.75rem;
+    color: var(--accent);
+    z-index: 100;
+    pointer-events: none;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+  }
+  .progress-indicator {
+    display: flex;
+    gap: 4px;
+  }
+  .dot {
+    width: 24px;
+    height: 2px;
+    background: var(--border);
+    transition: background 0.3s;
+  }
+  .dot.active {
+    background: var(--accent);
+    box-shadow: 0 0 8px var(--accent);
+  }
+
+  /* Animations */
+  .reveal {
+    opacity: 0;
+    transform: translateY(20px);
+    transition: opacity 0.8s cubic-bezier(0.16, 1, 0.3, 1), transform 0.8s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+  .is-inview .reveal {
+    opacity: 1;
+    transform: translateY(0);
+  }
+  .delay-1 { transition-delay: 100ms; }
+  .delay-2 { transition-delay: 200ms; }
+  .delay-3 { transition-delay: 300ms; }
+  .delay-4 { transition-delay: 400ms; }
+
+  .glitch-text {
+    position: relative;
+  }
+  .glitch-text::before, .glitch-text::after {
+    content: attr(data-text);
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    opacity: 0;
+  }
+  .is-inview .glitch-text:hover::before {
+    left: 2px;
+    text-shadow: -2px 0 red;
+    animation: glitch-anim 2s infinite linear alternate-reverse;
+    opacity: 0.8;
+  }
+  .is-inview .glitch-text:hover::after {
+    left: -2px;
+    text-shadow: -2px 0 blue;
+    animation: glitch-anim-2 3s infinite linear alternate-reverse;
+    opacity: 0.8;
+  }
+
+  @keyframes glitch-anim {
+    0% { clip-path: inset(20% 0 80% 0); }
+    20% { clip-path: inset(60% 0 10% 0); }
+    40% { clip-path: inset(40% 0 50% 0); }
+    60% { clip-path: inset(80% 0 5% 0); }
+    80% { clip-path: inset(10% 0 70% 0); }
+    100% { clip-path: inset(30% 0 20% 0); }
+  }
+  @keyframes glitch-anim-2 {
+    0% { clip-path: inset(10% 0 60% 0); }
+    20% { clip-path: inset(30% 0 20% 0); }
+    40% { clip-path: inset(70% 0 10% 0); }
+    60% { clip-path: inset(20% 0 50% 0); }
+    80% { clip-path: inset(90% 0 5% 0); }
+    100% { clip-path: inset(40% 0 30% 0); }
+  }
+
+  /* SVG Filter Overlay */
+  #svg-filters {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    z-index: 9999;
+    mix-blend-mode: overlay;
+    opacity: 0.15;
+  }
+
+  .data-readout {
+    font-family: var(--font-mono);
+    font-size: 0.7rem;
+    color: var(--accent);
+    position: absolute;
+    top: 1rem;
+    right: 1rem;
+    opacity: 0.7;
+    text-align: right;
+  }
+
+  /* Utility Classes */
+  .font-mono { font-family: var(--font-mono); }
+  .text-accent { color: var(--accent); }
+  .mb-6 { margin-bottom: 1.5rem; }
+  .absolute { position: absolute; }
+  .bottom-4 { bottom: 1rem; }
+  .right-4 { right: 1rem; }
+  .bg-black-80 { background-color: rgba(0, 0, 0, 0.8); }
+  .px-2 { padding-left: 0.5rem; padding-right: 0.5rem; }
+  .py-1 { padding-top: 0.25rem; padding-bottom: 0.25rem; }
+  .p-4 { padding: 1rem; }
+  .text-xs { font-size: 0.75rem; }
+  .text-sm { font-size: 0.875rem; }
+  .border { border: 1px solid; }
+  .border-accent-30 { border-color: rgba(0, 240, 255, 0.3); }
+  .border-t { border-top-width: 1px; }
+  .border-b { border-bottom-width: 1px; }
+  .grid { display: grid; }
+  .grid-cols-1 { grid-template-columns: 1fr; }
+  .gap-4 { gap: 1rem; }
+  .w-full { width: 100%; }
+  .max-w-3xl { max-width: 48rem; }
+  .max-w-4xl { max-width: 56rem; }
+  .my-8 { margin-top: 2rem; margin-bottom: 2rem; }
+  .mt-12 { margin-top: 3rem; }
+  .mx-auto { margin-left: auto; margin-right: auto; }
+  .bg-accent-5 { background-color: rgba(0, 240, 255, 0.05); }
+  .inline-block { display: inline-block; }
+  .text-left { text-align: left; }
+  .text-center { text-align: center; }
+  .items-center { align-items: center; }
+  .justify-center { justify-content: center; }
+
+  /* Layout overrides */
+  .grid-1col { grid-template-columns: 1fr !important; }
+
+  /* Background Images */
+  .bg-scene11-3 { background-image: url('./images/scene11(3).jpg'); }
+  .bg-scene14-3 { background-image: url('./images/scene14(3).jpg'); }
+  .bg-scene12-3 { background-image: url('./images/scene-12(3).jpg'); }
+  .bg-scene13-3 { background-image: url('./images/scene-13(3).jpg'); }
+  .bg-scene15-3 { background-image: url('./images/scene15(3).jpg'); }
+</style>
+</head>
+<body>
+
+<svg id="svg-filters">
+  <filter id="noise">
+    <feTurbulence type="fractalNoise" baseFrequency="0.8" numOctaves="3" stitchTiles="stitch">
+      <animate attributeName="seed" from="0" to="100" dur="1s" repeatCount="indefinite" />
+    </feTurbulence>
+    <feColorMatrix type="matrix" values="1 0 0 0 0, 0 1 0 0 0, 0 0 1 0 0, 0 0 0 0.2 0" />
+  </filter>
+  <rect width="100%" height="100%" filter="url(#noise)" />
+</svg>
+
+<div class="meta-bar">
+  <div class="sys-status">SYS_STATUS: ONLINE // HMM-RESNET_v1.0</div>
+  <div class="progress-indicator">
+    <div class="dot active" data-target="0"></div>
+    <div class="dot" data-target="1"></div>
+    <div class="dot" data-target="2"></div>
+    <div class="dot" data-target="3"></div>
+    <div class="dot" data-target="4"></div>
+    <div class="dot" data-target="5"></div>
+  </div>
+  <div class="target-metric">OPT_TARGET: MIAWF1</div>
+</div>
+
+<main class="carousel-container" id="scroll-container">
+
+  <!-- PANEL 1: Title & Goal -->
+  <section class="panel">
+    <div class="grid-layout">
+      <div class="text-content tech-border">
+        <div class="corner-mark tl"></div><div class="corner-mark tr"></div>
+        <div class="corner-mark bl"></div><div class="corner-mark br"></div>
+        <div class="data-readout reveal">INIT_SEQ: 0x00A1</div>
+        
+        <h1 class="reveal delay-1 glitch-text" data-text="Domain Report: Cellular Component Prediction">Domain Report:<br>Cellular Component Prediction</h1>
+        <p class="reveal delay-2 font-mono text-accent mb-6">// Protein Cellular Component Prediction Pipeline: Research Synthesis</p>
+        
+        <div class="reveal delay-3">
+          <h3>**Goal:**</h3>
+          <p>Build a self-contained machine learning pipeline to predict Cellular Component (CC) Gene Ontology terms for proteins based strictly on their amino acid sequences. You will use the provided training set of experimentally determined GO terms to train your model. Your ultimate objective is to optimize the maximum information-accretion weighted F1-measure specifically for the CC subontology across no-knowledge, limited-knowledge, and partial-knowledge protein targets. You do not need to consider Molecular Function or Biological Process targets.</p>
+          <p>This report synthesizes the research and implementation strategies for building a machine learning pipeline to predict Cellular Component (CC) Gene Ontology (GO) terms from protein sequences. The primary objective is to optimize the maximum information-accretion weighted F1-measure (MIAWF1) across varying levels of prior knowledge (no-knowledge, limited-knowledge, and partial-knowledge).</p>
+        </div>
+      </div>
+      <div class="visual-content tech-border">
+        <div class="corner-mark tl"></div><div class="corner-mark tr"></div>
+        <div class="corner-mark bl"></div><div class="corner-mark br"></div>
+        <div class="image-layer bg-scene11-3"></div>
+        <div class="scanline-overlay"></div>
+        <div class="absolute bottom-4 right-4 bg-black-80 px-2 py-1 font-mono text-xs text-accent border border-accent-30 reveal delay-4">FIG 01: GO DAG ARCHITECTURE</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- PANEL 2: 1. Information Accretion -->
+  <section class="panel">
+    <div class="grid-layout reverse-layout">
+      <div class="text-content tech-border">
+        <div class="corner-mark tl"></div><div class="corner-mark tr"></div>
+        <div class="corner-mark bl"></div><div class="corner-mark br"></div>
+        
+        <h2 class="reveal delay-1">1. Information Accretion (IA) and Data Analysis</h2>
+        <p class="reveal delay-2">The foundation of the evaluation framework rests on Information Accretion (IA) weights. Unlike standard F1-scores, which treat all GO terms as equal, IA-weighted metrics recognize that terms deeper in the Gene Ontology Directed Acyclic Graph (DAG) are more specific and provide more information.</p>
+        <p class="reveal delay-3">The IA for each term is calculated as the negative log-probability of a term occurring given its parents. The root term for Cellular Component (<code>GO:0005575</code>) and its immediate children possess the lowest IA weights. As the model predicts more specific terms, the IA increases, effectively penalizing errors in specific predictions more heavily than errors in generic ones.</p>
+        <p class="reveal delay-4">A complete mapping of these weights has been established in <code>ia_weights.json</code> to ensure the training objective aligns with biological specificity.</p>
+      </div>
+      <div class="visual-content tech-border">
+        <div class="corner-mark tl"></div><div class="corner-mark tr"></div>
+        <div class="corner-mark bl"></div><div class="corner-mark br"></div>
+        <div class="image-layer bg-scene14-3"></div>
+        <div class="scanline-overlay"></div>
+        <div class="absolute bottom-4 right-4 bg-black-80 px-2 py-1 font-mono text-xs text-accent border border-accent-30 reveal delay-4">FIG 02: KNOWLEDGE LEVEL TRIAGE</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- PANEL 3: 2. Sequence Representation -->
+  <section class="panel">
+    <div class="grid-layout">
+      <div class="text-content tech-border">
+        <div class="corner-mark tl"></div><div class="corner-mark tr"></div>
+        <div class="corner-mark bl"></div><div class="corner-mark br"></div>
+        
+        <h2 class="reveal delay-1">2. Protein Sequence Representation</h2>
+        <p class="reveal delay-2">To transform raw amino acid sequences into a format suitable for deep learning, the pipeline utilizes <strong>ESM-2 (Evolutionary Scale Modeling)</strong>, specifically the <code>esm2_t12_35M_UR50D</code> variant. ESM-2 was selected for its state-of-the-art ability to capture both biophysical properties and evolutionary information directly from sequences without requiring explicit structural data.</p>
+        
+        <h3 class="reveal delay-3">The sequence encoding process involves:</h3>
+        <ul class="reveal delay-4">
+          <li><strong>Mean Pooling:</strong> Variable-length protein sequences are passed through the ESM-2 transformer layers, and the last hidden layer is mean-pooled to produce a fixed-size 480-dimensional embedding.</li>
+          <li><strong>Batch Processing:</strong> The implementation in <code>sequence_encoder.py</code> supports GPU acceleration and batching to handle large-scale training sets efficiently.</li>
+        </ul>
+      </div>
+      <div class="visual-content tech-border">
+        <div class="corner-mark tl"></div><div class="corner-mark tr"></div>
+        <div class="corner-mark bl"></div><div class="corner-mark br"></div>
+        <div class="image-layer bg-scene12-3"></div>
+        <div class="scanline-overlay"></div>
+        <div class="absolute bottom-4 right-4 bg-black-80 px-2 py-1 font-mono text-xs text-accent border border-accent-30 reveal delay-4">FIG 03: ESM-2 ENCODING LAYERS</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- PANEL 4: 3. Model Architecture -->
+  <section class="panel">
+    <div class="grid-layout reverse-layout">
+      <div class="text-content tech-border">
+        <div class="corner-mark tl"></div><div class="corner-mark tr"></div>
+        <div class="corner-mark bl"></div><div class="corner-mark br"></div>
+        
+        <h2 class="reveal delay-1">3. Model Architecture: HMM-ResNet</h2>
+        <p class="reveal delay-2">The core of the prediction engine is a <strong>Hierarchical Multi-Modal Residual Network (HMM-ResNet)</strong>. This architecture is specifically designed to handle the complexities of biological ontologies and the varying knowledge levels of target proteins.</p>
+        
+        <h3 class="reveal delay-3">Key Architectural Components:</h3>
+        <ul class="reveal delay-4">
+          <li><strong>Modality Attention Module:</strong> This module dynamically manages inputs across different knowledge states. If certain features are missing (common in "no-knowledge" targets), the module uses self-attention to fuse available features and map missing inputs to zero-tensors without crashing the pipeline.</li>
+          <li><strong>Deep Residual Blocks:</strong> To prevent vanishing gradients and capture complex non-linear interactions, the model utilizes Multi-Layer Perceptrons (MLPs) with skip connections.</li>
+          <li><strong>Hierarchical Max-Pooling Decoder:</strong> This is a critical, parameter-free layer that enforces the <strong>True Path Rule</strong> of the GO hierarchy. It ensures that if a specific child term is predicted, all its parent terms in the DAG are consistently predicted with at least the same probability.</li>
+          <li><strong>Modality Dropout:</strong> During training, this technique simulates missing knowledge states, forcing the model to remain robust when high-level features are unavailable.</li>
+        </ul>
+      </div>
+      <div class="visual-content tech-border">
+        <div class="corner-mark tl"></div><div class="corner-mark tr"></div>
+        <div class="corner-mark bl"></div><div class="corner-mark br"></div>
+        <div class="image-layer bg-scene13-3"></div>
+        <div class="scanline-overlay"></div>
+        <div class="absolute bottom-4 right-4 bg-black-80 px-2 py-1 font-mono text-xs text-accent border border-accent-30 reveal delay-4">FIG 04: HMM-RESNET TOPOLOGY</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- PANEL 5: 4. Evaluation -->
+  <section class="panel">
+    <div class="grid-layout">
+      <div class="text-content tech-border">
+        <div class="corner-mark tl"></div><div class="corner-mark tr"></div>
+        <div class="corner-mark bl"></div><div class="corner-mark br"></div>
+        
+        <h2 class="reveal delay-1">4. Evaluation and Knowledge-Level Categorization</h2>
+        <p class="reveal delay-2">The pipeline includes a dedicated <code>MetricsEvaluator</code> class to calculate the maximum information-accretion weighted F1-measure (MIAWF1). This metric is the primary optimization target.</p>
+        
+        <h3 class="reveal delay-3">Evaluation Logic:</h3>
+        <ul class="reveal delay-4">
+          <li><strong>Categorization:</strong> Proteins are categorized into three groups based on the sum of IA from existing annotations: <strong>no-knowledge</strong>, <strong>limited-knowledge</strong>, and <strong>partial-knowledge</strong>. This allows for a granular analysis of model performance across different stages of protein characterization.</li>
+          <li><strong>MIAWF1 Calculation:</strong> The system computes precision and recall across multiple threshold steps (from 0 to 1). The MIAWF1 score is determined by finding the maximum F1-measure across these thresholds, weighted by the precomputed IA values.</li>
+          <li><strong>Threshold Optimization:</strong> The evaluator identifies the optimal probability threshold for term assignment, ensuring the model's predictions are calibrated for maximum biological relevance.</li>
+        </ul>
+      </div>
+      <div class="visual-content tech-border">
+        <div class="corner-mark tl"></div><div class="corner-mark tr"></div>
+        <div class="corner-mark bl"></div><div class="corner-mark br"></div>
+        <div class="image-layer bg-scene15-3"></div>
+        <div class="scanline-overlay"></div>
+        <div class="absolute bottom-4 right-4 bg-black-80 px-2 py-1 font-mono text-xs text-accent border border-accent-30 reveal delay-4">FIG 05: MIAWF1 EVALUATION CHART</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- PANEL 6: 5. Summary -->
+  <section class="panel">
+    <div class="grid-layout grid-1col">
+      <div class="text-content tech-border items-center text-center">
+        <div class="corner-mark tl"></div><div class="corner-mark tr"></div>
+        <div class="corner-mark bl"></div><div class="corner-mark br"></div>
+        
+        <h2 class="reveal delay-1 justify-center">5. Implementation Summary</h2>
+        <p class="reveal delay-2 max-w-3xl">The research results are modularized into several components:</p>
+        
+        <div class="grid grid-cols-1 gap-4 w-full max-w-4xl my-8 text-left">
+           <div class="p-4 border bg-black-80 reveal delay-3">
+             <code>ia_weights.json</code>
+             <p class="mt-2 text-sm text-accent">The weight distribution for the CC subontology.</p>
+           </div>
+           <div class="p-4 border bg-black-80 reveal delay-3">
+             <code>sequence_encoder.py</code>
+             <p class="mt-2 text-sm text-accent">The ESM-2 embedding utility.</p>
+           </div>
+           <div class="p-4 border bg-black-80 reveal delay-4">
+             <code>model_design.md</code>
+             <p class="mt-2 text-sm text-accent">The HMM-ResNet architecture and True Path Rule enforcement strategy.</p>
+           </div>
+           <div class="p-4 border bg-black-80 reveal delay-4">
+             <code>metrics_evaluator.py</code>
+             <p class="mt-2 text-sm text-accent">The logic for MIAWF1 calculation and protein categorization.</p>
+           </div>
+        </div>
+
+        <p class="reveal delay-5 max-w-3xl mx-auto">This integrated approach ensures that the model is not only statistically accurate but also biologically consistent with the hierarchical nature of Cellular Component classifications.</p>
+        
+        <div class="mt-12 p-4 border-t border-b border-accent-30 font-mono text-accent text-sm reveal delay-5 bg-accent-5 inline-block">
+          *Note: All worker components were reported with high confidence; no results were flagged as low confidence.*
+        </div>
+      </div>
+    </div>
+  </section>
+
+</main>
+
+<script>
+  document.addEventListener('DOMContentLoaded', () => {
+    const panels = document.querySelectorAll('.panel');
+    const dots = document.querySelectorAll('.dot');
+    const container = document.getElementById('scroll-container');
+
+    // Intersection Observer for entrance animations
+    const observerOptions = {
+      root: container,
+      threshold: 0.5
+    };
+
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          entry.target.classList.add('is-inview');
+          
+          // Update meta progress bar
+          const index = Array.from(panels).indexOf(entry.target);
+          dots.forEach((dot, i) => {
+            if (i === index) {
+              dot.classList.add('active');
+            } else {
+              dot.classList.remove('active');
+            }
+          });
+        }
+      });
+    }, observerOptions);
+
+    panels.forEach(panel => observer.observe(panel));
+
+    // Optional: Add some interactive noise based on mouse movement over text
+    const textContents = document.querySelectorAll('.text-content');
+    const turbulence = document.querySelector('feTurbulence');
+    
+    textContents.forEach(tc => {
+      tc.addEventListener('mousemove', (e) => {
+        const rect = tc.getBoundingClientRect();
+        const x = (e.clientX - rect.left) / rect.width;
+        // subtly alter frequency based on horizontal position
+        const freq = 0.7 + (x * 0.2);
+        turbulence.setAttribute('baseFrequency', freq.toString());
+      });
+      tc.addEventListener('mouseleave', () => {
+        turbulence.setAttribute('baseFrequency', '0.8');
+      });
+    });
+  });
+</script>
+</body>
+</html>

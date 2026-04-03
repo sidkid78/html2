@@ -430,12 +430,50 @@
       color: var(--text-secondary);
       border-top: 1px solid var(--grid-line);
     }
+
+    /* Utility Classes */
+    .hidden-svg {
+      position: absolute;
+      z-index: -1;
+    }
+
+    .text-accent {
+      color: var(--accent);
+    }
+
+    .mt-2 {
+      margin-top: 2rem;
+    }
+
+    .mt-3 {
+      margin-top: 3rem;
+    }
+
+    .mb-2 {
+      margin-bottom: 2rem;
+    }
+
+    .delay-05 {
+      animation-delay: -0.5s;
+    }
+
+    .delay-1 {
+      animation-delay: -1s;
+    }
+
+    .delay-15 {
+      animation-delay: -1.5s;
+    }
+
+    .delay-2 {
+      animation-delay: -2s;
+    }
   </style>
 </head>
 
 <body>
 
-  <svg width="0" height="0" style="position:absolute;z-index:-1;">
+  <svg width="0" height="0" class="hidden-svg">
     <defs>
       <filter id="noiseFilter">
         <feTurbulence type="fractalNoise" baseFrequency="0.8" numOctaves="3" stitchTiles="stitch">
@@ -464,7 +502,7 @@
       </div>
       <h1 class="glitch-text reveal stagger-1" data-text="Protein Sequence Preprocessing">Protein Sequence Preprocessing
       </h1>
-      <h1 class="reveal stagger-2" style="color: var(--accent);">and Feature Extraction Layer</h1>
+      <h1 class="reveal stagger-2 text-accent">and Feature Extraction Layer</h1>
     </section>
 
     <!-- SECTION 1 & 2 -->
@@ -475,7 +513,7 @@
           <p>This specification details the design and implementation of the sequence preprocessing and feature
             extraction layer optimized for predicting Gene Ontology Molecular Function (MF) terms.</p>
         </div>
-        <div class="reveal stagger-1" style="margin-top: 3rem;">
+        <div class="reveal stagger-1 mt-3">
           <h2>2. Selected Embedding Strategy</h2>
           <p>Following a comparative analysis of One-hot+CNN, ESM-2, and ProtT5, the <strong>ProtT5-XL</strong>
             (encoder-only) architecture is selected as the primary feature extractor for maximum predictive accuracy in
@@ -492,7 +530,7 @@
     <!-- SECTION 3: Workflow P1 -->
     <section class="section grid-2">
       <div class="img-container reveal">
-        <div class="scanner-line" style="animation-delay: -1s;"></div>
+        <div class="scanner-line delay-1"></div>
         <img src="./images/scene12.jpg" alt="Data Sanitization in Progress">
       </div>
       <div class="content-block">
@@ -534,7 +572,7 @@
         </ul>
       </div>
       <div class="img-container reveal stagger-1">
-        <div class="scanner-line" style="animation-delay: -2s;"></div>
+        <div class="scanner-line delay-2"></div>
         <img src="./images/scene13.jpg" alt="Sliding Window Mechanism">
       </div>
     </section>
@@ -542,7 +580,7 @@
     <!-- SECTION 4: Feature Extraction -->
     <section class="section">
       <h2 class="reveal">4. Feature Extraction (Embedding Layer)</h2>
-      <div class="grid-2" style="margin-top: 2rem;">
+      <div class="grid-2 mt-2">
         <div class="reveal stagger-1">
           <h3>4.1 Model Configurations</h3>
           <table class="tech-table">
@@ -577,7 +615,7 @@
             </tbody>
           </table>
 
-          <h3 style="margin-top: 3rem;">4.2 Layer Selection & Pooling</h3>
+          <h3 class="mt-3">4.2 Layer Selection & Pooling</h3>
           <ul>
             <li><strong>Extraction Layer:</strong> Extract representations from the <strong>last hidden layer</strong>.
             </li>
@@ -588,7 +626,7 @@
           </ul>
         </div>
         <div class="img-container reveal stagger-2">
-          <div class="scanner-line" style="animation-delay: -0.5s;"></div>
+          <div class="scanner-line delay-05"></div>
           <img src="./images/scene-14.jpg" alt="Transformer Layers Visualization">
         </div>
       </div>
@@ -606,7 +644,7 @@
           <li><code>fair-esm</code> (for ESM-2 support)</li>
         </ul>
 
-        <h3 style="margin-top: 2rem;">5.2 Hardware Targets</h3>
+        <h3 class="mt-2">5.2 Hardware Targets</h3>
         <ul>
           <li><strong>Inference (ProtT5-XL):</strong> NVIDIA A100 (40GB/80GB) or RTX 3090/4090 (24GB) using
             <code>half()</code> precision.</li>
@@ -617,8 +655,8 @@
 
       <div class="content-block reveal stagger-1">
         <h2>6. Efficiency vs. Performance</h2>
-        <div class="img-container" style="margin-bottom: 2rem;">
-          <div class="scanner-line" style="animation-delay: -1.5s;"></div>
+        <div class="img-container mb-2">
+          <div class="scanner-line delay-15"></div>
           <img src="./images/scene15.jpg" alt="NVIDIA A100 GPU Performance Metrics">
         </div>
         <ul>
@@ -629,7 +667,7 @@
             requirements.</li>
         </ul>
       </div>
-    </section>
+    </section>ion>
 
     <footer class="footer-meta reveal">
       <span>Date of Specification: 2024-05-22</span>

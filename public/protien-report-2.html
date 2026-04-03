@@ -1,0 +1,481 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Molecular Function Prediction Pipeline</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600&family=Space+Mono:ital,wght@0,400;0,700;1,400&display=swap');
+
+    :root {
+      --bg: #020617;
+      --surface: #0f172a;
+      --text-main: #f8fafc;
+      --text-muted: #94a3b8;
+      --accent: #06b6d4;
+      --accent-glow: rgba(6, 182, 212, 0.3);
+      --border: #1e293b;
+      --mono: 'Space Mono', monospace;
+      --sans: 'Inter', sans-serif;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      background-color: var(--bg);
+      color: var(--text-main);
+      font-family: var(--sans);
+      overflow: hidden;
+      line-height: 1.6;
+    }
+
+    h1,
+    h2,
+    h3,
+    code,
+    .math,
+    .counter,
+    th {
+      font-family: var(--mono);
+    }
+
+    .carousel-container {
+      display: flex;
+      overflow-x: auto;
+      overflow-y: hidden;
+      scroll-snap-type: x mandatory;
+      height: 100vh;
+      scrollbar-width: none;
+      -ms-overflow-style: none;
+    }
+
+    .carousel-container::-webkit-scrollbar {
+      display: none;
+    }
+
+    .panel {
+      flex: 0 0 100vw;
+      height: 100vh;
+      scroll-snap-align: start;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      position: relative;
+      border-right: 1px solid var(--border);
+    }
+
+    .panel-intro {
+      grid-template-columns: 1fr;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      padding: 4rem;
+      text-align: center;
+      background: radial-gradient(circle at center, var(--surface) 0%, var(--bg) 100%);
+    }
+
+    .content-wrap {
+      padding: 4rem 4rem 4rem 6rem;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      height: 100%;
+      overflow-y: auto;
+    }
+
+    .image-wrap {
+      position: relative;
+      height: 100%;
+      width: 100%;
+      border-left: 1px solid var(--border);
+      overflow: hidden;
+      background: #000;
+    }
+
+    .image-wrap img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      opacity: 0.6;
+      transition: opacity 0.8s ease, transform 1.5s cubic-bezier(0.2, 0.8, 0.2, 1);
+      filter: url(#terminal-noise) grayscale(50%) contrast(120%);
+    }
+
+    .panel.is-active .image-wrap img {
+      opacity: 0.9;
+      transform: scale(1.02);
+      filter: url(#terminal-noise) grayscale(0%) contrast(110%);
+    }
+
+    .grid-split-rows {
+      display: grid;
+      grid-template-rows: 1fr 1fr;
+      height: 100%;
+    }
+
+    .grid-split-rows .image-wrap {
+      border-left: none;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .grid-split-rows .image-wrap:last-child {
+      border-bottom: none;
+    }
+
+    h1 {
+      font-size: clamp(2.5rem, 5vw, 5rem);
+      font-weight: 700;
+      letter-spacing: -0.03em;
+      line-height: 1.1;
+      margin-bottom: 2rem;
+      text-transform: uppercase;
+      color: var(--text-main);
+      text-shadow: 0 0 20px var(--accent-glow);
+    }
+
+    h2 {
+      font-size: clamp(1.5rem, 2vw, 2rem);
+      color: var(--accent);
+      margin-bottom: 1.5rem;
+      font-weight: 700;
+    }
+
+    h3 {
+      font-size: 1.2rem;
+      color: var(--text-main);
+      margin: 1.5rem 0 0.5rem 0;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      border-bottom: 1px solid var(--border);
+      padding-bottom: 0.5rem;
+    }
+
+    p {
+      font-size: clamp(1rem, 1.1vw, 1.125rem);
+      color: var(--text-muted);
+      margin-bottom: 1.25rem;
+    }
+
+    ul,
+    ol {
+      margin-left: 1.5rem;
+      margin-bottom: 1.5rem;
+      color: var(--text-muted);
+    }
+
+    li {
+      margin-bottom: 0.5rem;
+      font-size: clamp(1rem, 1.1vw, 1.125rem);
+    }
+
+    li strong {
+      color: var(--text-main);
+    }
+
+    .math {
+      display: block;
+      background: var(--surface);
+      padding: 1rem;
+      border-left: 3px solid var(--accent);
+      color: var(--accent);
+      margin: 1rem 0;
+      font-size: 0.9rem;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 2rem;
+      font-size: 0.9rem;
+    }
+
+    th,
+    td {
+      padding: 1rem;
+      text-align: left;
+      border-bottom: 1px solid var(--border);
+    }
+
+    th {
+      color: var(--accent);
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+
+    .ui-layer {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+      z-index: 100;
+    }
+
+    .progress-bar {
+      position: absolute;
+      top: 0;
+      left: 0;
+      height: 3px;
+      background: var(--accent);
+      width: 0%;
+      transition: width 0.3s ease;
+      box-shadow: 0 0 10px var(--accent);
+    }
+
+    .counter {
+      position: absolute;
+      bottom: 2rem;
+      left: 2rem;
+      font-size: 0.875rem;
+      color: var(--accent);
+      letter-spacing: 0.1em;
+    }
+
+    .scanline {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(to bottom, rgba(255, 255, 255, 0), rgba(255, 255, 255, 0) 50%, rgba(0, 0, 0, 0.1) 50%, rgba(0, 0, 0, 0.1));
+      background-size: 100% 4px;
+      z-index: 50;
+      pointer-events: none;
+      opacity: 0.3;
+    }
+
+    .reveal {
+      opacity: 0;
+      transform: translateY(20px);
+      transition: all 0.8s cubic-bezier(0.2, 0.8, 0.2, 1);
+    }
+
+    .is-active .reveal {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    .del-1 {
+      transition-delay: 0.1s;
+    }
+
+    .del-2 {
+      transition-delay: 0.2s;
+    }
+
+    .del-3 {
+      transition-delay: 0.3s;
+    }
+
+    .del-4 {
+      transition-delay: 0.4s;
+    }
+
+    ::-moz-selection {
+      background: var(--accent);
+      color: #000;
+    }
+
+    ::selection {
+      background: var(--accent);
+      color: #000;
+    }
+
+    /* Utility Classes */
+    .hidden-svg {
+      display: none;
+    }
+
+    .max-w-800 {
+      max-width: 800px;
+    }
+
+    .p-hero {
+      color: var(--text-main);
+      font-size: 1.25rem;
+    }
+
+    .math-label {
+      color: var(--text-muted);
+      font-size: 0.8em;
+    }
+
+    .p-footer {
+      margin-top: 2rem;
+      color: var(--text-main);
+    }
+
+    .flex-center {
+      background: var(--surface);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .end-stamp {
+      font-family: var(--mono);
+      color: var(--accent);
+      opacity: 0.2;
+      font-size: 10vw;
+      transform: rotate(-90deg);
+      white-space: nowrap;
+    }
+  </style>
+</head>
+
+<body>
+  <svg class="hidden-svg">
+    <filter id="terminal-noise">
+      <feTurbulence type="fractalNoise" baseFrequency="0.75" numOctaves="2" result="noise" />
+      <feColorMatrix type="matrix" values="1 0 0 0 0  0 1 0 0 0  0 0 1 0 0  0 0 0 0.15 0" in="noise" result="coloredNoise" />
+      <feBlend mode="screen" in="coloredNoise" in2="SourceGraphic" />
+    </filter>
+  </svg>
+  <div class="ui-layer">
+    <div class="progress-bar" id="progress"></div>
+    <div class="counter" id="counter">[ 01 / 06 ]</div>
+    <div class="scanline"></div>
+  </div>
+  <div class="carousel-container" id="carousel">
+    <section class="panel panel-intro" id="panel-1">
+      <div class="reveal del-1">
+        <h1># Domain Report:<br>Molecular Function<br>Prediction</h1>
+      </div>
+      <div class="reveal del-2 max-w-800">
+        <p class="p-hero"><strong>Goal:</strong> Build a self-contained machine learning pipeline to predict Molecular Function (MF) Gene Ontology terms for proteins based strictly on their amino acid sequences. You will use the provided training set of experimentally determined GO terms to train your model. Your ultimate objective is to optimize the maximum information-accretion weighted F1-measure specifically for the MF subontology across no-knowledge, limited-knowledge, and partial-knowledge protein targets. You do not need to consider Biological Process or Cellular Component targets.</p>
+      </div>
+    </section>
+    <section class="panel" id="panel-2">
+      <div class="content-wrap">
+        <h2 class="reveal del-1">## 1. Information-Accretion (IA) Weighted Framework</h2>
+        <p class="reveal del-2">The core of the evaluation and training logic rests on the Information-Accretion (IA) metric. Unlike standard F1-measures that treat all GO terms as equal, the IA framework prioritizes specificity. IA weights are defined as the information gain:</p><code class="math reveal del-3">$$IA(v) = -\log_2(P(v | pa(v)))$<br><span class="math-label">where v is a GO term and pa(v) represents its parents.</span></code>
+        <p class="reveal del-4">This approach ensures that predicting a general term (e.g., "binding") yields less reward than a highly specific term (e.g., "zinc ion binding"). To maintain data integrity, the pipeline incorporates a reliability multiplier ($\theta$). Experimental evidence is assigned a weight of 1.0, while Inferred from Electronic Annotation (IEA) is scaled down. In cases where multiple evidence codes exist for a single term, the system is designed to select the maximum weight to prioritize the most informative known annotation.</p>
+      </div>
+      <div class="image-wrap"><img src="./images/scene11(4).jpg" alt="Information-Accretion Tree"></div>
+    </section>
+    <section class="panel" id="panel-3">
+      <div class="content-wrap">
+        <h2 class="reveal del-1">## 2. Protein Representation and Embedding Strategy</h2>
+        <p class="reveal del-2">The pipeline utilizes high-capacity Protein Language Models (PLMs) to transform raw amino acid sequences into dense numerical vectors.</p>
+        <ul class="reveal del-3">
+          <li><strong>Primary Recommendation:</strong> <strong>ProtT5-XL</strong> (3B parameters) is identified as the gold standard for MF prediction, achieving the highest semantic depth and an estimated $F_{max}$ of ~0.80.</li>
+          <li><strong>Efficiency Alternative:</strong> <strong>ESM-2 (650M)</strong> is recommended for high-throughput environments or hardware with limited VRAM (12-16GB), offering a competitive balance between accuracy and resource consumption.</li>
+          <li><strong>Preprocessing Requirements:</strong> For sequences exceeding the 1024-residue transformer limit, a sliding window pooling strategy is necessary.</li>
+          <li><strong>Feature Extraction:</strong> Global Average Pooling (Mean Pooling) across the last hidden layer of the transformer is the most effective method for capturing the global functional context required for MF categorization.</li>
+        </ul>
+      </div>
+      <div class="image-wrap"><img src="./images/scene12(4).jpg" alt="Transformer Embedding"></div>
+    </section>
+    <section class="panel" id="panel-4">
+      <div class="content-wrap">
+        <h2 class="reveal del-1">## 3. Model Architecture and Hierarchical Loss</h2>
+        <p class="reveal del-2">The proposed architecture is a hybrid neural network that integrates sequence-level embeddings with structural data where available.</p>
+        <h3 class="reveal del-3">Hybrid Design</h3>
+        <p class="reveal del-3">The model combines the <strong>ESM-2/ProtT5 embeddings</strong> with a <strong>Graph Convolutional Network (GCN)</strong>. The GCN processes 3D structural contact maps to refine node embeddings, which are then passed to a Multi-Layer Perceptron (MLP) classification head. This head uses Sigmoid activations to accommodate the multi-label nature of GO term prediction.</p>
+        <h3 class="reveal del-4">Addressing Class Imbalance and Hierarchy</h3>
+        <p class="reveal del-4">To handle the extreme sparsity and imbalance of GO annotations, the pipeline employs <strong>Asymmetric Loss (ASL)</strong> or <strong>Focal Loss</strong>. Furthermore, to ensure the model respects the biological logic of the Gene Ontology, a custom <strong>Hierarchical Regularization Loss</strong> is implemented. This loss enforces the <strong>True Path Rule</strong>: it penalizes the model if a child term is assigned a higher probability than its parent term, ensuring consistent predictions across the Directed Acyclic Graph (DAG).</p>
+      </div>
+      <div class="grid-split-rows border-left">
+        <div class="image-wrap"><img src="./images/scene13(4).jpg" alt="GCN Structure"></div>
+        <div class="image-wrap"><img src="./images/scene14(4).jpg" alt="True Path Rule"></div>
+      </div>
+    </section>
+    <section class="panel" id="panel-5">
+      <div class="content-wrap">
+        <h2 class="reveal del-1">## 4. Evaluation Framework and Target Stratification</h2>
+        <p class="reveal del-2">To ensure the model generalizes well to new biological discoveries, the evaluation framework utilizes a temporal split (T0 for training, T1 for testing). Targets are stratified into three distinct categories based on their annotation status:</p>
+        <ol class="reveal del-3">
+          <li><strong>No-Knowledge (NK):</strong> Proteins with no experimental annotations at T0.</li>
+          <li><strong>Limited-Knowledge (LK):</strong> Proteins with some existing functional data, testing the model's ability to leverage cross-ontology correlations.</li>
+          <li><strong>Partial-Knowledge (PK):</strong> Proteins with existing MF annotations that require further refinement or specific sub-term prediction.</li>
+        </ol>
+        <p class="reveal del-4">The primary performance metric is the <strong>IA-weighted $F_{max}$</strong>, which identifies the optimal threshold across the precision-recall curve while weighting specific, rare GO terms more heavily than common, non-specific terms.</p>
+      </div>
+      <div class="image-wrap"><img src="./images/scene15(4).jpg" alt="Target Stratification"></div>
+    </section>
+    <section class="panel" id="panel-6">
+      <div class="content-wrap">
+        <h2 class="reveal del-1">## 5. Summary of Technical Specifications</h2>
+        <div class="reveal del-2">
+          <table>
+            <thead>
+              <tr>
+                <th>Component</th>
+                <th>Specification</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><strong>Embeddings</strong></td>
+                <td>ProtT5-XL (Primary) or ESM-2 650M (Efficient)</td>
+              </tr>
+              <tr>
+                <td><strong>Architecture</strong></td>
+                <td>PLM-GCN Hybrid with MLP Head</td>
+              </tr>
+              <tr>
+                <td><strong>Loss Function</strong></td>
+                <td>Asymmetric/Focal Loss + Hierarchical Regularization (True Path Rule)</td>
+              </tr>
+              <tr>
+                <td><strong>Weighting</strong></td>
+                <td>Bayesian IA weights ($-\log_2(P(v|pa(v)))$)</td>
+              </tr>
+              <tr>
+                <td><strong>Targeting</strong></td>
+                <td>MF Subontology (NK, LK, PK targets)</td>
+              </tr>
+              <tr>
+                <td><strong>Evaluation</strong></td>
+                <td>IA-weighted $F_{max}$ via temporal split</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+        <p class="reveal del-3 p-footer">The synthesis of these components creates a self-contained pipeline that is both biologically grounded and computationally robust, specifically tuned for the nuances of Molecular Function prediction.</p>
+      </div>
+      <div class="image-wrap flex-center">
+        <div class="end-stamp">// END_REPORT</div>
+      </div>
+    </section>
+  </div>
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      const carousel = document.getElementById('carousel');
+      const panels = document.querySelectorAll('.panel');
+      const progressBar = document.getElementById('progress');
+      const counter = document.getElementById('counter');
+      const total = panels.length;
+      const observerOptions = {
+        root: carousel,
+        rootMargin: '0px',
+        threshold: 0.5
+      };
+      const observer = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+          if (entry.isIntersecting) {
+            entry.target.classList.add('is-active');
+            const index = Array.from(panels).indexOf(entry.target) + 1;
+            const progressPct = (index / total) * 100;
+            progressBar.style.width = `${progressPct}%`;
+            counter.innerText = `[ 0${index} / 0${total} ]`;
+          } else {
+            entry.target.classList.remove('is-active');
+          }
+        });
+      }, observerOptions);
+      panels.forEach(panel => {
+        observer.observe(panel);
+      });
+    });
+  </script>
+</body>
+
+</html>

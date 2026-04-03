@@ -1,0 +1,691 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Protein Biological Process Annotation Pipeline</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;700&family=Inter:wght@300;400;600&display=swap');
+
+    :root {
+      --bg: #050608;
+      --surface: #0a0c10;
+      --surface-border: #1a1e26;
+      --text-primary: #e2e8f0;
+      --text-muted: #8b949e;
+      --accent: #00e5ff;
+      --accent-dim: rgba(0, 229, 255, 0.15);
+      --font-mono: 'IBM Plex Mono', monospace;
+      --font-sans: 'Inter', sans-serif;
+      --grid-size: 40px;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      background-color: var(--bg);
+      color: var(--text-primary);
+      font-family: var(--font-sans);
+      overflow: hidden;
+      /* Handled by scroll container */
+      cursor: crosshair;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    /* System UI Overlay */
+    .sys-ui {
+      position: fixed;
+      z-index: 100;
+      font-family: var(--font-mono);
+      font-size: 0.75rem;
+      color: var(--accent);
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      pointer-events: none;
+    }
+
+    .sys-top-left {
+      top: 20px;
+      left: 20px;
+    }
+
+    .sys-top-right {
+      top: 20px;
+      right: 20px;
+      text-align: right;
+    }
+
+    .sys-bottom-left {
+      bottom: 20px;
+      left: 20px;
+    }
+
+    .progress-container {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      width: 100%;
+      height: 3px;
+      background: var(--surface-border);
+      z-index: 100;
+    }
+
+    .progress-bar {
+      height: 100%;
+      width: 0%;
+      background: var(--accent);
+      box-shadow: 0 0 10px var(--accent);
+      transition: width 0.1s linear;
+    }
+
+    /* Background Grid */
+    .tech-grid {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
+      background-image:
+        linear-gradient(var(--surface-border) 1px, transparent 1px),
+        linear-gradient(90deg, var(--surface-border) 1px, transparent 1px);
+      background-size: var(--grid-size) var(--grid-size);
+      background-position: center center;
+      opacity: 0.3;
+      z-index: -1;
+      pointer-events: none;
+    }
+
+    /* Carousel Physics */
+    .carousel {
+      display: flex;
+      overflow-x: auto;
+      overflow-y: hidden;
+      scroll-snap-type: x mandatory;
+      height: 100vh;
+      width: 100vw;
+      scroll-behavior: smooth;
+      scrollbar-width: none;
+      /* Firefox */
+    }
+
+    .carousel::-webkit-scrollbar {
+      display: none;
+      /* Chrome */
+    }
+
+    /* Panel Architecture */
+    .panel {
+      flex: 0 0 100vw;
+      width: 100vw;
+      height: 100vh;
+      scroll-snap-align: start;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      position: relative;
+    }
+
+    .panel-intro {
+      grid-template-columns: 1fr;
+      place-items: center;
+      text-align: center;
+    }
+
+    .content-col {
+      padding: 100px 4vw 60px 8vw;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      height: 100%;
+      overflow-y: auto;
+      scrollbar-width: none;
+      border-right: 1px solid var(--surface-border);
+      background: linear-gradient(90deg, rgba(5, 6, 8, 0) 0%, rgba(10, 12, 16, 0.8) 100%);
+    }
+
+    .content-col::-webkit-scrollbar {
+      display: none;
+    }
+
+    .media-col {
+      position: relative;
+      height: 100%;
+      overflow: hidden;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 40px;
+      background: var(--surface);
+    }
+
+    /* Typography */
+    h1 {
+      font-family: var(--font-mono);
+      font-size: clamp(2rem, 4vw, 4rem);
+      color: #fff;
+      line-height: 1.1;
+      letter-spacing: -0.02em;
+      margin-bottom: 1.5rem;
+      text-shadow: 0 0 20px rgba(255, 255, 255, 0.1);
+    }
+
+    h2 {
+      font-family: var(--font-mono);
+      font-size: 1.5rem;
+      color: var(--accent);
+      margin-bottom: 2rem;
+      text-transform: uppercase;
+      display: inline-flex;
+      align-items: center;
+      gap: 15px;
+    }
+
+    h2::before {
+      content: '';
+      display: block;
+      width: 30px;
+      height: 2px;
+      background: var(--accent);
+    }
+
+    h3 {
+      font-family: var(--font-mono);
+      font-size: 1.1rem;
+      color: #fff;
+      margin: 2rem 0 1rem 0;
+    }
+
+    p {
+      font-size: 1.1rem;
+      line-height: 1.7;
+      color: var(--text-muted);
+      margin-bottom: 1.5rem;
+      max-width: 65ch;
+    }
+
+    ul,
+    ol {
+      margin-bottom: 1.5rem;
+      padding-left: 1.5rem;
+      color: var(--text-muted);
+      font-size: 1.1rem;
+      line-height: 1.7;
+      max-width: 65ch;
+    }
+
+    li {
+      margin-bottom: 0.75rem;
+    }
+
+    li strong {
+      color: #fff;
+      font-family: var(--font-mono);
+      font-size: 0.95em;
+    }
+
+    code {
+      font-family: var(--font-mono);
+      background: var(--surface-border);
+      color: var(--accent);
+      padding: 0.2em 0.4em;
+      border-radius: 3px;
+      font-size: 0.9em;
+    }
+
+    .formula {
+      display: inline-block;
+      font-family: var(--font-mono);
+      background: var(--accent-dim);
+      color: var(--accent);
+      padding: 0.5rem 1rem;
+      border: 1px solid rgba(0, 229, 255, 0.3);
+      margin: 1rem 0;
+      letter-spacing: 0.05em;
+    }
+
+    .note-box {
+      border-left: 3px solid var(--accent);
+      padding-left: 1rem;
+      background: linear-gradient(90deg, var(--accent-dim) 0%, transparent 100%);
+      padding: 1rem;
+      margin-top: 2rem;
+    }
+
+    .note-box p {
+      margin-bottom: 0;
+    }
+
+    /* Image Treatment */
+    .img-wrapper {
+      position: relative;
+      width: 100%;
+      height: 100%;
+      max-height: 80vh;
+      border: 1px solid var(--surface-border);
+      overflow: hidden;
+    }
+
+    .img-wrapper::after {
+      content: '';
+      position: absolute;
+      inset: 0;
+      box-shadow: inset 0 0 50px rgba(5, 6, 8, 1);
+      pointer-events: none;
+    }
+
+    .img-inner {
+      width: 100%;
+      height: 100%;
+      background-size: cover;
+      background-position: center;
+      /* Technical grayscale filter, reveals on hover */
+      filter: grayscale(100%) contrast(120%) brightness(0.7) sepia(100%) hue-rotate(180deg);
+      transition: filter 0.8s cubic-bezier(0.16, 1, 0.3, 1), transform 0.8s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    .img-wrapper:hover .img-inner {
+      filter: grayscale(0%) contrast(100%) brightness(1) sepia(0%) hue-rotate(0deg);
+      transform: scale(1.03);
+    }
+
+    /* Reticle Corners for Images */
+    .reticle {
+      position: absolute;
+      width: 15px;
+      height: 15px;
+      border-color: var(--accent);
+      border-style: solid;
+      z-index: 10;
+      transition: all 0.3s ease;
+    }
+
+    .img-wrapper:hover .reticle {
+      width: 25px;
+      height: 25px;
+    }
+
+    .reticle.tl {
+      top: -1px;
+      left: -1px;
+      border-width: 2px 0 0 2px;
+    }
+
+    .reticle.tr {
+      top: -1px;
+      right: -1px;
+      border-width: 2px 2px 0 0;
+    }
+
+    .reticle.bl {
+      bottom: -1px;
+      left: -1px;
+      border-width: 0 0 2px 2px;
+    }
+
+    .reticle.br {
+      bottom: -1px;
+      right: -1px;
+      border-width: 0 2px 2px 0;
+    }
+
+    /* Animations & Reveals */
+    .reveal {
+      opacity: 0;
+      transform: translateY(20px);
+      transition: opacity 0.8s cubic-bezier(0.16, 1, 0.3, 1),
+        transform 0.8s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    .reveal.active {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    .delay-1 {
+      transition-delay: 100ms;
+    }
+
+    .delay-2 {
+      transition-delay: 200ms;
+    }
+
+    .delay-3 {
+      transition-delay: 300ms;
+    }
+
+    .delay-4 {
+      transition-delay: 400ms;
+    }
+
+    /* SVG Filters */
+    .glitch-text:hover {
+      filter: url(#chromatic-aberration);
+    }
+
+    @media (max-width: 900px) {
+      .panel {
+        grid-template-columns: 1fr;
+        grid-template-rows: auto 40vh;
+        overflow-y: auto;
+        scroll-snap-align: start;
+      }
+
+      .content-col {
+        padding: 60px 5vw 40px 5vw;
+        height: auto;
+        border-right: none;
+        border-bottom: 1px solid var(--surface-border);
+      }
+
+      .media-col {
+        padding: 20px;
+        height: 40vh;
+      }
+    }
+
+    /* Utility Classes */
+    .hidden-svg {
+      display: none;
+    }
+
+    .centered-col {
+      border: none !important;
+      align-items: center;
+      padding: 0 10vw;
+    }
+
+    .vertical-divider {
+      width: 2px;
+      height: 60px;
+      background: var(--accent);
+      margin: 2rem 0;
+    }
+
+    .p-summary {
+      text-align: justify;
+      max-width: 800px;
+    }
+
+    /* Background Images */
+    .bg-scene1-2 {
+      background-image: url('./images/scene1(2).jpg');
+    }
+
+    .bg-scene12-2 {
+      background-image: url('./images/scene12(2).jpg');
+    }
+
+    .bg-scene13-2 {
+      background-image: url('./images/scene13(2).jpg');
+    }
+
+    .bg-scene14-2 {
+      background-image: url('./images/scene14(2).jpg');
+    }
+
+    .bg-scene15-2 {
+      background-image: url('./images/scene15(2).jpg');
+    }
+  </style>
+</head>
+
+<body>
+
+  <!-- SVG Filters -->
+  <svg class="hidden-svg">
+    <defs>
+      <filter id="chromatic-aberration">
+        <feColorMatrix type="matrix" values="1 0 0 0 0  0 0 0 0 0  0 0 0 0 0  0 0 0 1 0" in="SourceGraphic"
+          result="red" />
+        <feColorMatrix type="matrix" values="0 0 0 0 0  0 1 0 0 0  0 0 0 0 0  0 0 0 1 0" in="SourceGraphic"
+          result="green" />
+        <feColorMatrix type="matrix" values="0 0 0 0 0  0 0 0 0 0  0 0 1 0 0  0 0 0 1 0" in="SourceGraphic"
+          result="blue" />
+        <feOffset in="red" dx="-3" dy="0" result="red_shifted" />
+        <feOffset in="blue" dx="3" dy="0" result="blue_shifted" />
+        <feMerge>
+          <feMergeNode in="red_shifted" />
+          <feMergeNode in="green" />
+          <feMergeNode in="blue_shifted" />
+        </feMerge>
+      </filter>
+    </defs>
+  </svg>
+
+  <div class="tech-grid"></div>
+
+  <!-- System UI -->
+  <div class="sys-ui sys-top-left">SYS.OP // DOMAIN_REP_v1.0</div>
+  <div class="sys-ui sys-top-right"><span id="panel-indicator">01 / 06</span><br>SECURE CONNECTION</div>
+  <div class="sys-ui sys-bottom-left">SCROLL TO NAVIGATE →</div>
+
+  <div class="progress-container">
+    <div class="progress-bar" id="p-bar"></div>
+  </div>
+
+  <div class="carousel" id="main-scroll">
+
+    <!-- Panel 1: Exec Summary -->
+    <section class="panel panel-intro" data-index="1">
+      <div class="content-col centered-col">
+        <h2 class="reveal">Domain Report</h2>
+        <h1 class="reveal delay-1 glitch-text">Protein Biological Process Annotation Pipeline</h1>
+        <div class="reveal delay-2 vertical-divider"></div>
+        <h3>Executive Summary</h3>
+        <p class="reveal delay-3 p-summary">
+          This report synthesizes the development of a self-contained machine learning pipeline designed to predict
+          Biological Process (BP) Gene Ontology (GO) terms from amino acid sequences. The pipeline integrates
+          state-of-the-art protein language models with a specialized evaluation framework designed to optimize the
+          maximum information-accretion weighted F1-measure (wFmax). Key components include ESM-2 sequence embeddings, a
+          hierarchical Information Content (IC) weighting system, a custom multi-label neural network architecture, and
+          a knowledge-tiered evaluation module.
+        </p>
+      </div>
+    </section>
+
+    <!-- Panel 2: Section 1 -->
+    <section class="panel" data-index="2">
+      <div class="content-col">
+        <h2 class="reveal">1. Information Content and Semantic Weighting</h2>
+        <p class="reveal delay-1">
+          The foundation of the pipeline lies in its ability to handle the hierarchical and non-uniform nature of Gene
+          Ontology terms. Worker-Biol-1 implemented a frequency-based calculation for Information Content (IC), defined
+          as:
+        </p>
+        <div class="reveal delay-2 formula">
+          IC = -log₁₀(p(t))
+        </div>
+        <p class="reveal delay-3">
+          where <code>p(t)</code> represents the probability of a term <code>t</code> occurring within the dataset.
+        </p>
+        <p class="reveal delay-4">
+          Crucially, the system implements hierarchical propagation, ensuring that the frequency of a specific term
+          includes the counts of all its descendant terms in the GO graph. This methodology ensures that rare, highly
+          specific biological processes are assigned higher weights than generic, high-level terms (e.g., "cellular
+          process"). These weights are serialized into a centralized data structure used for both the loss function and
+          final evaluation metrics.
+        </p>
+      </div>
+      <div class="media-col">
+        <div class="img-wrapper reveal delay-2">
+          <div class="reticle tl"></div>
+          <div class="reticle tr"></div>
+          <div class="reticle bl"></div>
+          <div class="reticle br"></div>
+          <div class="img-inner bg-scene1-2"></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Panel 3: Section 2 -->
+    <section class="panel" data-index="3">
+      <div class="content-col">
+        <h2 class="reveal">2. Sequence Feature Engineering via ESM-2</h2>
+        <p class="reveal delay-1">
+          To bridge the gap between raw amino acid sequences and numerical machine learning inputs, the pipeline
+          utilizes Meta AI’s <strong>ESM-2</strong> (Evolutionary Scale Modeling) transformer model. Specifically, the
+          <code>facebook/esm2_t6_8M_UR50D</code> model was selected to generate context-aware embeddings.
+        </p>
+        <p class="reveal delay-2">
+          The feature extraction process transforms variable-length sequences into fixed-length <strong>320-dimensional
+            vectors</strong> using mean pooling across residue-level hidden states. This approach captures the
+          biochemical and evolutionary context of the sequence while ensuring a uniform input space for the downstream
+          classifier. The module supports GPU acceleration and handles batch processing through automated padding and
+          truncation.
+        </p>
+      </div>
+      <div class="media-col">
+        <div class="img-wrapper reveal delay-2">
+          <div class="reticle tl"></div>
+          <div class="reticle tr"></div>
+          <div class="reticle bl"></div>
+          <div class="reticle br"></div>
+          <div class="img-inner bg-scene12-2"></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Panel 4: Section 3 -->
+    <section class="panel" data-index="4">
+      <div class="content-col">
+        <h2 class="reveal">3. Model Architecture and Information-Accretion Loss</h2>
+        <p class="reveal delay-1">
+          The core predictive engine, developed by Worker-Biol-3, is a Multi-Layer Perceptron (MLP) specifically
+          optimized for high-dimensional sequence embeddings.
+        </p>
+        <ul class="reveal delay-2">
+          <li><strong>BPClassifier Architecture:</strong> The network incorporates <code>BatchNorm1d</code> and
+            <code>Dropout</code> layers to mitigate overfitting, which is a common risk given the high dimensionality of
+            ESM-2 embeddings relative to specific GO term frequencies.</li>
+          <li><strong>Information-Accretion Loss:</strong> Standard Binary Cross-Entropy (BCE) is replaced by a custom
+            <code>InformationAccretionLoss</code>. This loss function scales the penalty for misclassifications based on
+            the individual Information Accretion (IA) weights of the BP nodes. This forces the model to prioritize
+            accuracy on highly informative biological terms.</li>
+          <li><strong>Threshold Optimization:</strong> Because the model outputs probabilities for multi-label
+            classification, the pipeline includes logic to iterate through dynamic decision thresholds. This allows for
+            the identification of the optimal threshold that maximizes the weighted F1-measure (wFmax) and minimizes
+            Semantic Distance (Smin).</li>
+        </ul>
+      </div>
+      <div class="media-col">
+        <div class="img-wrapper reveal delay-2">
+          <div class="reticle tl"></div>
+          <div class="reticle tr"></div>
+          <div class="reticle bl"></div>
+          <div class="reticle br"></div>
+          <div class="img-inner bg-scene13-2"></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Panel 5: Section 4 -->
+    <section class="panel" data-index="5">
+      <div class="content-col">
+        <h2 class="reveal">4. Multi-Tiered Evaluation Framework</h2>
+        <p class="reveal delay-1">
+          To ensure the model is robust across different levels of biological understanding, Worker-Biol-4 implemented a
+          validation framework that categorizes protein targets based on existing knowledge levels:
+        </p>
+        <ol class="reveal delay-2">
+          <li><strong>No-Knowledge:</strong> Targets with 0 existing annotations.</li>
+          <li><strong>Limited-Knowledge:</strong> Targets with 1-3 existing annotations.</li>
+          <li><strong>Partial-Knowledge:</strong> Targets with more than 3 existing annotations.</li>
+        </ol>
+        <p class="reveal delay-3">
+          The framework provides automated dataset partitioning and generates performance reports for each category.
+          This segmentation is critical for assessing how well the model generalizes from well-studied proteins to "dark
+          matter" proteins (those with no known functions), mirroring the challenges found in the CAFA (Critical
+          Assessment of Functional Annotation) competitions.
+        </p>
+      </div>
+      <div class="media-col">
+        <div class="img-wrapper reveal delay-2">
+          <div class="reticle tl"></div>
+          <div class="reticle tr"></div>
+          <div class="reticle bl"></div>
+          <div class="reticle br"></div>
+          <div class="img-inner bg-scene14-2"></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Panel 6: Section 5 -->
+    <section class="panel" data-index="6">
+      <div class="content-col">
+        <h2 class="reveal">5. Implementation Status</h2>
+        <p class="reveal delay-1">
+          All modules are currently functional and saved within the <code>workers/</code> directory:
+        </p>
+        <ul class="reveal delay-2">
+          <li><code>compute_ic.py</code>: Handles semantic weights.</li>
+          <li><code>sequence_feature_engineering.py</code>: Handles ESM-2 embedding generation.</li>
+          <li><code>bp_term_prediction.py</code>: Contains the MLP architecture and weighted loss function.</li>
+          <li><code>evaluation_framework.py</code>: Handles tiered performance reporting.</li>
+        </ul>
+        <p class="reveal delay-3">
+          No worker results were marked with low confidence; however, it is noted that the current feature extraction
+          uses the 8M parameter version of ESM-2. For higher accuracy at the cost of computational overhead, larger
+          ESM-2 variants (e.g., 650M or 3B parameters) could be dropped into the existing
+          <code>sequence_feature_engineering.py</code> module with minimal configuration changes.
+        </p>
+        <div class="note-box reveal delay-4">
+          <p><strong>Note:</strong> The complete synthesized pipeline is ready for integration, with all components
+            communicating via standardized JSON and CSV formats.</p>
+        </div>
+      </div>
+      <div class="media-col">
+        <div class="img-wrapper reveal delay-2">
+          <div class="reticle tl"></div>
+          <div class="reticle tr"></div>
+          <div class="reticle bl"></div>
+          <div class="reticle br"></div>
+          <div class="img-inner bg-scene15-2"></div>
+        </div>
+      </div>
+    </section>
+
+  </div>
+
+  <script>
+    // Intersection Observer for staggered entrance animations
+    const observerOptions = {
+      root: document.getElementById('main-scroll'),
+      threshold: 0.3
+    };
+
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          entry.target.classList.add('active');
+          // Update UI Index indicator
+          const panel = entry.target.closest('.panel');
+          if (panel) {
+            const index = panel.getAttribute('data-index');
+            document.getElementById('panel-indicator').innerText = `0${index} / 06`;
+          }
+        }
+      });
+    }, observerOptions);
+
+    document.querySelectorAll('.reveal').forEach(el => {
+      observer.observe(el);
+    });
+
+    // Scroll Progress Bar logic
+    const scrollContainer = document.getElementById('main-scroll');
+    const progressBar = document.getElementById('p-bar');
+
+    scrollContainer.addEventListener('scroll', () => {
+      const totalScroll = scrollContainer.scrollWidth - scrollContainer.clientWidth;
+      const currentScroll = scrollContainer.scrollLeft;
+      const progress = (currentScroll / totalScroll) * 100;
+      progressBar.style.width = progress + '%';
+    });
+  </script>
+</body>
+
+</html>
