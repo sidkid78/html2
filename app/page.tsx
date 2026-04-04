@@ -74,6 +74,24 @@ const hubs = [
     color: "from-red-600 to-orange-600",
     border: "hover:border-red-500/50",
     shadow: "hover:shadow-[0_0_40px_-10px_rgba(255,51,51,0.2)]"
+  },
+  {
+    title: "Audio Story Hub I",
+    description: "Modern Anxiety & High-Tech Capability. A premium narrative experience exploring digital tensions.",
+    href: "/audio-story",
+    icon: "🎙️",
+    color: "from-indigo-600 to-sky-700",
+    border: "hover:border-indigo-500/50",
+    shadow: "hover:shadow-[0_0_40px_-10px_rgba(79,70,229,0.2)]"
+  },
+  {
+    title: "Audio Story Hub II",
+    description: "Weary Ambient & Cinematic Rock. The next chapter in high-fidelity soundscape exploration.",
+    href: "/audio-story-2",
+    icon: "🎸",
+    color: "from-stone-700 to-amber-800",
+    border: "hover:border-amber-600/50",
+    shadow: "hover:shadow-[0_0_40px_-10px_rgba(217,119,6,0.2)]"
   }
 ];
 
