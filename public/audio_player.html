@@ -1,0 +1,401 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Audio Story Hub | Premium Narration Player</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-color: #0c1015;
+            --glass-bg: rgba(255, 255, 255, 0.05);
+            --glass-border: rgba(255, 255, 255, 0.1);
+            --primary: #4f46e5;
+            --accent: #0ea5e9;
+            --text: #f8fafc;
+        }
+
+        body {
+            margin: 0;
+            font-family: 'Inter', sans-serif;
+            background: var(--bg-color);
+            color: var(--text);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            overflow-x: hidden;
+            background: radial-gradient(circle at top left, #1e1b4b, #0c1015), 
+                        radial-gradient(circle at bottom right, #0c4a6e, #0c1015);
+        }
+
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+            padding: 4rem 2rem;
+            width: 100%;
+            box-sizing: border-box;
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 4rem;
+        }
+
+        h1 {
+            font-size: 3rem;
+            font-weight: 700;
+            background: linear-gradient(135deg, #f8fafc, #94a3b8);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin: 0;
+            letter-spacing: -0.02em;
+        }
+
+        p.subtitle {
+            color: #94a3b8;
+            font-weight: 300;
+            margin-top: 1rem;
+            font-size: 1.1rem;
+        }
+
+        /* Ambient Panel */
+        .ambient-panel {
+            background: var(--glass-bg);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid var(--glass-border);
+            border-radius: 24px;
+            padding: 2rem;
+            margin-bottom: 3rem;
+            display: flex;
+            align-items: center;
+            gap: 2rem;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+        }
+
+        .ambient-info {
+            flex-grow: 1;
+        }
+
+        .ambient-tag {
+            font-size: 0.75rem;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            color: var(--accent);
+            margin-bottom: 0.5rem;
+            font-weight: 600;
+        }
+
+        .ambient-title {
+            font-size: 1.25rem;
+            font-weight: 600;
+        }
+
+        .controls {
+            display: flex;
+            align-items: center;
+            gap: 1.5rem;
+        }
+
+        button {
+            background: var(--primary);
+            color: white;
+            border: none;
+            border-radius: 50%;
+            width: 48px;
+            height: 48px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+            box-shadow: 0 4px 12px rgba(79, 70, 229, 0.3);
+        }
+
+        button:hover {
+            transform: scale(1.05);
+            background: #6366f1;
+        }
+
+        button:active {
+            transform: scale(0.95);
+        }
+
+        /* Narrative Grid */
+        .narrative-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 2rem;
+        }
+
+        .track-card {
+            background: var(--glass-bg);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border: 1px solid var(--glass-border);
+            border-radius: 20px;
+            padding: 1.5rem;
+            transition: transform 0.3s ease, border-color 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .track-card:hover {
+            transform: translateY(-5px);
+            border-color: rgba(255, 255, 255, 0.2);
+        }
+
+        .track-card.playing {
+            border-color: var(--primary);
+        }
+
+        .track-index {
+            opacity: 0.3;
+            font-size: 0.875rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .track-name {
+            font-weight: 600;
+            font-size: 1.1rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .progress-container {
+            width: 100%;
+            height: 6px;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 10px;
+            margin-bottom: 1rem;
+            cursor: pointer;
+            position: relative;
+        }
+
+        .progress-bar {
+            height: 100%;
+            background: var(--primary);
+            border-radius: 10px;
+            width: 0%;
+            transition: width 0.1s linear;
+        }
+
+        .track-meta {
+            display: flex;
+            justify-content: space-between;
+            font-size: 0.8rem;
+            color: #94a3b8;
+        }
+
+        /* Volume Control */
+        .volume-control {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        input[type="range"] {
+            -webkit-appearance: none;
+            background: transparent;
+            width: 80px;
+        }
+
+        input[type="range"]::-webkit-slider-runnable-track {
+            height: 4px;
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 10px;
+        }
+
+        input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            height: 12px;
+            width: 12px;
+            background: white;
+            border-radius: 50%;
+            cursor: pointer;
+            margin-top: -4px;
+        }
+
+        /* Icons */
+        .icon {
+            width: 20px;
+            height: 20px;
+            fill: currentColor;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .ambient-panel {
+                flex-direction: column;
+                text-align: center;
+            }
+            .controls {
+                width: 100%;
+                justify-content: center;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>Audio Story Hub</h1>
+            <p class="subtitle">Experience the fusion of modern anxiety and high-tech capability.</p>
+        </header>
+
+        <!-- Ambient Layer -->
+        <div class="ambient-panel">
+            <button id="ambient-play" title="Play Ambient Mix">
+                <svg class="icon play-icon" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
+                <svg class="icon pause-icon" viewBox="0 0 24 24" style="display:none;"><path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/></svg>
+            </button>
+            <div class="ambient-info">
+                <div class="ambient-tag">Ambient Foundation</div>
+                <div class="ambient-title">Modern Anxiety to High-Tech Capability</div>
+            </div>
+            <div class="volume-control">
+                <svg class="icon" viewBox="0 0 24 24"><path d="M3 9v6h4l5 5V4L7 9H3zm13.5 3c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02zM14 3.23v2.06c2.89.86 5 3.54 5 6.71s-2.11 5.85-5 6.71v2.06c4.01-.91 7-4.49 7-8.77s-2.99-7.86-7-8.77z"/></svg>
+                <input type="range" id="ambient-volume" min="0" max="1" step="0.01" value="0.5">
+            </div>
+        </div>
+
+        <!-- Narration Tracks -->
+        <div class="narrative-grid" id="track-container">
+            <!-- Tracks will be generated here -->
+        </div>
+    </div>
+
+    <!-- Hidden Audio Elements -->
+    <audio id="ambient-audio" loop>
+        <source src="audio/Modern Anxiety to High-Tech Capability..mp3" type="audio/mpeg">
+    </audio>
+
+    <script>
+        const ambientAudio = document.getElementById('ambient-audio');
+        const ambientPlayBtn = document.getElementById('ambient-play');
+        const ambientVolume = document.getElementById('ambient-volume');
+        const trackContainer = document.getElementById('track-container');
+
+        const tracks = [
+            { name: "Segment I", file: "audio/download (1).wav" },
+            { name: "Segment II", file: "audio/download (2).wav" },
+            { name: "Segment III", file: "audio/download (3).wav" },
+            { name: "Segment IV", file: "audio/download (4).wav" },
+            { name: "Segment V", file: "audio/download (5).wav" }
+        ];
+
+        let currentNarration = null;
+        let ambientDucked = false;
+
+        // Initialize Tracks
+        tracks.forEach((track, index) => {
+            const card = document.createElement('div');
+            card.className = 'track-card';
+            card.innerHTML = `
+                <div class="track-index">Narration 0${index + 1}</div>
+                <div class="track-name">${track.name}</div>
+                <div class="progress-container">
+                    <div class="progress-bar" id="progress-${index}"></div>
+                </div>
+                <div class="track-meta">
+                    <span id="time-${index}">0:00</span>
+                    <button class="track-play" data-index="${index}">
+                        <svg class="icon play-icon" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
+                        <svg class="icon pause-icon" viewBox="0 0 24 24" style="display:none;"><path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/></svg>
+                    </button>
+                </div>
+                <audio id="audio-${index}">
+                    <source src="${track.file}" type="audio/wav">
+                </audio>
+            `;
+            trackContainer.appendChild(card);
+
+            const audio = card.querySelector('audio');
+            const playBtn = card.querySelector('.track-play');
+            const progressBar = card.querySelector('.progress-bar');
+            const timeDisplay = card.querySelector('.track-meta span');
+
+            playBtn.addEventListener('click', () => toggleTrack(index));
+
+            audio.addEventListener('timeupdate', () => {
+                const percent = (audio.currentTime / audio.duration) * 100;
+                progressBar.style.width = percent + '%';
+                timeDisplay.textContent = formatTime(audio.currentTime);
+            });
+
+            audio.addEventListener('ended', () => {
+                stopNarration(index);
+            });
+        });
+
+        // Ambient Controls
+        ambientPlayBtn.addEventListener('click', () => {
+            if (ambientAudio.paused) {
+                ambientAudio.play();
+                updatePlayPauseIcons(ambientPlayBtn, true);
+            } else {
+                ambientAudio.pause();
+                updatePlayPauseIcons(ambientPlayBtn, false);
+            }
+        });
+
+        ambientVolume.addEventListener('input', (e) => {
+            ambientAudio.volume = e.target.value;
+        });
+
+        // Track Logic
+        function toggleTrack(index) {
+            const audio = document.getElementById(`audio-${index}`);
+            const btn = trackContainer.querySelectorAll('.track-play')[index];
+            const card = trackContainer.querySelectorAll('.track-card')[index];
+
+            if (currentNarration !== null && currentNarration !== index) {
+                stopNarration(currentNarration);
+            }
+
+            if (audio.paused) {
+                audio.play();
+                currentNarration = index;
+                card.classList.add('playing');
+                updatePlayPauseIcons(btn, true);
+                duckAmbient(true);
+            } else {
+                audio.pause();
+                stopNarration(index);
+            }
+        }
+
+        function stopNarration(index) {
+            const audio = document.getElementById(`audio-${index}`);
+            const btn = trackContainer.querySelectorAll('.track-play')[index];
+            const card = trackContainer.querySelectorAll('.track-card')[index];
+            
+            audio.pause();
+            card.classList.remove('playing');
+            updatePlayPauseIcons(btn, false);
+            if (currentNarration === index) {
+                currentNarration = null;
+                duckAmbient(false);
+            }
+        }
+
+        function duckAmbient(duck) {
+            const targetVolume = duck ? ambientVolume.value * 0.3 : ambientVolume.value;
+            // Smooth transition for ducking
+            ambientAudio.volume = targetVolume;
+        }
+
+        function updatePlayPauseIcons(btn, isPlaying) {
+            btn.querySelector('.play-icon').style.display = isPlaying ? 'none' : 'block';
+            btn.querySelector('.pause-icon').style.display = isPlaying ? 'block' : 'none';
+        }
+
+        function formatTime(seconds) {
+            const mins = Math.floor(seconds / 60);
+            const secs = Math.floor(seconds % 60);
+            return `${mins}:${secs.toString().padStart(2, '0')}`;
+        }
+    </script>
+</body>
+</html>
