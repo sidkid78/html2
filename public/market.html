@@ -1,0 +1,767 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Strategic Framework for S&P 500 Alpha Generation</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@100;300;400;700&family=Space+Grotesk:wght@300;500;700&display=swap');
+
+    :root {
+      --bg: #05080f;
+      --text: #8b9bb4;
+      --heading: #f8fafc;
+      --accent: #00f0ff;
+      --accent-dim: rgba(0, 240, 255, 0.15);
+      --warn: #ffb000;
+    }
+
+    * {
+      box-sizing: border-box;
+      cursor: none !important;
+    }
+
+    body {
+      margin: 0;
+      background-color: var(--bg);
+      color: var(--text);
+      font-family: 'JetBrains Mono', monospace;
+      overflow: hidden;
+      font-size: clamp(0.75rem, 1vw, 0.875rem);
+      line-height: 1.6;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    h1,
+    h2,
+    h3,
+    .font-display {
+      font-family: 'Space Grotesk', sans-serif;
+    }
+
+    /* Custom Cursor */
+    #cursor-dot {
+      position: fixed;
+      width: 4px;
+      height: 4px;
+      background: var(--accent);
+      border-radius: 50%;
+      pointer-events: none;
+      z-index: 9999;
+      transform: translate(-50%, -50%);
+      transition: width 0.2s, height 0.2s;
+    }
+
+    #cursor-ring {
+      position: fixed;
+      width: 24px;
+      height: 24px;
+      border: 1px solid var(--accent);
+      border-radius: 50%;
+      pointer-events: none;
+      z-index: 9998;
+      transform: translate(-50%, -50%);
+      transition: transform 0.1s ease-out;
+    }
+
+    a:hover~#cursor-dot,
+    button:hover~#cursor-dot {
+      width: 8px;
+      height: 8px;
+    }
+
+    /* Scroll Container */
+    .carousel-container {
+      display: flex;
+      width: 100vw;
+      height: 100vh;
+      overflow-x: auto;
+      overflow-y: hidden;
+      scroll-snap-type: x mandatory;
+      scrollbar-width: none;
+    }
+
+    .carousel-container::-webkit-scrollbar {
+      display: none;
+    }
+
+    /* Panel Styles */
+    .panel {
+      min-width: 100vw;
+      height: 100vh;
+      scroll-snap-align: start;
+      position: relative;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      padding: clamp(2rem, 5vw, 6rem);
+      overflow: hidden;
+    }
+
+    .panel-content {
+      position: relative;
+      z-index: 10;
+      width: 100%;
+      max-width: 1400px;
+      margin: 0 auto;
+      display: grid;
+      grid-template-columns: repeat(12, 1fr);
+      gap: 2rem;
+      max-height: 85vh;
+      overflow-y: auto;
+      scrollbar-width: none;
+      padding-right: 2rem;
+    }
+
+    .panel-content::-webkit-scrollbar {
+      display: none;
+    }
+
+    /* Background Imagery & Overlays */
+    .bg-layer {
+      position: absolute;
+      inset: 0;
+      z-index: 1;
+      opacity: 0.15;
+      mix-blend-mode: luminosity;
+      transition: transform 0.8s cubic-bezier(0.2, 0.8, 0.2, 1);
+    }
+
+    .bg-layer img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      filter: grayscale(100%) contrast(1.2);
+    }
+
+    .vignette {
+      position: absolute;
+      inset: 0;
+      background: radial-gradient(circle at center, transparent 20%, var(--bg) 90%),
+        linear-gradient(to right, var(--bg) 40%, transparent 100%);
+      z-index: 2;
+    }
+
+    /* Typography & Layout Utility */
+    .col-span-full {
+      grid-column: 1 / -1;
+    }
+
+    .col-span-text {
+      grid-column: 1 / 13;
+    }
+
+    @media (min-width: 1024px) {
+      .col-span-text {
+        grid-column: 1 / 8;
+      }
+
+      .col-span-data {
+        grid-column: 8 / 13;
+      }
+    }
+
+    .hero-title {
+      font-size: clamp(2.5rem, 5vw, 4.5rem);
+      font-weight: 300;
+      color: var(--heading);
+      line-height: 1.1;
+      letter-spacing: -0.02em;
+      margin-bottom: 2rem;
+      text-transform: uppercase;
+    }
+
+    .section-title {
+      font-size: clamp(1.5rem, 3vw, 2.5rem);
+      color: var(--heading);
+      font-weight: 500;
+      border-bottom: 1px solid var(--accent-dim);
+      padding-bottom: 0.5rem;
+      margin-bottom: 1.5rem;
+    }
+
+    .sub-title {
+      font-family: 'Space Grotesk', sans-serif;
+      color: var(--heading);
+      font-size: 1.1rem;
+      margin-top: 2rem;
+      margin-bottom: 0.5rem;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .sub-title::before {
+      content: '>>';
+      color: var(--accent);
+      font-size: 0.8em;
+    }
+
+    p,
+    li {
+      margin-bottom: 1rem;
+      color: var(--text);
+    }
+
+    ul {
+      list-style-type: square;
+      padding-left: 1.5rem;
+      color: var(--accent);
+    }
+
+    ul li span {
+      color: var(--text);
+    }
+
+    .highlight {
+      color: var(--accent);
+    }
+
+    .highlight-warn {
+      color: var(--warn);
+    }
+
+    /* Data Table styling */
+    .data-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr 1.5fr 1fr 1fr;
+      gap: 1px;
+      background: var(--accent-dim);
+      border: 1px solid var(--accent-dim);
+      font-size: 0.75rem;
+      margin-top: 2rem;
+    }
+
+    .data-grid>div {
+      background: var(--bg);
+      padding: 0.75rem;
+      display: flex;
+      align-items: center;
+    }
+
+    .data-grid .header {
+      color: var(--heading);
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      background: rgba(255, 255, 255, 0.03);
+    }
+
+    /* Math / Code Blocks */
+    .code-block {
+      background: rgba(0, 240, 255, 0.03);
+      border-left: 2px solid var(--accent);
+      padding: 1rem;
+      font-family: 'JetBrains Mono', monospace;
+      color: var(--heading);
+      margin: 1.5rem 0;
+      overflow-x: auto;
+    }
+
+    /* UI Elements */
+    .progress-container {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      width: 100%;
+      height: 2px;
+      background: rgba(255, 255, 255, 0.1);
+      z-index: 50;
+    }
+
+    .progress-bar {
+      height: 100%;
+      background: var(--accent);
+      width: 0%;
+      transition: width 0.3s ease-out;
+    }
+
+    .panel-indicator {
+      position: fixed;
+      top: 2rem;
+      right: 2rem;
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: 0.8rem;
+      color: var(--accent);
+      z-index: 50;
+      letter-spacing: 0.1em;
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+    }
+
+    .panel-indicator::before {
+      content: '';
+      display: block;
+      width: 30px;
+      height: 1px;
+      background: var(--accent);
+    }
+
+    /* Animations */
+    .reveal {
+      opacity: 0;
+      transform: translateY(20px);
+      transition: opacity 0.8s cubic-bezier(0.2, 0.8, 0.2, 1),
+        transform 0.8s cubic-bezier(0.2, 0.8, 0.2, 1);
+    }
+
+    .reveal.active {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    .delay-1 {
+      transition-delay: 100ms;
+    }
+
+    .delay-2 {
+      transition-delay: 200ms;
+    }
+
+    .delay-3 {
+      transition-delay: 300ms;
+    }
+
+    .delay-4 {
+      transition-delay: 400ms;
+    }
+
+    /* Glitch Effect on load */
+    @keyframes textGlitch {
+      0% {
+        transform: translate(0)
+      }
+
+      20% {
+        transform: translate(-2px, 1px)
+      }
+
+      40% {
+        transform: translate(-1px, -1px)
+      }
+
+      60% {
+        transform: translate(2px, 1px)
+      }
+
+      80% {
+        transform: translate(1px, -1px)
+      }
+
+      100% {
+        transform: translate(0)
+      }
+    }
+
+    .glitch:hover {
+      animation: textGlitch 0.2s linear infinite;
+      color: var(--heading);
+      text-shadow: 2px 0 var(--accent), -2px 0 var(--warn);
+    }
+
+    /* Static/Noise SVG */
+    .noise-overlay {
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      z-index: 100;
+      opacity: 0.04;
+      mix-blend-mode: difference;
+    }
+  </style>
+</head>
+
+<body>
+
+  <!-- SVG Filters -->
+  <svg class="noise-overlay">
+    <filter id="noise">
+      <feTurbulence type="fractalNoise" baseFrequency="0.8" numOctaves="3" stitchTiles="stitch">
+        <animate attributeName="baseFrequency" values="0.8;0.82;0.8" dur="0.2s" repeatCount="indefinite" />
+      </feTurbulence>
+      <feColorMatrix type="matrix" values="1 0 0 0 0, 0 1 0 0 0, 0 0 1 0 0, 0 0 0 0 0" />
+    </filter>
+    <rect width="100%" height="100%" filter="url(#noise)" />
+  </svg>
+
+  <!-- Custom Cursor -->
+  <div id="cursor-dot"></div>
+  <div id="cursor-ring"></div>
+
+  <!-- Global UI -->
+  <div class="panel-indicator" id="indicator">SEC [ 01 / 06 ]</div>
+  <div class="progress-container">
+    <div class="progress-bar" id="progress"></div>
+  </div>
+
+  <div class="carousel-container" id="scroll-container">
+
+    <!-- PANEL 1: Title & Executive Summary -->
+    <section class="panel" id="panel-1">
+      <div class="bg-layer"><img src="./images/scen1(1).jpg" alt="Terminal Background"></div>
+      <div class="vignette"></div>
+      <div class="panel-content">
+        <div class="col-span-full reveal">
+          <h1 class="hero-title">Strategic Framework <br><span class="highlight">for S&P 500</span> Alpha Generation
+            <br>and Volatility Management</h1>
+        </div>
+        <div class="col-span-text reveal delay-1">
+          <h2 class="section-title glitch">Executive Summary</h2>
+          <p>The research synthesized in this document establishes a mathematically rigorous framework designed to
+            generate persistent excess returns (Alpha) on the S&P 500 while strictly adhering to a <span
+              class="highlight-warn">120% volatility cap</span> relative to the benchmark. This objective is achieved by
+            challenging the Efficient Market Hypothesis (EMH) through the integration of three core pillars:</p>
+          <ul>
+            <li><span><strong>Predictive Signal Engineering:</strong> Exploitation of behavioral biases (e.g.,
+                asymmetric loss aversion), market microstructure inefficiencies (e.g., 0DTE Gamma Exposure), and
+                macro-monetary regime shifts.</span></li>
+            <li><span><strong>Continuous-Time Machine Learning:</strong> Deployment of a Continuous-Time Temporal Fusion
+                Transformer with Mixture-of-Experts (CT-TFT-MoE). This architecture utilizes Neural ODEs to model market
+                dynamics as continuous processes and Sparse Mixture-of-Experts (MoE) for regime adaptation.</span></li>
+            <li><span><strong>Friction-Aware Execution:</strong> A dynamic allocation strategy utilizing Mean-Variance
+                Optimization (MVO) and Bayesian shrinkage to map signals to portfolio weights, explicitly accounting for
+                market impact and transaction costs.</span></li>
+          </ul>
+          <p class="mt-4">Key findings indicate that negative sentiment has an impact <span class="highlight">~3x
+              stronger</span> than positive sentiment on returns, and that specific macro indicators, such as real 10Y
+            yields, provide a predictable P/E compression ratio of 7% per 100-basis-point increase. Strategic tensions
+            regarding execution frequency and "Active Share" metrics have been identified as critical areas for
+            resolution prior to deployment.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- PANEL 2: I. Alpha Generation -->
+    <section class="panel" id="panel-2">
+      <div class="bg-layer"><img src="./images/scen2(1).jpg" alt="Data Network"></div>
+      <div class="vignette"></div>
+      <div class="panel-content">
+        <div class="col-span-text reveal">
+          <h2 class="section-title glitch">I. Alpha Generation and Signal Engineering</h2>
+          <p>The framework identifies and quantifies alpha through three distinct domains: behavioral signals, market
+            microstructure, and macro-monetary dynamics.</p>
+
+          <h3 class="sub-title">1. Behavioral and Sentiment Signals</h3>
+          <p>Research into cognitive biases has yielded six engineered features targeting specific market
+            inefficiencies:</p>
+        </div>
+
+        <!-- Data Grid mimicking a terminal table -->
+        <div class="col-span-full reveal delay-1">
+          <div class="data-grid">
+            <div class="header">Feature</div>
+            <div class="header">ID</div>
+            <div class="header">Logic</div>
+            <div class="header">Behavioral Quirk</div>
+            <div class="header">Correlation (S&P 500)</div>
+
+            <div>Negative Sentiment Multiplier</div>
+            <div>neg_sent_mult</div>
+            <div class="font-mono text-cyan-400">IF Sent < 0 THEN Sent * 1.7</div>
+                <div>Loss Aversion</div>
+                <div class="highlight-warn">-0.22 (Next-day)</div>
+                <div>Inst-Retail Sentiment Gap</div>
+                <div>irsg_delta</div>
+                <div class="font-mono text-cyan-400">News_Sent - Social_Sent</div>
+                <div>Info Asymmetry</div>
+                <div>0.15 (1-month forward)</div>
+                <div>Retail Hype Acceleration</div>
+                <div>rha_score</div>
+                <div class="font-mono text-cyan-400">d/dt(Log(Vol)) * Sent</div>
+                <div>Herding / FOMO</div>
+                <div>0.12 (3-day window)</div>
+                <div>Social Disagreement Index</div>
+                <div>social_disagree</div>
+                <div class="font-mono text-cyan-400">StdDev(Sent) / Mean(Vol)</div>
+                <div>Confirmation Bias</div>
+                <div class="highlight-warn">-0.14</div>
+                <div>News Flow Entropy</div>
+                <div>news_entropy</div>
+                <div class="font-mono text-cyan-400">-Sum(p(x)log(p(x)))</div>
+                <div>Info Overload</div>
+                <div class="highlight-warn">-0.09</div>
+                <div>Stale News Decay Factor</div>
+                <div>news_decay</div>
+                <div class="font-mono text-cyan-400">Sent * exp(-Lambda * Time)</div>
+                <div>Anchoring</div>
+                <div>0.08</div>
+            </div>
+          </div>
+
+          <div class="col-span-text reveal delay-2">
+            <h3 class="sub-title">2. Market Microstructure and Liquidity</h3>
+            <p>Short-term edges are derived from the mechanical constraints of market participants and dealer
+              positioning:</p>
+            <ul>
+              <li><span><strong>Order Flow Imbalance (OFI):</strong> Captures transient liquidity voids in elevated VIX
+                  environments where top-of-book volume thins.</span></li>
+              <li><span><strong>Dark Index (DIX) Divergence:</strong> Anticipates market maker (MM) short covering
+                  following institutional block buy orders in dark pools, typically leading to mean reversion in T+2 to
+                  T+5 days.</span></li>
+              <li><span><strong>0DTE Gamma Exposure (GEX):</strong> Identifies "Gamma Walls" where dealer hedging
+                  constraints force market stabilization or rejection at specific strike levels.</span></li>
+              <li><span><strong>VIX Futures Basis:</strong> Exploits the transition from acute backwardation to
+                  structural contango to harvest roll yield.</span></li>
+            </ul>
+          </div>
+
+          <div class="col-span-text reveal delay-3">
+            <h3 class="sub-title">3. Macro-Monetary Divergence</h3>
+            <p>Macroeconomic indicators define the broader regime for equity valuations:</p>
+            <ul>
+              <li><span><strong>Real Interest Rates:</strong> A 100bps increase in real 10Y yields correlates to a ~7%
+                  compression in S&P 500 forward P/E multiples.</span></li>
+              <li><span><strong>Yield Curve Dynamics:</strong> Bull steepening marks recovery phases and high excess
+                  returns; inversions (2Y > 10Y) lead market peaks by 6–12 months.</span></li>
+              <li><span><strong>Credit Spread Volatility:</strong> Serves as a high-conviction fear signal, with
+                  widening spreads typically preceding equity market bottoms.</span></li>
+            </ul>
+          </div>
+        </div>
+    </section>
+
+    <!-- PANEL 3: II. ML Architecture -->
+    <section class="panel" id="panel-3">
+      <div class="bg-layer"><img src="./images/scen3(1).jpg" alt="ML Core"></div>
+      <div class="vignette"></div>
+      <div class="panel-content">
+        <div class="col-span-text reveal">
+          <h2 class="section-title glitch">II. Advanced Machine Learning Architecture</h2>
+          <p>The core of the predictive engine is the <span class="highlight">Continuous-Time Temporal Fusion
+              Transformer with Mixture-of-Experts (CT-TFT-MoE)</span>. This model is designed to handle the noise,
+            non-linearity, and non-stationarity of financial data.</p>
+
+          <h3 class="sub-title">1. Architectural Components</h3>
+          <ul>
+            <li><span><strong>Neural ODE-RNN Encoders:</strong> Unlike discrete LSTMs, these model the unobserved latent
+                state of the market as a continuous dynamical system <code
+                  class="text-cyan-400">(dh(t)/dt = f_θ(h(t), t))</code>, effectively handling missing data and
+                irregular intervals.</span></li>
+            <li><span><strong>Sparse Mixture-of-Experts (MoE):</strong> Dynamically routes data through specialized
+                sub-networks based on the identified market regime (e.g., bull vs. bear), enhancing adaptability.</span>
+            </li>
+            <li><span><strong>Variable Selection Network (VSN):</strong> Uses Gated Residual Networks (GRNs) to
+                adaptively drop uninformative predictors and combat financial noise.</span></li>
+            <li><span><strong>Output Head:</strong> Parameterized for Point-Quantile and Adaptive Risk Forecasting to
+                capture asymmetric tail risks like Value-at-Risk (VaR).</span></li>
+          </ul>
+        </div>
+        <div class="col-span-text reveal delay-1">
+          <h3 class="sub-title">2. Hybrid Objective Function</h3>
+          <p>Standard Mean Squared Error (MSE) is rejected in favor of a hybrid loss function (L_{total}) that aligns
+            with economic utility:</p>
+          <div class="code-block">
+            1. L_{MSE}: For general convergence.<br>
+            2. L_{Sharpe}: Differentiable Sharpe Ratio to optimize for risk-adjusted returns.<br>
+            3. L_{Directional}: Penalizes "whipsaw" trades (wrong-sign predictions).<br>
+            4. L_{MDD}: Soft Maximum Drawdown penalty for capital preservation.
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- PANEL 4: III. Validation -->
+    <section class="panel" id="panel-4">
+      <div class="bg-layer"><img src="./images/scen4(1).jpg" alt="Risk Architecture"></div>
+      <div class="vignette"></div>
+      <div class="panel-content">
+        <div class="col-span-text reveal">
+          <h2 class="section-title glitch">III. Training Strategy and Validation</h2>
+          <p>To prevent overfitting—the primary failure mode in financial ML—the framework implements a rigorous <span
+              class="highlight">"Purged and Embargoed"</span> protocol.</p>
+
+          <h3 class="sub-title">1. Overfitting Mitigation</h3>
+          <ul>
+            <li><span><strong>Purged and Embargoed K-Fold CV:</strong> Removes training observations that overlap in
+                time with the test set (purging) and removes a set of observations immediately following the test set
+                (embargoing) to account for serial correlation.</span></li>
+            <li><span><strong>Bayesian Dropout (MC Dropout):</strong> Maintains dropout layers during inference to
+                quantify epistemic uncertainty ("knowing when the model doesn't know").</span></li>
+            <li><span><strong>Label Smoothing:</strong> Reduces overconfidence in noisy labels typical of financial
+                returns.</span></li>
+          </ul>
+        </div>
+        <div class="col-span-text reveal delay-1">
+          <h3 class="sub-title">2. Statistical Acceptance Criteria</h3>
+          <p>For a signal to be deemed actionable, it must meet strict validation thresholds:</p>
+          <ul class="font-mono">
+            <li><span><strong>Information Coefficient (IC):</strong> Minimum average of 0.03.</span></li>
+            <li><span><strong>IC Information Ratio (IR):</strong> Minimum of 0.5.</span></li>
+            <li><span><strong>Probability of Overfitting (PBO):</strong> Below 5%.</span></li>
+            <li><span><strong>Deflated Sharpe Ratio (DSR):</strong> Used to adjust for selection bias and the number of
+                backtest trials.</span></li>
+          </ul>
+        </div>
+      </div>
+    </section>
+
+    <!-- PANEL 5: IV. Betting Strategy -->
+    <section class="panel" id="panel-5">
+      <div class="bg-layer"><img src="./images/scen4(1).jpg" alt="Volatility Control"></div>
+      <div class="vignette"></div>
+      <div class="panel-content">
+        <div class="col-span-text reveal">
+          <h2 class="section-title glitch">IV. Betting Strategy and Execution Framework</h2>
+          <p>The translation of return predictions into actionable market exposure is governed by a modified
+            Mean-Variance Optimization (MVO) framework.</p>
+
+          <h3 class="sub-title">1. Alpha-to-Weight Mapping</h3>
+          <p>The strategy uses Bayesian Shrinkage to prevent over-aggressive positioning on uncertain signals. The
+            optimal single-asset weight (w^*) is:</p>
+          <div class="code-block text-center text-lg">
+            w^* = \frac{r_{pred}}{\lambda(\sigma^2 + \sigma_{pred}^2)}
+          </div>
+          <p>Where:</p>
+          <ul class="font-mono text-sm">
+            <li><span><strong>r_{pred}:</strong> Raw daily return prediction.</span></li>
+            <li><span><strong>\lambda:</strong> Risk-aversion parameter (fractional Kelly equivalent).</span></li>
+            <li><span><strong>\sigma^2:</strong> Historical asset variance.</span></li>
+            <li><span><strong>\sigma_{pred}^2:</strong> Variance of the prediction error (uncertainty from MC
+                Dropout).</span></li>
+          </ul>
+        </div>
+        <div class="col-span-text reveal delay-1">
+          <h3 class="sub-title">2. Volatility Control and Constraints</h3>
+          <ul>
+            <li><span><strong>120% Volatility Cap:</strong> The "Vol Control" overlay scales exposure to ensure realized
+                volatility does not exceed 1.2x the target volatility (pegged to S&P 500 or an absolute cap).</span>
+            </li>
+            <li><span><strong>Dynamic Scaling:</strong> Uses EWMA for fast reaction and GARCH(1,1) for mean-reversion
+                characteristics.</span></li>
+            <li><span><strong>Rebalancing Buffer:</strong> A 5% tolerance buffer prevents daily "whipsawing" and
+                minimizes transaction costs.</span></li>
+            <li><span><strong>Cash Equitization:</strong> To eliminate "cash drag," balances >1% are equitized using S&P
+                500 E-mini futures.</span></li>
+          </ul>
+        </div>
+        <div class="col-span-text reveal delay-2">
+          <h3 class="sub-title">3. Market Friction Analysis</h3>
+          <p>Daily rebalancing is sensitive to execution drag. For a $1B AUM portfolio, annual drag is estimated at 14
+            bps.</p>
+          <ul>
+            <li><span><strong>Vehicle Selection:</strong> SPY is the preferred vehicle due to superior liquidity
+                (spreads of 0.5–1.0 bps) compared to IVV or VOO.</span></li>
+            <li><span><strong>Impact Model:</strong> Uses a Square Root Model <code
+                  class="text-cyan-400">(I = \sigma \cdot k \cdot \sqrt{V/ADV})</code> integrated into the optimizer as
+                an L1 turnover penalty.</span></li>
+          </ul>
+        </div>
+      </div>
+    </section>
+
+    <!-- PANEL 6: V. Strategic Tensions -->
+    <section class="panel" id="panel-6">
+      <div class="bg-layer"><img src="./images/scen5(1).jpg" alt="KPI Dashboard"></div>
+      <div class="vignette"></div>
+      <div class="panel-content">
+        <div class="col-span-text reveal">
+          <h2 class="section-title glitch">V. Strategic Tensions and Resolutions</h2>
+          <p>The synthesis of domain reports identified three critical contradictions that require immediate resolution:
+          </p>
+          <ol class="list-decimal pl-5 text-accent space-y-4">
+            <li><span><strong class="text-heading">Signal Horizon vs. Rebalancing Friction:</strong> Transient
+                microstructure signals (e.g., 0DTE GEX) may be "choked out" by the 5% rebalancing buffer and daily
+                execution mandate.</span></li>
+            <li><span><strong class="text-heading">The "Active Share" Fallacy:</strong> While domain reports suggested a
+                target of >75% Active Share, this is identified as a flaw for an index timing strategy. The strategy
+                relies on beta-flexing (market timing) rather than stock selection; thus, Active Share is an
+                inappropriate KPI.</span></li>
+            <li><span><strong class="text-heading">Continuous Architecture vs. Discrete Execution:</strong> The high
+                computational cost of continuous-time Neural ODEs may be over-engineered given the operational
+                constraint of daily rebalancing.</span></li>
+          </ol>
+        </div>
+        <div class="col-span-text reveal delay-1 mt-8">
+          <h3 class="sub-title highlight-warn">Prioritized Next Steps</h3>
+          <ul class="border-l-2 border-warn pl-4 py-2 bg-[rgba(255,176,0,0.05)]">
+            <li><span><strong>Conduct Latency-Decay Study:</strong> Determine if microstructure alpha persists until the
+                daily close.</span></li>
+            <li><span><strong>Hardwire the Risk Bridge:</strong> Directly integrate CT-TFT-MoE’s MC Dropout output into
+                the MVO Bayesian shrinkage equation.</span></li>
+            <li><span><strong>Update KPI Dashboard:</strong> Strike "Active Share" and replace with Tracking Error
+                (400-700 bps target), Maximum Drawdown limits, and Information Ratio.</span></li>
+            <li><span><strong>Execute CPCV Backtest:</strong> Perform a combinatorial purged cross-validation including
+                SPY liquidity drag and a strict <span class="highlight-warn">1.2x volatility cap</span>.</span></li>
+          </ul>
+        </div>
+      </div>
+    </section>
+
+  </div>
+
+  <script>
+    // Custom Cursor Logic
+    const dot = document.getElementById('cursor-dot');
+    const ring = document.getElementById('cursor-ring');
+
+    document.addEventListener('mousemove', (e) => {
+      dot.style.left = `${e.clientX}px`;
+      dot.style.top = `${e.clientY}px`;
+
+      // Slight delay for ring
+      setTimeout(() => {
+        ring.style.left = `${e.clientX}px`;
+        ring.style.top = `${e.clientY}px`;
+      }, 40);
+    });
+
+    // Scroll Progress and Intersection Observer for Reveals
+    const container = document.getElementById('scroll-container');
+    const progressBar = document.getElementById('progress');
+    const indicator = document.getElementById('indicator');
+    const panels = document.querySelectorAll('.panel');
+    const reveals = document.querySelectorAll('.reveal');
+
+    // Update Progress Bar & Indicator
+    container.addEventListener('scroll', () => {
+      const totalScroll = container.scrollWidth - container.clientWidth;
+      const currentScroll = container.scrollLeft;
+      const progressPercent = (currentScroll / totalScroll) * 100;
+      progressBar.style.width = `${progressPercent}%`;
+
+      // Calculate current panel index
+      const panelIndex = Math.round(currentScroll / window.innerWidth) + 1;
+      indicator.innerHTML = `SEC [ 0${panelIndex} / 0${panels.length} ]`;
+    });
+
+    // Intersection Observer for triggering text reveals
+    const observerOptions = {
+      root: container,
+      threshold: 0.2
+    };
+
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          // Find all reveals in this specific panel and activate them
+          const panelReveals = entry.target.querySelectorAll('.reveal');
+          panelReveals.forEach(el => el.classList.add('active'));
+
+          // Subtle parallax/zoom on background image
+          const bg = entry.target.querySelector('.bg-layer');
+          if (bg) bg.style.transform = 'scale(1.05)';
+        } else {
+          // Optional: reset animation when leaving viewport
+          const bg = entry.target.querySelector('.bg-layer');
+          if (bg) bg.style.transform = 'scale(1)';
+        }
+      });
+    }, observerOptions);
+
+    panels.forEach(panel => {
+      observer.observe(panel);
+    });
+
+    // Initialize first panel animations on load
+    setTimeout(() => {
+      panels[0].querySelectorAll('.reveal').forEach(el => el.classList.add('active'));
+      const firstBg = panels[0].querySelector('.bg-layer');
+      if (firstBg) firstBg.style.transform = 'scale(1.05)';
+    }, 100);
+
+  </script>
+</body>
+
+</html>

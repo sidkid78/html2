@@ -38,6 +38,13 @@ const articles = [
     href: "/fairgig-2.html",
     icon: "🛠️",
     accent: "from-emerald-600/20 to-teal-400/20"
+  },
+  {
+    title: "The Truth Layer (v7)",
+    description: "The absolute truth in live music. High-fidelity strategic intelligence for artists, venues, and the future of independent performance.",
+    href: "/fairgig7.html",
+    icon: "⚡",
+    accent: "from-red-500/20 to-orange-500/20"
   }
 ];
 

@@ -24,6 +24,13 @@ const articles = [
     href: "/listen-&-fix2.html",
     icon: "⚡",
     accent: "from-cyan-500/20 to-blue-500/20"
+  },
+  {
+    title: "Kinetic Diagnostic Experience",
+    description: "Interactive scrollytelling with real-time audio narration. Step into the machine and witness the diagnostic revolution.",
+    href: "/kinetic-card (5).html",
+    icon: "🔮",
+    accent: "from-purple-500/20 to-blue-500/20"
   }
 ];
 
