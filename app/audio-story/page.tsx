@@ -326,7 +326,7 @@ export default function AudioStoryPage() {
 
       <audio 
         ref={ambientRef}
-        src="/audio/background3.mp3" // Modern Anxiety to High-Tech Capability..mp3"
+        src="/audio/easy.mp3" // Modern Anxiety to High-Tech Capability..mp3"
       />
     </div>
   );
