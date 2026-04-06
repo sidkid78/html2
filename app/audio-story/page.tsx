@@ -132,10 +132,16 @@ export default function AudioStoryPage() {
     if (ambientRef.current) {
       if (ambientPlaying) {
         ambientRef.current.pause();
+        setAmbientPlaying(false);
       } else {
-        ambientRef.current.play();
+        // 2-second delay before background music kicks in
+        setTimeout(() => {
+          if (ambientRef.current) {
+            ambientRef.current.play();
+            setAmbientPlaying(true);
+          }
+        }, 2000);
       }
-      setAmbientPlaying(!ambientPlaying);
     }
   };
 
@@ -169,15 +175,22 @@ export default function AudioStoryPage() {
     }
   };
 
-  // "Play All" — start ambient, enable continuous mode, play from segment I
+  // "Play All" — start narration immediately, delay ambient by 2 seconds
   const handlePlayAll = () => {
-    if (ambientRef.current && !ambientPlaying) {
-      ambientRef.current.play();
-      setAmbientPlaying(true);
-    }
     setContinuousMode(true);
     setCurrentTrack(tracks[0].id);
-    duckAmbient(true);
+    if (!ambientPlaying) {
+      // 2-second delay before background music kicks in
+      setTimeout(() => {
+        if (ambientRef.current) {
+          ambientRef.current.play();
+          setAmbientPlaying(true);
+          duckAmbient(true);
+        }
+      }, 2000);
+    } else {
+      duckAmbient(true);
+    }
   };
 
   // Stop everything
