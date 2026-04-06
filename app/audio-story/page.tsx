@@ -4,7 +4,7 @@ import React, { useState, useRef, useEffect } from 'react';
 import { Play, Pause, Volume2, ListMusic, SkipForward } from 'lucide-react';
 
 const tracks = [
-  { id: 1, name: "Segment I", file: "/audio/download (1).wav" },
+  { id: 1, name: "Segment I", file: "/audio/download.wav" },
   { id: 2, name: "Segment II", file: "/audio/download (2).wav" },
   { id: 3, name: "Segment III", file: "/audio/download (3).wav" },
   { id: 4, name: "Segment IV", file: "/audio/download (4).wav" },
