@@ -1,0 +1,591 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>strategy.md</title>
+<meta http-equiv="Content-type" content="text/html;charset=UTF-8">
+
+<style>
+/* https://github.com/microsoft/vscode/blob/master/extensions/markdown-language-features/media/markdown.css */
+/*---------------------------------------------------------------------------------------------
+ *  Copyright (c) Microsoft Corporation. All rights reserved.
+ *  Licensed under the MIT License. See License.txt in the project root for license information.
+ *--------------------------------------------------------------------------------------------*/
+
+body {
+	font-family: var(--vscode-markdown-font-family, -apple-system, BlinkMacSystemFont, "Segoe WPC", "Segoe UI", "Ubuntu", "Droid Sans", sans-serif);
+	font-size: var(--vscode-markdown-font-size, 14px);
+	padding: 0 26px;
+	line-height: var(--vscode-markdown-line-height, 22px);
+	word-wrap: break-word;
+}
+
+#code-csp-warning {
+	position: fixed;
+	top: 0;
+	right: 0;
+	color: white;
+	margin: 16px;
+	text-align: center;
+	font-size: 12px;
+	font-family: sans-serif;
+	background-color:#444444;
+	cursor: pointer;
+	padding: 6px;
+	box-shadow: 1px 1px 1px rgba(0,0,0,.25);
+}
+
+#code-csp-warning:hover {
+	text-decoration: none;
+	background-color:#007acc;
+	box-shadow: 2px 2px 2px rgba(0,0,0,.25);
+}
+
+body.scrollBeyondLastLine {
+	margin-bottom: calc(100vh - 22px);
+}
+
+body.showEditorSelection .code-line {
+	position: relative;
+}
+
+body.showEditorSelection .code-active-line:before,
+body.showEditorSelection .code-line:hover:before {
+	content: "";
+	display: block;
+	position: absolute;
+	top: 0;
+	left: -12px;
+	height: 100%;
+}
+
+body.showEditorSelection li.code-active-line:before,
+body.showEditorSelection li.code-line:hover:before {
+	left: -30px;
+}
+
+.vscode-light.showEditorSelection .code-active-line:before {
+	border-left: 3px solid rgba(0, 0, 0, 0.15);
+}
+
+.vscode-light.showEditorSelection .code-line:hover:before {
+	border-left: 3px solid rgba(0, 0, 0, 0.40);
+}
+
+.vscode-light.showEditorSelection .code-line .code-line:hover:before {
+	border-left: none;
+}
+
+.vscode-dark.showEditorSelection .code-active-line:before {
+	border-left: 3px solid rgba(255, 255, 255, 0.4);
+}
+
+.vscode-dark.showEditorSelection .code-line:hover:before {
+	border-left: 3px solid rgba(255, 255, 255, 0.60);
+}
+
+.vscode-dark.showEditorSelection .code-line .code-line:hover:before {
+	border-left: none;
+}
+
+.vscode-high-contrast.showEditorSelection .code-active-line:before {
+	border-left: 3px solid rgba(255, 160, 0, 0.7);
+}
+
+.vscode-high-contrast.showEditorSelection .code-line:hover:before {
+	border-left: 3px solid rgba(255, 160, 0, 1);
+}
+
+.vscode-high-contrast.showEditorSelection .code-line .code-line:hover:before {
+	border-left: none;
+}
+
+img {
+	max-width: 100%;
+	max-height: 100%;
+}
+
+a {
+	text-decoration: none;
+}
+
+a:hover {
+	text-decoration: underline;
+}
+
+a:focus,
+input:focus,
+select:focus,
+textarea:focus {
+	outline: 1px solid -webkit-focus-ring-color;
+	outline-offset: -1px;
+}
+
+hr {
+	border: 0;
+	height: 2px;
+	border-bottom: 2px solid;
+}
+
+h1 {
+	padding-bottom: 0.3em;
+	line-height: 1.2;
+	border-bottom-width: 1px;
+	border-bottom-style: solid;
+}
+
+h1, h2, h3 {
+	font-weight: normal;
+}
+
+table {
+	border-collapse: collapse;
+}
+
+table > thead > tr > th {
+	text-align: left;
+	border-bottom: 1px solid;
+}
+
+table > thead > tr > th,
+table > thead > tr > td,
+table > tbody > tr > th,
+table > tbody > tr > td {
+	padding: 5px 10px;
+}
+
+table > tbody > tr + tr > td {
+	border-top: 1px solid;
+}
+
+blockquote {
+	margin: 0 7px 0 5px;
+	padding: 0 16px 0 10px;
+	border-left-width: 5px;
+	border-left-style: solid;
+}
+
+code {
+	font-family: Menlo, Monaco, Consolas, "Droid Sans Mono", "Courier New", monospace, "Droid Sans Fallback";
+	font-size: 1em;
+	line-height: 1.357em;
+}
+
+body.wordWrap pre {
+	white-space: pre-wrap;
+}
+
+pre:not(.hljs),
+pre.hljs code > div {
+	padding: 16px;
+	border-radius: 3px;
+	overflow: auto;
+}
+
+pre code {
+	color: var(--vscode-editor-foreground);
+	tab-size: 4;
+}
+
+/** Theming */
+
+.vscode-light pre {
+	background-color: rgba(220, 220, 220, 0.4);
+}
+
+.vscode-dark pre {
+	background-color: rgba(10, 10, 10, 0.4);
+}
+
+.vscode-high-contrast pre {
+	background-color: rgb(0, 0, 0);
+}
+
+.vscode-high-contrast h1 {
+	border-color: rgb(0, 0, 0);
+}
+
+.vscode-light table > thead > tr > th {
+	border-color: rgba(0, 0, 0, 0.69);
+}
+
+.vscode-dark table > thead > tr > th {
+	border-color: rgba(255, 255, 255, 0.69);
+}
+
+.vscode-light h1,
+.vscode-light hr,
+.vscode-light table > tbody > tr + tr > td {
+	border-color: rgba(0, 0, 0, 0.18);
+}
+
+.vscode-dark h1,
+.vscode-dark hr,
+.vscode-dark table > tbody > tr + tr > td {
+	border-color: rgba(255, 255, 255, 0.18);
+}
+
+</style>
+
+<style>
+/* Tomorrow Theme */
+/* http://jmblog.github.com/color-themes-for-google-code-highlightjs */
+/* Original theme - https://github.com/chriskempson/tomorrow-theme */
+
+/* Tomorrow Comment */
+.hljs-comment,
+.hljs-quote {
+	color: #8e908c;
+}
+
+/* Tomorrow Red */
+.hljs-variable,
+.hljs-template-variable,
+.hljs-tag,
+.hljs-name,
+.hljs-selector-id,
+.hljs-selector-class,
+.hljs-regexp,
+.hljs-deletion {
+	color: #c82829;
+}
+
+/* Tomorrow Orange */
+.hljs-number,
+.hljs-built_in,
+.hljs-builtin-name,
+.hljs-literal,
+.hljs-type,
+.hljs-params,
+.hljs-meta,
+.hljs-link {
+	color: #f5871f;
+}
+
+/* Tomorrow Yellow */
+.hljs-attribute {
+	color: #eab700;
+}
+
+/* Tomorrow Green */
+.hljs-string,
+.hljs-symbol,
+.hljs-bullet,
+.hljs-addition {
+	color: #718c00;
+}
+
+/* Tomorrow Blue */
+.hljs-title,
+.hljs-section {
+	color: #4271ae;
+}
+
+/* Tomorrow Purple */
+.hljs-keyword,
+.hljs-selector-tag {
+	color: #8959a8;
+}
+
+.hljs {
+	display: block;
+	overflow-x: auto;
+	color: #4d4d4c;
+	padding: 0.5em;
+}
+
+.hljs-emphasis {
+	font-style: italic;
+}
+
+.hljs-strong {
+	font-weight: bold;
+}
+</style>
+
+<style>
+/*
+ * Markdown PDF CSS
+ */
+
+ body {
+	font-family: -apple-system, BlinkMacSystemFont, "Segoe WPC", "Segoe UI", "Ubuntu", "Droid Sans", sans-serif, "Meiryo";
+	padding: 0 12px;
+}
+
+pre {
+	background-color: #f8f8f8;
+	border: 1px solid #cccccc;
+	border-radius: 3px;
+	overflow-x: auto;
+	white-space: pre-wrap;
+	overflow-wrap: break-word;
+}
+
+pre:not(.hljs) {
+	padding: 23px;
+	line-height: 19px;
+}
+
+blockquote {
+	background: rgba(127, 127, 127, 0.1);
+	border-color: rgba(0, 122, 204, 0.5);
+}
+
+.emoji {
+	height: 1.4em;
+}
+
+code {
+	font-size: 14px;
+	line-height: 19px;
+}
+
+/* for inline code */
+:not(pre):not(.hljs) > code {
+	color: #C9AE75; /* Change the old color so it seems less like an error */
+	font-size: inherit;
+}
+
+/* Page Break : use <div class="page"/> to insert page break
+-------------------------------------------------------- */
+.page {
+	page-break-after: always;
+}
+
+</style>
+
+<script src="https://unpkg.com/mermaid/dist/mermaid.min.js"></script>
+</head>
+<body>
+  <script>
+    mermaid.initialize({
+      startOnLoad: true,
+      theme: document.body.classList.contains('vscode-dark') || document.body.classList.contains('vscode-high-contrast')
+          ? 'dark'
+          : 'default'
+    });
+  </script>
+<h1 id="project-autonomy--listen--fix-launch">Project Autonomy — Listen &amp; Fix Launch</h1>
+<h2 id="meta-ads-growth-strategy">Meta Ads Growth Strategy</h2>
+<hr>
+<h2 id="step-1-campaign-structure--audience-targeting">Step 1: Campaign Structure &amp; Audience Targeting</h2>
+<h3 id="campaign-structure">Campaign Structure</h3>
+<ul>
+<li><strong>Objective:</strong> Lead Generation (Native Instant Forms). This minimizes friction for mobile users and keeps them on-platform where conversion rates are highest.</li>
+<li><strong>Budget Optimization:</strong> Advantage Campaign Budget (CBO) enabled to fluidly allocate spend across creative variations and audience segments based on real-time performance.</li>
+</ul>
+<h3 id="audience-targeting-strategy">Audience Targeting Strategy</h3>
+<ul>
+<li><strong>Location:</strong> Austin, TX (+15 miles)</li>
+</ul>
+<p><strong>Balancing Constraints:</strong> To balance the hyper-local constraint of 15 miles, we will deploy a two-ad-set structure targeting self-reliant Texans, &quot;Right to Repair&quot; advocates, hands-on homeowners, and anyone who feels a spike of anxiety when the &quot;Check Engine&quot; light comes on.</p>
+<table>
+<thead>
+<tr>
+<th>Ad Set</th>
+<th>Targeting</th>
+<th>Notes</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Ad Set 1 — Broad/Local</strong></td>
+<td>Location only</td>
+<td>Relies entirely on Meta's ML and highly specific creative to filter the right audience. Prevents rapid ad fatigue and high frequency caps in a small radius.</td>
+</tr>
+<tr>
+<td><strong>Ad Set 2 — Stacked Interests</strong></td>
+<td>Location + stacked interests</td>
+<td>Monitor frequency closely. If audience size falls below 250k, expand interests or shift budget entirely to Ad Set 1.</td>
+</tr>
+</tbody>
+</table>
+<h3 id="budget-pacing--placements">Budget Pacing &amp; Placements</h3>
+<ul>
+<li><strong>Placements:</strong> Advantage+ Placements, with creative specifically tailored for <strong>9:16</strong> (Reels/Stories) where local UGC performs best and CPMs are often more efficient.</li>
+</ul>
+<hr>
+<h2 id="step-2-creative--copy-execution">Step 2: Creative &amp; Copy Execution</h2>
+<h3 id="916-video-storyboard-0%E2%80%9315s">9:16 Video Storyboard (0–15s)</h3>
+<p><strong>Concept:</strong></p>
+<blockquote>
+<p><em>Visual:</em> Extreme close-up of a driver gripping the steering wheel. We hear an awful, rhythmic grinding sound from the engine.</p>
+<p><em>On-Screen Text:</em> &quot;That sinking feeling in your stomach...&quot;</p>
+<p><em>Audio (Internal Monologue):</em> &quot;Please not today. A tow is $200. The mechanic is going to invent three different things wrong with it. I don't have $1,000 for this.&quot;</p>
+<p><em>Action:</em> The driver takes a breath. Her expression shifts from panic to resolve. She opens Listen &amp; Fix, holds her phone near the dash. The screen glows <strong>Safety Cyan</strong>, analyzing the audio waves.</p>
+<p><em>The Reveal:</em> The AI identifies a loose heat shield. Cost to fix? <strong>$0.</strong> Time to fix? <strong>3 minutes.</strong> We see her tighten a bolt on the shoulder of the road. She slams the hood, wipes grease off her hand, and smiles. <strong>She just beat the system.</strong></p>
+</blockquote>
+<hr>
+<h4 id="0%E2%80%933s--the-hook"><code>0–3s</code> — THE HOOK</h4>
+<p>Fast-paced, native-looking intro in a recognizable Austin, TX spot. Text overlay calling out locals directly to stop the scroll.</p>
+<h4 id="3%E2%80%939s--value-prop"><code>3–9s</code> — VALUE PROP</h4>
+<p>Quick cuts showing the app in action. Voiceover:</p>
+<blockquote>
+<p><em>&quot;Modern car companies designed the 'Check Engine' light to make you feel stupid. They want you helpless, sitting in a waiting room, paying $150 just for a mechanic to plug in a scanner. Enough. We built Listen &amp; Fix because you have the right to know what's happening under your own hood. Our AI has listened to millions of broken engines so it can tell you <strong>exactly</strong> what that rattle, hum, or grind is. No more guessing. No more getting ripped off by the 'black box.' Let our AI diagnose the problem, guide you through the fix, and put the wrench back in your hands. Take your power back. Download for free today.&quot;</em></p>
+</blockquote>
+<h4 id="9%E2%80%9315s--the-offer--cta"><code>9–15s</code> — THE OFFER &amp; CTA</h4>
+<p>Clear visual of the offer: <strong>&quot;Join the Rebellion: Get your first 3 'Master Mechanic' AI Scans on us.&quot;</strong> On-screen arrow pointing down to the <strong>Sign Up</strong> button.</p>
+<hr>
+<h3 id="copy-variations">Copy Variations</h3>
+<h4 id="primary-text-1--direct--offer-led">Primary Text 1 — Direct &amp; Offer-Led</h4>
+<p>Hey Austin, TX! 👋 Modern car companies designed the &quot;Check Engine&quot; light to make you feel stupid — but not anymore. We built <strong>Listen &amp; Fix</strong> so you know exactly what that rattle, hum, or grind is. <strong>No more guessing. No more getting ripped off.</strong></p>
+<p>🎁 We're giving away <strong>3 free &quot;Master Mechanic&quot; AI Scans</strong> to local residents. Tap <strong>Sign Up</strong> to claim yours before they're gone!</p>
+<hr>
+<h4 id="primary-text-2--story-driven">Primary Text 2 — Story-Driven</h4>
+<p>That sinking feeling when the &quot;Check Engine&quot; light comes on? It doesn't have to end in a $1,000 repair bill. 📱</p>
+<p><strong>Listen &amp; Fix</strong> uses AI to diagnose your car — in seconds. Join the rebellion and claim your <strong>3 free AI scans</strong> today.</p>
+<hr>
+<h4 id="primary-text-3--urgency--niche">Primary Text 3 — Urgency &amp; Niche</h4>
+<p>📍 Austin, TX exclusive! We have a limited number of <strong>free &quot;Master Mechanic&quot; AI Scans</strong> available for self-reliant Texans who refuse to get ripped off at the shop.</p>
+<p>If you believe in your <strong>Right to Repair</strong>, this app is for you. 👇</p>
+<hr>
+<h3 id="local-authenticity-execution">Local Authenticity Execution</h3>
+<ul>
+<li>Use <strong>local landmarks</strong> in the first 3 seconds</li>
+<li>Mention <strong>Austin, TX</strong> explicitly in copy</li>
+<li>Use <strong>UGC creators</strong> with a genuine local accent/vibe</li>
+<li>Intentionally <strong>avoid overly polished studio lighting</strong> — ads must feel like native social content</li>
+</ul>
+<hr>
+<h2 id="step-3-meta-instant-form-design">Step 3: Meta Instant Form Design</h2>
+<h3 id="form-type-recommendation">Form Type Recommendation</h3>
+<p><strong>&quot;More Volume&quot;</strong> is recommended initially. Since the ultimate goal is an app download (which adds friction), capture lead information with minimal resistance first, then use the automated funnel to drive the download.</p>
+<h3 id="form-structure--fields">Form Structure &amp; Fields</h3>
+<ul>
+<li><strong>Intro Section:</strong> Use the winning ad creative as the background image</li>
+<li><strong>Headline:</strong> <em>&quot;Claim Your 3 Free Master Mechanic AI Scans&quot;</em></li>
+<li><strong>Paragraph:</strong> <em>&quot;Enter your details below to get your exclusive access link sent instantly.&quot;</em></li>
+</ul>
+<p><strong>Questions</strong> <em>(optimized for completion rate):</em></p>
+<ul>
+<li>First Name <em>(Auto-fill)</em></li>
+<li>Email <em>(Auto-fill)</em></li>
+<li>Phone Number <em>(Auto-fill — crucial for SMS delivery of the app link)</em></li>
+</ul>
+<p><strong>Privacy Policy:</strong> Link to company privacy policy.<br>
+<strong>Custom disclaimer:</strong> <em>&quot;By submitting, you agree to receive your offer via SMS/Email.&quot;</em></p>
+<hr>
+<h3 id="%E2%AD%90-completion-screen--critical-conversion-point">⭐ Completion Screen — Critical Conversion Point</h3>
+<table>
+<thead>
+<tr>
+<th>Field</th>
+<th>Content</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Headline</strong></td>
+<td>&quot;You're In! Step 2: Download to Claim.&quot;</td>
+</tr>
+<tr>
+<td><strong>Description</strong></td>
+<td>&quot;Your 3 free AI Scans are waiting inside the app. Tap the button below to download and activate now.&quot;</td>
+</tr>
+<tr>
+<td><strong>CTA Button</strong></td>
+<td>&quot;Download App Now&quot; → links to dynamic deep link (Branch.io / AppsFlyer OneLink → App Store / Google Play)</td>
+</tr>
+</tbody>
+</table>
+<hr>
+<h2 id="step-4-funnel-automation--attribution-workflow">Step 4: Funnel Automation &amp; Attribution Workflow</h2>
+<h3 id="technical-stack">Technical Stack</h3>
+<ol>
+<li>Meta Lead Form</li>
+<li>Zapier / Make.com</li>
+<li>CRM &amp; SMS <em>(e.g., Klaviyo / Twilio)</em></li>
+<li>MMP <em>(AppsFlyer / Adjust)</em></li>
+</ol>
+<h3 id="immediate-post-submission-sequence">Immediate Post-Submission Sequence</h3>
+<p>The moment a lead is captured, intent is at its peak. We trigger an immediate multi-channel sequence:</p>
+<table>
+<thead>
+<tr>
+<th>Timing</th>
+<th>Channel</th>
+<th>Message</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>T+0 min</strong></td>
+<td>SMS</td>
+<td><em>&quot;Hey [Name]! Here's your link to claim your 3 free AI Scans. Download: [Deferred Deep Link]. See you inside!&quot;</em></td>
+</tr>
+<tr>
+<td><strong>T+5 min</strong></td>
+<td>Email</td>
+<td><em>&quot;Welcome! Your free scans are ready — here's how to get started...&quot;</em> + QR code for desktop-to-mobile flow</td>
+</tr>
+<tr>
+<td><strong>T+24 hrs</strong></td>
+<td>SMS <em>(if no install tracked)</em></td>
+<td><em>&quot;Just a reminder — your free scans expire soon. Tap here to download and claim them.&quot;</em></td>
+</tr>
+</tbody>
+</table>
+<h3 id="bridging-the-attribution-gap">Bridging the Attribution Gap</h3>
+<p>We will use a <strong>Mobile Measurement Partner (MMP)</strong> to generate deferred deep links. When the user clicks the SMS link or the Completion Screen CTA:</p>
+<ol>
+<li>The MMP <strong>fingerprints the click</strong></li>
+<li>After app install + first open, the MMP <strong>matches the install to the click</strong></li>
+<li>Conversion data is passed back to Meta via <strong>Conversions API (CAPI)</strong> for offline conversion tracking and algorithm optimization</li>
+</ol>
+<hr>
+<h2 id="step-5-kpi-measurement--optimization-plan">Step 5: KPI Measurement &amp; Optimization Plan</h2>
+<h3 id="target-kpis">Target KPIs</h3>
+<table>
+<thead>
+<tr>
+<th>Metric</th>
+<th>Target</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Cost Per Install (CPI)</td>
+<td>&lt; $3.00</td>
+</tr>
+<tr>
+<td>Cost Per Acquisition (CPA)</td>
+<td>&lt; $5.00</td>
+</tr>
+<tr>
+<td><strong>True North</strong></td>
+<td>Users who successfully fix their own machine without calling a mechanic in <strong>week one</strong></td>
+</tr>
+</tbody>
+</table>
+<p>Tracked via <strong>Meta Ads Manager</strong> (CPL, Form Completion Rate) and <strong>MMP Dashboard</strong> (Install Rate, CPA, In-App Events).</p>
+<hr>
+<h3 id="troubleshooting-matrix">Troubleshooting Matrix</h3>
+<table>
+<thead>
+<tr>
+<th>Scenario</th>
+<th>Signal</th>
+<th>Action Plan</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Form Completion Rate &lt; 15%</strong></td>
+<td>Form is too long or intent is low</td>
+<td>Remove custom questions. Ensure ad creative clearly states a form submit is required to claim the offer. Test &quot;Higher Intent&quot; form type if lead quality is the issue.</td>
+</tr>
+<tr>
+<td><strong>CPL Spikes (Local Saturation)</strong></td>
+<td>Audience fatigue in Austin, TX</td>
+<td>Refresh creative immediately (new hooks, new angles). Broaden radius if possible. Shift budget to Broad Ad Set to let the algorithm find cheaper inventory pockets.</td>
+</tr>
+<tr>
+<td><strong>Low Lead-to-App-User Rate</strong></td>
+<td>Leads captured but not downloading</td>
+<td>Optimize Completion Screen CTA prominence. Improve SMS deliverability and copy urgency. Launch a retargeting campaign targeting &quot;Lead Form Submitters&quot; with a direct App Install objective.</td>
+</tr>
+</tbody>
+</table>
+
+</body>
+</html>

@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState, useRef, useEffect } from 'react';
-import { Play, Pause, Volume2 } from 'lucide-react';
+import { Play, Pause, Volume2, ListMusic, SkipForward } from 'lucide-react';
 
 const tracks = [
   { id: 1, name: "Segment I", file: "/audio/download (1).wav" },
@@ -17,9 +17,10 @@ function formatTime(seconds: number) {
   return `${mins}:${secs.toString().padStart(2, '0')}`;
 }
 
-const TrackCard = ({ track, isPlaying, onToggle, onEnded }: { 
+const TrackCard = ({ track, isPlaying, isQueued, onToggle, onEnded }: { 
   track: any, 
-  isPlaying: boolean, 
+  isPlaying: boolean,
+  isQueued: boolean,
   onToggle: () => void,
   onEnded: () => void 
 }) => {
@@ -32,9 +33,16 @@ const TrackCard = ({ track, isPlaying, onToggle, onEnded }: {
     if (!audio) return;
 
     if (isPlaying) {
+      audio.currentTime = 0;
       audio.play().catch(() => {});
     } else {
       audio.pause();
+      // Reset progress when not playing and not just paused
+      if (!isPlaying) {
+        setProgress(0);
+        setCurrentTime(0);
+        audio.currentTime = 0;
+      }
     }
   }, [isPlaying]);
 
@@ -48,35 +56,49 @@ const TrackCard = ({ track, isPlaying, onToggle, onEnded }: {
 
   return (
     <div 
-      className={`group bg-white/5 backdrop-blur-xl border transition-all duration-300 rounded-3xl p-6 hover:translate-y-[-4px] 
-        ${isPlaying ? 'border-indigo-500/50 shadow-2xl shadow-indigo-500/10' : 'border-white/10 hover:border-white/20'}`}
+      className={`group bg-white/5 backdrop-blur-xl border transition-all duration-300 rounded-3xl p-6 hover:translate-y-[-4px] relative overflow-hidden
+        ${isPlaying ? 'border-indigo-500/50 shadow-2xl shadow-indigo-500/10' : isQueued ? 'border-indigo-500/20 bg-indigo-900/10' : 'border-white/10 hover:border-white/20'}`}
     >
-      <div className="flex items-center justify-between mb-6">
-        <div className="text-xs font-mono text-slate-500">SEGMENT_0{track.id}</div>
-        <div className={`w-2 h-2 rounded-full ${isPlaying ? 'bg-indigo-500 animate-pulse' : 'bg-transparent'}`} />
-      </div>
+      {/* Queued indicator glow */}
+      {isQueued && !isPlaying && (
+        <div className="absolute inset-0 bg-indigo-600/5 pointer-events-none" />
+      )}
 
-      <h3 className="text-lg font-semibold mb-8 group-hover:text-indigo-300 transition-colors">{track.name}</h3>
-
-      <div className="space-y-4">
-        <div className="h-1.5 w-full bg-white/5 rounded-full overflow-hidden">
-          <div 
-            className="h-full bg-indigo-500 transition-all duration-100 ease-linear rounded-full"
-            style={{ width: `${progress}%` }}
-          />
+      <div className="relative z-10">
+        <div className="flex items-center justify-between mb-6">
+          <div className="text-xs font-mono text-slate-500">SEGMENT_0{track.id}</div>
+          <div className="flex items-center gap-2">
+            {isQueued && !isPlaying && (
+              <span className="text-[0.6rem] font-black text-indigo-400/60 uppercase tracking-widest">queued</span>
+            )}
+            <div className={`w-2 h-2 rounded-full ${isPlaying ? 'bg-indigo-500 animate-pulse' : 'bg-transparent'}`} />
+          </div>
         </div>
 
-        <div className="flex items-center justify-between">
-          <button 
-            onClick={onToggle}
-            className={`w-10 h-10 rounded-full flex items-center justify-center transition-all 
-              ${isPlaying ? 'bg-indigo-600' : 'bg-white/10 hover:bg-white/20'}`}
-            title={isPlaying ? 'Pause' : 'Play'}
-          >
-            {isPlaying ? <Pause className="w-4 h-4 fill-white" /> : <Play className="w-4 h-4 ml-0.5" />}
-          </button>
-          <div className="text-xs text-slate-500 font-mono">
-            {formatTime(currentTime)}
+        <h3 className={`text-lg font-semibold mb-8 transition-colors duration-300 ${isPlaying ? 'text-indigo-300' : 'group-hover:text-indigo-300'}`}>
+          {track.name}
+        </h3>
+
+        <div className="space-y-4">
+          <div className="h-1.5 w-full bg-white/5 rounded-full overflow-hidden">
+            <div 
+              className="h-full bg-indigo-500 transition-all duration-100 ease-linear rounded-full"
+              style={{ width: `${progress}%` }}
+            />
+          </div>
+
+          <div className="flex items-center justify-between">
+            <button 
+              onClick={onToggle}
+              className={`w-10 h-10 rounded-full flex items-center justify-center transition-all 
+                ${isPlaying ? 'bg-indigo-600' : 'bg-white/10 hover:bg-white/20'}`}
+              title={isPlaying ? 'Pause' : 'Play'}
+            >
+              {isPlaying ? <Pause className="w-4 h-4 fill-white" /> : <Play className="w-4 h-4 ml-0.5" />}
+            </button>
+            <div className="text-xs text-slate-500 font-mono">
+              {formatTime(currentTime)}
+            </div>
           </div>
         </div>
       </div>
@@ -95,6 +117,7 @@ export default function AudioStoryPage() {
   const [ambientPlaying, setAmbientPlaying] = useState(false);
   const [ambientVolume, setAmbientVolume] = useState(0.5);
   const [currentTrack, setCurrentTrack] = useState<number | null>(null);
+  const [continuousMode, setContinuousMode] = useState(false);
 
   const ambientRef = useRef<HTMLAudioElement>(null);
 
@@ -126,6 +149,46 @@ export default function AudioStoryPage() {
     }
   };
 
+  // Advance to next track in continuous mode, or stop if last
+  const handleTrackEnded = (id: number) => {
+    if (continuousMode) {
+      const currentIndex = tracks.findIndex(t => t.id === id);
+      const nextTrack = tracks[currentIndex + 1];
+      if (nextTrack) {
+        setCurrentTrack(nextTrack.id);
+        // ambient stays ducked — narration continues
+      } else {
+        // All done — restore ambient
+        setCurrentTrack(null);
+        duckAmbient(false);
+        setContinuousMode(false);
+      }
+    } else {
+      setCurrentTrack(null);
+      duckAmbient(false);
+    }
+  };
+
+  // "Play All" — start ambient, enable continuous mode, play from segment I
+  const handlePlayAll = () => {
+    if (ambientRef.current && !ambientPlaying) {
+      ambientRef.current.play();
+      setAmbientPlaying(true);
+    }
+    setContinuousMode(true);
+    setCurrentTrack(tracks[0].id);
+    duckAmbient(true);
+  };
+
+  // Stop everything
+  const handleStop = () => {
+    setCurrentTrack(null);
+    setContinuousMode(false);
+    duckAmbient(false);
+  };
+
+  const isRunning = continuousMode && currentTrack !== null;
+
   return (
     <div className="min-h-screen bg-[#0c1015] text-slate-100 font-sans selection:bg-indigo-500 selection:text-white">
       {/* Background Gradients */}
@@ -145,7 +208,7 @@ export default function AudioStoryPage() {
         </header>
 
         {/* Ambient Layer Panel */}
-        <section className="mb-12">
+        <section className="mb-6">
           <div className="bg-white/5 backdrop-blur-2xl border border-white/10 rounded-3xl p-8 shadow-2xl flex flex-col md:flex-row items-center gap-8">
             <button 
               onClick={toggleAmbient}
@@ -181,6 +244,64 @@ export default function AudioStoryPage() {
           </div>
         </section>
 
+        {/* Continuous Play Toolbar */}
+        <section className="mb-12">
+          <div className={`rounded-2xl border px-6 py-4 flex flex-col sm:flex-row items-center gap-4 transition-all duration-500 ${isRunning ? 'bg-indigo-950/40 border-indigo-500/30 shadow-lg shadow-indigo-900/20' : 'bg-white/3 border-white/8'}`}>
+            <div className="flex items-center gap-3 flex-1">
+              <ListMusic className={`w-5 h-5 ${isRunning ? 'text-indigo-400' : 'text-slate-600'}`} />
+              <div>
+                <div className={`text-sm font-semibold ${isRunning ? 'text-indigo-300' : 'text-slate-400'}`}>
+                  {isRunning
+                    ? `Playing all segments continuously — now on ${tracks.find(t => t.id === currentTrack)?.name}`
+                    : 'Continuous Play'}
+                </div>
+                <div className="text-xs text-slate-600 mt-0.5">
+                  Auto-advances through all segments with background music
+                </div>
+              </div>
+            </div>
+
+            <div className="flex items-center gap-3">
+              {isRunning && (
+                <>
+                  {/* Skip to next */}
+                  <button
+                    onClick={() => {
+                      const currentIndex = tracks.findIndex(t => t.id === currentTrack);
+                      const next = tracks[currentIndex + 1];
+                      if (next) setCurrentTrack(next.id);
+                      else handleStop();
+                    }}
+                    className="flex items-center gap-1.5 text-xs font-semibold text-slate-400 hover:text-indigo-300 border border-white/10 hover:border-indigo-500/30 px-3 py-2 rounded-xl transition-all"
+                    title="Skip to next segment"
+                  >
+                    <SkipForward className="w-3.5 h-3.5" /> Skip
+                  </button>
+                  {/* Stop */}
+                  <button
+                    onClick={handleStop}
+                    className="flex items-center gap-1.5 text-xs font-semibold text-slate-400 hover:text-red-400 border border-white/10 hover:border-red-500/30 px-3 py-2 rounded-xl transition-all"
+                    title="Stop continuous play"
+                  >
+                    Stop
+                  </button>
+                </>
+              )}
+
+              {!isRunning && (
+                <button
+                  onClick={handlePlayAll}
+                  className="flex items-center gap-2 text-sm font-bold text-white bg-indigo-600 hover:bg-indigo-500 px-5 py-2.5 rounded-xl transition-all hover:scale-105 active:scale-95 shadow-md shadow-indigo-600/30"
+                  title="Play all segments with background music"
+                >
+                  <Play className="w-4 h-4 fill-white" />
+                  Play All
+                </button>
+              )}
+            </div>
+          </div>
+        </section>
+
         {/* Narrative Grid */}
         <section className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {tracks.map((track) => (
@@ -188,11 +309,9 @@ export default function AudioStoryPage() {
               key={track.id}
               track={track}
               isPlaying={currentTrack === track.id}
+              isQueued={continuousMode && currentTrack !== null && track.id > (currentTrack ?? 0)}
               onToggle={() => handleToggleTrack(track.id)}
-              onEnded={() => {
-                setCurrentTrack(null);
-                duckAmbient(false);
-              }}
+              onEnded={() => handleTrackEnded(track.id)}
             />
           ))}
         </section>
@@ -207,8 +326,7 @@ export default function AudioStoryPage() {
 
       <audio 
         ref={ambientRef}
-        loop
-        src="/audio/Modern Anxiety to High-Tech Capability..mp3"
+        src="/audio/background3.mp3" // Modern Anxiety to High-Tech Capability..mp3"
       />
     </div>
   );

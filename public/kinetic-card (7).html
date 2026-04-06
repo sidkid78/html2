@@ -1,0 +1,238 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Digital Foreman - Unfair Advantage</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Anton&family=Inter:wght@300;400;700;900&display=swap');
+
+        :root {
+            --orange: #f97316;
+            --bg-dark: #09090b;
+        }
+
+        body, html {
+            margin: 0;
+            padding: 0;
+            background-color: var(--bg-dark);
+            color: white;
+            font-family: 'Inter', sans-serif;
+            overscroll-behavior-x: none;
+        }
+
+        .font-anton {
+            font-family: 'Anton', sans-serif;
+        }
+
+        /* Hide Scrollbar but keep functionality */
+        .hide-scrollbar::-webkit-scrollbar {
+            display: none;
+        }
+        .hide-scrollbar {
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+        }
+
+        /* Typography Scaling */
+        .hero-text {
+            font-size: clamp(2.5rem, 6vw + 1rem, 7rem);
+            line-height: 0.9;
+            text-transform: uppercase;
+        }
+        .body-text {
+            font-size: clamp(1.125rem, 2vw + 0.5rem, 2rem);
+            line-height: 1.4;
+        }
+
+        /* Animation Primitives */
+        .reveal {
+            opacity: 0;
+            transform: translateY(30px) rotate(-1deg);
+            transition: opacity 0.8s cubic-bezier(0.19, 1, 0.22, 1), 
+                        transform 0.8s cubic-bezier(0.19, 1, 0.22, 1);
+            will-change: transform, opacity;
+        }
+        .reveal.active {
+            opacity: 1;
+            transform: translateY(0) rotate(0);
+        }
+
+        .bg-zoom {
+            transition: transform 12s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+            will-change: transform;
+        }
+        .panel.is-active .bg-zoom {
+            transform: scale(1.08);
+        }
+
+        /* Custom Selection */
+        ::selection {
+            background: var(--orange);
+            color: white;
+        }
+    </style>
+</head>
+<body class="overflow-hidden">
+
+    <!-- Animated Grain Filter Layer -->
+    <svg class="fixed inset-0 pointer-events-none z-50 w-full h-full opacity-[0.12] mix-blend-screen">
+        <filter id="noise">
+            <feTurbulence type="fractalNoise" baseFrequency="0.7" numOctaves="3" stitchTiles="stitch">
+                <animate attributeName="seed" from="0" to="10" dur="1s" repeatCount="indefinite" />
+            </feTurbulence>
+            <feColorMatrix type="saturate" values="0" />
+        </filter>
+        <rect width="100%" height="100%" filter="url(#noise)"></rect>
+    </svg>
+
+    <!-- Persistent UI Navigation / Metadata -->
+    <div class="fixed top-6 right-6 md:top-10 md:right-10 z-40 font-anton text-2xl tracking-widest text-zinc-500 mix-blend-difference">
+        <span id="counter-current" class="text-white">01</span><span class="text-zinc-600">/04</span>
+    </div>
+    <div class="fixed bottom-6 left-6 md:bottom-10 md:left-10 z-40 font-inter font-bold text-xs tracking-[0.3em] uppercase text-zinc-500 flex items-center gap-4">
+        <div class="w-12 h-[1px] bg-zinc-500"></div>
+        Swipe or Scroll Right
+    </div>
+
+    <!-- Carousel Container -->
+    <main class="flex overflow-x-auto snap-x snap-mandatory h-screen w-full hide-scrollbar">
+
+        <!-- Panel 01: The Problem -->
+        <section class="panel flex-none w-screen h-screen snap-start relative flex flex-col justify-end p-6 pb-32 md:p-16 md:pb-32 lg:p-24">
+            <div class="absolute inset-0 z-0 overflow-hidden bg-black">
+                <img src="./images/scene1(3).jpg" alt="Hot day in Texas" class="bg-zoom w-full h-full object-cover opacity-60 grayscale-[30%]" />
+                <div class="absolute inset-0 bg-gradient-to-t from-zinc-950 via-zinc-950/80 to-transparent"></div>
+                <div class="absolute inset-0 bg-gradient-to-r from-zinc-950/90 w-2/3"></div>
+            </div>
+            
+            <div class="relative z-10 max-w-5xl">
+                <h1 class="hero-text font-anton text-zinc-200 mb-6 md:mb-10 reveal">
+                    It’s <span class="text-orange-500">100 degrees</span> in Bell County, your AC just died, and you know exactly what happens next.
+                </h1>
+                <p class="body-text font-inter font-light text-zinc-400 max-w-3xl reveal">
+                    You’ll wait three days for a guy in a van to show up, charge you a <span class="text-white font-bold">$150 'dispatch fee,'</span> and quote you <span class="text-white font-bold">$1,200</span> for a <span class="text-white font-bold">$45</span> part.
+                </p>
+            </div>
+        </section>
+
+        <!-- Panel 02: The Revelation -->
+        <section class="panel flex-none w-screen h-screen snap-start relative flex flex-col justify-center p-6 md:p-16 lg:p-24">
+            <div class="absolute inset-0 z-0 overflow-hidden bg-black">
+                <img src="./images/scene2(3).jpg" alt="Greasy hands holding phone with app" class="bg-zoom w-full h-full object-cover opacity-50" />
+                <div class="absolute inset-0 bg-zinc-950/70 mix-blend-multiply"></div>
+            </div>
+
+            <div class="relative z-10 max-w-4xl">
+                <p class="body-text font-inter font-light text-zinc-400 mb-8 reveal">
+                    The repair industry profits off keeping you in the dark. It’s time to take your power back.
+                </p>
+                <h2 class="hero-text font-anton text-white reveal">
+                    Meet <span class="text-orange-500 block">Listen & Fix.</span>
+                </h2>
+                <p class="body-text font-inter font-medium text-zinc-300 mt-8 border-l-4 border-orange-500 pl-6 reveal">
+                    It’s not just a repair guide; it’s your unfair advantage.
+                </p>
+            </div>
+        </section>
+
+        <!-- Panel 03: The Mechanics -->
+        <section class="panel flex-none w-screen h-screen snap-start relative flex flex-col justify-end p-6 pb-32 md:p-16 md:pb-32 lg:p-24">
+            <div class="absolute inset-0 z-0 overflow-hidden bg-black">
+                <img src="./images/scene3(3).jpg" alt="App diagram and Home Depot aisle" class="bg-zoom w-full h-full object-cover opacity-40" />
+                <div class="absolute inset-0 bg-gradient-to-t from-zinc-950 via-zinc-950/90 to-zinc-950/30"></div>
+            </div>
+
+            <div class="relative z-10 max-w-6xl">
+                <h2 class="hero-text font-anton text-zinc-200 reveal">
+                    We pinpoint exactly what’s broken, walk you through the fix step-by-step, and tell you exactly which aisle at the Killeen Home Depot has the part in stock right now.
+                </h2>
+                <div class="mt-12 flex flex-col gap-2 reveal">
+                    <p class="font-anton text-3xl md:text-5xl text-orange-500 uppercase tracking-wide">No more guessing.</p>
+                    <p class="font-anton text-3xl md:text-5xl text-orange-500 uppercase tracking-wide">No more getting ripped off.</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Panel 04: The Resolution & CTA -->
+        <section class="panel flex-none w-screen h-screen snap-start relative flex flex-col justify-center p-6 md:p-16 lg:p-24">
+            <div class="absolute inset-0 z-0 overflow-hidden bg-black">
+                <img src="./images/scene4(3).jpg" alt="Empowered homeowner in garage" class="bg-zoom w-full h-full object-cover opacity-60" />
+                <div class="absolute inset-0 bg-gradient-to-r from-zinc-950 via-zinc-950/80 to-transparent"></div>
+            </div>
+
+            <div class="relative z-10 max-w-4xl">
+                <h2 class="hero-text font-anton text-white reveal">
+                    Stop paying people to do what you’re entirely capable of doing yourself.
+                </h2>
+                <p class="body-text font-inter font-bold text-zinc-300 mt-6 reveal">
+                    Grab your tools. We've got your back.
+                </p>
+                
+                <div class="mt-16 reveal">
+                    <a href="#" class="group relative inline-flex items-center justify-center bg-orange-600 px-8 py-5 md:px-12 md:py-6 overflow-hidden transition-all hover:bg-orange-500">
+                        <div class="absolute inset-0 w-0 bg-white transition-all duration-[250ms] ease-out group-hover:w-full opacity-10"></div>
+                        <span class="relative font-anton text-2xl md:text-4xl uppercase tracking-wider text-white">
+                            Reclaim Your Garage
+                        </span>
+                        <span class="relative ml-4 font-inter font-bold text-sm md:text-base text-orange-200 uppercase tracking-widest">
+                            [Download Free]
+                        </span>
+                    </a>
+                </div>
+
+                <div class="mt-16 flex flex-wrap gap-4 md:gap-8 font-inter text-xs md:text-sm font-bold text-zinc-500 uppercase tracking-[0.2em] reveal">
+                    <span>#RightToRepair</span>
+                    <span>#SelfReliant</span>
+                    <span>#KilleenTX</span>
+                    <span>#TexasBuilt</span>
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const panels = document.querySelectorAll('.panel');
+            const counter = document.getElementById('counter-current');
+            
+            // Intersection Observer for scroll triggers and counter updates
+            const observerOptions = {
+                root: document.querySelector('main'),
+                rootMargin: '0px',
+                threshold: 0.6 // Trigger when 60% of the panel is visible
+            };
+
+            const observer = new IntersectionObserver((entries) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        // Mark panel as active for background zoom
+                        entry.target.classList.add('is-active');
+                        
+                        // Update numerical counter
+                        const index = Array.from(panels).indexOf(entry.target) + 1;
+                        counter.textContent = '0' + index;
+
+                        // Trigger staggered typography reveals
+                        const reveals = entry.target.querySelectorAll('.reveal');
+                        reveals.forEach((el, i) => {
+                            setTimeout(() => {
+                                el.classList.add('active');
+                            }, i * 180 + 100); // 180ms stagger, 100ms initial delay
+                        });
+                    } else {
+                        // Remove active state when out of view
+                        entry.target.classList.remove('is-active');
+                        const reveals = entry.target.querySelectorAll('.reveal');
+                        reveals.forEach(el => el.classList.remove('active'));
+                    }
+                });
+            }, observerOptions);
+
+            panels.forEach(panel => observer.observe(panel));
+        });
+    </script>
+</body>
+</html>

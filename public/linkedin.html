@@ -1,0 +1,600 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Listen & Fix - Dynamic JIT RAG</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500&family=JetBrains+Mono:wght@400;700&family=Space+Grotesk:wght@500;700&display=swap');
+
+    :root {
+      --bg: #050506;
+      --text-main: #e2e8f0;
+      --text-muted: #8a94a6;
+      --accent-cyan: #00f0ff;
+      --accent-red: #ff3300;
+      --grid-color: rgba(255, 255, 255, 0.04);
+
+      --font-hero: 'Space Grotesk', sans-serif;
+      --font-body: 'Inter', sans-serif;
+      --font-mono: 'JetBrains Mono', monospace;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      cursor: none !important;
+    }
+
+    body {
+      background-color: var(--bg);
+      color: var(--text-main);
+      font-family: var(--font-body);
+      overflow: hidden;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    /* Global Noise Overlay */
+    .noise-layer {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
+      pointer-events: none;
+      z-index: 999;
+      opacity: 0.4;
+      mix-blend-mode: overlay;
+    }
+
+    /* Custom Cursor */
+    #cursor {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 20px;
+      height: 20px;
+      border: 1px solid var(--accent-cyan);
+      border-radius: 50%;
+      transform: translate(-50%, -50%);
+      pointer-events: none;
+      z-index: 10000;
+      mix-blend-mode: difference;
+      transition: width 0.2s, height 0.2s, background-color 0.2s;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    #cursor::after {
+      content: '';
+      width: 4px;
+      height: 4px;
+      background: var(--accent-red);
+      border-radius: 50%;
+    }
+
+    /* Background Grid */
+    .tech-grid {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
+      background-image:
+        linear-gradient(var(--grid-color) 1px, transparent 1px),
+        linear-gradient(90deg, var(--grid-color) 1px, transparent 1px);
+      background-size: 40px 40px;
+      z-index: 0;
+      pointer-events: none;
+    }
+
+    /* Progress Terminal Bar */
+    .terminal-bar {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      width: 100vw;
+      height: 40px;
+      background: #000;
+      border-top: 1px solid #222;
+      z-index: 50;
+      display: flex;
+      align-items: center;
+      padding: 0 24px;
+      font-family: var(--font-mono);
+      font-size: 0.75rem;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+
+    .terminal-bar .status {
+      color: var(--accent-cyan);
+      margin-right: auto;
+    }
+
+    .terminal-bar .progress-text {
+      margin-left: 24px;
+    }
+
+    .progress-track {
+      width: 150px;
+      height: 4px;
+      background: #222;
+      margin-left: 16px;
+      position: relative;
+    }
+
+    .progress-fill {
+      position: absolute;
+      top: 0;
+      left: 0;
+      height: 100%;
+      background: var(--accent-cyan);
+      width: 0%;
+      transition: width 0.3s ease;
+    }
+
+    /* Carousel Layout */
+    .carousel {
+      display: flex;
+      width: 100vw;
+      height: 100vh;
+      overflow-x: scroll;
+      overflow-y: hidden;
+      scroll-snap-type: x mandatory;
+      scrollbar-width: none;
+      -ms-overflow-style: none;
+      filter: url(#scroll-blur);
+    }
+
+    .carousel::-webkit-scrollbar {
+      display: none;
+    }
+
+    .panel {
+      flex: 0 0 100vw;
+      width: 100vw;
+      height: 100vh;
+      scroll-snap-align: start;
+      position: relative;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      z-index: 1;
+      padding-bottom: 40px;
+      /* offset for terminal bar */
+    }
+
+    /* Image / Media Half */
+    .panel-media {
+      position: relative;
+      height: 100%;
+      border-right: 1px solid #222;
+      overflow: hidden;
+    }
+
+    .media-layer {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-size: cover;
+      background-position: center;
+      filter: grayscale(100%) contrast(1.2);
+      transition: transform 1.2s cubic-bezier(0.16, 1, 0.3, 1), filter 1.2s ease;
+      transform: scale(1.05);
+    }
+
+    .panel.is-active .media-layer {
+      transform: scale(1);
+      filter: grayscale(20%) contrast(1.1) sepia(20%) hue-rotate(180deg);
+    }
+
+    .panel-media::after {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(to bottom, rgba(0, 0, 0, 0) 50%, rgba(0, 0, 0, 0.25) 50%);
+      background-size: 100% 4px;
+      pointer-events: none;
+    }
+
+    .media-overlay {
+      position: absolute;
+      inset: 0;
+      box-shadow: inset 0 0 100px rgba(0, 0, 0, 0.9);
+      pointer-events: none;
+    }
+
+    .media-label {
+      position: absolute;
+      top: 24px;
+      left: 24px;
+      background: rgba(0, 0, 0, 0.8);
+      border: 1px solid var(--accent-cyan);
+      padding: 4px 8px;
+      font-family: var(--font-mono);
+      font-size: 0.65rem;
+      color: var(--accent-cyan);
+      text-transform: uppercase;
+      letter-spacing: 2px;
+    }
+
+    /* Text Half */
+    .panel-content {
+      position: relative;
+      height: 100%;
+      padding: 8vh 4vw 8vh 4vw;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      overflow-y: auto;
+      scrollbar-width: none;
+    }
+
+    .panel-content::-webkit-scrollbar {
+      display: none;
+    }
+
+    /* Typography */
+    .label {
+      font-family: var(--font-mono);
+      font-size: 0.75rem;
+      color: var(--accent-red);
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      margin-bottom: 2rem;
+      display: inline-block;
+      border-bottom: 1px solid var(--accent-red);
+      padding-bottom: 4px;
+    }
+
+    h1 {
+      font-family: var(--font-hero);
+      font-size: clamp(2rem, 3.5vw, 4rem);
+      line-height: 1.05;
+      font-weight: 700;
+      margin-bottom: 1.5rem;
+      color: #fff;
+      letter-spacing: -0.02em;
+    }
+
+    h2 {
+      font-family: var(--font-hero);
+      font-size: clamp(1.25rem, 2vw, 2rem);
+      line-height: 1.2;
+      font-weight: 500;
+      margin-top: 2rem;
+      margin-bottom: 1rem;
+      color: #fff;
+    }
+
+    p {
+      font-size: clamp(0.9rem, 1.1vw, 1.125rem);
+      line-height: 1.6;
+      margin-bottom: 1.25rem;
+      color: var(--text-muted);
+      max-width: 65ch;
+    }
+
+    /* Highlighted Data Fragments */
+    .data-hl {
+      font-family: var(--font-mono);
+      color: var(--accent-cyan);
+      font-weight: 700;
+      background: rgba(0, 240, 255, 0.1);
+      padding: 0 4px;
+      border-radius: 2px;
+    }
+
+    a.cta-link {
+      display: inline-block;
+      margin-top: 2rem;
+      padding: 1rem 2rem;
+      border: 1px solid var(--accent-cyan);
+      color: var(--accent-cyan);
+      text-decoration: none;
+      font-family: var(--font-mono);
+      font-size: 0.875rem;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      transition: all 0.3s ease;
+      background: rgba(0, 240, 255, 0.05);
+    }
+
+    a.cta-link:hover {
+      background: var(--accent-cyan);
+      color: #000;
+    }
+
+    /* Animation Classes */
+    .reveal {
+      opacity: 0;
+      transform: translateY(20px);
+      transition: opacity 0.8s cubic-bezier(0.16, 1, 0.3, 1), transform 0.8s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    .panel.is-active .reveal {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    .delay-1 {
+      transition-delay: 0.1s;
+    }
+
+    .delay-2 {
+      transition-delay: 0.2s;
+    }
+
+    .delay-3 {
+      transition-delay: 0.3s;
+    }
+
+    .delay-4 {
+      transition-delay: 0.4s;
+    }
+
+    .delay-5 {
+      transition-delay: 0.5s;
+    }
+
+    /* Responsive */
+    @media (max-width: 900px) {
+      .panel {
+        grid-template-columns: 1fr;
+        grid-template-rows: 40vh 1fr;
+      }
+
+      .panel-media {
+        border-right: none;
+        border-bottom: 1px solid #222;
+      }
+
+      .panel-content {
+        padding: 2rem 1.5rem;
+        justify-content: flex-start;
+      }
+    }
+  </style>
+</head>
+
+<body>
+
+  <!-- SVG Filters -->
+  <svg style="width:0;height:0;position:absolute;">
+    <filter id="noise">
+      <feTurbulence type="fractalNoise" baseFrequency="0.8" numOctaves="3" stitchTiles="stitch">
+        <animate attributeName="baseFrequency" values="0.8;0.82;0.8" dur="0.2s" repeatCount="indefinite" />
+      </feTurbulence>
+      <feColorMatrix type="matrix" values="1 0 0 0 0, 0 1 0 0 0, 0 0 1 0 0, 0 0 0 0.08 0" />
+    </filter>
+    <filter id="scroll-blur" x="-20%" y="-20%" width="140%" height="140%">
+      <feGaussianBlur id="dynamic-blur" in="SourceGraphic" stdDeviation="0,0" />
+    </filter>
+  </svg>
+
+  <div class="noise-layer" style="filter: url(#noise);"></div>
+  <div class="tech-grid"></div>
+  <div id="cursor"></div>
+
+  <div class="terminal-bar">
+    <div class="status">[ SYS.OP: ACTIVE ] // DIAGNOSTIC MODE</div>
+    <div class="progress-text" id="panel-counter">01 / 05</div>
+    <div class="progress-track">
+      <div class="progress-fill" id="progress-fill"></div>
+    </div>
+  </div>
+
+  <main class="carousel" id="carousel">
+
+    <!-- PANEL 1 -->
+    <section class="panel">
+      <div class="panel-media">
+        <div class="media-layer" style="background-image: url('./images/scene1(4).jpg');"></div>
+        <div class="media-overlay"></div>
+        <div class="media-label">CAM_01 // ANOMALY DETECTED</div>
+      </div>
+      <div class="panel-content">
+        <div class="label reveal">RAG Architecture Article (Long-Form Content)</div>
+        <h1 class="reveal delay-1">Beyond the Guesswork: How Dynamic JIT RAG Eliminates AI Hallucinations in High-Stakes
+          Mechanical Diagnostics</h1>
+        <p class="reveal delay-2">In the realm of mechanical repair and industrial maintenance, the cost of a confident
+          but incorrect answer—an AI hallucination—is measured in catastrophic equipment failure, extended downtime, and
+          severe safety risks. Traditional Large Language Models (LLMs) operate on static training data. When asked to
+          diagnose a complex, anomalous engine noise or a visual schematic irregularity, they often interpolate blindly,
+          delivering plausible but technically disastrous advice.</p>
+        <p class="reveal delay-3">At Listen & Fix DIY Assistant, we knew that building "The Digital Foreman"—a system
+          designed to be the "Shazam for Engines & Appliances"—required fundamentally abandoning the traditional LLM
+          reliance on parametric memory. For DIY enthusiasts, professional technicians, and industrial operators to
+          trust an AI, the intelligence must act as a high-end, calibrated instrument.</p>
+        <p class="reveal delay-4">Here is how our Dynamic Just-In-Time Retrieval-Augmented Generation (JIT RAG) pipeline
+          establishes a new standard for precision in 2026, operating with <span class="data-hl">99.8% to 99.9%</span>
+          accuracy.</p>
+        <h2 class="reveal delay-5">The Problem with Static LLMs in the Workshop</h2>
+        <p class="reveal delay-5">Standard LLMs fail in mechanical diagnostics because they cannot decouple signal from
+          noise. They lack access to granular, machine-specific service bulletins, and they cannot reason across
+          multiple discrete technical steps without losing context. If an operator in a noisy manufacturing plant
+          uploads an audio clip of a failing bearing, a standard LLM will likely offer a generalized, unverified guess.
+        </p>
+      </div>
+    </section>
+
+    <!-- PANEL 2 -->
+    <section class="panel">
+      <div class="panel-media">
+        <div class="media-layer" style="background-image: url('./images/scene2(4).jpg');"></div>
+        <div class="media-overlay"></div>
+        <div class="media-label">CAM_02 // AUDIO TELEMETRY</div>
+      </div>
+      <div class="panel-content">
+        <h2 class="reveal">The Listen & Fix Infrastructure: A 2026 RAG Paradigm</h2>
+        <p class="reveal delay-1">To bridge the gap between noticing a problem and executing an industrial-grade repair,
+          our architecture relies on a highly specialized multimodal intake and dynamic RAG pipeline.</p>
+        <h1 class="reveal delay-2">1. Multimodal Intake and Noise Decoupling</h1>
+        <p class="reveal delay-3">When a user uploads audio, video, or imagery of a failing asset, our core multimodal
+          intelligence engine processes the request with an astonishing latency of just <span
+            class="data-hl">0.02ms</span>. The system is engineered to decouple mechanical anomalies from ambient
+          interference—isolating the exact frequency of a rod knock from the background hum of a busy shop floor with
+          <span class="data-hl">99.9%</span> precision.
+        </p>
+      </div>
+    </section>
+
+    <!-- PANEL 3 -->
+    <section class="panel">
+      <div class="panel-media">
+        <div class="media-layer" style="background-image: url('./images/scene3(4).jpg');"></div>
+        <div class="media-overlay"></div>
+        <div class="media-label">CAM_03 // DATA INGESTION</div>
+      </div>
+      <div class="panel-content">
+        <div class="label reveal">INFRASTRUCTURE LAYER</div>
+        <h1 class="reveal delay-1">2. Dynamic Just-In-Time RAG Pipeline</h1>
+        <p class="reveal delay-2">Instead of relying on pre-trained memory, the engine triggers a Just-In-Time (JIT) RAG
+          pipeline based on the specific equipment metadata detected. The system automatically crawls OEM repositories,
+          cleans the data by stripping out navigational bloat and advertisements, and ingests hyper-relevant technical
+          documentation and service bulletins in real-time.</p>
+      </div>
+    </section>
+
+    <!-- PANEL 4 -->
+    <section class="panel">
+      <div class="panel-media">
+        <div class="media-layer" style="background-image: url('./images/scene4(4).jpg');"></div>
+        <div class="media-overlay"></div>
+        <div class="media-label">CAM_04 // VECTOR SPACE</div>
+      </div>
+      <div class="panel-content">
+        <div class="label reveal">RETRIEVAL SYSTEM</div>
+        <h1 class="reveal delay-1">3. Advanced Vector Embeddings & Multi-Chunk Reasoning</h1>
+        <p class="reveal delay-2">Once the documentation is ingested, our retrieval system utilizes
+          gemini-embedding-2-preview to generate highly optimized, <span class="data-hl">1536-dimensional</span>
+          vectors. To ensure zero loss of context during cosine similarity searches, we chunk the technical documents at
+          exactly <span class="data-hl">1,000</span> characters with a <span class="data-hl">200-character</span>
+          overlap.</p>
+        <p class="reveal delay-3">This overlapping multi-chunk reasoning is critical. Mechanical instructions are
+          sequential. By preserving the <span class="data-hl">200-character</span> context window across chunks, the AI
+          understands that step 4 is dependent on step 3.</p>
+      </div>
+    </section>
+
+    <!-- PANEL 5 -->
+    <section class="panel">
+      <div class="panel-media">
+        <div class="media-layer" style="background-image: url('./images/scene5(3).jpg');"></div>
+        <div class="media-overlay"></div>
+        <div class="media-label">CAM_05 // RESOLUTION MAP</div>
+      </div>
+      <div class="panel-content">
+        <div class="label reveal">SYNTHESIS ENGINE</div>
+        <h1 class="reveal delay-1">4. The 40-Million-Node Ground Truth</h1>
+        <p class="reveal delay-2">Finally, through advanced query reformulation, the system cross-references these
+          specific retrieved documents against our <span class="data-hl">40-Million-Node</span> failure database. The AI
+          compares the multimodal audio/visual input against confirmed historical anomalies to pinpoint the exact
+          failure.</p>
+        <h2 class="reveal delay-3">The result?</h2>
+        <p class="reveal delay-4">The system does not guess. It retrieves, verifies, and synthesizes, outputting an
+          industrial-grade repair map via a highly readable technical editorial interface.</p>
+        <p class="reveal delay-5">It is time to Master Your Mechanical World. Experience the precision of the Digital
+          Foreman today:</p>
+        <div class="reveal delay-5">
+          <a href="https://asset-manager--chriskoehne.replit.app/" target="_blank" class="cta-link">Initialize Digital
+            Foreman_</a>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      const carousel = document.getElementById('carousel');
+      const panels = document.querySelectorAll('.panel');
+      const counterText = document.getElementById('panel-counter');
+      const progressFill = document.getElementById('progress-fill');
+      const blurFilter = document.getElementById('dynamic-blur');
+
+      // Custom Cursor tracking
+      const cursor = document.getElementById('cursor');
+      document.addEventListener('mousemove', (e) => {
+        cursor.style.left = e.clientX + 'px';
+        cursor.style.top = e.clientY + 'px';
+      });
+
+      // Translate Vertical Wheel to Horizontal Scroll (Snap Chapter by Chapter)
+      let isWheeling = false;
+      carousel.addEventListener('wheel', (e) => {
+        e.preventDefault();
+        if (isWheeling) return;
+        isWheeling = true;
+
+        const direction = e.deltaY > 0 ? 1 : -1;
+        carousel.scrollBy({
+          left: direction * window.innerWidth,
+          behavior: 'smooth'
+        });
+
+        setTimeout(() => {
+          isWheeling = false;
+        }, 800); // Wait for snap animation to finish
+      }, { passive: false });
+
+      // Dynamic Motion Blur on Scroll
+      let isScrolling;
+      let lastScroll = carousel.scrollLeft;
+
+      carousel.addEventListener('scroll', () => {
+        const currentScroll = carousel.scrollLeft;
+        const diff = Math.abs(currentScroll - lastScroll);
+        // Map velocity to blur (max 12px)
+        const blurValue = Math.min(diff * 0.15, 12);
+
+        blurFilter.setAttribute('stdDeviation', `${blurValue},0`);
+        lastScroll = currentScroll;
+
+        window.clearTimeout(isScrolling);
+        isScrolling = setTimeout(() => {
+          blurFilter.setAttribute('stdDeviation', `0,0`);
+        }, 100);
+      }, { passive: true });
+
+      // Intersection Observer for Panel Activation (Triggers Typography Reveals)
+      const observerOptions = {
+        root: carousel,
+        threshold: 0.5
+      };
+
+      const observer = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+          if (entry.isIntersecting) {
+            entry.target.classList.add('is-active');
+
+            // Update Progress Terminal
+            const index = Array.from(panels).indexOf(entry.target) + 1;
+            const total = panels.length;
+            counterText.innerText = `0${index} / 0${total}`;
+            progressFill.style.width = `${(index / total) * 100}%`;
+          }
+        });
+      }, observerOptions);
+
+      panels.forEach(panel => observer.observe(panel));
+
+      // Initial active state trigger
+      setTimeout(() => {
+        panels[0].classList.add('is-active');
+        progressFill.style.width = `20%`;
+      }, 100);
+    });
+  </script>
+</body>
+
+</html>

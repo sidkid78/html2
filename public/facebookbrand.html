@@ -1,0 +1,623 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Digital Foreman</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@100;400;700;800&family=Syncopate:wght@700&display=swap');
+
+    :root {
+      --bg: #05070a;
+      --surface: #0a0d14;
+      --border: rgba(59, 130, 246, 0.3);
+      --border-glow: rgba(59, 130, 246, 0.6);
+      --text-main: #e2e8f0;
+      --text-muted: #64748b;
+      --accent: #3b82f6;
+      --accent-hover: #60a5fa;
+      --grid-size: 40px;
+      --ease-out-expo: cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      cursor: none;
+      /* Custom cursor used */
+    }
+
+    body {
+      background-color: var(--bg);
+      color: var(--text-main);
+      font-family: 'JetBrains Mono', monospace;
+      min-height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      overflow: hidden;
+      padding: 2rem;
+    }
+
+    /* SVG Filters & Overlays */
+    .noise-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
+      pointer-events: none;
+      z-index: 50;
+      opacity: 0.4;
+      mix-blend-mode: overlay;
+    }
+
+    .bg-image {
+      position: fixed;
+      top: -5%;
+      left: -5%;
+      width: 110vw;
+      height: 110vh;
+      background-image: url('./images/mood-bg.png');
+      background-size: cover;
+      background-position: center;
+      opacity: 0.15;
+      filter: grayscale(100%) contrast(120%);
+      z-index: -2;
+    }
+
+    .grid-bg {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
+      background-image:
+        linear-gradient(to right, var(--border) 1px, transparent 1px),
+        linear-gradient(to bottom, var(--border) 1px, transparent 1px);
+      background-size: var(--grid-size) var(--grid-size);
+      opacity: 0.1;
+      z-index: -1;
+    }
+
+    /* Custom Cursor */
+    .cursor {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 20px;
+      height: 20px;
+      border: 1px solid var(--accent);
+      border-radius: 50%;
+      transform: translate(-50%, -50%);
+      pointer-events: none;
+      z-index: 9999;
+      transition: width 0.2s, height 0.2s, background-color 0.2s;
+    }
+
+    .cursor::after {
+      content: '';
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      width: 4px;
+      height: 4px;
+      background: var(--accent);
+      border-radius: 50%;
+      transform: translate(-50%, -50%);
+    }
+
+    .cursor.hovering {
+      width: 40px;
+      height: 40px;
+      background-color: rgba(59, 130, 246, 0.1);
+    }
+
+    /* HUD Container */
+    .hud-container {
+      position: relative;
+      width: 100%;
+      max-width: 1400px;
+      height: 85vh;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      grid-template-rows: auto 1fr auto;
+      gap: 2rem;
+      padding: 3rem;
+      background: rgba(10, 13, 20, 0.7);
+      border: 1px solid var(--border);
+      -webkit-backdrop-filter: blur(10px);
+      backdrop-filter: blur(10px);
+      box-shadow: 0 0 40px rgba(0, 0, 0, 0.8), inset 0 0 20px rgba(59, 130, 246, 0.05);
+    }
+
+    /* Tech Corners */
+    .hud-container::before,
+    .hud-container::after,
+    .hud-corner-bl,
+    .hud-corner-br {
+      content: '';
+      position: absolute;
+      width: 15px;
+      height: 15px;
+      border: 2px solid var(--accent);
+    }
+
+    .hud-container::before {
+      top: -1px;
+      left: -1px;
+      border-right: none;
+      border-bottom: none;
+    }
+
+    .hud-container::after {
+      top: -1px;
+      right: -1px;
+      border-left: none;
+      border-bottom: none;
+    }
+
+    .hud-corner-bl {
+      bottom: -1px;
+      left: -1px;
+      border-right: none;
+      border-top: none;
+      position: absolute;
+    }
+
+    .hud-corner-br {
+      bottom: -1px;
+      right: -1px;
+      border-left: none;
+      border-top: none;
+      position: absolute;
+    }
+
+    /* Scanline */
+    .scanline {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 2px;
+      background: var(--accent);
+      box-shadow: 0 0 10px var(--accent);
+      opacity: 0.5;
+      animation: scan 6s linear infinite;
+      z-index: 10;
+      pointer-events: none;
+    }
+
+    @keyframes scan {
+      0% {
+        top: 0;
+        opacity: 0;
+      }
+
+      5% {
+        opacity: 0.5;
+      }
+
+      95% {
+        opacity: 0.5;
+      }
+
+      100% {
+        top: 100%;
+        opacity: 0;
+      }
+    }
+
+    /* Typography & Elements */
+    .meta-label {
+      font-size: 0.7rem;
+      text-transform: uppercase;
+      letter-spacing: 0.2em;
+      color: var(--accent);
+      margin-bottom: 1rem;
+      display: block;
+    }
+
+    .hero-title {
+      font-family: 'Syncopate', sans-serif;
+      font-size: clamp(1.5rem, 3vw, 3rem);
+      line-height: 1.1;
+      color: #fff;
+      text-transform: uppercase;
+      grid-column: 1 / -1;
+      margin-bottom: 1rem;
+      position: relative;
+    }
+
+    .hero-title span {
+      color: var(--accent);
+    }
+
+    .text-column {
+      grid-column: 1 / 2;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      padding-right: 2rem;
+      border-right: 1px solid var(--border);
+      position: relative;
+    }
+
+    .body-text {
+      font-size: 1rem;
+      line-height: 1.6;
+      color: var(--text-muted);
+      margin-bottom: 1.5rem;
+      font-weight: 400;
+    }
+
+    .highlight-block {
+      border-left: 2px solid var(--accent);
+      padding-left: 1.5rem;
+      margin: 2rem 0;
+      background: linear-gradient(90deg, rgba(59, 130, 246, 0.1) 0%, transparent 100%);
+      padding-top: 1rem;
+      padding-bottom: 1rem;
+    }
+
+    .highlight-text {
+      font-size: 1.1rem;
+      color: #fff;
+      font-weight: 700;
+    }
+
+    .visual-column {
+      grid-column: 2 / 3;
+      position: relative;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      padding-left: 2rem;
+    }
+
+    .image-wrapper {
+      width: 100%;
+      height: 100%;
+      border: 1px solid var(--border);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .image-wrapper::after {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      box-shadow: inset 0 0 50px rgba(5, 7, 10, 0.8);
+      pointer-events: none;
+    }
+
+    .user-image {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      filter: sepia(20%) hue-rotate(180deg) saturate(150%) contrast(110%);
+      transition: filter 0.5s ease;
+    }
+
+    .image-wrapper:hover .user-image {
+      filter: sepia(0%) hue-rotate(0deg) saturate(100%) contrast(100%);
+    }
+
+    .footer-row {
+      grid-column: 1 / -1;
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-end;
+      border-top: 1px solid var(--border);
+      padding-top: 2rem;
+    }
+
+    .tags {
+      font-size: 0.75rem;
+      color: var(--text-muted);
+      letter-spacing: 0.05em;
+      display: flex;
+      gap: 1rem;
+    }
+
+    .cta-btn {
+      background: transparent;
+      border: 1px solid var(--accent);
+      color: var(--accent);
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 1rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      padding: 1rem 2rem;
+      position: relative;
+      overflow: hidden;
+      transition: all 0.3s ease;
+    }
+
+    .cta-btn::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: -100%;
+      width: 100%;
+      height: 100%;
+      background: var(--accent);
+      transition: transform 0.3s var(--ease-out-expo);
+      z-index: -1;
+    }
+
+    .cta-btn:hover {
+      color: var(--bg);
+      box-shadow: 0 0 20px var(--border-glow);
+    }
+
+    .cta-btn:hover::before {
+      transform: translateX(100%);
+    }
+
+    /* Animation Classes */
+    .reveal-clip {
+      clip-path: polygon(0 0, 0 0, 0 100%, 0% 100%);
+      opacity: 0;
+      transform: translateY(10px);
+    }
+
+    .is-visible .reveal-clip {
+      animation: revealRight 1s var(--ease-out-expo) forwards;
+    }
+
+    .is-visible .stagger-1 {
+      animation-delay: 0.2s;
+    }
+
+    .is-visible .stagger-2 {
+      animation-delay: 0.4s;
+    }
+
+    .is-visible .stagger-3 {
+      animation-delay: 0.6s;
+    }
+
+    .is-visible .stagger-4 {
+      animation-delay: 0.8s;
+    }
+
+    .is-visible .stagger-5 {
+      animation-delay: 1.0s;
+    }
+
+    @keyframes revealRight {
+      0% {
+        clip-path: polygon(0 0, 0 0, 0 100%, 0% 100%);
+        opacity: 0;
+        transform: translateY(10px);
+      }
+
+      100% {
+        clip-path: polygon(0 0, 100% 0, 100% 100%, 0 100%);
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    /* Typewriter effect for labels */
+    .typewriter {
+      overflow: hidden;
+      white-space: nowrap;
+      border-right: 2px solid var(--accent);
+      width: 0;
+    }
+
+    .is-visible .typewriter {
+      animation: typing 1s steps(20, end) forwards, blink-caret 0.75s step-end infinite;
+      animation-delay: 0.1s;
+    }
+
+    @keyframes typing {
+      from {
+        width: 0
+      }
+
+      to {
+        width: 100%
+      }
+    }
+
+    @keyframes blink-caret {
+
+      from,
+      to {
+        border-color: transparent
+      }
+
+      50% {
+        border-color: var(--accent);
+      }
+    }
+
+    @media (max-width: 900px) {
+      .hud-container {
+        grid-template-columns: 1fr;
+        height: auto;
+        overflow-y: auto;
+      }
+
+      .text-column {
+        border-right: none;
+        padding-right: 0;
+        border-bottom: 1px solid var(--border);
+        padding-bottom: 2rem;
+      }
+
+      .visual-column {
+        padding-left: 0;
+        padding-top: 2rem;
+        min-height: 300px;
+      }
+
+      .footer-row {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 1.5rem;
+      }
+
+      .tags {
+        flex-wrap: wrap;
+      }
+    }
+  </style>
+</head>
+
+<body>
+
+  <!-- SVG Filters -->
+  <svg style="display: none;">
+    <filter id="noise-filter">
+      <feTurbulence type="fractalNoise" baseFrequency="0.8" numOctaves="3" stitchTiles="stitch">
+        <animate attributeName="baseFrequency" values="0.8;0.85;0.8" dur="0.2s" repeatCount="indefinite" />
+      </feTurbulence>
+      <feColorMatrix type="matrix" values="1 0 0 0 0, 0 1 0 0 0, 0 0 1 0 0, 0 0 0 0.15 0" />
+    </filter>
+    <filter id="chromatic-aberration">
+      <feColorMatrix type="matrix" values="1 0 0 0 0  0 0 0 0 0  0 0 0 0 0  0 0 0 1 0" in="SourceGraphic"
+        result="red" />
+      <feColorMatrix type="matrix" values="0 0 0 0 0  0 1 0 0 0  0 0 0 0 0  0 0 0 1 0" in="SourceGraphic"
+        result="green" />
+      <feColorMatrix type="matrix" values="0 0 0 0 0  0 0 0 0 0  0 0 1 0 0  0 0 0 1 0" in="SourceGraphic"
+        result="blue" />
+      <feOffset dx="2" dy="0" in="red" result="redShift" />
+      <feOffset dx="-2" dy="0" in="blue" result="blueShift" />
+      <feMerge>
+        <feMergeNode in="redShift" />
+        <feMergeNode in="green" />
+        <feMergeNode in="blueShift" />
+      </feMerge>
+    </filter>
+  </svg>
+
+  <!-- Background Layers -->
+  <div class="bg-image"></div>
+  <div class="grid-bg"></div>
+  <div class="noise-overlay" style="filter: url(#noise-filter);"></div>
+
+  <!-- Custom Cursor -->
+  <div class="cursor" id="cursor"></div>
+
+  <!-- Main Content -->
+  <main class="hud-container" id="main-hud">
+    <div class="hud-corner-bl"></div>
+    <div class="hud-corner-br"></div>
+    <div class="scanline"></div>
+
+    <header class="hero-title reveal-clip stagger-1">
+      <span class="meta-label typewriter"></span>
+      Killeen DIYers:<br>Meet Your New <span>Digital Foreman</span>.
+    </header>
+
+    <section class="text-column">
+      <p class="body-text reveal-clip stagger-2">
+        Tackling home repairs shouldn't feel like a guessing game.
+      </p>
+      <p class="body-text reveal-clip stagger-3">
+        From washing machines to HVAC systems, get step-by-step instructions and local part availability at Home Depot
+        or AutoZone right here in Killeen.
+      </p>
+      <div class="highlight-block reveal-clip stagger-4">
+        <p class="highlight-text">
+          It's like having a master mechanic in your pocket.
+        </p>
+      </div>
+
+      <!-- Listen & Fix Ad -->
+      <div class="listen-and-fix-ad reveal-clip stagger-5" style="margin-top: 1.5rem; border: 1px solid rgba(255, 51, 51, 0.4); background: rgba(255, 51, 51, 0.05); padding: 1.5rem; position: relative; display: flex; flex-direction: column; gap: 1rem; pointer-events: auto;">
+        <span class="meta-label" style="color: #ff3333; margin-bottom: 0; font-size: 0.6rem;">System Expansion / Audio Diagnostic</span>
+        <div style="display: flex; gap: 1rem; align-items: center;">
+          <div style="width: 80px; height: 80px; border: 1px solid #ff3333; overflow: hidden; flex-shrink: 0; position: relative;">
+            <img src="./images/listenandfix-ad-v2.png" alt="Listen & Fix Audio Analysis" title="Audio Diagnostic Module" style="width: 100%; height: 100%; object-fit: cover; filter: grayscale(100%) contrast(120%) sepia(50%) hue-rotate(-50deg);">
+            <div style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: linear-gradient(45deg, rgba(255,51,51,0.2) 0%, transparent 100%);"></div>
+          </div>
+          <div>
+            <h3 style="font-family: 'Syncopate', sans-serif; font-size: 1rem; color: #fff; margin-bottom: 0.3rem; letter-spacing: 1px;">LISTEN & FIX</h3>
+            <p style="font-size: 0.75rem; color: var(--text-muted); line-height: 1.4; margin: 0;">"Shazam for Machines". Acoustic fingerprinting and RAG-grounded repairs.</p>
+          </div>
+        </div>
+        <a href="https://asset-manager--chriskoehne.replit.app/" class="interactable" style="display: block; color: #ff3333; font-size: 0.7rem; font-weight: 800; text-decoration: none; border: 1px solid #ff3333; padding: 0.7rem; text-align: center; transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1); text-transform: uppercase; letter-spacing: 2px;" onmouseover="this.style.background='#ff3333'; this.style.color='#000';" onmouseout="this.style.background='transparent'; this.style.color='#ff3333';">Initialize Scanner _</a>
+      </div>
+    </section>
+
+    <section class="visual-column reveal-clip stagger-3">
+      <div class="image-wrapper interactable">
+        <img src="./images/listenandfix-ad.png" alt="Futuristic Diagnostic Interface" title="Digital Foreman Diagnostic HUD" class="user-image">
+        <!-- Tech crosshairs overlay -->
+        <div
+          style="position:absolute; top:50%; left:50%; width:40px; height:40px; border:1px solid rgba(59, 130, 246, 0.5); transform:translate(-50%, -50%); border-radius:50%; pointer-events:none;">
+        </div>
+        <div
+          style="position:absolute; top:50%; left:calc(50% - 25px); width:10px; height:1px; background:rgba(59, 130, 246, 0.8); pointer-events:none;">
+        </div>
+        <div
+          style="position:absolute; top:50%; left:calc(50% + 15px); width:10px; height:1px; background:rgba(59, 130, 246, 0.8); pointer-events:none;">
+        </div>
+        <div
+          style="position:absolute; top:calc(50% - 25px); left:50%; width:1px; height:10px; background:rgba(59, 130, 246, 0.8); pointer-events:none;">
+        </div>
+        <div
+          style="position:absolute; top:calc(50% + 15px); left:50%; width:1px; height:10px; background:rgba(59, 130, 246, 0.8); pointer-events:none;">
+        </div>
+      </div>
+    </section>
+
+    <footer class="footer-row">
+      <div class="tags reveal-clip stagger-4">
+        <span>#HomeMaintenance</span>
+        <span>#TexasDIY</span>
+        <span>#TechInnovation</span>
+        <span>#FixIt</span>
+      </div>
+      <a href="https://asset-manager--chriskoehne.replit.app/" class="cta-btn interactable reveal-clip stagger-5" style="text-decoration: none; display: inline-block;">
+        Get Started _
+      </a>
+    </footer>
+  </main>
+
+  <script>
+    // Initialization and Animation Trigger
+    document.addEventListener('DOMContentLoaded', () => {
+      const hud = document.getElementById('main-hud');
+
+      // Slight delay to ensure fonts load before calculating clip-paths visually
+      setTimeout(() => {
+        hud.classList.add('is-visible');
+      }, 100);
+
+      // Custom Cursor Logic
+      const cursor = document.getElementById('cursor');
+      const interactables = document.querySelectorAll('.interactable');
+
+      document.addEventListener('mousemove', (e) => {
+        cursor.style.left = e.clientX + 'px';
+        cursor.style.top = e.clientY + 'px';
+      });
+
+      interactables.forEach(el => {
+        el.addEventListener('mouseenter', () => cursor.classList.add('hovering'));
+        el.addEventListener('mouseleave', () => cursor.classList.remove('hovering'));
+      });
+
+      // Subtle Parallax on Background
+      const bgImage = document.querySelector('.bg-image');
+      document.addEventListener('mousemove', (e) => {
+        const x = (window.innerWidth / 2 - e.clientX) / 50;
+        const y = (window.innerHeight / 2 - e.clientY) / 50;
+        bgImage.style.transform = `translate(${x}px, ${y}px)`;
+      });
+    });
+  </script>
+</body>
+
+</html>
