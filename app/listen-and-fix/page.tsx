@@ -31,6 +31,13 @@ const articles = [
     href: "/kinetic-card (5).html",
     icon: "🔮",
     accent: "from-purple-500/20 to-blue-500/20"
+  },
+  {
+    title: "Developer Documentation",
+    description: "The full technical blueprint for the JIT RAG pipeline — API architecture, vector embedding specs, multimodal intake, and integration guides.",
+    href: "/documentation.html",
+    icon: "📄",
+    accent: "from-teal-500/20 to-cyan-500/20"
   }
 ];
 
