@@ -123,11 +123,17 @@ const TrackCard = ({ track, isPlaying, isQueued, isExcluded, onToggle, onEnded }
   );
 };
 
+const MUSIC_OPTIONS = [
+  { id: 'ambient', label: 'Weary Ambient', file: '/audio/background.mp3' },
+  { id: 'cinematic', label: 'Cinematic Rock', file: '/audio/backgroundmusic2.mp3' },
+];
+
 export default function AudioStoryHub2Page() {
   const [ambientPlaying, setAmbientPlaying] = useState(false);
   const [ambientVolume, setAmbientVolume] = useState(0.5);
   const [currentTrack, setCurrentTrack] = useState<number | null>(null);
   const [continuousMode, setContinuousMode] = useState(false);
+  const [selectedMusic, setSelectedMusic] = useState<'ambient' | 'cinematic'>('ambient');
 
   const ambientRef = useRef<HTMLAudioElement>(null);
 
@@ -142,10 +148,12 @@ export default function AudioStoryHub2Page() {
     if (ambientRef.current) {
       if (ambientPlaying) {
         ambientRef.current.pause();
+        setAmbientPlaying(false);
       } else {
+        ambientRef.current.currentTime = 0; // reset in case it reached the end
         ambientRef.current.play();
+        setAmbientPlaying(true);
       }
-      setAmbientPlaying(!ambientPlaying);
     }
   };
 
@@ -181,6 +189,7 @@ export default function AudioStoryHub2Page() {
   // Play All — starts ambient + queued segments (skips Segment IX)
   const handlePlayAll = () => {
     if (ambientRef.current && !ambientPlaying) {
+      ambientRef.current.currentTime = 0; // reset in case it reached the end
       ambientRef.current.play();
       setAmbientPlaying(true);
     }
@@ -226,15 +235,42 @@ export default function AudioStoryHub2Page() {
           <div className="bg-stone-900/40 backdrop-blur-3xl border border-stone-800 rounded-3xl p-8 shadow-2xl flex flex-col md:flex-row items-center gap-8 ring-1 ring-white/5">
             <button 
               onClick={toggleAmbient}
-              className="w-16 h-16 rounded-full bg-amber-600 hover:bg-amber-500 flex items-center justify-center transition-all hover:scale-105 active:scale-95 shadow-lg shadow-amber-600/30"
+              className="w-16 h-16 rounded-full bg-amber-600 hover:bg-amber-500 flex items-center justify-center transition-all hover:scale-105 active:scale-95 shadow-lg shadow-amber-600/30 shrink-0"
               title={ambientPlaying ? 'Pause Ambient' : 'Play Ambient'}
             >
               {ambientPlaying ? <Pause className="w-6 h-6 fill-white" /> : <Play className="w-6 h-6 fill-white ml-0.5" />}
             </button>
             
-            <div className="flex-1 space-y-1 text-center md:text-left">
+            <div className="flex-1 space-y-3 text-center md:text-left">
               <div className="text-[0.7rem] uppercase tracking-widest font-black text-amber-500/80">Foundation Track</div>
-              <h2 className="text-xl font-bold text-stone-200">Weary Ambient To Cinematic Rock</h2>
+              {/* Music Selector */}
+              <div className="flex gap-2">
+                {MUSIC_OPTIONS.map(opt => (
+                  <button
+                    key={opt.id}
+                    disabled={ambientPlaying}
+                    onClick={() => {
+                      setSelectedMusic(opt.id as 'ambient' | 'cinematic');
+                      if (ambientRef.current) {
+                        ambientRef.current.src = opt.file;
+                        ambientRef.current.load();
+                      }
+                    }}
+                    className={`px-3 py-1.5 rounded-xl text-xs font-bold tracking-wide border transition-all duration-200
+                      ${ selectedMusic === opt.id
+                        ? 'bg-amber-600/20 border-amber-500/60 text-amber-300'
+                        : 'bg-stone-900/60 border-stone-700 text-stone-500 hover:border-stone-500 hover:text-stone-300'
+                      }
+                      ${ ambientPlaying ? 'opacity-40 cursor-not-allowed' : 'cursor-pointer' }`}
+                    title={ambientPlaying ? 'Stop music to switch tracks' : `Switch to ${opt.label}`}
+                  >
+                    {opt.label}
+                  </button>
+                ))}
+                {ambientPlaying && (
+                  <span className="text-[0.65rem] text-stone-600 italic self-center ml-1">Stop to switch</span>
+                )}
+              </div>
             </div>
 
             <div className="flex items-center gap-4 bg-stone-950/50 py-3 px-6 rounded-2xl border border-stone-800">
@@ -339,7 +375,7 @@ export default function AudioStoryHub2Page() {
 
       <audio 
         ref={ambientRef}
-        src="/audio/background.mp3"
+        src={MUSIC_OPTIONS.find(o => o.id === selectedMusic)?.file ?? '/audio/background.mp3'}
       />
     </div>
   );

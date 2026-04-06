@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Listen & Fix</title>
+<title>Listen &amp; Fix</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@300;400;600&family=Oswald:wght@500;700&display=swap" rel="stylesheet">
@@ -21,7 +21,7 @@
   }
   * { box-sizing: border-box; margin: 0; padding: 0; cursor: none; }
   body { background: var(--c-bg); color: var(--c-text); font-family: var(--font-body); overflow: hidden; -webkit-font-smoothing: antialiased; }
-  
+
   /* Custom Cursor */
   .cursor { position: fixed; top: 0; left: 0; width: 12px; height: 12px; border-radius: 50%; background: white; mix-blend-mode: difference; pointer-events: none; z-index: 9999; transform: translate(-50%, -50%); transition: width 0.3s var(--ease-out), height 0.3s var(--ease-out); }
   .cursor.hovered { width: 60px; height: 60px; background: transparent; border: 1px solid rgba(255,255,255,0.5); backdrop-filter: blur(2px); }
@@ -33,12 +33,12 @@
   /* Scroller */
   .scroller { height: 100vh; overflow-y: scroll; scroll-snap-type: y mandatory; scroll-behavior: smooth; }
   .scroller::-webkit-scrollbar { display: none; }
-  
+
   /* Panel Structure */
   .panel { height: 100vh; width: 100vw; position: relative; scroll-snap-align: start; display: flex; align-items: flex-end; padding: 6vw; overflow: hidden; }
   .panel-bg { position: absolute; inset: 0; background-size: cover; background-position: center; z-index: 1; transform: scale(1.1); transition: transform 2.5s var(--ease-out), filter 2s ease; filter: brightness(0.3) saturate(0.5); }
   .panel.in-view .panel-bg { transform: scale(1); filter: brightness(0.4) saturate(1); }
-  
+
   /* Content Layouts */
   .content { position: relative; z-index: 10; max-width: 1400px; width: 100%; margin: 0 auto; display: grid; grid-template-columns: 1fr; gap: 4vh; }
   @media(min-width: 900px) {
@@ -46,38 +46,38 @@
     .panel:nth-child(even) .content { grid-template-columns: 1.5fr 1fr; }
     .panel:nth-child(even) .content-text { order: -1; }
   }
-  
+
   /* Typography */
   h1, h2 { font-family: var(--font-head); text-transform: uppercase; line-height: 0.9; margin-bottom: 1rem; }
   h1 { font-size: clamp(3rem, 8vw, 8rem); font-weight: 700; }
   h2 { font-size: clamp(2.5rem, 5vw, 5rem); font-weight: 500; }
   p { font-size: clamp(1rem, 1.2vw, 1.5rem); font-weight: 300; line-height: 1.6; max-width: 50ch; margin-bottom: 1.5rem; opacity: 0.9; }
   p strong, p b { font-weight: 600; color: #fff; }
-  
+
   .meta { font-family: var(--font-body); font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.2em; margin-bottom: 2rem; display: block; color: rgba(255,255,255,0.5); }
-  
+
   /* Animations */
   .split-word { display: inline-block; overflow: hidden; vertical-align: bottom; }
   .split-word span { display: inline-block; transform: translateY(110%); transition: transform 0.8s var(--ease-out); }
   .panel.in-view .split-word span { transform: translateY(0); }
-  
+
   .fade-up { opacity: 0; transform: translateY(30px); transition: opacity 1s var(--ease-out), transform 1s var(--ease-out); transition-delay: 0.4s; }
   .panel.in-view .fade-up { opacity: 1; transform: translateY(0); }
 
   /* Specific Panel Styling */
   #panel-1 .panel-bg { background-image: url('./images/scen1(2).jpg'); }
   #panel-1 h1 { color: var(--c-accent-warn); }
-  
+
   #panel-2 .panel-bg { background-image: url('./images/scen2(2).jpg'); }
   #panel-2 h2 { color: var(--c-text); }
-  
+
   #panel-3 .panel-bg { background-image: url('./images/scen3(2).jpg'); }
   #panel-3 h2 { color: var(--c-accent-tech); }
   #panel-3 .content { align-items: center; text-align: center; grid-template-columns: 1fr; }
   #panel-3 p { margin: 0 auto 1.5rem auto; }
-  
+
   #panel-4 .panel-bg { background-image: url('./images/scen4(2).jpg'); }
-  
+
   #panel-5 .panel-bg { background-image: url('./images/scen5(2).jpg'); filter: brightness(0.5) saturate(1.2); }
   #panel-5.in-view .panel-bg { filter: brightness(0.6) saturate(1.2); }
   #panel-5 h1 { color: var(--c-accent-opt); }
@@ -175,7 +175,7 @@
 <audio id="bg-music" src="./audio/background3.mp3" loop preload="auto"></audio>
 
 <main class="scroller">
-  
+
   <!-- PANEL 1 -->
   <section class="panel" id="panel-1">
     <div class="panel-bg"></div>
@@ -183,12 +183,12 @@
     <div class="content">
       <div class="content-title">
         <span class="meta">01 — The Dread</span>
-        <h1 class="split-text distort-hover">Listen & Fix: Never Feel Helpless Again.</h1>
+        <h1 class="split-text distort-hover">Listen &amp; Fix: Never Feel Helpless Again.</h1>
       </div>
       <div class="content-text fade-up">
         <p>There is a specific kind of dread that hits when a machine you rely on betrays you.</p>
-        <p>It’s the sudden, harsh <em>clanking</em> from under the hood of your car on a lonely stretch of highway. It’s the screeching of your washing machine, threatening to flood the floor. In that moment, your stomach drops.</p>
-        <p>You aren't thinking about technology. You’re thinking about the massive repair bill. You're thinking about the tow truck. You're thinking about the mechanic who might look at you and see an easy target to upcharge.</p>
+        <p>It's the sudden, harsh <em>clanking</em> from under the hood of your car on a lonely stretch of highway. It's the screeching of your washing machine, threatening to flood the floor. In that moment, your stomach drops.</p>
+        <p>You aren't thinking about technology. You're thinking about the massive repair bill. You're thinking about the tow truck. You're thinking about the mechanic who might look at you and see an easy target to upcharge.</p>
       </div>
     </div>
   </section>
@@ -204,8 +204,8 @@
       </div>
       <div class="content-text fade-up">
         <p>They are designed to make us feel helpless when they break.</p>
-        <p>We built <strong>Listen & Fix</strong> to give you your power back.</p>
-        <p>Imagine having an ASE-certified master mechanic, an HVAC specialist, and a master plumber standing right next to you, 24/7. That is Listen & Fix. We are the "Shazam for broken things."</p>
+        <p>We built <strong>Listen &amp; Fix</strong> to give you your power back.</p>
+        <p>Imagine having an ASE-certified master mechanic, an HVAC specialist, and a master plumber standing right next to you, 24/7. That is Listen &amp; Fix. We are the "Shazam for broken things."</p>
       </div>
     </div>
   </section>
@@ -238,7 +238,7 @@
       </div>
       <div class="content-text fade-up">
         <p>Then, the panic stops, and the magic happens.</p>
-        <p>Listen & Fix speaks to you with the calm, authoritative voice of a Digital Foreman. It tells you exactly what is wrong. It tells you if it’s safe to keep driving or if you need to shut it down.</p>
+        <p>Listen &amp; Fix speaks to you with the calm, authoritative voice of a Digital Foreman. It tells you exactly what is wrong. It tells you if it's safe to keep driving or if you need to shut it down.</p>
         <p>It gives you a localized, step-by-step repair guide. It even finds the exact $15 replacement part at the auto-shop down the street, so you can fix it yourself this afternoon.</p>
       </div>
     </div>
@@ -264,16 +264,13 @@
 </main>
 
 <script>
-  // Custom Cursor Logic
+  // Custom Cursor
   const cursor = document.getElementById('cursor');
-  const interactiveElements = document.querySelectorAll('h1, h2, strong');
-
   document.addEventListener('mousemove', (e) => {
     cursor.style.left = e.clientX + 'px';
     cursor.style.top = e.clientY + 'px';
   });
-
-  interactiveElements.forEach(el => {
+  document.querySelectorAll('h1, h2, strong').forEach(el => {
     el.addEventListener('mouseenter', () => cursor.classList.add('hovered'));
     el.addEventListener('mouseleave', () => cursor.classList.remove('hovered'));
   });
@@ -282,91 +279,90 @@
   document.querySelectorAll('.split-text').forEach(el => {
     const text = el.innerText;
     el.innerHTML = '';
-    const words = text.split(' ');
-    words.forEach((word, index) => {
+    text.split(' ').forEach((word, index) => {
       const wrapper = document.createElement('span');
       wrapper.className = 'split-word';
-      wrapper.innerHTML = `<span style="transition-delay: ${index * 0.08}s">${word}&nbsp;</span>`;
+      const inner = document.createElement('span');
+      inner.style.transitionDelay = (index * 0.08) + 's';
+      inner.textContent = word + '\u00a0';
+      wrapper.appendChild(inner);
       el.appendChild(wrapper);
     });
   });
 
-  // Intersection Observer for Scroll Reveals & Progress Dots
+  // Audio State
+  let isMuted = true;
+  let hasStarted = false;
   const panels = document.querySelectorAll('.panel');
+  const audioToggle = document.getElementById('audio-control');
+  const audioStatus = document.getElementById('audio-status');
+  const bgMusic = document.getElementById('bg-music');
 
+  function getPanelAudio(panel) {
+    return document.getElementById(panel.id.replace('panel-', 'audio-'));
+  }
+
+  function playPanelAudio(panel) {
+    if (isMuted || !hasStarted) return;
+    const audio = getPanelAudio(panel);
+    if (audio) {
+      audio.currentTime = 0;
+      audio.play().catch(e => console.warn('Audio play failed:', e));
+    }
+  }
+
+  function stopAllPanelAudio() {
+    panels.forEach(panel => {
+      const audio = getPanelAudio(panel);
+      if (audio) { audio.pause(); audio.currentTime = 0; }
+    });
+  }
+
+  // Intersection Observer — triggers in-view animations + panel audio
   const observer = new IntersectionObserver((entries) => {
     entries.forEach(entry => {
       if (entry.isIntersecting) {
         entry.target.classList.add('in-view');
-
-        // Audio Logic
-        const audioId = entry.target.id.replace('panel-', 'audio-');
-        const audio = document.getElementById(audioId);
-        if (audio && !isMuted && hasStarted) {
-          audio.currentTime = 0;
-          audio.play().catch(e => console.warn('Audio play failed:', e));
-        }
+        playPanelAudio(entry.target);
       } else {
         entry.target.classList.remove('in-view');
-        const audioId = entry.target.id.replace('panel-', 'audio-');
-        const audio = document.getElementById(audioId);
-        if (audio) {
-          audio.pause();
-        }
+        const audio = getPanelAudio(entry.target);
+        if (audio) audio.pause();
       }
     });
-  }, { threshold: 0.2 });
+  }, { threshold: 0.5 });
 
   panels.forEach(panel => observer.observe(panel));
 
-  // Global Audio Logic
-  let isMuted = true;
-  let hasStarted = false;
-  const audioToggle = document.getElementById('audio-control');
-  const audioStatus = document.getElementById('audio-status');
+  // Autoscroll — every panel's audio ending scrolls to the next panel
+  panels.forEach((panel, index) => {
+    if (index >= panels.length - 1) return; // skip last panel
+    const audio = getPanelAudio(panel);
+    if (audio) {
+      audio.addEventListener('ended', () => {
+        panels[index + 1].scrollIntoView({ behavior: 'smooth' });
+      });
+    }
+  });
 
+  // Audio Toggle Button
   audioToggle.addEventListener('click', () => {
     isMuted = !isMuted;
     hasStarted = true;
 
     if (!isMuted) {
       audioToggle.classList.add('active');
-      audioStatus.innerText = "Audio On";
-      
-      // Play current panel audio
+      audioStatus.innerText = 'Audio On';
       const visiblePanel = document.querySelector('.panel.in-view');
-      if (visiblePanel) {
-        const audioId = visiblePanel.id.replace('panel-', 'audio-');
-        const audio = document.getElementById(audioId);
-        if (audio) {
-          audio.currentTime = 0;
-          audio.play();
-        }
-      }
-
-      // Start BG music
-      const bgMusic = document.getElementById('bg-music');
-      if (bgMusic) {
-        bgMusic.volume = 0.4;
-        bgMusic.play().catch(e => console.warn('BG music failed:', e));
-      }
+      if (visiblePanel) playPanelAudio(visiblePanel);
+      if (bgMusic) { bgMusic.volume = 0.4; bgMusic.play().catch(() => {}); }
     } else {
       audioToggle.classList.remove('active');
-      audioStatus.innerText = "Audio Off";
-      document.querySelectorAll('audio').forEach(a => a.pause());
+      audioStatus.innerText = 'Audio Off';
+      stopAllPanelAudio();
+      if (bgMusic) bgMusic.pause();
     }
   });
-
-  // Autoscroll Logic for Scene 1
-  const audio1 = document.getElementById('audio-1');
-  if (audio1) {
-    audio1.addEventListener('ended', () => {
-      const nextPanel = document.getElementById('panel-2');
-      if (nextPanel) {
-        nextPanel.scrollIntoView({ behavior: 'smooth' });
-      }
-    });
-  }
 </script>
 </body>
 </html>

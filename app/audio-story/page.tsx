@@ -137,6 +137,7 @@ export default function AudioStoryPage() {
         // 2-second delay before background music kicks in
         setTimeout(() => {
           if (ambientRef.current) {
+            ambientRef.current.currentTime = 0; // reset in case it reached the end
             ambientRef.current.play();
             setAmbientPlaying(true);
           }
@@ -183,6 +184,7 @@ export default function AudioStoryPage() {
       // 2-second delay before background music kicks in
       setTimeout(() => {
         if (ambientRef.current) {
+          ambientRef.current.currentTime = 0; // reset in case it reached the end
           ambientRef.current.play();
           setAmbientPlaying(true);
           duckAmbient(true);
