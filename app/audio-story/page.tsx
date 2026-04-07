@@ -3,6 +3,8 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { Play, Pause, Volume2, ListMusic, SkipForward } from 'lucide-react';
 
+
+
 const tracks = [
   { id: 1, name: "Segment I", file: "/audio/download.wav" },
   { id: 2, name: "Segment II", file: "/audio/download (2).wav" },
@@ -118,6 +120,7 @@ export default function AudioStoryPage() {
   const [ambientVolume, setAmbientVolume] = useState(0.5);
   const [currentTrack, setCurrentTrack] = useState<number | null>(null);
   const [continuousMode, setContinuousMode] = useState(false);
+  const [highlightContinuous, setHighlightContinuous] = useState(false);
 
   const ambientRef = useRef<HTMLAudioElement>(null);
 
@@ -204,6 +207,17 @@ export default function AudioStoryPage() {
 
   const isRunning = continuousMode && currentTrack !== null;
 
+  // Auto-start continuous play if ?autoplay=1 is in the URL
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    if (params.get('autoplay') === '1') {
+      setHighlightContinuous(true);
+      handlePlayAll();
+      setTimeout(() => setHighlightContinuous(false), 2000);
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
   return (
     <div className="min-h-screen bg-[#0c1015] text-slate-100 font-sans selection:bg-indigo-500 selection:text-white">
       {/* Background Gradients */}
@@ -260,7 +274,10 @@ export default function AudioStoryPage() {
         </section>
 
         {/* Continuous Play Toolbar */}
-        <section className="mb-12">
+        <section 
+            id="continuous-play" 
+            className={`mb-12 ${highlightContinuous ? 'ring-2 ring-indigo-500/40 rounded-2xl' : ''}`}
+        >
           <div className={`rounded-2xl border px-6 py-4 flex flex-col sm:flex-row items-center gap-4 transition-all duration-500 ${isRunning ? 'bg-indigo-950/40 border-indigo-500/30 shadow-lg shadow-indigo-900/20' : 'bg-white/3 border-white/8'}`}>
             <div className="flex items-center gap-3 flex-1">
               <ListMusic className={`w-5 h-5 ${isRunning ? 'text-indigo-400' : 'text-slate-600'}`} />

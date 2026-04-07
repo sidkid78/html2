@@ -1,0 +1,478 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>The Digital Foreman - UX Case Study</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500&family=JetBrains+Mono:wght@400;700;800&display=swap');
+
+    :root {
+      --bg: #060709;
+      --text-main: #E2E8F0;
+      --text-muted: #64748B;
+      --accent: #00FF9D;
+      --ease: cubic-bezier(0.16, 1, 0.3, 1);
+      --grid-size: 40px;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      background-color: var(--bg);
+      color: var(--text-main);
+      font-family: 'Inter', sans-serif;
+      overflow-x: hidden;
+      cursor: none;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    /* Custom Cursor */
+    .cursor {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 12px;
+      height: 12px;
+      background: var(--accent);
+      pointer-events: none;
+      z-index: 9999;
+      transform: translate(-50%, -50%);
+      transition: width 0.3s var(--ease), height 0.3s var(--ease), background 0.3s var(--ease), border-radius 0.3s var(--ease);
+      mix-blend-mode: difference;
+    }
+
+    .cursor.hover {
+      width: 48px;
+      height: 48px;
+      background: transparent;
+      border: 1px solid var(--accent);
+      border-radius: 50%;
+    }
+
+    /* Global UI Chrome */
+    .ui-layer {
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      z-index: 50;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      padding: 2vw;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.75rem;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+    }
+
+    .ui-top,
+    .ui-bottom {
+      display: flex;
+      justify-content: space-between;
+      width: 100%;
+    }
+
+    .ui-status {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .status-dot {
+      width: 6px;
+      height: 6px;
+      background: var(--accent);
+      border-radius: 50%;
+      animation: pulse 2s infinite;
+    }
+
+    @keyframes pulse {
+
+      0%,
+      100% {
+        opacity: 1;
+      }
+
+      50% {
+        opacity: 0.3;
+      }
+    }
+
+    /* Grid Background Overlay */
+    .grid-bg {
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      z-index: 1;
+      background-image:
+        linear-gradient(to right, rgba(255, 255, 255, 0.03) 1px, transparent 1px),
+        linear-gradient(to bottom, rgba(255, 255, 255, 0.03) 1px, transparent 1px);
+      background-size: var(--grid-size) var(--grid-size);
+    }
+
+    /* Carousel Container */
+    .carousel {
+      display: flex;
+      overflow-x: auto;
+      scroll-snap-type: x mandatory;
+      height: 100vh;
+      width: 100vw;
+      scrollbar-width: none;
+      /* Firefox */
+    }
+
+    .carousel::-webkit-scrollbar {
+      display: none;
+      /* Chrome */
+    }
+
+    /* Panels */
+    .panel {
+      flex: 0 0 100vw;
+      height: 100vh;
+      scroll-snap-align: start;
+      position: relative;
+      display: flex;
+      align-items: center;
+      padding: 0 10vw;
+    }
+
+    .panel-bg {
+      position: absolute;
+      inset: 0;
+      background-size: cover;
+      background-position: center;
+      filter: grayscale(100%) contrast(1.2) brightness(0.2);
+      z-index: 0;
+      transition: transform 10s linear;
+    }
+
+    .panel.in-view .panel-bg {
+      transform: scale(1.05);
+    }
+
+    .panel-content {
+      position: relative;
+      z-index: 10;
+      max-width: 800px;
+    }
+
+    /* Typography */
+    .font-mono {
+      font-family: 'JetBrains Mono', monospace;
+    }
+
+    .text-accent {
+      color: var(--accent);
+    }
+
+    .label {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.85rem;
+      letter-spacing: 0.05em;
+      color: var(--text-muted);
+      margin-bottom: 2rem;
+      text-transform: uppercase;
+      display: inline-block;
+      border-left: 2px solid var(--accent);
+      padding-left: 1rem;
+    }
+
+    .hero {
+      font-family: 'JetBrains Mono', monospace;
+      font-weight: 800;
+      font-size: clamp(2rem, 5vw, 4.5rem);
+      line-height: 1.1;
+      letter-spacing: -0.02em;
+      text-transform: uppercase;
+      margin-bottom: 2rem;
+    }
+
+    .hero-sm {
+      font-family: 'JetBrains Mono', monospace;
+      font-weight: 700;
+      font-size: clamp(1.5rem, 3vw, 2.5rem);
+      line-height: 1.2;
+      text-transform: uppercase;
+      margin-bottom: 1.5rem;
+    }
+
+    .body {
+      font-size: clamp(1rem, 1.5vw, 1.25rem);
+      line-height: 1.6;
+      color: #CBD5E1;
+      max-width: 600px;
+    }
+
+    .body-large {
+      font-size: clamp(1.25rem, 2vw, 1.75rem);
+      line-height: 1.5;
+      font-weight: 400;
+      color: #F8FAFC;
+    }
+
+    .tags {
+      margin-top: 2rem;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.85rem;
+      color: var(--text-muted);
+    }
+
+    .link {
+      display: inline-block;
+      margin-top: 2rem;
+      color: var(--accent);
+      text-decoration: none;
+      font-family: 'JetBrains Mono', monospace;
+      border-bottom: 1px dashed var(--accent);
+      padding-bottom: 4px;
+      word-break: break-all;
+    }
+
+    /* Animations */
+    .anim-line {
+      overflow: hidden;
+      display: block;
+    }
+
+    .anim-line>* {
+      display: block;
+      transform: translateY(100%);
+      opacity: 0;
+      transition: transform 0.8s var(--ease), opacity 0.8s var(--ease);
+    }
+
+    .panel.in-view .anim-line>* {
+      transform: translateY(0);
+      opacity: 1;
+    }
+
+    /* Staggering */
+    .panel.in-view .d-1>* {
+      transition-delay: 0.1s;
+    }
+
+    .panel.in-view .d-2>* {
+      transition-delay: 0.2s;
+    }
+
+    .panel.in-view .d-3>* {
+      transition-delay: 0.3s;
+    }
+
+    .panel.in-view .d-4>* {
+      transition-delay: 0.4s;
+    }
+
+    /* SVG Filter for Text */
+    .glitch-text {
+      filter: url(#chromatic);
+    }
+
+    /* Responsive */
+    @media (max-width: 768px) {
+      .panel {
+        padding: 0 5vw;
+      }
+
+      .ui-layer {
+        padding: 4vw;
+      }
+
+      .hero {
+        font-size: 2.5rem;
+      }
+    }
+  </style>
+</head>
+
+<body>
+
+  <!-- SVG Filters -->
+  <svg style="width:0;height:0;position:absolute;" aria-hidden="true">
+    <filter id="chromatic">
+      <feColorMatrix type="matrix" values="1 0 0 0 0  0 0 0 0 0  0 0 0 0 0  0 0 0 1 0" in="SourceGraphic"
+        result="red" />
+      <feColorMatrix type="matrix" values="0 0 0 0 0  0 1 0 0 0  0 0 0 0 0  0 0 0 1 0" in="SourceGraphic"
+        result="green" />
+      <feColorMatrix type="matrix" values="0 0 0 0 0  0 0 0 0 0  0 0 1 0 0  0 0 0 1 0" in="SourceGraphic"
+        result="blue" />
+      <feOffset in="red" dx="-2" dy="0" result="red_shifted" />
+      <feOffset in="blue" dx="2" dy="0" result="blue_shifted" />
+      <feBlend mode="screen" in="red_shifted" in2="green" result="rg" />
+      <feBlend mode="screen" in="rg" in2="blue_shifted" />
+    </filter>
+  </svg>
+
+  <!-- Custom Cursor -->
+  <div class="cursor" id="cursor"></div>
+
+  <!-- UI Chrome Layer -->
+  <div class="grid-bg"></div>
+  <div class="ui-layer">
+    <div class="ui-top">
+      <div class="ui-status"><span class="status-dot"></span> SYS.DIAGNOSTIC_ACTIVE</div>
+      <div>CASE_STUDY_V4.2</div>
+    </div>
+    <div class="ui-bottom">
+      <div>SWIPE / SCROLL TO INITIATE <span class="text-accent">&#8594;</span></div>
+      <div id="panel-counter">[ 01 / 06 ]</div>
+    </div>
+  </div>
+
+  <!-- Carousel System -->
+  <div class="carousel" id="carousel">
+
+    <!-- Panel 1: Hook -->
+    <div class="panel" data-index="1">
+      <div class="panel-bg" style="background-image: url('./images/scene21.jpg');"></div>
+      <div class="panel-content">
+        <div class="anim-line d-1">
+          <div class="label">UI/UX Case Study Promotion (Standard Post)</div>
+        </div>
+        <div class="anim-line d-2">
+          <h1 class="hero glitch-text">Industrial AI fails when the interface cannot be trusted. 🛠️</h1>
+        </div>
+        <div class="anim-line d-3">
+          <p class="body">In high-stakes workshop environments, technicians don’t have time for cluttered dashboards or
+            abstract chat windows. They need immediate, actionable data.</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Panel 2: Context -->
+    <div class="panel" data-index="2">
+      <div class="panel-bg" style="background-image: url('./images/scene-32.jpg');"></div>
+      <div class="panel-content">
+        <div class="anim-line d-1">
+          <p class="body-large mb-4">We recently published a UX Case Study on "The Digital Foreman"—the design system
+            powering the Listen & Fix DIY Assistant. We set out to design the "Shazam for Engines & Appliances,"
+            bridging the gap between professional technicians and DIY enthusiasts through what we call a "Technical
+            Editorial" interface.</p>
+        </div>
+        <div class="anim-line d-2" style="margin-top: 3rem;">
+          <div class="label">Key UI/UX breakthroughs from the case study:</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Panel 3: Point 1 -->
+    <div class="panel" data-index="3">
+      <div class="panel-bg" style="background-image: url('./images/scene23.jpg');"></div>
+      <div class="panel-content">
+        <div class="anim-line d-1">
+          <h2 class="hero-sm"><span class="text-accent">⚙️ Visual Noise Decoupling:</span></h2>
+        </div>
+        <div class="anim-line d-2">
+          <p class="body">How we use high-contrast waveform UI to show users exactly how the AI is isolating mechanical
+            faults from ambient shop noise.</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Panel 4: Point 2 -->
+    <div class="panel" data-index="4">
+      <div class="panel-bg" style="background-image: url('./images/repair_mapping_panel4.png');"></div>
+      <div class="panel-content">
+        <div class="anim-line d-1">
+          <h2 class="hero-sm"><span class="text-accent">⚙️ Industrial-Grade Repair Mapping:</span></h2>
+        </div>
+        <div class="anim-line d-2">
+          <p class="body">Translating a massive 40-million-node failure database into scannable, step-by-step visual
+            blueprints optimized for rapid decision-making.</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Panel 5: Point 3 -->
+    <div class="panel" data-index="5">
+      <div class="panel-bg" style="background-image: url('./images/scene42.jpg');"></div>
+      <div class="panel-content">
+        <div class="anim-line d-1">
+          <h2 class="hero-sm"><span class="text-accent">⚙️ High-Trust Architecture:</span></h2>
+        </div>
+        <div class="anim-line d-2">
+          <p class="body">Exposing the AI's 0.02ms multimodal processing latency through micro-interactions to build
+            user confidence in real-time.</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Panel 6: Conclusion & CTA -->
+    <div class="panel" data-index="6">
+      <div class="panel-bg" style="background-image: url('./images/scene52.jpg');"></div>
+      <div class="panel-content">
+        <div class="anim-line d-1">
+          <h1 class="hero-sm glitch-text">Good AI architecture is invisible; excellent AI UI/UX makes the user feel like
+            a master of their mechanical world.</h1>
+        </div>
+        <div class="anim-line d-2">
+          <p class="body" style="margin-top: 2rem;">Read the full case study and try the interactive diagnostic wizard
+            here:</p>
+          <a href="https://asset-manager--chriskoehne.replit.app/"
+            class="link interactive">https://asset-manager--chriskoehne.replit.app/</a>
+        </div>
+        <div class="anim-line d-3">
+          <div class="tags">#DigitalForeman #IndustrialUX #AIInfrastructure #B2BDesign #TechDiagnostics</div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <script>
+    // Custom Cursor Logic
+    const cursor = document.getElementById('cursor');
+    const interactiveElements = document.querySelectorAll('.interactive, a');
+
+    document.addEventListener('mousemove', (e) => {
+      cursor.style.transform = `translate(${e.clientX - 6}px, ${e.clientY - 6}px)`;
+    });
+
+    interactiveElements.forEach(el => {
+      el.addEventListener('mouseenter', () => cursor.classList.add('hover'));
+      el.addEventListener('mouseleave', () => cursor.classList.remove('hover'));
+    });
+
+    // Intersection Observer for Animations and Counter
+    const panels = document.querySelectorAll('.panel');
+    const counter = document.getElementById('panel-counter');
+
+    const observerOptions = {
+      root: document.getElementById('carousel'),
+      threshold: 0.6
+    };
+
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          // Add animation class
+          entry.target.classList.add('in-view');
+          // Update counter
+          const index = entry.target.getAttribute('data-index');
+          counter.innerHTML = `[ 0${index} / 06 ]`;
+        }
+      });
+    }, observerOptions);
+
+    panels.forEach(panel => {
+      observer.observe(panel);
+    });
+
+    // Initial trigger for first panel if loaded in view
+    setTimeout(() => {
+      if (panels[0].getBoundingClientRect().left < window.innerWidth / 2) {
+        panels[0].classList.add('in-view');
+      }
+    }, 100);
+  </script>
+</body>
+
+</html>
