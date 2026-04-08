@@ -39,12 +39,8 @@ const TrackCard = ({ track, isPlaying, isQueued, onToggle, onEnded }: {
       audio.play().catch(() => {});
     } else {
       audio.pause();
-      // Reset progress when not playing and not just paused
-      if (!isPlaying) {
-        setProgress(0);
-        setCurrentTime(0);
-        audio.currentTime = 0;
-      }
+      // Reset current time when stopping
+      audio.currentTime = 0;
     }
   }, [isPlaying]);
 
@@ -54,6 +50,11 @@ const TrackCard = ({ track, isPlaying, isQueued, onToggle, onEnded }: {
       setProgress((audio.currentTime / audio.duration) * 100 || 0);
       setCurrentTime(audio.currentTime);
     }
+  };
+
+  const handlePause = () => {
+    setProgress(0);
+    setCurrentTime(0);
   };
 
   return (
@@ -110,6 +111,7 @@ const TrackCard = ({ track, isPlaying, isQueued, onToggle, onEnded }: {
         src={track.file}
         onTimeUpdate={handleTimeUpdate}
         onEnded={onEnded}
+        onPause={handlePause}
       />
     </div>
   );
@@ -349,8 +351,9 @@ export default function AudioStoryPage() {
         </section>
 
         <footer className="mt-24 text-center border-t border-white/5 pt-12 pb-8 flex flex-col items-center gap-6">
-            <div className="flex gap-4">
-                <a href="/audio-story-2" className="text-slate-500 hover:text-amber-400 text-xs transition-colors border border-white/5 px-4 py-2 rounded-xl bg-white/5">Switch to Hub II (Cinematic Rock) →</a>
+            <div className="flex flex-wrap justify-center gap-4">
+                <a href="/audio-story-2" className="text-slate-500 hover:text-amber-400 text-xs transition-colors border border-white/5 px-4 py-2 rounded-xl bg-white/5">HUB II: Cinematic Rock →</a>
+                <a href="/audio-story-3" className="text-slate-500 hover:text-cyan-400 text-xs transition-colors border border-white/5 px-4 py-2 rounded-xl bg-white/5">HUB III: Listen & Fix →</a>
             </div>
             <p className="text-slate-600 text-sm">© {new Date().getFullYear()} Audio Story Showcase • Built for Vercel Deployment</p>
         </footer>

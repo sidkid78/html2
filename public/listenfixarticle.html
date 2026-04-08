@@ -1,0 +1,660 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Listen & Fix: Digital Foreman</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link
+    href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700;900&family=Public+Sans:wght@300;400;500;700&display=swap"
+    rel="stylesheet">
+  <style>
+    :root {
+      --bg-base: #0f151e;
+      --bg-surface: #171f2c;
+      --text-primary: #f0f4f8;
+      --text-secondary: #8b9bb4;
+      --accent: #38bdf8;
+      /* Calibrated Cyan */
+      --accent-dark: #0284c7;
+      --font-display: 'Inter', sans-serif;
+      --font-body: 'Public Sans', sans-serif;
+      --easing: cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      cursor: none;
+      /* Custom cursor */
+    }
+
+    body {
+      background-color: var(--bg-base);
+      color: var(--text-primary);
+      font-family: var(--font-body);
+      font-weight: 300;
+      line-height: 1.6;
+      overflow-x: hidden;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    /* Custom Scrollbar */
+    ::-webkit-scrollbar {
+      width: 6px;
+    }
+
+    ::-webkit-scrollbar-track {
+      background: var(--bg-base);
+    }
+
+    ::-webkit-scrollbar-thumb {
+      background: var(--bg-surface);
+      border-radius: 3px;
+    }
+
+    /* Typography Hierarchy */
+    h1,
+    h2,
+    h3 {
+      font-family: var(--font-display);
+      font-weight: 900;
+      line-height: 1.1;
+      letter-spacing: -0.02em;
+      color: var(--text-primary);
+    }
+
+    h1 {
+      font-size: clamp(3rem, 6vw, 5.5rem);
+      margin-bottom: 1.5rem;
+    }
+
+    h2 {
+      font-size: clamp(2rem, 4vw, 3.5rem);
+      margin-bottom: 1.5rem;
+    }
+
+    p {
+      font-size: clamp(1rem, 1.2vw, 1.25rem);
+      margin-bottom: 1.5rem;
+      max-width: 65ch;
+    }
+
+    .label {
+      font-family: var(--font-display);
+      font-size: 0.75rem;
+      text-transform: uppercase;
+      letter-spacing: 0.15em;
+      color: var(--accent);
+      font-weight: 700;
+      display: block;
+      margin-bottom: 0.5rem;
+    }
+
+    /* Layout Archetype: Editorial Grid / Technical */
+    .grid-container {
+      display: grid;
+      grid-template-columns: repeat(12, 1fr);
+      gap: 2rem;
+      width: 100%;
+      max-width: 1600px;
+      margin: 0 auto;
+      padding: 0 4vw;
+    }
+
+    .section-pad {
+      padding: 15vh 0;
+      position: relative;
+    }
+
+    /* No-Line Rule: Tonal Shifts */
+    .bg-shift {
+      background-color: var(--bg-surface);
+    }
+
+    /* Specific Grid Placements */
+    .col-full {
+      grid-column: 1 / -1;
+    }
+
+    .col-text-left {
+      grid-column: 1 / 13;
+    }
+
+    .col-img-right {
+      grid-column: 1 / 13;
+      margin-top: 3rem;
+    }
+
+    .col-text-right {
+      grid-column: 1 / 13;
+    }
+
+    .col-img-left {
+      grid-column: 1 / 13;
+      margin-top: 3rem;
+      grid-row: 2;
+    }
+
+    .col-center {
+      grid-column: 1 / 13;
+      text-align: center;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    @media (min-width: 992px) {
+      .col-text-left {
+        grid-column: 2 / 7;
+      }
+
+      .col-img-right {
+        grid-column: 7 / 12;
+        margin-top: 0;
+      }
+
+      .col-img-left {
+        grid-column: 2 / 7;
+        margin-top: 0;
+        grid-row: auto;
+      }
+
+      .col-text-right {
+        grid-column: 7 / 12;
+      }
+
+      .col-center {
+        grid-column: 3 / 11;
+      }
+    }
+
+    /* Technical Image Treatment */
+    .tech-frame {
+      position: relative;
+      width: 100%;
+      height: 100%;
+      min-height: 400px;
+      overflow: hidden;
+      background: #000;
+    }
+
+    .tech-frame img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      opacity: 0.4;
+      filter: grayscale(100%) contrast(1.2);
+      transform: scale(1.05);
+      transition: opacity 1.5s var(--easing), filter 1.5s var(--easing), transform 3s var(--easing);
+    }
+
+    .tech-frame::after {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(135deg, rgba(15, 21, 30, 0) 50%, rgba(15, 21, 30, 0.8) 100%);
+      pointer-events: none;
+    }
+
+    /* Reticle Corners */
+    .reticle {
+      position: absolute;
+      width: 24px;
+      height: 24px;
+      border: 2px solid var(--accent);
+      z-index: 10;
+      opacity: 0;
+      transition: opacity 0.5s ease 0.5s;
+    }
+
+    .r-tl {
+      top: 20px;
+      left: 20px;
+      border-right: none;
+      border-bottom: none;
+    }
+
+    .r-tr {
+      top: 20px;
+      right: 20px;
+      border-left: none;
+      border-bottom: none;
+    }
+
+    .r-bl {
+      bottom: 20px;
+      left: 20px;
+      border-right: none;
+      border-top: none;
+    }
+
+    .r-br {
+      bottom: 20px;
+      right: 20px;
+      border-left: none;
+      border-top: none;
+    }
+
+    .reveal-trigger.active .tech-frame img {
+      opacity: 0.85;
+      filter: grayscale(20%) contrast(1.05);
+      transform: scale(1);
+    }
+
+    .reveal-trigger.active .reticle {
+      opacity: 1;
+    }
+
+    /* Tags & Meta */
+    .tag-cluster {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.75rem;
+      margin-bottom: 2rem;
+    }
+
+    .tag {
+      font-family: var(--font-display);
+      font-size: 0.7rem;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      padding: 0.3em 0.8em;
+      border: 1px solid rgba(56, 189, 248, 0.3);
+      color: var(--accent);
+      background: rgba(56, 189, 248, 0.05);
+    }
+
+    /* Ambient Background System */
+    .bg-ambient {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
+      z-index: -2;
+      background-image: url('./images/ambient-mood-bg.png');
+      background-size: cover;
+      background-position: center;
+      opacity: 0.15;
+      filter: grayscale(100%) blur(4px);
+    }
+
+    .noise-layer {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
+      z-index: -1;
+      pointer-events: none;
+      opacity: 0.4;
+    }
+
+    /* Animation & Interaction Layer */
+    .reveal-text {
+      overflow: hidden;
+    }
+
+    .reveal-text>* {
+      display: block;
+      transform: translateY(110%);
+      opacity: 0;
+      transition: transform 1.2s var(--easing), opacity 1.2s var(--easing);
+    }
+
+    .reveal-fade {
+      opacity: 0;
+      transform: translateY(30px);
+      transition: opacity 1s var(--easing), transform 1s var(--easing);
+    }
+
+    .reveal-trigger.active .reveal-text>* {
+      transform: translateY(0);
+      opacity: 1;
+    }
+
+    .reveal-trigger.active .reveal-fade {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    /* Staggering */
+    .d-1 {
+      transition-delay: 0.1s !important;
+    }
+
+    .d-2 {
+      transition-delay: 0.2s !important;
+    }
+
+    .d-3 {
+      transition-delay: 0.3s !important;
+    }
+
+    /* Custom Cursor */
+    #cursor {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 20px;
+      height: 20px;
+      border: 1px solid var(--accent);
+      border-radius: 50%;
+      transform: translate(-50%, -50%);
+      pointer-events: none;
+      z-index: 9999;
+      mix-blend-mode: difference;
+      transition: width 0.3s, height 0.3s, background-color 0.3s;
+    }
+
+    #cursor::after {
+      content: '';
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      width: 4px;
+      height: 4px;
+      background: var(--accent);
+      transform: translate(-50%, -50%);
+    }
+
+    body:hover #cursor {
+      width: 30px;
+      height: 30px;
+    }
+
+    /* Structural Metadata Lines */
+    .data-line {
+      width: 1px;
+      height: 100px;
+      background: linear-gradient(to bottom, var(--accent), transparent);
+      margin: 0 auto 2rem auto;
+    }
+
+    .h-line {
+      height: 1px;
+      width: 100%;
+      background: rgba(255, 255, 255, 0.05);
+      margin: 3rem 0;
+    }
+  </style>
+</head>
+
+<body>
+
+  <!-- Ambient Layers -->
+  <div class="bg-ambient"></div>
+  <svg class="noise-layer">
+    <filter id="noiseFilter">
+      <feTurbulence type="fractalNoise" baseFrequency="0.8" numOctaves="3" stitchTiles="stitch" />
+      <feColorMatrix type="matrix" values="1 0 0 0 0, 0 1 0 0 0, 0 0 1 0 0, 0 0 0 0.15 0" />
+    </filter>
+    <rect width="100%" height="100%" filter="url(#noiseFilter)" />
+  </svg>
+
+  <div id="cursor"></div>
+
+  <!-- Main Content Sequence -->
+  <main>
+
+    <!-- HERO / TITLE -->
+    <section class="section-pad reveal-trigger" style="min-height: 90vh; display: flex; align-items: center;">
+      <div class="grid-container">
+        <div class="col-full">
+          <div class="tag-cluster reveal-fade d-1">
+            <span class="tag">#AI Repair</span>
+            <span class="tag">#DIY Maintenance</span>
+            <span class="tag">#Gemini AI</span>
+            <span class="tag">#Smart Home</span>
+            <span class="tag">#Automotive Tech</span>
+            <span class="tag">#Digital Foreman</span>
+          </div>
+          <div class="reveal-text">
+            <span class="label d-1"></span>
+          </div>
+          <div class="reveal-text">
+            <h1 class="d-2">Listen & Fix:<br>Meet Your New AI-Powered Digital Foreman</h1>
+          </div>
+          <div class="h-line reveal-fade d-2"></div>
+          <div class="reveal-fade d-3" style="max-width: 800px;">
+            <span class="label"></span>
+            <p class="text-secondary" style="font-size: 1.25rem; font-weight: 400;">Discover Listen & Fix, the
+              AI-powered 'Shazam for Engines' that uses multimodal intelligence to diagnose and guide your DIY repairs
+              with expert precision.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- INTRO -->
+    <section class="section-pad bg-shift reveal-trigger">
+      <div class="grid-container">
+        <div class="col-center reveal-fade">
+          <div class="data-line"></div>
+          <p class="text-secondary">We’ve all been there: you’re driving down the highway or just trying to get a load
+            of laundry done when you hear it—that dreaded "clunk-clunk-squeal" coming from somewhere deep inside the
+            machine. Usually, this is the part where you start sweating, wondering if you’re looking at a $500 repair
+            bill or a weekend spent crying over a 400-page manual written in technical jargon.</p>
+          <p>But what if you could just point your phone at the problem, let it "listen" to the sound, and have a
+            professional mechanic tell you exactly what’s wrong and how to fix it? That is the core promise of Listen &
+            Fix. By combining the power of Google’s Gemini 1.5 Flash model with a "just-in-time" data pipeline, this
+            platform acts like a "Shazam for Engines." It doesn't just guess; it analyzes audio signatures, visual wear
+            patterns, and real-time technical manuals to give you the confidence to pick up a wrench. Whether you are a
+            total beginner or a seasoned DIYer, Listen & Fix is designed to bridge the gap between mechanical mystery
+            and a job well done.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- MULTIMODAL INTELLIGENCE -->
+    <section class="section-pad reveal-trigger">
+      <div class="grid-container" style="align-items: center;">
+        <div class="col-text-left reveal-fade">
+          <span class="label"></span>
+          <h2>The Superpower of Multimodal Intelligence</h2>
+          <p class="text-secondary">So, how does an app actually "know" that your fan belt is loose just by hearing it?
+            It’s all about a digital superpower called multimodal intelligence. While older diagnostic tools might only
+            look at one thing—like an error code from your car’s computer—Listen & Fix uses a blend of audio, video, and
+            image analysis.</p>
+          <p>When you record a clip of your engine knocking, the AI isn't just looking for loud noises; it's analyzing
+            high-definition audio nuances and subtle frequency shifts. It compares these specific sounds against
+            thousands of known mechanical failures in its database. At the same time, the system can look at a photo of
+            your engine bay to spot frayed wires or fluid leaks that you might have missed. By fusing these different
+            senses together, the AI can catch a bearing failure or a micro-fracture long before it turns into a
+            catastrophic breakdown. It’s like having a mechanic with X-ray vision and perfect hearing standing right
+            next to you.</p>
+        </div>
+        <div class="col-img-right">
+          <div class="tech-frame">
+            <div class="reticle r-tl"></div>
+            <div class="reticle r-tr"></div>
+            <div class="reticle r-bl"></div>
+            <div class="reticle r-br"></div>
+            <img src="./images/visual-11.png" alt="Mechanic using AI app over car engine">
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- FOUR-STEP PATH -->
+    <section class="section-pad bg-shift reveal-trigger">
+      <div class="grid-container" style="align-items: center;">
+        <div class="col-img-left">
+          <div class="tech-frame">
+            <div class="reticle r-tl"></div>
+            <div class="reticle r-tr"></div>
+            <div class="reticle r-bl"></div>
+            <div class="reticle r-br"></div>
+            <img src="./images/visual-21.png" alt="App UI showing audio frequency analysis">
+          </div>
+        </div>
+        <div class="col-text-right reveal-fade">
+          <span class="label">Workflow</span>
+          <h2>The Four-Step Path to Repair Success</h2>
+          <p class="text-secondary">The app is built around a super-smooth "wizard" interface that takes the guesswork
+            out of the process. It follows a simple four-step workflow: Capture, Details, Analyzing, and Results.</p>
+          <p>First, you "Capture" the issue by recording the sound or taking high-res photos. Next, the "Details" step
+            asks a few quick questions—like the make and model of your appliance and how comfortable you are with tools.
+            While the "Analyzing" step happens, you aren't left staring at a spinning circle; the app uses a live status
+            feed to give you real-time updates like "Analyzing engine harmonics..." or "Checking thermal signatures."
+            Finally, you get your "Results"—a full RepairGuide that includes a diagnosis, a confidence score (so you
+            know how sure the AI is), and a custom-tailored plan to get things running again. It’s designed to be snappy
+            and informative, keeping you in the loop every second of the way.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- DIGITAL LIBRARIAN -->
+    <section class="section-pad reveal-trigger">
+      <div class="grid-container">
+        <div class="col-center reveal-fade">
+          <span class="label">Data Retrieval</span>
+          <h2>The Digital Librarian: Accuracy Without the Guesswork</h2>
+          <p class="text-secondary">One of the biggest problems with standard AI is that it can sometimes "hallucinate"
+            or give you generic advice that doesn't apply to your specific dryer or car. Listen & Fix solves this using
+            a process called Retrieval-Augmented Generation (RAG). Think of this as a digital librarian that works at
+            lightning speed.</p>
+          <p>The moment you identify your equipment, the system’s "Document Crawler" sprints out across the web to
+            trusted sites like iFixit and official manufacturer databases. It finds the exact service manual for your
+            specific year and model, strips out all the annoying ads and filler, and feeds the relevant torque settings
+            and tool requirements directly into the AI. This means the advice you get isn't just "general repair
+            tips"—it’s the specific step-by-step instructions meant for your exact machine, grounded in real-world
+            technical documentation.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- DIGITAL FOREMAN DESIGN -->
+    <section class="section-pad bg-shift reveal-trigger">
+      <div class="grid-container" style="align-items: center;">
+        <div class="col-text-left reveal-fade">
+          <span class="label">UI Architecture</span>
+          <h2>The Digital Foreman: Design That Inspires Trust</h2>
+          <p class="text-secondary">Repairing expensive equipment is high-stakes, so the app's design—nicknamed the
+            "Digital Foreman"—is all about authority and clarity. This professional-grade workspace is designed to
+            transition seamlessly from the complex AI analysis to a practical tool you can use in the heat of the
+            moment.</p>
+          <p>You won't find any distracting neon colors or cluttered menus here. Instead, the UI uses stable blues and
+            charcoal tones to create a "calibrated instrument" feel. One of the most practical design choices is the
+            "No-Line Rule." Instead of using messy borders to separate sections, the app uses subtle shifts in
+            background tones to guide your eye. This creates a clean, "Technical Editorial" look that prevents eye
+            strain and makes the screen easy to read even if you're in a dimly lit garage or trying to navigate the app
+            with greasy hands. The typography is also carefully chosen: "Inter" for big, clear headlines and "Public
+            Sans" for detailed instructions, ensuring you never misread a crucial measurement.</p>
+        </div>
+        <div class="col-img-right">
+          <div class="tech-frame">
+            <div class="reticle r-tl"></div>
+            <div class="reticle r-tr"></div>
+            <div class="reticle r-bl"></div>
+            <div class="reticle r-br"></div>
+            <img src="./images/visual-31.png" alt="Digital Foreman app interface in a workshop">
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- SMART SOURCING & SAFETY -->
+    <section class="section-pad reveal-trigger">
+      <div class="grid-container" style="align-items: center;">
+        <div class="col-img-left">
+          <div class="tech-frame">
+            <div class="reticle r-tl"></div>
+            <div class="reticle r-tr"></div>
+            <div class="reticle r-bl"></div>
+            <div class="reticle r-br"></div>
+            <img src="./images/visual-41.png" alt="Holographic safety checklist and supplier matrix">
+          </div>
+        </div>
+        <div class="col-text-right reveal-fade">
+          <span class="label">Protocol</span>
+          <h2>Smart Sourcing and Safety First</h2>
+          <p class="text-secondary">Knowing what’s wrong is only half the battle; you also need the right parts and you
+            definitely don't want to get hurt. Listen & Fix has an automated procurement system that identifies the
+            exact part numbers you need and checks local shops in real-time. It even gives you a "Supplier Matrix" so
+            you can see who has the part in stock and how long delivery will take.</p>
+          <p>But before you touch a single bolt, the system triggers mandatory safety protocols. If you're working on a
+            car, it’ll remind you about jack stands; if it’s a dishwasher, it’ll walk you through turning off the
+            circuit breaker. If the AI sees a confidence score below 89% or identifies a "Critical" danger, it will
+            automatically flag the job for expert review. It’s about empowering you to do the work yourself without
+            taking unnecessary risks.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- CONCLUSION -->
+    <section class="section-pad bg-shift reveal-trigger" style="padding-bottom: 20vh;">
+      <div class="grid-container">
+        <div class="col-center reveal-fade">
+          <div class="data-line"></div>
+          <h2>Conclusion</h2>
+          <p class="text-secondary">At the end of the day, Listen & Fix is about more than just fixing a broken
+            appliance; it’s about taking back control. In a world where technology often feels like a "black box" that
+            we aren't allowed to touch, this platform gives you the keys to the kingdom. By turning complex data into
+            simple, actionable steps, it removes the fear of the unknown. You don't need to be a master mechanic to keep
+            your home running smoothly—you just need the right partner. With the "Digital Foreman" in your pocket, that
+            scary clunking sound isn't a reason to panic anymore; it’s just the start of your next successful DIY
+            project.</p>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <script>
+    // Custom Cursor Logic
+    const cursor = document.getElementById('cursor');
+    let mouseX = window.innerWidth / 2;
+    let mouseY = window.innerHeight / 2;
+    let cursorX = mouseX;
+    let cursorY = mouseY;
+
+    document.addEventListener('mousemove', (e) => {
+      mouseX = e.clientX;
+      mouseY = e.clientY;
+    });
+
+    function renderCursor() {
+      // Smooth interpolation
+      cursorX += (mouseX - cursorX) * 0.2;
+      cursorY += (mouseY - cursorY) * 0.2;
+      cursor.style.transform = `translate(${cursorX}px, ${cursorY}px)`;
+      requestAnimationFrame(renderCursor);
+    }
+    requestAnimationFrame(renderCursor);
+
+    // Intersection Observer for scroll animations
+    const observerOptions = {
+      root: null,
+      rootMargin: '0px',
+      threshold: 0.15
+    };
+
+    const observer = new IntersectionObserver((entries, observer) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          entry.target.classList.add('active');
+          // Optional: stop observing once revealed
+          // observer.unobserve(entry.target);
+        }
+      });
+    }, observerOptions);
+
+    document.querySelectorAll('.reveal-trigger').forEach(section => {
+      observer.observe(section);
+    });
+
+    // Subtly move ambient background on scroll for parallax depth
+    const ambientBg = document.querySelector('.bg-ambient');
+    window.addEventListener('scroll', () => {
+      const scrolled = window.pageYOffset;
+      ambientBg.style.transform = `translateY(${scrolled * 0.15}px)`;
+    });
+  </script>
+</body>
+
+</html>

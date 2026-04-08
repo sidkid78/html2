@@ -1,0 +1,543 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Listen & Fix</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link
+    href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500&family=Oswald:wght@500;700&family=Space+Mono:ital,wght@0,400;0,700;1,400&display=swap"
+    rel="stylesheet">
+  <style>
+    :root {
+      --bg: #050505;
+      --surface: #111111;
+      --text: #e4e4e7;
+      --text-dim: #a1a1aa;
+      --accent: #f59e0b;
+      --font-hero: 'Oswald', sans-serif;
+      --font-body: 'Inter', sans-serif;
+      --font-mono: 'Space Mono', monospace;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      cursor: none;
+    }
+
+    body {
+      background-color: var(--bg);
+      color: var(--text);
+      font-family: var(--font-body);
+      overflow-x: hidden;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    /* Custom Cursor */
+    #cursor {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 20px;
+      height: 20px;
+      border: 1px solid var(--accent);
+      border-radius: 50%;
+      pointer-events: none;
+      z-index: 9999;
+      transform: translate(-50%, -50%);
+      transition: width 0.2s, height 0.2s, background-color 0.2s;
+      mix-blend-mode: difference;
+    }
+
+    #cursor::after {
+      content: '';
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      width: 4px;
+      height: 4px;
+      background: var(--accent);
+      border-radius: 50%;
+      transform: translate(-50%, -50%);
+    }
+
+    /* Noise Overlay */
+    .noise {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
+      pointer-events: none;
+      z-index: 9000;
+      opacity: 0.04;
+      mix-blend-mode: screen;
+    }
+
+    /* Typography */
+    h1,
+    h2,
+    h3,
+    .hero-font {
+      font-family: var(--font-hero);
+      text-transform: uppercase;
+      line-height: 1.1;
+    }
+
+    p {
+      font-size: clamp(1rem, 1.5vw, 1.25rem);
+      line-height: 1.6;
+      margin-bottom: 2rem;
+      font-weight: 300;
+      color: var(--text-dim);
+    }
+
+    strong {
+      color: var(--text);
+      font-weight: 500;
+    }
+
+    .mono {
+      font-family: var(--font-mono);
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      font-size: 0.85rem;
+      color: var(--accent);
+    }
+
+    /* Layout Archetypes */
+    .section-bleed {
+      position: relative;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      justify-content: flex-end;
+      padding: 5vw;
+      overflow: hidden;
+    }
+
+    .section-bleed .bg-img {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 120%;
+      /* For parallax */
+      object-fit: cover;
+      z-index: 0;
+      filter: brightness(0.4) saturate(0.8);
+    }
+
+    .section-bleed .content {
+      position: relative;
+      z-index: 10;
+      max-width: 1200px;
+    }
+
+    .editorial-grid {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 4rem;
+      padding: 10vw 5vw;
+      position: relative;
+    }
+
+    @media(min-width: 768px) {
+      .editorial-grid {
+        grid-template-columns: 1fr 1fr;
+      }
+    }
+
+    .sticky-col {
+      position: sticky;
+      top: 10vh;
+      height: 80vh;
+      overflow: hidden;
+    }
+
+    .sticky-col img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      filter: grayscale(20%) contrast(1.1);
+      z-index: 5;
+    }
+
+    .order-mobile-first {
+      order: -1;
+    }
+
+    @media(min-width: 768px) {
+      .order-mobile-first {
+        order: 0;
+      }
+    }
+
+    .text-col {
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      padding-block: 20vh;
+    }
+
+    /* Specifics */
+    .title-main {
+      font-size: clamp(3rem, 8vw, 7rem);
+      margin-bottom: 2rem;
+      color: var(--text);
+      text-shadow: 0 4px 24px rgba(0, 0, 0, 0.8);
+    }
+
+    .meta-box {
+      background: rgba(17, 17, 17, 0.8);
+      backdrop-filter: blur(10px);
+      border-left: 4px solid var(--accent);
+      padding: 2rem;
+      max-width: 600px;
+      margin-bottom: 4rem;
+    }
+
+    .meta-box p {
+      margin-bottom: 0;
+      font-size: 1rem;
+      color: var(--text);
+    }
+
+    .sounds {
+      font-family: var(--font-hero);
+      font-size: clamp(2.5rem, 5vw, 4rem);
+      color: var(--accent);
+      font-style: italic;
+      display: block;
+      margin-block: 2rem;
+      letter-spacing: 0.05em;
+    }
+
+    .huge-statement {
+      font-size: clamp(2rem, 4vw, 3.5rem);
+      color: var(--text);
+      margin-block: 4rem;
+      border-top: 1px solid rgba(255, 255, 255, 0.1);
+      border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+      padding-block: 2rem;
+    }
+
+    .image-stack {
+      display: grid;
+      grid-template-rows: 1fr 1fr;
+      gap: 1rem;
+      height: 100%;
+    }
+
+    /* Animations */
+    .reveal {
+      opacity: 0;
+      transform: translateY(40px);
+      transition: opacity 1s cubic-bezier(0.215, 0.610, 0.355, 1), transform 1s cubic-bezier(0.215, 0.610, 0.355, 1);
+      will-change: opacity, transform;
+    }
+
+    .reveal.is-visible {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    .delay-1 {
+      transition-delay: 100ms;
+    }
+
+    .delay-2 {
+      transition-delay: 200ms;
+    }
+
+    .delay-3 {
+      transition-delay: 300ms;
+    }
+
+    /* Chromatic Aberration Filter FX */
+    .glitch-text {
+      position: relative;
+    }
+
+    .glitch-text::before,
+    .glitch-text::after {
+      content: attr(data-text);
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      opacity: 0.8;
+    }
+
+    .glitch-text::before {
+      left: 2px;
+      text-shadow: -2px 0 red;
+      clip: rect(24px, 550px, 90px, 0);
+      animation: glitch-anim-2 3s infinite linear alternate-reverse;
+    }
+
+    .glitch-text::after {
+      left: -2px;
+      text-shadow: -2px 0 blue;
+      clip: rect(85px, 550px, 140px, 0);
+      animation: glitch-anim 2.5s infinite linear alternate-reverse;
+    }
+
+    @keyframes glitch-anim {
+      0% {
+        clip: rect(10px, 9999px, 83px, 0);
+      }
+
+      20% {
+        clip: rect(65px, 9999px, 16px, 0);
+      }
+
+      40% {
+        clip: rect(43px, 9999px, 5px, 0);
+      }
+
+      60% {
+        clip: rect(89px, 9999px, 78px, 0);
+      }
+
+      80% {
+        clip: rect(22px, 9999px, 44px, 0);
+      }
+
+      100% {
+        clip: rect(54px, 9999px, 32px, 0);
+      }
+    }
+
+    @keyframes glitch-anim-2 {
+      0% {
+        clip: rect(24px, 9999px, 53px, 0);
+      }
+
+      20% {
+        clip: rect(85px, 9999px, 11px, 0);
+      }
+
+      40% {
+        clip: rect(13px, 9999px, 95px, 0);
+      }
+
+      60% {
+        clip: rect(69px, 9999px, 38px, 0);
+      }
+
+      80% {
+        clip: rect(42px, 9999px, 84px, 0);
+      }
+
+      100% {
+        clip: rect(74px, 9999px, 22px, 0);
+      }
+    }
+
+    .progress-bar {
+      position: fixed;
+      top: 0;
+      left: 0;
+      height: 3px;
+      background: var(--accent);
+      width: 0%;
+      z-index: 9999;
+      transition: width 0.1s ease-out;
+    }
+  </style>
+</head>
+
+<body>
+
+  <div id="cursor"></div>
+  <div class="progress-bar" id="progress"></div>
+
+  <!-- SVG Filters -->
+  <svg style="width:0;height:0;position:absolute;" aria-hidden="true" focusable="false">
+    <filter id="svg-noise">
+      <feTurbulence type="fractalNoise" baseFrequency="0.7" numOctaves="3" stitchTiles="stitch" />
+      <feColorMatrix type="matrix" values="1 0 0 0 0, 0 1 0 0 0, 0 0 1 0 0, 0 0 0 0.15 0" />
+    </filter>
+    <filter id="distort">
+      <feTurbulence type="fractalNoise" baseFrequency="0.01" numOctaves="1" result="noise" />
+      <feDisplacementMap in="SourceGraphic" in2="noise" scale="5" xChannelSelector="R" yChannelSelector="G" />
+    </filter>
+  </svg>
+  <div class="noise" style="filter: url(#svg-noise);"></div>
+
+  <main>
+    <!-- SECTION 1: HERO -->
+    <section class="section-bleed">
+      <img src="./images/scene-(1)1.jpg" alt="Driving in rain" class="bg-img js-parallax" />
+      <div class="content reveal">
+        <div class="mono mb-4">001 // System Failure</div>
+        <h1 class="title-main glitch-text" data-text="The Death of the Black Box">**Title:** The Death of the Black
+          Box:<br><span style="color: var(--accent)">Take Back Your Independence</span><br>with Listen & Fix</h1>
+
+        <div class="meta-box reveal delay-1">
+          <p><span class="mono">META:</span> **Meta:** Don’t let mechanics hold your wallet hostage. Listen & Fix is the
+            AI superpower that turns the terrifying sounds of a broken engine into your next victorious DIY repair.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- SECTION 2: VULNERABILITY -->
+    <section class="editorial-grid">
+      <div class="sticky-col">
+        <img src="./images/heartbeat-schematic.png" alt="Engine schematic heartbeat" style="filter: url(#distort); opacity: 0.6;" />
+      </div>
+      <div class="text-col">
+        <p class="reveal">You know the feeling.</p>
+        <p class="reveal">You’re driving down the highway with your family, or you’re halfway through a week’s worth of
+          laundry, when you hear it.</p>
+        <span class="sounds reveal">*Clunk. Squeal. Grind.*</span>
+        <p class="reveal">Your stomach drops. Your pulse spikes. It’s not just the fear of a $500 repair bill—it’s the
+          terrifying realization that you are completely at the mercy of a machine you don’t understand. In that moment,
+          you are vulnerable. You’ll have to tow it, wait in a fluorescent-lit waiting room, and nod politely while a
+          mechanic uses technical jargon to justify draining your bank account.</p>
+        <p class="reveal">For decades, corporations have designed our cars and appliances to be impenetrable "black
+          boxes." They stripped away our self-reliance.</p>
+        <h2 class="huge-statement reveal hero-font">**It’s time to take your power back.**</h2>
+      </div>
+    </section>
+
+    <!-- SECTION 3: THE SOLUTION -->
+    <section class="editorial-grid" style="background: var(--surface);">
+      <div class="text-col">
+        <div class="mono reveal">002 // Diagnostic Protocol</div>
+        <h2 class="title-main reveal delay-1" style="font-size: clamp(2rem, 5vw, 4rem);">**A Master Mechanic in Your
+          Pocket**</h2>
+        <p class="reveal">Meet Listen & Fix. We built an AI-powered "Shazam for Engines" because we believe no one
+          should ever feel helpless when their equipment breaks.</p>
+        <p class="reveal">Imagine pointing your phone at a rattling engine and letting it simply "listen." In seconds,
+          Listen & Fix doesn't just guess what’s wrong—it *knows*.</p>
+        <p class="reveal">Using multimodal intelligence, it hears the subtle frequency shifts of a failing bearing. It
+          sees the microscopic fraying on a fan belt through your camera. It fuses sight and sound with the precision of
+          a master mechanic who has spent 40 years under the hood. Suddenly, that terrifying mechanical mystery is
+          translated into plain, empowering English.</p>
+      </div>
+      <div class="sticky-col order-mobile-first">
+        <img src="./images/scne2.jpg" alt="AI scanning engine" />
+      </div>
+    </section>
+
+    <!-- SECTION 4: THE FOREMAN -->
+    <section class="editorial-grid">
+      <div class="sticky-col">
+        <div class="image-stack">
+          <img src="./images/scne3.jpg" alt="Digital Manual" />
+          <img src="./images/scne4.jpg" alt="Fixing car" />
+        </div>
+      </div>
+      <div class="text-col">
+        <div class="mono reveal">003 // Execution Phase</div>
+        <h2 class="title-main reveal delay-1" style="font-size: clamp(2rem, 5vw, 4rem);">**The End of the Guessing
+          Game**</h2>
+        <p class="reveal">We don’t just leave you with a diagnosis and a generic Google search. Listen & Fix operates as
+          your "Digital Foreman." The second it identifies the problem, our system scours the deepest corners of the
+          internet, stripping away ads, forum arguments, and filler. It hands you the exact, manufacturer-verified
+          service manual for your specific machine—like a scrub nurse handing a scalpel to a surgeon.</p>
+        <p class="reveal">It tells you exactly what tools you need. It locates the exact parts at the cheapest local
+          hardware store. And most importantly, it wraps you in a safety net. Before you touch a single bolt, it walks
+          you through locking out circuit breakers and placing jack stands. If a job is genuinely too dangerous, it
+          tells you. It gives you the courage to start, and the wisdom to stay safe.</p>
+      </div>
+    </section>
+
+    <!-- SECTION 5: PRIDE & CTA -->
+    <section class="section-bleed">
+      <img src="./images/sce5.jpg" alt="Proud mechanic" class="bg-img js-parallax" style="filter: brightness(0.5);" />
+      <div class="content reveal" style="text-align: center; margin: 0 auto;">
+        <div class="mono mb-4" style="justify-content: center;">004 // Resolution</div>
+        <h2 class="title-main glitch-text" data-text="The Pride of the Fix" style="font-size: clamp(3rem, 7vw, 6rem);">
+          **The Pride of the Fix**</h2>
+        <p style="max-width: 800px; margin: 0 auto 2rem auto;">We designed Listen & Fix to be a calm, professional
+          sanctuary. No messy interfaces, no blinking ads. Just a perfectly calibrated digital workspace designed for
+          greasy hands and dimly lit garages.</p>
+        <p style="max-width: 800px; margin: 0 auto 4rem auto;">Because at the end of the day, Listen & Fix isn't about
+          AI, data pipelines, or technology. It’s about the grease under your fingernails. It’s about the profound,
+          chest-swelling pride of turning the key and hearing an engine roar back to life, knowing *you* did that.</p>
+
+        <h3 class="hero-font" style="font-size: clamp(2rem, 5vw, 4rem); color: var(--accent); margin-bottom: 1rem;">Stop
+          being a hostage to the machines you own.</h3>
+        <h3 class="hero-font" style="font-size: clamp(2.5rem, 6vw, 5rem);">Grab your wrench.<br>Listen & Fix is standing
+          by.</h3>
+      </div>
+    </section>
+
+  </main>
+
+  <script>
+    // Custom Cursor Logic
+    const cursor = document.getElementById('cursor');
+    document.addEventListener('mousemove', (e) => {
+      cursor.style.left = e.clientX + 'px';
+      cursor.style.top = e.clientY + 'px';
+    });
+
+    document.querySelectorAll('h1, h2, h3').forEach(el => {
+      el.addEventListener('mouseenter', () => {
+        cursor.style.width = '60px';
+        cursor.style.height = '60px';
+        cursor.style.backgroundColor = 'rgba(245, 158, 11, 0.2)';
+      });
+      el.addEventListener('mouseleave', () => {
+        cursor.style.width = '20px';
+        cursor.style.height = '20px';
+        cursor.style.backgroundColor = 'transparent';
+      });
+    });
+
+    // Scroll Progress Bar
+    const progressBar = document.getElementById('progress');
+    window.addEventListener('scroll', () => {
+      const winScroll = document.body.scrollTop || document.documentElement.scrollTop;
+      const height = document.documentElement.scrollHeight - document.documentElement.clientHeight;
+      const scrolled = (winScroll / height) * 100;
+      progressBar.style.width = scrolled + '%';
+    });
+
+    // Intersection Observer for Text Reveals
+    const revealOptions = {
+      threshold: 0.15,
+      rootMargin: "0px 0px -10% 0px"
+    };
+
+    const revealObserver = new IntersectionObserver((entries, observer) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          entry.target.classList.add('is-visible');
+          observer.unobserve(entry.target);
+        }
+      });
+    }, revealOptions);
+
+    document.querySelectorAll('.reveal').forEach(el => {
+      revealObserver.observe(el);
+    });
+
+    // Fixed Parallax Logic
+    const parallaxImages = document.querySelectorAll('.js-parallax');
+    window.addEventListener('scroll', () => {
+      let scrollPos = window.pageYOffset;
+      parallaxImages.forEach(img => {
+        const parent = img.closest('section');
+        const sectionOffset = parent.offsetTop;
+        const relativeScroll = scrollPos - sectionOffset;
+        
+        // Only apply if the section is relatively near the viewport
+        if (scrollPos > sectionOffset - window.innerHeight && scrollPos < sectionOffset + parent.offsetHeight) {
+           img.style.transform = `translateY(${relativeScroll * 0.3}px)`;
+        }
+      });
+    });
+  </script>
+</body>
+
+</html>

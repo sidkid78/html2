@@ -41,8 +41,7 @@ const TrackCard = ({ track, isPlaying, isQueued, isExcluded, onToggle, onEnded }
       audio.play().catch(() => {});
     } else {
       audio.pause();
-      setProgress(0);
-      setCurrentTime(0);
+      // Reset current time when stopping
       audio.currentTime = 0;
     }
   }, [isPlaying]);
@@ -53,6 +52,11 @@ const TrackCard = ({ track, isPlaying, isQueued, isExcluded, onToggle, onEnded }
       setProgress((audio.currentTime / audio.duration) * 100 || 0);
       setCurrentTime(audio.currentTime);
     }
+  };
+
+  const handlePause = () => {
+    setProgress(0);
+    setCurrentTime(0);
   };
 
   return (
@@ -118,6 +122,7 @@ const TrackCard = ({ track, isPlaying, isQueued, isExcluded, onToggle, onEnded }
         src={track.file}
         onTimeUpdate={handleTimeUpdate}
         onEnded={onEnded}
+        onPause={handlePause}
       />
     </div>
   );
@@ -366,8 +371,9 @@ export default function AudioStoryHub2Page() {
         </section>
 
         <footer className="mt-24 text-center border-t border-stone-800/50 pt-12 pb-8 flex flex-col items-center gap-6">
-            <div className="flex gap-4">
-                <a href="/audio-story" className="text-stone-500 hover:text-indigo-400 text-xs transition-colors border border-stone-800 px-4 py-2 rounded-xl bg-stone-900/50">← Switch to Hub I (Modern Anxiety)</a>
+            <div className="flex flex-wrap justify-center gap-4">
+                <a href="/audio-story" className="text-stone-500 hover:text-indigo-400 text-xs transition-colors border border-stone-800 px-4 py-2 rounded-xl bg-stone-900/50">HUB I: Modern Anxiety</a>
+                <a href="/audio-story-3" className="text-stone-500 hover:text-cyan-400 text-xs transition-colors border border-stone-800 px-4 py-2 rounded-xl bg-stone-900/50">HUB III: Listen & Fix →</a>
             </div>
             <p className="text-stone-700 text-[0.7rem] font-mono tracking-widest uppercase font-bold">© {new Date().getFullYear()} Cinematic Foundation • Hub II Deploy Ready</p>
         </footer>
