@@ -1,368 +1,674 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Listen &amp; Fix</title>
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@300;400;600&family=Oswald:wght@500;700&display=swap" rel="stylesheet">
-<style>
-  :root {
-    --c-bg: #050505;
-    --c-text: #f0f0f0;
-    --c-accent-warn: #ff4a22;
-    --c-accent-tech: #00f0ff;
-    --c-accent-opt: #f2a900;
-    --font-head: 'Oswald', sans-serif;
-    --font-body: 'Manrope', sans-serif;
-    --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
-    --ease-spring: cubic-bezier(0.175, 0.885, 0.32, 1.275);
-  }
-  * { box-sizing: border-box; margin: 0; padding: 0; cursor: none; }
-  body { background: var(--c-bg); color: var(--c-text); font-family: var(--font-body); overflow: hidden; -webkit-font-smoothing: antialiased; }
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Listen &amp; Fix</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@300;400;600&family=Oswald:wght@500;700&display=swap"
+    rel="stylesheet">
+  <style>
+    :root {
+      --c-bg: #050505;
+      --c-text: #f0f0f0;
+      --c-accent-warn: #ff4a22;
+      --c-accent-tech: #00f0ff;
+      --c-accent-opt: #f2a900;
+      --font-head: 'Oswald', sans-serif;
+      --font-body: 'Manrope', sans-serif;
+      --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
+      --ease-spring: cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    }
 
-  /* Custom Cursor */
-  .cursor { position: fixed; top: 0; left: 0; width: 12px; height: 12px; border-radius: 50%; background: white; mix-blend-mode: difference; pointer-events: none; z-index: 9999; transform: translate(-50%, -50%); transition: width 0.3s var(--ease-out), height 0.3s var(--ease-out); }
-  .cursor.hovered { width: 60px; height: 60px; background: transparent; border: 1px solid rgba(255,255,255,0.5); backdrop-filter: blur(2px); }
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      cursor: none;
+    }
 
-  /* SVG Filters Overlay */
-  .grain-overlay { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; pointer-events: none; z-index: 9990; opacity: 0.4; mix-blend-mode: overlay; }
-  .vignette { position: fixed; inset: 0; background: radial-gradient(circle, transparent 40%, #000 120%); z-index: 50; pointer-events: none; }
+    body {
+      background: var(--c-bg);
+      color: var(--c-text);
+      font-family: var(--font-body);
+      overflow: hidden;
+      -webkit-font-smoothing: antialiased;
+    }
 
-  /* Scroller */
-  .scroller { height: 100vh; overflow-y: scroll; scroll-snap-type: y mandatory; scroll-behavior: smooth; }
-  .scroller::-webkit-scrollbar { display: none; }
+    /* Custom Cursor */
+    .cursor {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 12px;
+      height: 12px;
+      border-radius: 50%;
+      background: white;
+      mix-blend-mode: difference;
+      pointer-events: none;
+      z-index: 100001;
+      transform: translate(-50%, -50%);
+      transition: width 0.3s var(--ease-out), height 0.3s var(--ease-out);
+    }
 
-  /* Panel Structure */
-  .panel { height: 100vh; width: 100vw; position: relative; scroll-snap-align: start; display: flex; align-items: flex-end; padding: 6vw; overflow: hidden; }
-  .panel-bg { position: absolute; inset: 0; background-size: cover; background-position: center; z-index: 1; transform: scale(1.1); transition: transform 2.5s var(--ease-out), filter 2s ease; filter: brightness(0.3) saturate(0.5); }
-  .panel.in-view .panel-bg { transform: scale(1); filter: brightness(0.4) saturate(1); }
+    .cursor.hovered {
+      width: 60px;
+      height: 60px;
+      background: transparent;
+      border: 1px solid rgba(255, 255, 255, 0.5);
+      -webkit-backdrop-filter: blur(2px);
+      backdrop-filter: blur(2px);
+    }
 
-  /* Content Layouts */
-  .content { position: relative; z-index: 10; max-width: 1400px; width: 100%; margin: 0 auto; display: grid; grid-template-columns: 1fr; gap: 4vh; }
-  @media(min-width: 900px) {
-    .content { grid-template-columns: 1fr 1fr; align-items: end; gap: 8vw; }
-    .panel:nth-child(even) .content { grid-template-columns: 1.5fr 1fr; }
-    .panel:nth-child(even) .content-text { order: -1; }
-  }
+    /* SVG Filters Overlay */
+    .grain-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
+      pointer-events: none;
+      z-index: 9990;
+      opacity: 0.4;
+      mix-blend-mode: overlay;
+    }
 
-  /* Typography */
-  h1, h2 { font-family: var(--font-head); text-transform: uppercase; line-height: 0.9; margin-bottom: 1rem; }
-  h1 { font-size: clamp(3rem, 8vw, 8rem); font-weight: 700; }
-  h2 { font-size: clamp(2.5rem, 5vw, 5rem); font-weight: 500; }
-  p { font-size: clamp(1rem, 1.2vw, 1.5rem); font-weight: 300; line-height: 1.6; max-width: 50ch; margin-bottom: 1.5rem; opacity: 0.9; }
-  p strong, p b { font-weight: 600; color: #fff; }
+    .vignette {
+      position: fixed;
+      inset: 0;
+      background: radial-gradient(circle, transparent 40%, #000 120%);
+      z-index: 50;
+      pointer-events: none;
+    }
 
-  .meta { font-family: var(--font-body); font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.2em; margin-bottom: 2rem; display: block; color: rgba(255,255,255,0.5); }
+    /* Scroller */
+    .scroller {
+      height: 100vh;
+      overflow-y: scroll;
+      scroll-snap-type: y mandatory;
+      scroll-behavior: smooth;
+    }
 
-  /* Animations */
-  .split-word { display: inline-block; overflow: hidden; vertical-align: bottom; }
-  .split-word span { display: inline-block; transform: translateY(110%); transition: transform 0.8s var(--ease-out); }
-  .panel.in-view .split-word span { transform: translateY(0); }
+    .scroller::-webkit-scrollbar {
+      display: none;
+    }
 
-  .fade-up { opacity: 0; transform: translateY(30px); transition: opacity 1s var(--ease-out), transform 1s var(--ease-out); transition-delay: 0.4s; }
-  .panel.in-view .fade-up { opacity: 1; transform: translateY(0); }
+    /* Panel Structure */
+    .panel {
+      height: 100vh;
+      width: 100vw;
+      position: relative;
+      scroll-snap-align: start;
+      display: flex;
+      align-items: flex-end;
+      padding: 6vw;
+      overflow: hidden;
+    }
 
-  /* Specific Panel Styling */
-  #panel-1 .panel-bg { background-image: url('./images/scen1(2).jpg'); }
-  #panel-1 h1 { color: var(--c-accent-warn); }
+    .panel-bg {
+      position: absolute;
+      inset: 0;
+      background-size: cover;
+      background-position: center;
+      z-index: 1;
+      transform: scale(1.1);
+      transition: transform 2.5s var(--ease-out), filter 2s ease;
+      filter: brightness(0.3) saturate(0.5);
+    }
 
-  #panel-2 .panel-bg { background-image: url('./images/scen2(2).jpg'); }
-  #panel-2 h2 { color: var(--c-text); }
+    .panel.in-view .panel-bg {
+      transform: scale(1);
+      filter: brightness(0.4) saturate(1);
+    }
 
-  #panel-3 .panel-bg { background-image: url('./images/scen3(2).jpg'); }
-  #panel-3 h2 { color: var(--c-accent-tech); }
-  #panel-3 .content { align-items: center; text-align: center; grid-template-columns: 1fr; }
-  #panel-3 p { margin: 0 auto 1.5rem auto; }
+    /* Content Layouts */
+    .content {
+      position: relative;
+      z-index: 10;
+      max-width: 1400px;
+      width: 100%;
+      margin: 0 auto;
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 4vh;
+    }
 
-  #panel-4 .panel-bg { background-image: url('./images/scen4(2).jpg'); }
+    @media(min-width: 900px) {
+      .content {
+        grid-template-columns: 1fr 1fr;
+        align-items: end;
+        gap: 8vw;
+      }
 
-  #panel-5 .panel-bg { background-image: url('./images/scen5(2).jpg'); filter: brightness(0.5) saturate(1.2); }
-  #panel-5.in-view .panel-bg { filter: brightness(0.6) saturate(1.2); }
-  #panel-5 h1 { color: var(--c-accent-opt); }
-  #panel-5 .content { align-items: center; text-align: center; grid-template-columns: 1fr; }
-  #panel-5 p { margin: 0 auto 1.5rem auto; }
+      .panel:nth-child(even) .content {
+        grid-template-columns: 1.5fr 1fr;
+      }
 
-  /* Audio Control UI */
-  .audio-toggle {
-    position: fixed;
-    top: 30px;
-    right: 30px;
-    z-index: 10000;
-    background: rgba(255, 255, 255, 0.05);
-    -webkit-backdrop-filter: blur(10px);
-    backdrop-filter: blur(10px);
-    border: 1px solid rgba(255, 255, 255, 0.1);
-    padding: 10px 20px;
-    border-radius: 30px;
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    cursor: pointer;
-    transition: all 0.3s var(--ease-out);
-    color: #888;
-    font-size: 0.8rem;
-    font-weight: 700;
-    text-transform: uppercase;
-    letter-spacing: 0.1em;
-  }
-  .audio-toggle:hover {
-    background: rgba(255, 255, 255, 0.1);
-    border-color: rgba(255, 255, 255, 0.3);
-    color: var(--c-text);
-  }
-  .audio-toggle.active {
-    color: var(--c-accent-tech);
-    border-color: var(--c-accent-tech);
-    box-shadow: 0 0 20px rgba(0, 240, 255, 0.2);
-  }
-  .sound-bars {
-    display: flex;
-    align-items: center;
-    gap: 2px;
-    height: 12px;
-  }
-  .bar {
-    width: 2px;
-    height: 100%;
-    background: currentColor;
-    border-radius: 2px;
-    transition: height 0.3s ease;
-  }
-  .active .bar {
-    animation: sound-bar-anim 1s infinite ease-in-out alternate;
-  }
-  .active .bar:nth-child(2) { animation-delay: 0.2s; }
-  .active .bar:nth-child(3) { animation-delay: 0.4s; }
+      .panel:nth-child(even) .content-text {
+        order: -1;
+      }
+    }
 
-  @keyframes sound-bar-anim {
-    0% { height: 30%; }
-    100% { height: 100%; }
-  }
-</style>
+    /* Typography */
+    h1,
+    h2 {
+      font-family: var(--font-head);
+      text-transform: uppercase;
+      line-height: 0.9;
+      margin-bottom: 1rem;
+    }
+
+    h1 {
+      font-size: clamp(3rem, 8vw, 8rem);
+      font-weight: 700;
+    }
+
+    h2 {
+      font-size: clamp(2.5rem, 5vw, 5rem);
+      font-weight: 500;
+    }
+
+    p {
+      font-size: clamp(1rem, 1.2vw, 1.5rem);
+      font-weight: 300;
+      line-height: 1.6;
+      max-width: 50ch;
+      margin-bottom: 1.5rem;
+      opacity: 0.9;
+    }
+
+    p strong,
+    p b {
+      font-weight: 600;
+      color: #fff;
+    }
+
+    .meta {
+      font-family: var(--font-body);
+      font-size: 0.75rem;
+      text-transform: uppercase;
+      letter-spacing: 0.2em;
+      margin-bottom: 2rem;
+      display: block;
+      color: rgba(255, 255, 255, 0.5);
+    }
+
+    /* Animations */
+    .split-word {
+      display: inline-block;
+      overflow: hidden;
+      vertical-align: bottom;
+    }
+
+    .split-word span {
+      display: inline-block;
+      transform: translateY(110%);
+      transition: transform 0.8s var(--ease-out);
+    }
+
+    .panel.in-view .split-word span {
+      transform: translateY(0);
+    }
+
+    .fade-up {
+      opacity: 0;
+      transform: translateY(30px);
+      transition: opacity 1s var(--ease-out), transform 1s var(--ease-out);
+      transition-delay: 0.4s;
+    }
+
+    .panel.in-view .fade-up {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    /* Specific Panel Styling */
+    #panel-1 .panel-bg {
+      background-image: url('./images/scen1(2).jpg');
+    }
+
+    #panel-1 h1 {
+      color: var(--c-accent-warn);
+    }
+
+    #panel-2 .panel-bg {
+      background-image: url('./images/scen2(2).jpg');
+    }
+
+    #panel-2 h2 {
+      color: var(--c-text);
+    }
+
+    #panel-3 .panel-bg {
+      background-image: url('./images/scen3(2).jpg');
+    }
+
+    #panel-3 h2 {
+      color: var(--c-accent-tech);
+    }
+
+    #panel-3 .content {
+      align-items: center;
+      text-align: center;
+      grid-template-columns: 1fr;
+    }
+
+    #panel-3 p {
+      margin: 0 auto 1.5rem auto;
+    }
+
+    #panel-4 .panel-bg {
+      background-image: url('./images/scen4(2).jpg');
+    }
+
+    #panel-5 .panel-bg {
+      background-image: url('./images/scen5(2).jpg');
+      filter: brightness(0.5) saturate(1.2);
+    }
+
+    #panel-5.in-view .panel-bg {
+      filter: brightness(0.6) saturate(1.2);
+    }
+
+    #panel-5 h1 {
+      color: var(--c-accent-opt);
+    }
+
+    #panel-5 .content {
+      align-items: center;
+      text-align: center;
+      grid-template-columns: 1fr;
+    }
+
+    #panel-5 p {
+      margin: 0 auto 1.5rem auto;
+    }
+
+    /* Audio Control UI */
+    .audio-toggle {
+      position: fixed;
+      top: 30px;
+      right: 30px;
+      z-index: 10000;
+      background: rgba(255, 255, 255, 0.05);
+      -webkit-backdrop-filter: blur(10px);
+      backdrop-filter: blur(10px);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      padding: 10px 20px;
+      border-radius: 30px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      cursor: pointer;
+      transition: all 0.3s var(--ease-out);
+      color: #888;
+      font-size: 0.8rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+    }
+
+    .audio-toggle:hover {
+      background: rgba(255, 255, 255, 0.1);
+      border-color: rgba(255, 255, 255, 0.3);
+      color: var(--c-text);
+    }
+
+    .audio-toggle.active {
+      color: var(--c-accent-tech);
+      border-color: var(--c-accent-tech);
+      box-shadow: 0 0 20px rgba(0, 240, 255, 0.2);
+    }
+
+    .sound-bars {
+      display: flex;
+      align-items: center;
+      gap: 2px;
+      height: 12px;
+    }
+
+    .bar {
+      width: 2px;
+      height: 100%;
+      background: currentColor;
+      border-radius: 2px;
+      transition: height 0.3s ease;
+    }
+
+    .active .bar {
+      animation: sound-bar-anim 1s infinite ease-in-out alternate;
+    }
+
+    .active .bar:nth-child(2) {
+      animation-delay: 0.2s;
+    }
+
+    .active .bar:nth-child(3) {
+      animation-delay: 0.4s;
+    }
+
+    @keyframes sound-bar-anim {
+      0% {
+        height: 30%;
+      }
+
+      100% {
+        height: 100%;
+      }
+    }
+
+    /* Start Overlay */
+    .start-overlay {
+      position: fixed;
+      inset: 0;
+      z-index: 100000;
+      background: rgba(5, 5, 5, 0.9);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      transition: opacity 1s var(--ease-out);
+      -webkit-backdrop-filter: blur(20px);
+      backdrop-filter: blur(20px);
+    }
+
+    .start-overlay.hidden {
+      opacity: 0;
+      pointer-events: none;
+    }
+
+    .start-btn {
+      background: transparent;
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      color: white;
+      padding: 24px 48px;
+      font-family: var(--font-head);
+      font-size: 1.5rem;
+      text-transform: uppercase;
+      letter-spacing: 0.2em;
+      border-radius: 50px;
+      cursor: pointer;
+      position: relative;
+      overflow: hidden;
+      transition: all 0.4s var(--ease-out);
+      background: rgba(255, 255, 255, 0.05);
+    }
+
+    .start-btn:hover {
+      background: white;
+      color: black;
+      transform: scale(1.05);
+      border-color: white;
+      box-shadow: 0 0 40px rgba(255, 255, 255, 0.3);
+    }
+  </style>
 </head>
+
 <body>
 
-<div class="cursor" id="cursor"></div>
-
-<!-- SVG Filters -->
-<svg width="0" height="0" style="position: absolute;">
-  <filter id="grain">
-    <feTurbulence type="fractalNoise" baseFrequency="0.8" numOctaves="3" stitchTiles="stitch"/>
-    <feColorMatrix type="matrix" values="1 0 0 0 0, 0 1 0 0 0, 0 0 1 0 0, 0 0 0 0.1 0" />
-  </filter>
-  <filter id="liquid">
-    <feTurbulence type="fractalNoise" baseFrequency="0.02 0.05" numOctaves="2" result="noise">
-      <animate attributeName="baseFrequency" values="0.02 0.05; 0.04 0.1; 0.02 0.05" dur="3s" repeatCount="indefinite"/>
-    </feTurbulence>
-    <feDisplacementMap in="SourceGraphic" in2="noise" scale="15" xChannelSelector="R" yChannelSelector="G"/>
-  </filter>
-</svg>
-
-<div class="grain-overlay" style="filter: url(#grain);"></div>
-<div class="vignette"></div>
-
-<div id="audio-control" class="audio-toggle">
-  <div class="sound-bars">
-    <div class="bar"></div>
-    <div class="bar"></div>
-    <div class="bar"></div>
+  <div id="start-overlay" class="start-overlay">
+    <button id="start-btn" class="start-btn">Start Experience</button>
   </div>
-  <span id="audio-status">Audio Off</span>
-</div>
 
-<audio id="bg-music" src="./audio/background3.mp3" loop preload="auto"></audio>
+  <div class="cursor" id="cursor"></div>
 
-<main class="scroller">
+  <!-- SVG Filters -->
+  <svg width="0" height="0" style="position: absolute;">
+    <filter id="grain">
+      <feTurbulence type="fractalNoise" baseFrequency="0.8" numOctaves="3" stitchTiles="stitch" />
+      <feColorMatrix type="matrix" values="1 0 0 0 0, 0 1 0 0 0, 0 0 1 0 0, 0 0 0 0.1 0" />
+    </filter>
+    <filter id="liquid">
+      <feTurbulence type="fractalNoise" baseFrequency="0.02 0.05" numOctaves="2" result="noise">
+        <animate attributeName="baseFrequency" values="0.02 0.05; 0.04 0.1; 0.02 0.05" dur="3s"
+          repeatCount="indefinite" />
+      </feTurbulence>
+      <feDisplacementMap in="SourceGraphic" in2="noise" scale="15" xChannelSelector="R" yChannelSelector="G" />
+    </filter>
+  </svg>
 
-  <!-- PANEL 1 -->
-  <section class="panel" id="panel-1">
-    <div class="panel-bg"></div>
-    <audio id="audio-1" src="./audio/down (11).wav" preload="auto"></audio>
-    <div class="content">
-      <div class="content-title">
-        <span class="meta">01 — The Dread</span>
-        <h1 class="split-text distort-hover">Listen &amp; Fix: Never Feel Helpless Again.</h1>
-      </div>
-      <div class="content-text fade-up">
-        <p>There is a specific kind of dread that hits when a machine you rely on betrays you.</p>
-        <p>It's the sudden, harsh <em>clanking</em> from under the hood of your car on a lonely stretch of highway. It's the screeching of your washing machine, threatening to flood the floor. In that moment, your stomach drops.</p>
-        <p>You aren't thinking about technology. You're thinking about the massive repair bill. You're thinking about the tow truck. You're thinking about the mechanic who might look at you and see an easy target to upcharge.</p>
-      </div>
+  <div class="grain-overlay" style="filter: url(#grain);"></div>
+  <div class="vignette"></div>
+
+  <div id="audio-control" class="audio-toggle">
+    <div class="sound-bars">
+      <div class="bar"></div>
+      <div class="bar"></div>
+      <div class="bar"></div>
     </div>
-  </section>
+    <span id="audio-status">Audio Off</span>
+  </div>
 
-  <!-- PANEL 2 -->
-  <section class="panel" id="panel-2">
-    <div class="panel-bg"></div>
-    <audio id="audio-2" src="./audio/down(12).wav" preload="auto"></audio>
-    <div class="content">
-      <div class="content-title">
-        <span class="meta">02 — The Black Box</span>
-        <h2 class="split-text">Modern machines have become black boxes.</h2>
-      </div>
-      <div class="content-text fade-up">
-        <p>They are designed to make us feel helpless when they break.</p>
-        <p>We built <strong>Listen &amp; Fix</strong> to give you your power back.</p>
-        <p>Imagine having an ASE-certified master mechanic, an HVAC specialist, and a master plumber standing right next to you, 24/7. That is Listen &amp; Fix. We are the "Shazam for broken things."</p>
-      </div>
-    </div>
-  </section>
+  <audio id="bg-music" src="./audio/background3.mp3" loop preload="auto"></audio>
 
-  <!-- PANEL 3 -->
-  <section class="panel" id="panel-3">
-    <div class="panel-bg"></div>
-    <audio id="audio-3" src="./audio/down(13).wav" preload="auto"></audio>
-    <div class="content">
-      <div class="content-title" style="max-width: 800px; margin: 0 auto;">
-        <span class="meta">03 — Acoustic Diagnostic</span>
-        <h2 class="split-text">Let it listen. Let it look.</h2>
-      </div>
-      <div class="content-text fade-up" style="max-width: 800px; margin: 0 auto;">
-        <p>You don't need to know the name of the part. You don't need to read a 500-page service manual. Just pull out your phone.</p>
-        <p><strong>Let it listen</strong> to the squeal of the engine belt. <strong>Let it look</strong> at the frayed wire or the leaking pipe.</p>
-        <p>In seconds, our advanced AI cuts through the panic. It processes the exact acoustic signature of the knock and visually cross-references the damage against millions of pages of manufacturer service bulletins.</p>
-      </div>
-    </div>
-  </section>
+  <main class="scroller">
 
-  <!-- PANEL 4 -->
-  <section class="panel" id="panel-4">
-    <div class="panel-bg"></div>
-    <audio id="audio-4" src="./audio/down(14).wav" preload="auto"></audio>
-    <div class="content">
-      <div class="content-title">
-        <span class="meta">04 — The Solution</span>
-        <h2 class="split-text">The Digital Foreman.</h2>
+    <!-- PANEL 1 -->
+    <section class="panel" id="panel-1">
+      <div class="panel-bg"></div>
+      <audio id="audio-1" src="./audio/down (11).wav" preload="auto"></audio>
+      <div class="content">
+        <div class="content-title">
+          <span class="meta">01 — The Dread</span>
+          <h1 class="split-text distort-hover">Listen &amp; Fix: Never Feel Helpless Again.</h1>
+        </div>
+        <div class="content-text fade-up">
+          <p>There is a specific kind of dread that hits when a machine you rely on betrays you.</p>
+          <p>It's the sudden, harsh <em>clanking</em> from under the hood of your car on a lonely stretch of highway.
+            It's the screeching of your washing machine, threatening to flood the floor. In that moment, your stomach
+            drops.</p>
+          <p>You aren't thinking about technology. You're thinking about the massive repair bill. You're thinking about
+            the tow truck. You're thinking about the mechanic who might look at you and see an easy target to upcharge.
+          </p>
+        </div>
       </div>
-      <div class="content-text fade-up">
-        <p>Then, the panic stops, and the magic happens.</p>
-        <p>Listen &amp; Fix speaks to you with the calm, authoritative voice of a Digital Foreman. It tells you exactly what is wrong. It tells you if it's safe to keep driving or if you need to shut it down.</p>
-        <p>It gives you a localized, step-by-step repair guide. It even finds the exact $15 replacement part at the auto-shop down the street, so you can fix it yourself this afternoon.</p>
+    </section>
+
+    <!-- PANEL 2 -->
+    <section class="panel" id="panel-2">
+      <div class="panel-bg"></div>
+      <audio id="audio-2" src="./audio/down(12).wav" preload="auto"></audio>
+      <div class="content">
+        <div class="content-title">
+          <span class="meta">02 — The Black Box</span>
+          <h2 class="split-text">Modern machines have become black boxes.</h2>
+        </div>
+        <div class="content-text fade-up">
+          <p>They are designed to make us feel helpless when they break.</p>
+          <p>We built <strong>Listen &amp; Fix</strong> to give you your power back.</p>
+          <p>Imagine having an ASE-certified master mechanic, an HVAC specialist, and a master plumber standing right
+            next to you, 24/7. That is Listen &amp; Fix. We are the "Shazam for broken things."</p>
+        </div>
       </div>
-    </div>
-  </section>
+    </section>
 
-  <!-- PANEL 5 -->
-  <section class="panel" id="panel-5">
-    <div class="panel-bg"></div>
-    <audio id="audio-5" src="./audio/down(15).wav" preload="auto"></audio>
-    <div class="content">
-      <div class="content-title" style="max-width: 900px; margin: 0 auto;">
-        <span class="meta">05 — Empowerment</span>
-        <h1 class="split-text">Confidence.</h1>
+    <!-- PANEL 3 -->
+    <section class="panel" id="panel-3">
+      <div class="panel-bg"></div>
+      <audio id="audio-3" src="./audio/down(13).wav" preload="auto"></audio>
+      <div class="content">
+        <div class="content-title" style="max-width: 800px; margin: 0 auto;">
+          <span class="meta">03 — Acoustic Diagnostic</span>
+          <h2 class="split-text">Let it listen. Let it look.</h2>
+        </div>
+        <div class="content-text fade-up" style="max-width: 800px; margin: 0 auto;">
+          <p>You don't need to know the name of the part. You don't need to read a 500-page service manual. Just pull
+            out your phone.</p>
+          <p><strong>Let it listen</strong> to the squeal of the engine belt. <strong>Let it look</strong> at the frayed
+            wire or the leaking pipe.</p>
+          <p>In seconds, our advanced AI cuts through the panic. It processes the exact acoustic signature of the knock
+            and visually cross-references the damage against millions of pages of manufacturer service bulletins.</p>
+        </div>
       </div>
-      <div class="content-text fade-up" style="max-width: 800px; margin: 0 auto;">
-        <p>We do the heavy lifting in the background—instantly crawling schematics, matching engine harmonics, and verifying safety protocols—so you can experience one simple feeling: <strong>Confidence.</strong></p>
-        <p>We believe that when things break, your life shouldn't stop. We believe in the right to repair. We believe you shouldn't need an engineering degree to fix the things you own.</p>
-        <p>Don't panic. Don't just throw it away. <strong>Listen, Fix, and get back to your life.</strong></p>
+    </section>
+
+    <!-- PANEL 4 -->
+    <section class="panel" id="panel-4">
+      <div class="panel-bg"></div>
+      <audio id="audio-4" src="./audio/down(14).wav" preload="auto"></audio>
+      <div class="content">
+        <div class="content-title">
+          <span class="meta">04 — The Solution</span>
+          <h2 class="split-text">The Digital Foreman.</h2>
+        </div>
+        <div class="content-text fade-up">
+          <p>Then, the panic stops, and the magic happens.</p>
+          <p>Listen &amp; Fix speaks to you with the calm, authoritative voice of a Digital Foreman. It tells you
+            exactly what is wrong. It tells you if it's safe to keep driving or if you need to shut it down.</p>
+          <p>It gives you a localized, step-by-step repair guide. It even finds the exact $15 replacement part at the
+            auto-shop down the street, so you can fix it yourself this afternoon.</p>
+        </div>
       </div>
-    </div>
-  </section>
+    </section>
 
-</main>
+    <!-- PANEL 5 -->
+    <section class="panel" id="panel-5">
+      <div class="panel-bg"></div>
+      <audio id="audio-5" src="./audio/down(15).wav" preload="auto"></audio>
+      <div class="content">
+        <div class="content-title" style="max-width: 900px; margin: 0 auto;">
+          <span class="meta">05 — Empowerment</span>
+          <h1 class="split-text">Confidence.</h1>
+        </div>
+        <div class="content-text fade-up" style="max-width: 800px; margin: 0 auto;">
+          <p>We do the heavy lifting in the background—instantly crawling schematics, matching engine harmonics, and
+            verifying safety protocols—so you can experience one simple feeling: <strong>Confidence.</strong></p>
+          <p>We believe that when things break, your life shouldn't stop. We believe in the right to repair. We believe
+            you shouldn't need an engineering degree to fix the things you own.</p>
+          <p>Don't panic. Don't just throw it away. <strong>Listen, Fix, and get back to your life.</strong></p>
+        </div>
+      </div>
+    </section>
 
-<script>
-  // Custom Cursor
-  const cursor = document.getElementById('cursor');
-  document.addEventListener('mousemove', (e) => {
-    cursor.style.left = e.clientX + 'px';
-    cursor.style.top = e.clientY + 'px';
-  });
-  document.querySelectorAll('h1, h2, strong').forEach(el => {
-    el.addEventListener('mouseenter', () => cursor.classList.add('hovered'));
-    el.addEventListener('mouseleave', () => cursor.classList.remove('hovered'));
-  });
+  </main>
 
-  // Text Splitting for Animation
-  document.querySelectorAll('.split-text').forEach(el => {
-    const text = el.innerText;
-    el.innerHTML = '';
-    text.split(' ').forEach((word, index) => {
-      const wrapper = document.createElement('span');
-      wrapper.className = 'split-word';
-      const inner = document.createElement('span');
-      inner.style.transitionDelay = (index * 0.08) + 's';
-      inner.textContent = word + '\u00a0';
-      wrapper.appendChild(inner);
-      el.appendChild(wrapper);
+  <script>
+    // Custom Cursor
+    const cursor = document.getElementById('cursor');
+    document.addEventListener('mousemove', (e) => {
+      cursor.style.left = e.clientX + 'px';
+      cursor.style.top = e.clientY + 'px';
     });
-  });
-
-  // Audio State
-  let isMuted = true;
-  let hasStarted = false;
-  const panels = document.querySelectorAll('.panel');
-  const audioToggle = document.getElementById('audio-control');
-  const audioStatus = document.getElementById('audio-status');
-  const bgMusic = document.getElementById('bg-music');
-
-  function getPanelAudio(panel) {
-    return document.getElementById(panel.id.replace('panel-', 'audio-'));
-  }
-
-  function playPanelAudio(panel) {
-    if (isMuted || !hasStarted) return;
-    const audio = getPanelAudio(panel);
-    if (audio) {
-      audio.currentTime = 0;
-      audio.play().catch(e => console.warn('Audio play failed:', e));
-    }
-  }
-
-  function stopAllPanelAudio() {
-    panels.forEach(panel => {
-      const audio = getPanelAudio(panel);
-      if (audio) { audio.pause(); audio.currentTime = 0; }
+    document.querySelectorAll('h1, h2, strong, .start-btn').forEach(el => {
+      el.addEventListener('mouseenter', () => cursor.classList.add('hovered'));
+      el.addEventListener('mouseleave', () => cursor.classList.remove('hovered'));
     });
-  }
 
-  // Intersection Observer — triggers in-view animations + panel audio
-  const observer = new IntersectionObserver((entries) => {
-    entries.forEach(entry => {
-      if (entry.isIntersecting) {
-        entry.target.classList.add('in-view');
-        playPanelAudio(entry.target);
-      } else {
-        entry.target.classList.remove('in-view');
-        const audio = getPanelAudio(entry.target);
-        if (audio) audio.pause();
-      }
-    });
-  }, { threshold: 0.5 });
-
-  panels.forEach(panel => observer.observe(panel));
-
-  // Autoscroll — every panel's audio ending scrolls to the next panel
-  panels.forEach((panel, index) => {
-    if (index >= panels.length - 1) return; // skip last panel
-    const audio = getPanelAudio(panel);
-    if (audio) {
-      audio.addEventListener('ended', () => {
-        panels[index + 1].scrollIntoView({ behavior: 'smooth' });
+    // Text Splitting for Animation
+    document.querySelectorAll('.split-text').forEach(el => {
+      const text = el.innerText;
+      el.innerHTML = '';
+      text.split(' ').forEach((word, index) => {
+        const wrapper = document.createElement('span');
+        wrapper.className = 'split-word';
+        const inner = document.createElement('span');
+        inner.style.transitionDelay = (index * 0.08) + 's';
+        inner.textContent = word + '\u00a0';
+        wrapper.appendChild(inner);
+        el.appendChild(wrapper);
       });
-    }
-  });
+    });
 
-  // Audio Toggle Button
-  audioToggle.addEventListener('click', () => {
-    isMuted = !isMuted;
-    hasStarted = true;
+    // Audio State
+    let isMuted = true;
+    let hasStarted = false;
+    const panels = document.querySelectorAll('.panel');
+    const audioToggle = document.getElementById('audio-control');
+    const startBtn = document.getElementById('start-btn');
+    const startOverlay = document.getElementById('start-overlay');
+    const audioStatus = document.getElementById('audio-status');
+    const bgMusic = document.getElementById('bg-music');
 
-    if (!isMuted) {
+    function startExperience() {
+      if (hasStarted) return;
+      hasStarted = true;
+      isMuted = false;
+
+      startOverlay.classList.add('hidden');
       audioToggle.classList.add('active');
       audioStatus.innerText = 'Audio On';
-      const visiblePanel = document.querySelector('.panel.in-view');
+
+      // Play background music
+      if (bgMusic) {
+        bgMusic.volume = 0.4;
+        bgMusic.play().catch(e => console.warn('BG Music play failed:', e));
+      }
+
+      // Play current panel audio
+      const visiblePanel = document.querySelector('.panel.in-view') || panels[0];
       if (visiblePanel) playPanelAudio(visiblePanel);
-      if (bgMusic) { bgMusic.volume = 0.4; bgMusic.play().catch(() => {}); }
-    } else {
-      audioToggle.classList.remove('active');
-      audioStatus.innerText = 'Audio Off';
-      stopAllPanelAudio();
-      if (bgMusic) bgMusic.pause();
     }
-  });
-</script>
+
+    startBtn.addEventListener('click', startExperience);
+
+    function getPanelAudio(panel) {
+      return document.getElementById(panel.id.replace('panel-', 'audio-'));
+    }
+
+    function playPanelAudio(panel) {
+      if (isMuted || !hasStarted) return;
+      const audio = getPanelAudio(panel);
+      if (audio) {
+        audio.currentTime = 0;
+        audio.play().catch(e => console.warn('Audio play failed:', e));
+      }
+    }
+
+    function stopAllPanelAudio() {
+      panels.forEach(panel => {
+        const audio = getPanelAudio(panel);
+        if (audio) { audio.pause(); audio.currentTime = 0; }
+      });
+    }
+
+    // Intersection Observer — triggers in-view animations + panel audio
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          entry.target.classList.add('in-view');
+          playPanelAudio(entry.target);
+        } else {
+          entry.target.classList.remove('in-view');
+          const audio = getPanelAudio(entry.target);
+          if (audio) audio.pause();
+        }
+      });
+    }, { threshold: 0.5 });
+
+    panels.forEach(panel => observer.observe(panel));
+
+    // Autoscroll — every panel's audio ending scrolls to the next panel
+    panels.forEach((panel, index) => {
+      if (index >= panels.length - 1) return; // skip last panel
+      const audio = getPanelAudio(panel);
+      if (audio) {
+        audio.addEventListener('ended', () => {
+          panels[index + 1].scrollIntoView({ behavior: 'smooth' });
+        });
+      }
+    });
+
+    // Audio Toggle Button
+    audioToggle.addEventListener('click', () => {
+      isMuted = !isMuted;
+      hasStarted = true;
+
+      if (!isMuted) {
+        audioToggle.classList.add('active');
+        audioStatus.innerText = 'Audio On';
+        const visiblePanel = document.querySelector('.panel.in-view');
+        if (visiblePanel) playPanelAudio(visiblePanel);
+        if (bgMusic) { bgMusic.volume = 0.4; bgMusic.play().catch(() => { }); }
+      } else {
+        audioToggle.classList.remove('active');
+        audioStatus.innerText = 'Audio Off';
+        stopAllPanelAudio();
+        if (bgMusic) bgMusic.pause();
+      }
+    });
+  </script>
 </body>
+
 </html>
