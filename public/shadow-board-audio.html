@@ -84,6 +84,47 @@
             letter-spacing: -0.01em;
         }
 
+        /* Header Controls */
+        .hub-controls {
+            display: flex;
+            justify-content: center;
+            gap: 1.5rem;
+            margin-bottom: 3rem;
+        }
+
+        .sequence-btn {
+            background: rgba(0, 229, 255, 0.1);
+            border: 1px solid rgba(0, 229, 255, 0.3);
+            color: var(--cyan);
+            padding: 0.8rem 1.5rem;
+            border-radius: 4px;
+            font-family: inherit;
+            font-size: 0.8rem;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            cursor: pointer;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            gap: 0.8rem;
+        }
+
+        .sequence-btn:hover {
+            background: var(--cyan);
+            color: var(--bg);
+            box-shadow: 0 0 20px rgba(0, 229, 255, 0.4);
+        }
+
+        .sequence-btn.active {
+            background: var(--cyan);
+            color: var(--bg);
+            border-color: var(--cyan);
+        }
+
+        .sequence-btn i {
+            font-style: normal;
+        }
+
         p.subtitle {
             font-size: 1.1rem;
             color: var(--text-muted);
@@ -92,21 +133,83 @@
             line-height: 1.6;
         }
 
-        /* Ambient Panel */
+        .btn-icon {
+            padding: 0;
+            width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%;
+        }
+
+        .master-mix-label {
+            font-family: var(--font-mono);
+            font-size: 0.65rem;
+            color: var(--text-muted);
+            margin-bottom: 0.5rem;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+        }
+
+        .hidden {
+            display: none !important;
+        }
+
+        .ambient-title {
+            font-family: var(--font-hero);
+            font-size: 1.1rem;
+        }
+
+        /* Ambient Panel & Tracks */
         .ambient-panel {
-            background: var(--glass-bg);
-            backdrop-filter: blur(40px);
-            -webkit-backdrop-filter: blur(40px);
+            background: rgba(3, 4, 6, 0.8);
             border: 1px solid var(--glass-border);
             border-radius: 4px;
             padding: 2.5rem;
             margin-bottom: 4rem;
-            display: grid;
-            grid-template-columns: auto 1fr auto;
+            display: flex;
             align-items: center;
             gap: 2.5rem;
-            box-shadow: 0 4px 64px rgba(0, 0, 0, 0.6);
+            -webkit-backdrop-filter: blur(40px);
+            backdrop-filter: blur(40px);
             border-left: 2px solid var(--primary);
+            box-shadow: 0 4px 64px rgba(0, 0, 0, 0.6);
+        }
+
+        .ambient-tracks {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1.5rem;
+            flex-grow: 1;
+        }
+
+        .ambient-track-item {
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            padding: 1.25rem;
+            display: flex;
+            align-items: center;
+            gap: 1.5rem;
+            cursor: pointer;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            border-radius: 2px;
+        }
+
+        .ambient-track-item:hover {
+            background: rgba(255, 255, 255, 0.06);
+            border-color: rgba(255, 255, 255, 0.15);
+        }
+
+        .ambient-track-item.playing {
+            border-color: var(--primary);
+            background: rgba(0, 229, 255, 0.05);
+            box-shadow: 0 0 20px rgba(0, 229, 255, 0.1);
+        }
+
+        .ambient-track-item.active-seq {
+            border-color: var(--primary);
+            box-shadow: inset 0 0 15px rgba(0, 229, 255, 0.1);
         }
 
         .ambient-info {
@@ -359,31 +462,45 @@
         <header>
             <span class="label">Tactical Intelligence Layer</span>
             <h1>The Shadow Board <br><span style="color: var(--text-muted);">Audio Repository</span></h1>
-            <p class="subtitle">Direct adversarial transcripts from the elite council. Experience the ruthless logic of the Shadow Board across seven tactical segments.</p>
+            <p class="subtitle">Direct adversarial transcripts from the elite council. Automated sequencing enabled for full tactical immersion.</p>
         </header>
+
+        <div class="hub-controls">
+            <button id="btn-master-sequence" class="sequence-btn" onclick="toggleMasterSequence()" title="Start automated sequential playback of all intelligence segments">
+                <div class="play-icon">▶</div>
+                <div class="pause-icon hidden">■</div>
+                <span>Initiate Master Sequence</span>
+            </button>
+        </div>
 
         <!-- Ambient Layer -->
         <div class="ambient-panel">
-            <button id="ambient-play" class="play-btn" title="Initiate Foundation Ambiance">
-                <svg class="icon play-icon" viewBox="0 0 24 24">
-                    <path d="M8 5v14l11-7z" />
-                </svg>
-                <svg class="icon pause-icon" viewBox="0 0 24 24" style="display:none;">
-                    <path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z" />
-                </svg>
-            </button>
-            <div class="ambient-info">
-                <div class="ambient-tag">Atmospheric Foundation</div>
-                <div class="ambient-selector">
-                    <button class="option active" data-src="audio/board-background-1.mp3">Tactical Tension</button>
-                    <button class="option" data-src="audio/board-background-2.mp3">Strategic Silence</button>
+            <div class="ambient-tracks">
+                <div class="ambient-track-item" id="ambient-0-card" onclick="toggleAmbient(0)">
+                    <button class="track-play btn-icon" id="ambient-play-0" aria-label="Play Tactical Tension">
+                        <div class="play-icon">▶</div>
+                        <div class="pause-icon hidden">■</div>
+                    </button>
+                    <div>
+                        <div class="ambient-tag">Sub-Layer 01</div>
+                        <div class="ambient-title">Tactical Tension</div>
+                    </div>
+                </div>
+                <div class="ambient-track-item" id="ambient-1-card" onclick="toggleAmbient(1)">
+                    <button class="track-play btn-icon" id="ambient-play-1" aria-label="Play Strategic Silence">
+                        <div class="play-icon">▶</div>
+                        <div class="pause-icon hidden">■</div>
+                    </button>
+                    <div>
+                        <div class="ambient-tag">Sub-Layer 02</div>
+                        <div class="ambient-title">Strategic Silence</div>
+                    </div>
                 </div>
             </div>
+            
             <div class="volume-control">
-                <svg class="icon" viewBox="0 0 24 24" style="width:16px; opacity:0.5;">
-                    <path d="M3 9v6h4l5 5V4L7 9H3zm13.5 3c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02zM14 3.23v2.06c2.89.86 5 3.54 5 6.71s-2.11 5.85-5 6.71v2.06c4.01-.91 7-4.49 7-8.77s-2.99-7.86-7-8.77z" />
-                </svg>
-                <input type="range" id="ambient-volume" min="0" max="1" step="0.01" value="0.4">
+                <div class="master-mix-label">Master_Mix</div>
+                <input type="range" id="master-volume" min="0" max="1" step="0.01" value="0.5" aria-label="Master Volume Control">
             </div>
         </div>
 
@@ -397,16 +514,20 @@
         NO MEMORY. NO EGO. JUST THE BRUTAL TRUTH. // SHADOW_BOARD_V1.0
     </footer>
 
-    <!-- Hidden Audio Element for Ambient -->
-    <audio id="ambient-audio" loop>
+    <!-- Hidden Audio Elements -->
+    <audio id="ambient-audio-0" loop>
         <source src="audio/board-background-1.mp3" type="audio/mpeg">
+    </audio>
+    <audio id="ambient-audio-1" loop>
+        <source src="audio/board-background-2.mp3" type="audio/mpeg">
     </audio>
 
     <script>
-        const ambientAudio = document.getElementById('ambient-audio');
-        const ambientPlayBtn = document.getElementById('ambient-play');
-        const ambientVolume = document.getElementById('ambient-volume');
-        const ambientOptions = document.querySelectorAll('.option');
+        const ambientAudios = [
+            document.getElementById('ambient-audio-0'),
+            document.getElementById('ambient-audio-1')
+        ];
+        const masterVolume = document.getElementById('master-volume');
         const trackContainer = document.getElementById('track-container');
 
         const tracks = [
@@ -420,12 +541,14 @@
         ];
 
         let currentNarration = null;
-        let baseVolume = 0.4;
+        let isMasterSequence = false;
+        let currentAmbientIndex = -1;
 
         // Initialize Tracks
         tracks.forEach((track, index) => {
             const card = document.createElement('div');
             card.className = 'track-card';
+            card.id = `card-${index}`;
             card.innerHTML = `
                 <div>
                     <div class="track-index">${track.id}</div>
@@ -437,7 +560,7 @@
                     </div>
                     <div class="track-meta">
                         <span id="time-${index}">0:00</span>
-                        <button class="track-play" data-index="${index}">Play Segment</button>
+                        <button class="track-play" id="play-${index}" onclick="toggleTrack(${index})" aria-label="Play ${track.name}">Play Segment</button>
                     </div>
                 </div>
                 <audio id="audio-${index}">
@@ -446,12 +569,9 @@
             `;
             trackContainer.appendChild(card);
 
-            const audio = card.querySelector('audio');
-            const playBtn = card.querySelector('.track-play');
-            const progressBar = card.querySelector('.progress-bar');
-            const timeDisplay = card.querySelector('.track-meta span');
-
-            playBtn.addEventListener('click', () => toggleTrack(index));
+            const audio = document.getElementById(`audio-${index}`);
+            const progressBar = document.getElementById(`progress-${index}`);
+            const timeDisplay = document.getElementById(`time-${index}`);
 
             audio.addEventListener('timeupdate', () => {
                 const percent = (audio.currentTime / audio.duration) * 100;
@@ -460,47 +580,107 @@
             });
 
             audio.addEventListener('ended', () => {
-                stopNarration(index);
-            });
-        });
-
-        // Ambient foundation Selection
-        ambientOptions.forEach(opt => {
-            opt.addEventListener('click', () => {
-                const wasPlaying = !ambientAudio.paused;
-                ambientOptions.forEach(o => o.classList.remove('active'));
-                opt.classList.add('active');
-                
-                ambientAudio.src = opt.dataset.src;
-                if (wasPlaying) ambientAudio.play();
+                if (isMasterSequence) {
+                    playNextInSequence(index);
+                } else {
+                    stopNarration(index);
+                }
             });
         });
 
         // Ambient Controls
-        ambientPlayBtn.addEventListener('click', () => {
-            if (ambientAudio.paused) {
-                ambientAudio.play();
-                updatePlayPauseIcons(ambientPlayBtn, true);
+        function toggleAmbient(index) {
+            const audio = ambientAudios[index];
+            const btn = document.getElementById(`ambient-play-${index}`);
+            const card = document.getElementById(`ambient-${index}-card`);
+
+            if (currentAmbientIndex === index) {
+                // Toggle off
+                audio.pause();
+                currentAmbientIndex = -1;
+                card.classList.remove('playing');
+                updatePlayPauseIcons(btn, false);
             } else {
-                ambientAudio.pause();
-                updatePlayPauseIcons(ambientPlayBtn, false);
+                // Pause existing
+                if (currentAmbientIndex !== -1) {
+                    ambientAudios[currentAmbientIndex].pause();
+                    document.getElementById(`ambient-${currentAmbientIndex}-card`).classList.remove('playing');
+                    updatePlayPauseIcons(document.getElementById(`ambient-play-${currentAmbientIndex}`), false);
+                }
+                
+                // Play new
+                audio.volume = masterVolume.value;
+                audio.play();
+                currentAmbientIndex = index;
+                card.classList.add('playing');
+                updatePlayPauseIcons(btn, true);
+
+                // Enable splicing logic: if index 0 finishes, start 1
+                if (index === 0) {
+                    audio.loop = false; // Turn off loop for auto-splice
+                    audio.onended = () => {
+                        if (currentAmbientIndex === 0) toggleAmbient(1);
+                        audio.onended = null;
+                        audio.loop = true; // Restore loop for manual plays
+                    };
+                }
             }
+        }
+
+        masterVolume.addEventListener('input', (e) => {
+            const vol = e.target.value;
+            ambientAudios.forEach(a => {
+                if (!a.paused) a.volume = (currentNarration !== null) ? vol * 0.25 : vol;
+            });
         });
 
-        ambientVolume.addEventListener('input', (e) => {
-            baseVolume = e.target.value;
-            if (currentNarration === null) {
-                ambientAudio.volume = baseVolume;
+        // Sequence Controls
+        function toggleMasterSequence() {
+            const btn = document.getElementById('btn-master-sequence');
+            if (isMasterSequence) {
+                stopAllNarration();
+                isMasterSequence = false;
+                btn.classList.remove('active');
+                updatePlayPauseIcons(btn, false);
             } else {
-                ambientAudio.volume = baseVolume * 0.25; // Keep ducked if playing
+                stopAllNarration();
+                
+                isMasterSequence = true;
+                btn.classList.add('active');
+                updatePlayPauseIcons(btn, true);
+                
+                // Start with ambient if not playing
+                if (currentAmbientIndex === -1) toggleAmbient(0);
+                
+                toggleTrack(0);
             }
-        });
+        }
+
+        function playNextInSequence(currentIndex) {
+            stopNarration(currentIndex);
+            const nextIndex = currentIndex + 1;
+            if (nextIndex < tracks.length) {
+                toggleTrack(nextIndex);
+            } else {
+                isMasterSequence = false;
+                const btn = document.getElementById('btn-master-sequence');
+                btn.classList.remove('active');
+                updatePlayPauseIcons(btn, false);
+                duckAmbient(false);
+            }
+        }
+
+        function stopAllNarration() {
+            tracks.forEach((_, idx) => stopNarration(idx));
+            currentNarration = null;
+            duckAmbient(false);
+        }
 
         // Track Logic
         function toggleTrack(index) {
             const audio = document.getElementById(`audio-${index}`);
             const btn = trackContainer.querySelectorAll('.track-play')[index];
-            const card = trackContainer.querySelectorAll('.track-card')[index];
+            const card = document.getElementById(`card-${index}`);
 
             if (currentNarration !== null && currentNarration !== index) {
                 stopNarration(currentNarration);
@@ -520,12 +700,13 @@
 
         function stopNarration(index) {
             const audio = document.getElementById(`audio-${index}`);
-            const btn = trackContainer.querySelectorAll('.track-play')[index];
-            const card = trackContainer.querySelectorAll('.track-card')[index];
+            const card = document.getElementById(`card-${index}`);
+            const btn = card.querySelector('.track-play');
             
             audio.pause();
             card.classList.remove('playing');
             btn.textContent = "Play Segment";
+            
             if (currentNarration === index) {
                 currentNarration = null;
                 duckAmbient(false);
@@ -533,14 +714,25 @@
         }
 
         function duckAmbient(duck) {
-            const targetVolume = duck ? baseVolume * 0.25 : baseVolume;
-            // Immediate ducking for intensity, could add fade later
-            ambientAudio.volume = targetVolume;
+            const vol = masterVolume.value;
+            const targetVolume = duck ? vol * 0.25 : vol;
+            ambientAudios.forEach(a => {
+                if (!a.paused) a.volume = targetVolume;
+            });
         }
 
         function updatePlayPauseIcons(btn, isPlaying) {
-            btn.querySelector('.play-icon').style.display = isPlaying ? 'none' : 'block';
-            btn.querySelector('.pause-icon').style.display = isPlaying ? 'block' : 'none';
+            const play = btn.querySelector('.play-icon');
+            const pause = btn.querySelector('.pause-icon');
+            if (play && pause) {
+                if (isPlaying) {
+                    play.classList.add('hidden');
+                    pause.classList.remove('hidden');
+                } else {
+                    play.classList.remove('hidden');
+                    pause.classList.add('hidden');
+                }
+            }
         }
 
         function formatTime(seconds) {

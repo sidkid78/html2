@@ -92,6 +92,33 @@ const hubs = [
     color: "from-stone-700 to-amber-800",
     border: "hover:border-amber-600/50",
     shadow: "hover:shadow-[0_0_40px_-10px_rgba(217,119,6,0.2)]"
+  },
+  {
+    title: "Listen & Fix Hub III",
+    description: "The Digital Foreman Protocol. Advanced mechanical diagnostic narrative.",
+    href: "/audio-story-3",
+    icon: "🏥",
+    color: "from-cyan-600 to-emerald-700",
+    border: "hover:border-emerald-500/50",
+    shadow: "hover:shadow-[0_0_40px_-10px_rgba(16,185,129,0.2)]"
+  },
+  {
+    title: "The Shadow Board",
+    description: "The end of the echo chamber. A boardroom that fights for the truth through adversarial debate.",
+    href: "/shadow-board.html",
+    icon: "👁️",
+    color: "from-slate-800 to-zinc-900",
+    border: "hover:border-slate-700/50",
+    shadow: "hover:shadow-[0_0_40px_-10px_rgba(15,23,42,0.4)]"
+  },
+  {
+    title: "Shadow Board Audio",
+    description: "Adversarial transcripts from the elite council. Seven tactical segments of brutal logic.",
+    href: "/shadow-board-audio.html",
+    icon: "🎙️",
+    color: "from-cyan-500 to-blue-600",
+    border: "hover:border-cyan-400/50",
+    shadow: "hover:shadow-[0_0_40px_-10px_rgba(6,182,212,0.3)]"
   }
 ];
 
