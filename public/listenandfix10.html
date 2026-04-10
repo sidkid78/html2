@@ -120,7 +120,8 @@
       overflow: hidden;
     }
 
-    .section-bleed .bg-img {
+    .section-bleed .bg-img,
+    .section-bleed .bg-video {
       position: absolute;
       top: 0;
       left: 0;
@@ -159,7 +160,8 @@
       overflow: hidden;
     }
 
-    .sticky-col img {
+    .sticky-col img,
+    .sticky-col video {
       width: 100%;
       height: 100%;
       object-fit: cover;
@@ -194,6 +196,7 @@
 
     .meta-box {
       background: rgba(17, 17, 17, 0.8);
+      -webkit-backdrop-filter: blur(10px);
       backdrop-filter: blur(10px);
       border-left: 4px solid var(--accent);
       padding: 2rem;
@@ -350,6 +353,97 @@
       z-index: 9999;
       transition: width 0.1s ease-out;
     }
+
+    /* Audio UI */
+    .audio-toggle {
+      position: fixed;
+      top: 30px;
+      right: 30px;
+      z-index: 10000;
+      background: rgba(17, 17, 17, 0.6);
+      -webkit-backdrop-filter: blur(12px);
+      backdrop-filter: blur(12px);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      padding: 10px 20px;
+      border-radius: 40px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      color: var(--text-dim);
+      font-family: var(--font-mono);
+      font-size: 0.75rem;
+    }
+
+    .audio-toggle.active {
+      color: var(--accent);
+      border-color: var(--accent);
+    }
+
+    .sound-bars {
+      display: flex;
+      align-items: center;
+      gap: 2px;
+      height: 12px;
+    }
+
+    .bar {
+      width: 2px;
+      height: 100%;
+      background: currentColor;
+      border-radius: 1px;
+    }
+
+    .active .bar {
+      animation: sound-bar-anim 1s infinite ease-in-out alternate;
+    }
+
+    .active .bar:nth-child(2) { animation-delay: 0.2s; }
+    .active .bar:nth-child(3) { animation-delay: 0.4s; }
+
+    @keyframes sound-bar-anim {
+      0% { height: 20%; }
+      100% { height: 100%; }
+    }
+
+    /* Start Overlay */
+    .start-overlay {
+      position: fixed;
+      inset: 0;
+      z-index: 100000;
+      background: var(--bg);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      transition: opacity 1s ease;
+      -webkit-backdrop-filter: blur(24px);
+      backdrop-filter: blur(24px);
+    }
+
+    .start-overlay.hidden {
+      opacity: 0;
+      pointer-events: none;
+    }
+
+    .start-btn {
+      background: transparent;
+      border: 1px solid var(--accent);
+      color: var(--accent);
+      padding: 20px 40px;
+      font-family: var(--font-hero);
+      font-size: 1.5rem;
+      border-radius: 4px;
+      cursor: pointer;
+      transition: all 0.3s ease;
+    }
+
+    .start-btn:hover {
+      background: var(--accent);
+      color: var(--bg);
+      box-shadow: 0 0 30px rgba(245, 158, 11, 0.4);
+    }
   </style>
 </head>
 
@@ -357,6 +451,26 @@
 
   <div id="cursor"></div>
   <div class="progress-bar" id="progress"></div>
+
+  <div id="start-overlay" class="start-overlay">
+    <button id="start-btn" class="start-btn">Start Experience</button>
+  </div>
+
+  <div id="audio-control" class="audio-toggle">
+    <div class="sound-bars">
+      <div class="bar"></div>
+      <div class="bar"></div>
+      <div class="bar"></div>
+    </div>
+    <span id="audio-status">Audio Off</span>
+  </div>
+
+  <audio id="bg-music" src="./audio/landfbackground.mp3" loop preload="auto"></audio>
+  <!-- Mapping Audios to Sections 2, 3, 4, 5 -->
+  <audio id="audio-vulnerability" src="./audio/landf.wav" preload="auto"></audio>
+  <audio id="audio-protocol" src="./audio/landf1.wav" preload="auto"></audio>
+  <audio id="audio-execution" src="./audio/landf2.wav" preload="auto"></audio>
+  <audio id="audio-resolution" src="./audio/landf3.wav" preload="auto"></audio>
 
   <!-- SVG Filters -->
   <svg style="width:0;height:0;position:absolute;" aria-hidden="true" focusable="false">
@@ -373,24 +487,13 @@
 
   <main>
     <!-- SECTION 1: HERO -->
-    <section class="section-bleed">
-      <img src="./images/scene-(1)1.jpg" alt="Driving in rain" class="bg-img js-parallax" />
-      <div class="content reveal">
-        <div class="mono mb-4">001 // System Failure</div>
-        <h1 class="title-main glitch-text" data-text="The Death of the Black Box">**Title:** The Death of the Black
-          Box:<br><span style="color: var(--accent)">Take Back Your Independence</span><br>with Listen & Fix</h1>
 
-        <div class="meta-box reveal delay-1">
-          <p><span class="mono">META:</span> **Meta:** Don’t let mechanics hold your wallet hostage. Listen & Fix is the
-            AI superpower that turns the terrifying sounds of a broken engine into your next victorious DIY repair.</p>
-        </div>
-      </div>
-    </section>
 
     <!-- SECTION 2: VULNERABILITY -->
     <section class="editorial-grid">
       <div class="sticky-col">
-        <img src="./images/heartbeat-schematic.png" alt="Engine schematic heartbeat" style="filter: url(#distort); opacity: 0.6;" />
+        <video src="./video/landf-1.mp4" autoplay muted loop playsinline
+          style="filter: url(#distort); opacity: 0.6;"></video>
       </div>
       <div class="text-col">
         <p class="reveal">You know the feeling.</p>
@@ -403,16 +506,16 @@
           mechanic uses technical jargon to justify draining your bank account.</p>
         <p class="reveal">For decades, corporations have designed our cars and appliances to be impenetrable "black
           boxes." They stripped away our self-reliance.</p>
-        <h2 class="huge-statement reveal hero-font">**It’s time to take your power back.**</h2>
+        <h2 class="huge-statement reveal hero-font">It’s time to take your power back.</h2>
       </div>
     </section>
 
     <!-- SECTION 3: THE SOLUTION -->
     <section class="editorial-grid" style="background: var(--surface);">
       <div class="text-col">
-        <div class="mono reveal">002 // Diagnostic Protocol</div>
-        <h2 class="title-main reveal delay-1" style="font-size: clamp(2rem, 5vw, 4rem);">**A Master Mechanic in Your
-          Pocket**</h2>
+        <div class="mono reveal"></div>
+        <h2 class="title-main reveal delay-1" style="font-size: clamp(2rem, 5vw, 4rem);">A Master Mechanic in Your
+          Pocket</h2>
         <p class="reveal">Meet Listen & Fix. We built an AI-powered "Shazam for Engines" because we believe no one
           should ever feel helpless when their equipment breaks.</p>
         <p class="reveal">Imagine pointing your phone at a rattling engine and letting it simply "listen." In seconds,
@@ -423,22 +526,19 @@
           translated into plain, empowering English.</p>
       </div>
       <div class="sticky-col order-mobile-first">
-        <img src="./images/scne2.jpg" alt="AI scanning engine" />
+        <video src="./video/landf-2.mp4" autoplay muted loop playsinline></video>
       </div>
     </section>
 
     <!-- SECTION 4: THE FOREMAN -->
     <section class="editorial-grid">
       <div class="sticky-col">
-        <div class="image-stack">
-          <img src="./images/scne3.jpg" alt="Digital Manual" />
-          <img src="./images/scne4.jpg" alt="Fixing car" />
-        </div>
+        <video src="./video/landf-3.mp4" autoplay muted loop playsinline></video>
       </div>
       <div class="text-col">
-        <div class="mono reveal">003 // Execution Phase</div>
-        <h2 class="title-main reveal delay-1" style="font-size: clamp(2rem, 5vw, 4rem);">**The End of the Guessing
-          Game**</h2>
+        <div class="mono reveal"></div>
+        <h2 class="title-main reveal delay-1" style="font-size: clamp(2rem, 5vw, 4rem);">The End of the Guessing
+          Game</h2>
         <p class="reveal">We don’t just leave you with a diagnosis and a generic Google search. Listen & Fix operates as
           your "Digital Foreman." The second it identifies the problem, our system scours the deepest corners of the
           internet, stripping away ads, forum arguments, and filler. It hands you the exact, manufacturer-verified
@@ -447,27 +547,42 @@
           hardware store. And most importantly, it wraps you in a safety net. Before you touch a single bolt, it walks
           you through locking out circuit breakers and placing jack stands. If a job is genuinely too dangerous, it
           tells you. It gives you the courage to start, and the wisdom to stay safe.</p>
-      </div>
-    </section>
-
-    <!-- SECTION 5: PRIDE & CTA -->
-    <section class="section-bleed">
-      <img src="./images/sce5.jpg" alt="Proud mechanic" class="bg-img js-parallax" style="filter: brightness(0.5);" />
+       <!-- SECTION 5: PRIDE -->
+    <section id="section-resolution" class="section-bleed">
+      <video src="./video/landf-4.mp4" autoplay muted loop playsinline class="bg-video js-parallax"
+        style="filter: brightness(0.5);"></video>
       <div class="content reveal" style="text-align: center; margin: 0 auto;">
-        <div class="mono mb-4" style="justify-content: center;">004 // Resolution</div>
+        <div class="mono mb-4" style="justify-content: center;"></div>
         <h2 class="title-main glitch-text" data-text="The Pride of the Fix" style="font-size: clamp(3rem, 7vw, 6rem);">
-          **The Pride of the Fix**</h2>
+          The Pride of the Fix</h2>
         <p style="max-width: 800px; margin: 0 auto 2rem auto;">We designed Listen & Fix to be a calm, professional
           sanctuary. No messy interfaces, no blinking ads. Just a perfectly calibrated digital workspace designed for
           greasy hands and dimly lit garages.</p>
         <p style="max-width: 800px; margin: 0 auto 4rem auto;">Because at the end of the day, Listen & Fix isn't about
           AI, data pipelines, or technology. It’s about the grease under your fingernails. It’s about the profound,
-          chest-swelling pride of turning the key and hearing an engine roar back to life, knowing *you* did that.</p>
+          chest-swelling pride of turning the key and hearing an engine roar back to life, knowing <strong>you</strong> did that.</p>
+      </div>
+    </section>
 
-        <h3 class="hero-font" style="font-size: clamp(2rem, 5vw, 4rem); color: var(--accent); margin-bottom: 1rem;">Stop
-          being a hostage to the machines you own.</h3>
-        <h3 class="hero-font" style="font-size: clamp(2.5rem, 6vw, 5rem);">Grab your wrench.<br>Listen & Fix is standing
-          by.</h3>
+    <!-- SECTION 6: THE FINAL FRONTIER (Restored 5th Video) -->
+    <section id="section-conclusion" class="section-bleed" style="background: var(--bg);">
+      <video src="./video/landf-5.mp4" autoplay muted loop playsinline class="bg-video js-parallax" style="filter: brightness(0.6);"></video>
+      <div class="content reveal" style="text-align: center; margin: 0 auto;">
+        <div class="mono mb-4" style="justify-content: center;">005 // Independence</div>
+        <h3 class="hero-font" style="font-size: clamp(2rem, 5vw, 4rem); color: var(--accent); margin-bottom: 1.5rem;">
+          Stop being a hostage to the machines you own.</h3>
+        <h3 class="hero-font" style="font-size: clamp(2.5rem, 6vw, 5.5rem); line-height: 1;">
+          Grab your wrench.<br>Listen & Fix is standing by.</h3>
+        
+        <div style="margin-top: 4rem;">
+          <a href="https://asset-manager--chriskoehne.replit.app/" target="_blank" rel="noopener" class="cta-btn" 
+             style="text-decoration: none; background: var(--accent); color: var(--bg); padding: 20px 40px; border-radius: 4px; font-family: var(--font-hero); font-size: 1.25rem; font-weight: bold; transition: transform 0.3s ease; display: inline-block;">
+            Launch Listen & Fix App
+          </a>
+        </div>
+      </div>
+    </section>
+>
       </div>
     </section>
 
@@ -481,7 +596,7 @@
       cursor.style.top = e.clientY + 'px';
     });
 
-    document.querySelectorAll('h1, h2, h3').forEach(el => {
+    document.querySelectorAll('h1, h2, h3, .cta-btn, .start-btn').forEach(el => {
       el.addEventListener('mouseenter', () => {
         cursor.style.width = '60px';
         cursor.style.height = '60px';
@@ -492,6 +607,115 @@
         cursor.style.height = '20px';
         cursor.style.backgroundColor = 'transparent';
       });
+    });
+
+    // Audio Logic
+    let isMuted = true;
+    let hasStarted = false;
+    const bgMusic = document.getElementById('bg-music');
+    const audioToggle = document.getElementById('audio-control');
+    const startBtn = document.getElementById('start-btn');
+    const startOverlay = document.getElementById('start-overlay');
+    const audioStatus = document.getElementById('audio-status');
+
+    // Section to Audio Mapping
+    const audioMap = {
+      'section-vulnerability': document.getElementById('audio-vulnerability'),
+      'section-protocol': document.getElementById('audio-protocol'),
+      'section-execution': document.getElementById('audio-execution'),
+      'section-resolution': document.getElementById('audio-resolution')
+    };
+
+    function startExperience() {
+      if (hasStarted) return;
+      hasStarted = true;
+      isMuted = false;
+      startOverlay.classList.add('hidden');
+      audioToggle.classList.add('active');
+      audioStatus.innerText = 'Audio On';
+
+      if (bgMusic) {
+        bgMusic.volume = 0.3;
+        bgMusic.play().catch(e => console.warn('BG Music blocked:', e));
+      }
+
+      // Check current visible section and play
+      checkAudioTriggers();
+    }
+
+    startBtn.addEventListener('click', startExperience);
+
+    function stopAllNarration() {
+      Object.values(audioMap).forEach(audio => {
+        if (audio) {
+          audio.pause();
+          audio.currentTime = 0;
+        }
+      });
+    }
+
+    function playNarration(id) {
+      if (isMuted || !hasStarted) return;
+      const audio = audioMap[id];
+      if (audio && audio.paused) {
+        stopAllNarration();
+        audio.play().catch(e => console.warn('Narration blocked:', e));
+        // Duck bg music
+        if (bgMusic) bgMusic.volume = 0.1;
+        audio.onended = () => {
+          if (bgMusic) bgMusic.volume = 0.3;
+        };
+      }
+    }
+
+    // Intersection Observer for Section IDs
+    const sectionObserver = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          playNarration(entry.target.id);
+        }
+      });
+    }, { threshold: 0.4 });
+
+    // Give sections IDs if missing and observe
+    const sectionsWithAudio = [
+      { el: document.querySelector('.editorial-grid:nth-of-type(1)'), id: 'section-vulnerability' },
+      { el: document.querySelector('.editorial-grid:nth-of-type(2)'), id: 'section-protocol' },
+      { el: document.querySelector('.editorial-grid:nth-of-type(3)'), id: 'section-execution' },
+      { el: document.getElementById('section-resolution'), id: 'section-resolution' }
+    ];
+
+    sectionsWithAudio.forEach(item => {
+      if (item.el) {
+        item.el.id = item.id;
+        sectionObserver.observe(item.el);
+      }
+    });
+
+    function checkAudioTriggers() {
+      sectionsWithAudio.forEach(item => {
+        if (item.el) {
+          const rect = item.el.getBoundingClientRect();
+          if (rect.top < window.innerHeight / 2 && rect.bottom > window.innerHeight / 2) {
+            playNarration(item.id);
+          }
+        }
+      });
+    }
+
+    audioToggle.addEventListener('click', () => {
+      isMuted = !isMuted;
+      if (!isMuted) {
+        audioToggle.classList.add('active');
+        audioStatus.innerText = 'Audio On';
+        if (bgMusic) bgMusic.play();
+        checkAudioTriggers();
+      } else {
+        audioToggle.classList.remove('active');
+        audioStatus.innerText = 'Audio Off';
+        stopAllNarration();
+        if (bgMusic) bgMusic.pause();
+      }
     });
 
     // Scroll Progress Bar
@@ -522,7 +746,7 @@
       revealObserver.observe(el);
     });
 
-    // Fixed Parallax Logic
+    // Parallax Logic
     const parallaxImages = document.querySelectorAll('.js-parallax');
     window.addEventListener('scroll', () => {
       let scrollPos = window.pageYOffset;
@@ -530,10 +754,9 @@
         const parent = img.closest('section');
         const sectionOffset = parent.offsetTop;
         const relativeScroll = scrollPos - sectionOffset;
-        
-        // Only apply if the section is relatively near the viewport
+
         if (scrollPos > sectionOffset - window.innerHeight && scrollPos < sectionOffset + parent.offsetHeight) {
-           img.style.transform = `translateY(${relativeScroll * 0.3}px)`;
+          img.style.transform = `translateY(${relativeScroll * 0.3}px)`;
         }
       });
     });

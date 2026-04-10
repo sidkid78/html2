@@ -1,0 +1,755 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>The Shadow Board</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:ital,wght@0,100..800;1,100..800&family=Playfair+Display:ital,wght@0,400..900;1,400..900&family=Inter:wght@300;400;600&display=swap');
+
+    :root {
+      --bg: #030304;
+      --text-main: #f4f4f5;
+      --text-muted: #8b8b93;
+      --accent-cyan: #00e5ff;
+      --accent-red: #ff3333;
+      --accent-green: #00ff66;
+      --font-hero: 'Playfair Display', serif;
+      --font-body: 'Inter', sans-serif;
+      --font-mono: 'JetBrains Mono', monospace;
+      --ease-out: cubic-bezier(0.19, 1, 0.22, 1);
+      --ease-in-out: cubic-bezier(0.65, 0, 0.35, 1);
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      cursor: none;
+    }
+
+    body {
+      background-color: var(--bg);
+      color: var(--text-main);
+      font-family: var(--font-body);
+      overflow-x: hidden;
+      -webkit-font-smoothing: antialiased;
+      line-height: 1.6;
+    }
+
+    ::selection {
+      background: var(--accent-cyan);
+      color: var(--bg);
+    }
+
+    /* Custom Cursor */
+    #cursor {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 20px;
+      height: 20px;
+      border: 1px solid var(--accent-cyan);
+      border-radius: 50%;
+      pointer-events: none;
+      transform: translate(-50%, -50%);
+      z-index: 9999;
+      transition: width 0.3s var(--ease-out), height 0.3s var(--ease-out), background-color 0.3s var(--ease-out);
+      mix-blend-mode: difference;
+    }
+
+    #cursor::after {
+      content: '';
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      width: 4px;
+      height: 4px;
+      background: var(--accent-cyan);
+      border-radius: 50%;
+      transform: translate(-50%, -50%);
+    }
+
+    /* Global Background Noise */
+    .noise-layer {
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      z-index: 0;
+      opacity: 0.15;
+      mix-blend-mode: overlay;
+    }
+
+    /* Typography */
+    h1,
+    h2,
+    h3 {
+      font-family: var(--font-hero);
+      font-weight: 600;
+      line-height: 1.1;
+    }
+
+    .label {
+      font-family: var(--font-mono);
+      text-transform: uppercase;
+      font-size: 0.75rem;
+      letter-spacing: 0.2em;
+      color: var(--accent-cyan);
+      display: block;
+      margin-bottom: 1rem;
+    }
+
+    .highlight {
+      color: var(--accent-cyan);
+    }
+
+    .danger {
+      color: var(--accent-red);
+    }
+
+    .success {
+      color: var(--accent-green);
+    }
+
+    /* Layout Archetypes */
+    section {
+      position: relative;
+      width: 100vw;
+      min-height: 100vh;
+      padding: 10vw 5vw;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      z-index: 2;
+    }
+
+    .container {
+      max-width: 1400px;
+      margin: 0 auto;
+      width: 100%;
+    }
+
+    .grid-2 {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 5vw;
+      align-items: center;
+    }
+
+    @media (max-width: 900px) {
+      .grid-2 {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    /* Image Backgrounds & Overlays */
+    .bg-image {
+      position: absolute;
+      inset: 0;
+      z-index: -1;
+      background-size: cover;
+      background-position: center;
+      background-attachment: fixed;
+      /* Parallax effect */
+    }
+
+    .bg-overlay {
+      position: absolute;
+      inset: 0;
+      z-index: -1;
+    }
+
+    /* Specific Sections */
+
+    /* 1. Hero */
+    #hero .bg-image {
+      background-image: url('./images/shadow_board_hero.png');
+    }
+
+    #hero .bg-overlay {
+      background: linear-gradient(to bottom, rgba(3, 3, 4, 0.3) 0%, rgba(3, 3, 4, 1) 100%);
+    }
+
+    .hero-title {
+      font-size: clamp(3rem, 7vw, 7rem);
+      max-width: 20ch;
+      margin-bottom: 2rem;
+    }
+
+    .hero-title span {
+      display: block;
+    }
+
+    /* 2. Problem */
+    #problem .bg-image {
+      background-image: url('./images/scne1.jpg');
+      opacity: 0.3;
+      filter: grayscale(100%) contrast(150%);
+    }
+
+    #problem .bg-overlay {
+      background: radial-gradient(circle at center, transparent 0%, var(--bg) 80%);
+    }
+
+    .problem-text {
+      font-size: clamp(1.5rem, 3vw, 2.5rem);
+      color: var(--text-muted);
+      max-width: 30ch;
+    }
+
+    .problem-text strong {
+      color: var(--text-main);
+      font-weight: 400;
+    }
+
+    /* 3. Vision */
+    #vision {
+      text-align: center;
+      align-items: center;
+      background: var(--bg);
+    }
+
+    .vision-statement {
+      font-size: clamp(2rem, 4vw, 4rem);
+      font-family: var(--font-hero);
+      max-width: 25ch;
+    }
+
+    .tech-line {
+      width: 1px;
+      height: 100px;
+      background: var(--accent-cyan);
+      margin: 3rem auto;
+    }
+
+    /* 4. Protocol */
+    #protocol .bg-image {
+      background-image: url('./images/sne3.jpg');
+      opacity: 0.4;
+    }
+
+    #protocol .bg-overlay {
+      background: linear-gradient(90deg, rgba(3, 3, 4, 1) 0%, rgba(3, 3, 4, 0.8) 50%, rgba(3, 3, 4, 1) 100%);
+    }
+
+    .protocol-list {
+      list-style: none;
+      display: flex;
+      flex-direction: column;
+      gap: 3rem;
+      max-width: 800px;
+      margin-left: auto;
+    }
+
+    .protocol-item {
+      position: relative;
+      padding-left: 3rem;
+      border-left: 1px solid rgba(255, 255, 255, 0.1);
+    }
+
+    .protocol-item::before {
+      content: attr(data-step);
+      position: absolute;
+      left: -1rem;
+      top: 0;
+      background: var(--bg);
+      padding: 0.2rem 0;
+      font-family: var(--font-mono);
+      color: var(--accent-cyan);
+      font-size: 0.8rem;
+    }
+
+    .protocol-item h3 {
+      font-family: var(--font-body);
+      font-size: 1.5rem;
+      margin-bottom: 0.5rem;
+    }
+
+    /* 5. Adversaries */
+    #adversaries .bg-image {
+      background-image: url('./images/sne2.jpg');
+      opacity: 0.15;
+      filter: blur(5px);
+    }
+
+    .adversary-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      gap: 2rem;
+      margin-top: 4rem;
+    }
+
+    .adversary-card {
+      background: rgba(255, 255, 255, 0.02);
+      border: 1px solid rgba(255, 255, 255, 0.05);
+      padding: 2rem;
+      -webkit-backdrop-filter: blur(10px);
+      backdrop-filter: blur(10px);
+      transition: border-color 0.4s var(--ease-out), transform 0.4s var(--ease-out);
+    }
+
+    .adversary-card:hover {
+      border-color: var(--accent-cyan);
+      transform: translateY(-5px);
+    }
+
+    .adversary-role {
+      font-family: var(--font-mono);
+      color: var(--text-main);
+      font-size: 1.2rem;
+      margin-bottom: 1rem;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+      padding-bottom: 0.5rem;
+    }
+
+    .adversary-trait {
+      font-size: 0.85rem;
+      color: var(--accent-cyan);
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      margin-bottom: 1rem;
+      display: block;
+    }
+
+    .adversary-quote {
+      font-style: italic;
+      color: var(--text-muted);
+      font-family: var(--font-hero);
+      font-size: 1.1rem;
+    }
+
+    /* 6. Trenches */
+    #trenches {
+      background: var(--bg);
+    }
+
+    .case-study {
+      display: grid;
+      grid-template-columns: 1fr 1.5fr;
+      gap: 4vw;
+      margin-bottom: 6rem;
+      border-top: 1px solid rgba(255, 255, 255, 0.1);
+      padding-top: 3rem;
+    }
+
+    @media (max-width: 900px) {
+      .case-study {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .case-img-container {
+      position: relative;
+      width: 100%;
+      aspect-ratio: 16/9;
+      overflow: hidden;
+    }
+
+    .case-img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      background-image: url('./images/sne4.jpg');
+      background-size: cover;
+      background-position: center;
+      filter: grayscale(80%) sepia(20%) hue-rotate(180deg);
+    }
+
+    .case-content h3 {
+      font-family: var(--font-mono);
+      color: var(--accent-red);
+      font-size: 1.2rem;
+      margin-bottom: 1rem;
+    }
+
+    .case-content p {
+      margin-bottom: 1rem;
+      color: var(--text-muted);
+    }
+
+    .synthesis {
+      background: rgba(0, 229, 255, 0.05);
+      border-left: 2px solid var(--accent-cyan);
+      padding: 1.5rem;
+      margin-top: 1.5rem;
+    }
+
+    .synthesis strong {
+      color: var(--accent-cyan);
+      display: block;
+      margin-bottom: 0.5rem;
+      font-family: var(--font-mono);
+      text-transform: uppercase;
+      font-size: 0.8rem;
+    }
+
+    /* 7. Output */
+    #output {
+      text-align: center;
+      align-items: center;
+      justify-content: center;
+    }
+
+    #output .bg-image {
+      background-image: url('./images/sne5.jpg');
+      opacity: 0.5;
+    }
+
+    #output .bg-overlay {
+      background: radial-gradient(circle at center, rgba(3, 3, 4, 0.6) 0%, rgba(3, 3, 4, 1) 100%);
+    }
+
+    .output-box {
+      border: 1px solid var(--accent-green);
+      background: rgba(0, 255, 102, 0.05);
+      padding: 4rem;
+      max-width: 800px;
+      -webkit-backdrop-filter: blur(5px);
+      backdrop-filter: blur(5px);
+      box-shadow: 0 0 50px rgba(0, 255, 102, 0.1);
+    }
+
+    .output-title {
+      font-size: clamp(2.5rem, 5vw, 5rem);
+      color: var(--accent-green);
+      margin-bottom: 2rem;
+      text-shadow: 0 0 20px rgba(0, 255, 102, 0.3);
+    }
+
+    .output-text {
+      font-size: 1.2rem;
+      color: var(--text-main);
+      margin-bottom: 2rem;
+    }
+
+    .final-mandate {
+      font-family: var(--font-mono);
+      font-size: 1.5rem;
+      color: var(--text-main);
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+
+    /* Animation Classes */
+    .reveal {
+      opacity: 0;
+      transform: translateY(40px);
+      transition: opacity 1.2s var(--ease-out), transform 1.2s var(--ease-out);
+      will-change: opacity, transform;
+    }
+
+    .reveal.active {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    .stagger-1 {
+      transition-delay: 0.1s;
+    }
+
+    .stagger-2 {
+      transition-delay: 0.2s;
+    }
+
+    .stagger-3 {
+      transition-delay: 0.3s;
+    }
+
+    .stagger-4 {
+      transition-delay: 0.4s;
+    }
+
+    /* SVG Filter specific utility */
+    .distort-text.active {
+      animation: glitch 0.3s cubic-bezier(.25, .46, .45, .94) both infinite;
+    }
+  </style>
+</head>
+
+<body>
+
+  <!-- Custom Cursor -->
+  <div id="cursor"></div>
+
+  <!-- SVG Filters -->
+  <svg style="display: none;">
+    <defs>
+      <filter id="noise">
+        <feTurbulence type="fractalNoise" baseFrequency="0.8" numOctaves="3" stitchTiles="stitch">
+          <animate attributeName="baseFrequency" values="0.8;0.85;0.8" dur="5s" repeatCount="indefinite" />
+        </feTurbulence>
+        <feColorMatrix type="matrix" values="1 0 0 0 0, 0 1 0 0 0, 0 0 1 0 0, 0 0 0 0.15 0" />
+      </filter>
+      <filter id="liquid-distortion">
+        <feTurbulence type="fractalNoise" baseFrequency="0.01 0.05" numOctaves="2" result="noise" />
+        <feDisplacementMap in="SourceGraphic" in2="noise" scale="10" xChannelSelector="R" yChannelSelector="G" />
+      </filter>
+    </defs>
+  </svg>
+
+  <!-- Ambient Noise Layer -->
+  <div class="noise-layer"
+    style="background: url('data:image/svg+xml,%3Csvg viewBox=%220 0 200 200%22 xmlns=%22http://www.w3.org/2000/svg%22%3E%3Cfilter id=%22noiseFilter%22%3E%3CfeTurbulence type=%22fractalNoise%22 baseFrequency=%220.65%22 numOctaves=%223%22 stitchTiles=%22stitch%22/%3E%3C/filter%3E%3Crect width=%22100%25%22 height=%22100%25%22 filter=%22url(%23noiseFilter)%22/%3E%3C/svg%3E');">
+  </div>
+
+  <main>
+    <!-- Section 1: Hero -->
+    <section id="hero">
+      <div class="bg-image"></div>
+      <div class="bg-overlay"></div>
+      <div class="container">
+        <span class="label reveal">THE CONCEPT</span>
+        <h1 class="hero-title reveal stagger-1">
+          <span style="color: var(--text-muted); font-size: 0.5em;">The End of the Echo Chamber:</span>
+          Welcome to the Shadow Board.
+        </h1>
+      </div>
+    </section>
+
+    <!-- Section 2: Problem -->
+    <section id="problem">
+      <div class="bg-image"></div>
+      <div class="bg-overlay"></div>
+      <div class="container grid-2">
+        <div class="reveal">
+          <span class="label danger">The Problem</span>
+          <h2 style="font-size: clamp(2rem, 4vw, 4rem); max-width: 15ch;">The Loneliest Seat in the Room</h2>
+        </div>
+        <div class="problem-text reveal stagger-1">
+          <p>Leadership is an isolating exercise in terror. When you are the CEO, your decisions don’t just move
+            numbers—they alter lives, define legacies, and burn millions of dollars.</p>
+          <br>
+          <p>Yet, how are these decisions made? In boardrooms filled with hidden agendas, departmental biases, and "Yes
+            Men" terrified of challenging the boss. <strong>You don't have a lack of data; you have a lack of brutal,
+              unbiased truth.</strong></p>
+          <br>
+          <p
+            style="color: var(--accent-red); font-family: var(--font-mono); font-size: 1rem; text-transform: uppercase;">
+            Groupthink is the silent killer of great companies.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- Section 3: Vision -->
+    <section id="vision">
+      <div class="container">
+        <span class="label reveal">The Vision</span>
+        <h2 class="vision-statement reveal stagger-1">A Boardroom That Fights for the Truth</h2>
+        <div class="tech-line reveal stagger-2"></div>
+        <p class="reveal stagger-3"
+          style="max-width: 60ch; margin: 0 auto; font-size: 1.25rem; color: var(--text-muted);">
+          We believe that the best decisions are forged in the fire of ruthless, adversarial debate. You don't need
+          another dashboard. <strong style="color: var(--text-main);">You need a Shadow Board.</strong>
+        </p>
+        <br>
+        <p class="reveal stagger-4" style="max-width: 60ch; margin: 0 auto; font-size: 1.1rem;">
+          We built an elite, AI-powered multi-agent council designed to do one thing: strip away the noise and
+          stress-test your strategy until only the bulletproof truth remains.
+        </p>
+      </div>
+    </section>
+
+    <!-- Section 4: Protocol -->
+    <section id="protocol">
+      <div class="bg-image"></div>
+      <div class="bg-overlay"></div>
+      <div class="container grid-2">
+        <div class="reveal">
+          <span class="label highlight">How It Works</span>
+          <h2 style="font-size: clamp(2rem, 3vw, 3rem); margin-bottom: 1rem;">The R-F-D Protocol</h2>
+          <p style="font-family: var(--font-mono); color: var(--text-muted); font-size: 0.9rem;">(No Egos, No Memory,
+            Just Facts)</p>
+          <br>
+          <p style="max-width: 30ch;">Human boards get bogged down in office politics and grudges. Our Shadow Board uses
+            a ruthless protocol to guarantee pure, unadulterated insight:</p>
+        </div>
+        <ul class="protocol-list">
+          <li class="protocol-item reveal stagger-1" data-step="01">
+            <h3>The CEO Synthesizes</h3>
+            <p style="color: var(--text-muted);">You (the lead agent) see everything. Every argument, every tension,
+              every shifting alliance.</p>
+          </li>
+          <li class="protocol-item reveal stagger-2" data-step="02">
+            <h3>The Board Focuses</h3>
+            <p style="color: var(--text-muted);">Our expert agents are fed only the immediate, burning context. No
+              distractions.</p>
+          </li>
+          <li class="protocol-item reveal stagger-3" data-step="03">
+            <h3 class="highlight">The Wipe (No Grudges)</h3>
+            <p style="color: var(--text-muted);">Between every round of debate, the board’s memory is wiped clean. They
+              cannot become entrenched in their own egos or past arguments. Every single response is a fresh, merciless
+              evaluation of the data in front of them.</p>
+          </li>
+        </ul>
+      </div>
+    </section>
+
+    <!-- Section 5: Adversaries -->
+    <section id="adversaries">
+      <div class="bg-image"></div>
+      <div class="bg-overlay" style="background: linear-gradient(to bottom, var(--bg), transparent, var(--bg));"></div>
+      <div class="container">
+        <span class="label reveal">Meet Your Adversaries</span>
+        <p class="reveal stagger-1" style="font-size: 1.5rem; max-width: 50ch;">Your Shadow Board doesn’t agree with
+          you, and they don’t agree with each other. They are hand-crafted to rip your assumptions to shreds:</p>
+
+        <div class="adversary-grid">
+          <div class="adversary-card reveal stagger-1">
+            <div class="adversary-role">The CRO</div>
+            <span class="adversary-trait">Ruthless and pragmatic</span>
+            <q class="adversary-quote">Can we get a customer to pay for this in 90 days, or is this a science
+              project?</q>
+          </div>
+          <div class="adversary-card reveal stagger-2">
+            <div class="adversary-role">The Tech Architect</div>
+            <span class="adversary-trait">The paranoid survivor</span>
+            <q class="adversary-quote">If we do this, what breaks permanently?</q>
+          </div>
+          <div class="adversary-card reveal stagger-3">
+            <div class="adversary-role">The Moonshot</div>
+            <span class="adversary-trait">The visionary</span>
+            <q class="adversary-quote">You're playing too small. How do we make the competition a rounding error?</q>
+          </div>
+          <div class="adversary-card reveal stagger-4">
+            <div class="adversary-role">The Contrarian</div>
+            <span class="adversary-trait">The Devil’s Advocate</span>
+            <q class="adversary-quote">What is the single most dangerous lie we are telling ourselves right now?</q>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Section 6: Trenches -->
+    <section id="trenches">
+      <div class="container">
+        <span class="label reveal">Real Stakes</span>
+        <h2 class="reveal stagger-1" style="margin-bottom: 4rem; font-size: 2.5rem;">The Shadow Board in the Trenches
+        </h2>
+
+        <!-- Case 1 -->
+        <div class="case-study reveal">
+          <div class="case-img-container">
+            <div class="case-img"></div>
+          </div>
+          <div class="case-content">
+            <h3>[01] The $12M Trap (BlendStack)</h3>
+            <p>When BlendStack received a $12M all-cash offer, human instinct was to pop champagne. The company was
+              bleeding out, and the CRO and TechArch screamed, "Take the money, it's a gift from the future!"</p>
+            <p>But our Moonshot and Contrarian agents caught the trap: <em>The buyer wasn't buying a supplement company;
+                they were stealing proprietary tech infrastructure for pennies.</em></p>
+            <div class="synthesis">
+              <strong>The Synthesis?</strong>
+              <p>The IP was incredibly valuable, but the company only had 14 months of runway—not enough to pivot.</p>
+              <p style="color: var(--text-main); font-style: italic;">The final mandate: You don't have the time to
+                build a cathedral. Take the money, but know exactly what you are selling.</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Case 2 -->
+        <div class="case-study reveal">
+          <div class="case-img-container">
+            <!-- Reusing mood image or structural div for variety -->
+            <div
+              style="width:100%; height:100%; background: #111; border: 1px solid #333; display: flex; align-items:center; justify-content:center;">
+              <span style="font-family: var(--font-mono); color: #444;">SYSTEM_LOG_HOSTAGE_SITUATION</span>
+            </div>
+          </div>
+          <div class="case-content">
+            <h3>[02] The Build vs. Buy Hostage Situation (RetailEdge)</h3>
+            <p>Faced with automating customer support, the team was paralyzed. Building it in-house was a suicide
+              mission. Buying a SaaS solution meant surrendering proprietary data and becoming a hostage to a vendor.
+            </p>
+            <div class="synthesis">
+              <strong>The Synthesis?</strong>
+              <p>The Surgical Strike. Spend $150K to rent the SaaS engine for immediate ROI, and use the rest to upskill
+                top agents to own the data.</p>
+              <p style="color: var(--text-main); font-style: italic;">Rent the engine, but keep the fuel.</p>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </section>
+
+    <!-- Section 7: Output -->
+    <section id="output">
+      <div class="bg-image"></div>
+      <div class="bg-overlay"></div>
+      <div class="container">
+        <div class="output-box reveal">
+          <span class="label success">The Output</span>
+          <h2 class="output-title">Pure Conviction</h2>
+          <div class="output-text">
+            <p>We don’t hand you a pile of chat transcripts. The system forces a conclusion. You receive a battle-tested
+              Executive Mandate. You see the final vote tally. You see exactly who fought whom (Tensions).</p>
+            <br>
+            <p>And most importantly, you get the single, decisive <strong>CEO Signal</strong>—the exact insight you need
+              to pull the trigger with absolute conviction.</p>
+          </div>
+          <div class="tech-line" style="background: var(--accent-green); height: 50px;"></div>
+          <p class="final-mandate">
+            Stop guessing. Stop relying on the echo chamber. <br><span style="color: var(--accent-green);">Step into the
+              arena with a board that tells you the truth.</span>
+          </p>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <script>
+    // Custom Cursor Logic
+    const cursor = document.getElementById('cursor');
+
+    document.addEventListener('mousemove', (e) => {
+      cursor.style.left = e.clientX + 'px';
+      cursor.style.top = e.clientY + 'px';
+    });
+
+    document.addEventListener('mousedown', () => {
+      cursor.style.transform = 'translate(-50%, -50%) scale(0.8)';
+    });
+
+    document.addEventListener('mouseup', () => {
+      cursor.style.transform = 'translate(-50%, -50%) scale(1)';
+    });
+
+    // Intersection Observer for Scroll Animations
+    const observerOptions = {
+      root: null,
+      rootMargin: '0px 0px -10% 0px',
+      threshold: 0.1
+    };
+
+    const observer = new IntersectionObserver((entries, observer) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          entry.target.classList.add('active');
+          // Optional: Unobserve after revealing for one-time animation
+          // observer.unobserve(entry.target);
+        }
+      });
+    }, observerOptions);
+
+    document.querySelectorAll('.reveal').forEach(el => {
+      observer.observe(el);
+    });
+
+    // Parallax effect for backgrounds
+    window.addEventListener('scroll', () => {
+      const scrolled = window.pageYOffset;
+      document.querySelectorAll('.bg-image').forEach(bg => {
+        const parent = bg.parentElement;
+        const offset = parent.offsetTop;
+        // Only calculate if in viewport roughly
+        if (scrolled + window.innerHeight > offset && scrolled < offset + parent.offsetHeight) {
+          const yPos = (scrolled - offset) * 0.3;
+          bg.style.transform = `translateY(${yPos}px)`;
+        }
+      });
+    });
+  </script>
+</body>
+
+</html>

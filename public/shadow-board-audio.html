@@ -1,0 +1,554 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Shadow Board | Audio Insight Hub</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;600;700&family=Inter:wght@300;400;600;700&family=Playfair+Display:ital,wght@0,400..900;1,400..900&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-color: #030304;
+            --glass-bg: rgba(255, 255, 255, 0.02);
+            --glass-border: rgba(255, 255, 255, 0.08);
+            --primary: #00e5ff;
+            /* Cyan */
+            --accent: #ff3333;
+            /* Red */
+            --success: #00ff66;
+            /* Green */
+            --text-main: #f4f4f5;
+            --text-muted: #8b8b93;
+            --font-hero: 'Playfair Display', serif;
+            --font-body: 'Inter', sans-serif;
+            --font-mono: 'JetBrains Mono', monospace;
+        }
+
+        body {
+            margin: 0;
+            font-family: var(--font-body);
+            background: var(--bg-color);
+            color: var(--text-main);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            overflow-x: hidden;
+            background: radial-gradient(circle at top left, #0a0a0c, #030304),
+                radial-gradient(circle at bottom right, #050505, #030304);
+            -webkit-font-smoothing: antialiased;
+        }
+
+        /* Scanline Overlay (Shadow Board Style) */
+        body::after {
+            content: '';
+            position: fixed;
+            inset: 0;
+            background: repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(0, 0, 0, 0.1) 2px, rgba(0, 0, 0, 0.1) 4px);
+            pointer-events: none;
+            z-index: 9990;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 5rem 2.5rem;
+            width: 100%;
+            box-sizing: border-box;
+            position: relative;
+            z-index: 10;
+        }
+
+        header {
+            margin-bottom: 5rem;
+            text-align: left;
+        }
+
+        .label {
+            font-family: var(--font-mono);
+            text-transform: uppercase;
+            font-size: 0.75rem;
+            letter-spacing: 0.3em;
+            color: var(--primary);
+            display: block;
+            margin-bottom: 1rem;
+        }
+
+        h1 {
+            font-family: var(--font-hero);
+            font-size: clamp(2.5rem, 5vw, 4.5rem);
+            font-weight: 600;
+            line-height: 1.1;
+            margin: 0;
+            letter-spacing: -0.01em;
+        }
+
+        p.subtitle {
+            font-size: 1.1rem;
+            color: var(--text-muted);
+            margin-top: 1.5rem;
+            max-width: 60ch;
+            line-height: 1.6;
+        }
+
+        /* Ambient Panel */
+        .ambient-panel {
+            background: var(--glass-bg);
+            backdrop-filter: blur(40px);
+            -webkit-backdrop-filter: blur(40px);
+            border: 1px solid var(--glass-border);
+            border-radius: 4px;
+            padding: 2.5rem;
+            margin-bottom: 4rem;
+            display: grid;
+            grid-template-columns: auto 1fr auto;
+            align-items: center;
+            gap: 2.5rem;
+            box-shadow: 0 4px 64px rgba(0, 0, 0, 0.6);
+            border-left: 2px solid var(--primary);
+        }
+
+        .ambient-info {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+
+        .ambient-tag {
+            font-family: var(--font-mono);
+            font-size: 0.7rem;
+            text-transform: uppercase;
+            letter-spacing: 0.15em;
+            color: var(--text-muted);
+        }
+
+        .ambient-selector {
+            display: flex;
+            gap: 1.5rem;
+            margin-top: 0.5rem;
+        }
+
+        .option {
+            background: none;
+            border: none;
+            color: var(--text-muted);
+            font-family: var(--font-mono);
+            font-size: 0.85rem;
+            cursor: pointer;
+            padding: 0;
+            transition: color 0.3s ease;
+            position: relative;
+        }
+
+        .option.active {
+            color: var(--primary);
+        }
+
+        .option::after {
+            content: '';
+            position: absolute;
+            bottom: -4px;
+            left: 0;
+            width: 0;
+            height: 1px;
+            background: var(--primary);
+            transition: width 0.3s ease;
+        }
+
+        .option.active::after {
+            width: 100%;
+        }
+
+        .controls {
+            display: flex;
+            align-items: center;
+            gap: 2rem;
+        }
+
+        .play-btn {
+            background: var(--primary);
+            color: var(--bg-color);
+            border: none;
+            border-radius: 2px;
+            width: 56px;
+            height: 56px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: transform 0.2s cubic-bezier(0.19, 1, 0.22, 1), background 0.3s;
+        }
+
+        .play-btn:hover {
+            transform: scale(1.05);
+            background: #fff;
+        }
+
+        .play-btn:active {
+            transform: scale(0.95);
+        }
+
+        /* Narrative Grid */
+        .narrative-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+            gap: 1.5rem;
+        }
+
+        .track-card {
+            background: var(--glass-bg);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid var(--glass-border);
+            border-radius: 2px;
+            padding: 2rem;
+            transition: border-color 0.4s ease, background 0.4s ease, transform 0.4s ease;
+            position: relative;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+        }
+
+        .track-card:hover {
+            border-color: rgba(0, 229, 255, 0.3);
+            background: rgba(255, 255, 255, 0.04);
+            transform: translateY(-2px);
+        }
+
+        .track-card.playing {
+            border-color: var(--primary);
+            background: rgba(0, 229, 255, 0.02);
+        }
+
+        .track-index {
+            font-family: var(--font-mono);
+            color: var(--accent);
+            font-size: 0.75rem;
+            margin-bottom: 0.75rem;
+            letter-spacing: 0.1em;
+        }
+
+        .track-name {
+            font-family: var(--font-hero);
+            font-weight: 500;
+            font-size: 1.5rem;
+            margin-bottom: 2rem;
+            line-height: 1.2;
+        }
+
+        .progress-container {
+            width: 100%;
+            height: 2px;
+            background: rgba(255, 255, 255, 0.05);
+            margin-bottom: 1.5rem;
+            cursor: pointer;
+            position: relative;
+        }
+
+        .progress-bar {
+            height: 100%;
+            background: var(--primary);
+            width: 0%;
+            transition: width 0.1s linear;
+        }
+
+        .track-meta {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-family: var(--font-mono);
+            font-size: 0.8rem;
+            color: var(--text-muted);
+        }
+
+        .track-play {
+            background: none;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            color: var(--text-main);
+            padding: 0.5rem 1rem;
+            border-radius: 2px;
+            font-family: var(--font-mono);
+            font-size: 0.7rem;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .track-card.playing .track-play {
+            border-color: var(--primary);
+            color: var(--primary);
+        }
+
+        .track-play:hover {
+            border-color: var(--primary);
+            color: var(--primary);
+        }
+
+        /* Volume Control */
+        .volume-control {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        input[type="range"] {
+            -webkit-appearance: none;
+            background: transparent;
+            width: 100px;
+        }
+
+        input[type="range"]::-webkit-slider-runnable-track {
+            height: 2px;
+            background: rgba(255, 255, 255, 0.1);
+        }
+
+        input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            height: 10px;
+            width: 10px;
+            background: var(--primary);
+            border-radius: 0;
+            cursor: pointer;
+            margin-top: -4px;
+        }
+
+        /* Icons */
+        .icon {
+            width: 24px;
+            height: 24px;
+            fill: currentColor;
+        }
+
+        /* Custom Footer (Shadow Board style) */
+        footer {
+            margin-top: 10rem;
+            border-top: 1px solid var(--glass-border);
+            padding: 4rem 2.5rem;
+            text-align: center;
+            font-family: var(--font-mono);
+            font-size: 0.7rem;
+            color: var(--text-muted);
+            letter-spacing: 0.2em;
+        }
+
+        /* Responsive */
+        @media (max-width: 900px) {
+            .ambient-panel {
+                grid-template-columns: 1fr;
+                text-align: center;
+                justify-items: center;
+            }
+
+            .ambient-selector {
+                justify-content: center;
+            }
+
+            .controls {
+                width: 100%;
+                justify-content: center;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <header>
+            <span class="label">Tactical Intelligence Layer</span>
+            <h1>The Shadow Board <br><span style="color: var(--text-muted);">Audio Repository</span></h1>
+            <p class="subtitle">Direct adversarial transcripts from the elite council. Experience the ruthless logic of the Shadow Board across seven tactical segments.</p>
+        </header>
+
+        <!-- Ambient Layer -->
+        <div class="ambient-panel">
+            <button id="ambient-play" class="play-btn" title="Initiate Foundation Ambiance">
+                <svg class="icon play-icon" viewBox="0 0 24 24">
+                    <path d="M8 5v14l11-7z" />
+                </svg>
+                <svg class="icon pause-icon" viewBox="0 0 24 24" style="display:none;">
+                    <path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z" />
+                </svg>
+            </button>
+            <div class="ambient-info">
+                <div class="ambient-tag">Atmospheric Foundation</div>
+                <div class="ambient-selector">
+                    <button class="option active" data-src="audio/board-background-1.mp3">Tactical Tension</button>
+                    <button class="option" data-src="audio/board-background-2.mp3">Strategic Silence</button>
+                </div>
+            </div>
+            <div class="volume-control">
+                <svg class="icon" viewBox="0 0 24 24" style="width:16px; opacity:0.5;">
+                    <path d="M3 9v6h4l5 5V4L7 9H3zm13.5 3c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02zM14 3.23v2.06c2.89.86 5 3.54 5 6.71s-2.11 5.85-5 6.71v2.06c4.01-.91 7-4.49 7-8.77s-2.99-7.86-7-8.77z" />
+                </svg>
+                <input type="range" id="ambient-volume" min="0" max="1" step="0.01" value="0.4">
+            </div>
+        </div>
+
+        <!-- Narration Tracks -->
+        <div class="narrative-grid" id="track-container">
+            <!-- Tracks will be generated here -->
+        </div>
+    </div>
+
+    <footer>
+        NO MEMORY. NO EGO. JUST THE BRUTAL TRUTH. // SHADOW_BOARD_V1.0
+    </footer>
+
+    <!-- Hidden Audio Element for Ambient -->
+    <audio id="ambient-audio" loop>
+        <source src="audio/board-background-1.mp3" type="audio/mpeg">
+    </audio>
+
+    <script>
+        const ambientAudio = document.getElementById('ambient-audio');
+        const ambientPlayBtn = document.getElementById('ambient-play');
+        const ambientVolume = document.getElementById('ambient-volume');
+        const ambientOptions = document.querySelectorAll('.option');
+        const trackContainer = document.getElementById('track-container');
+
+        const tracks = [
+            { id: "SEGMENT_01", name: "Strategic Synthesis", file: "audio/board-1.wav" },
+            { id: "SEGMENT_02", name: "Adversarial Tension", file: "audio/board-2.wav" },
+            { id: "SEGMENT_03", name: "The $12M Trap", file: "audio/board-3.wav" },
+            { id: "SEGMENT_04", name: "Build vs. Buy Protocol", file: "audio/board-4.wav" },
+            { id: "SEGMENT_05", name: "CEO Signal: The Mandate", file: "audio/board-5.wav" },
+            { id: "SEGMENT_06", name: "The Adversary's Verdict", file: "audio/board-6.wav" },
+            { id: "SEGMENT_07", name: "Final Board Decree", file: "audio/board-7.wav" }
+        ];
+
+        let currentNarration = null;
+        let baseVolume = 0.4;
+
+        // Initialize Tracks
+        tracks.forEach((track, index) => {
+            const card = document.createElement('div');
+            card.className = 'track-card';
+            card.innerHTML = `
+                <div>
+                    <div class="track-index">${track.id}</div>
+                    <div class="track-name">${track.name}</div>
+                </div>
+                <div>
+                    <div class="progress-container">
+                        <div class="progress-bar" id="progress-${index}"></div>
+                    </div>
+                    <div class="track-meta">
+                        <span id="time-${index}">0:00</span>
+                        <button class="track-play" data-index="${index}">Play Segment</button>
+                    </div>
+                </div>
+                <audio id="audio-${index}">
+                    <source src="${track.file}" type="audio/wav">
+                </audio>
+            `;
+            trackContainer.appendChild(card);
+
+            const audio = card.querySelector('audio');
+            const playBtn = card.querySelector('.track-play');
+            const progressBar = card.querySelector('.progress-bar');
+            const timeDisplay = card.querySelector('.track-meta span');
+
+            playBtn.addEventListener('click', () => toggleTrack(index));
+
+            audio.addEventListener('timeupdate', () => {
+                const percent = (audio.currentTime / audio.duration) * 100;
+                progressBar.style.width = percent + '%';
+                timeDisplay.textContent = formatTime(audio.currentTime);
+            });
+
+            audio.addEventListener('ended', () => {
+                stopNarration(index);
+            });
+        });
+
+        // Ambient foundation Selection
+        ambientOptions.forEach(opt => {
+            opt.addEventListener('click', () => {
+                const wasPlaying = !ambientAudio.paused;
+                ambientOptions.forEach(o => o.classList.remove('active'));
+                opt.classList.add('active');
+                
+                ambientAudio.src = opt.dataset.src;
+                if (wasPlaying) ambientAudio.play();
+            });
+        });
+
+        // Ambient Controls
+        ambientPlayBtn.addEventListener('click', () => {
+            if (ambientAudio.paused) {
+                ambientAudio.play();
+                updatePlayPauseIcons(ambientPlayBtn, true);
+            } else {
+                ambientAudio.pause();
+                updatePlayPauseIcons(ambientPlayBtn, false);
+            }
+        });
+
+        ambientVolume.addEventListener('input', (e) => {
+            baseVolume = e.target.value;
+            if (currentNarration === null) {
+                ambientAudio.volume = baseVolume;
+            } else {
+                ambientAudio.volume = baseVolume * 0.25; // Keep ducked if playing
+            }
+        });
+
+        // Track Logic
+        function toggleTrack(index) {
+            const audio = document.getElementById(`audio-${index}`);
+            const btn = trackContainer.querySelectorAll('.track-play')[index];
+            const card = trackContainer.querySelectorAll('.track-card')[index];
+
+            if (currentNarration !== null && currentNarration !== index) {
+                stopNarration(currentNarration);
+            }
+
+            if (audio.paused) {
+                audio.play();
+                currentNarration = index;
+                card.classList.add('playing');
+                btn.textContent = "Halt Audio";
+                duckAmbient(true);
+            } else {
+                audio.pause();
+                stopNarration(index);
+            }
+        }
+
+        function stopNarration(index) {
+            const audio = document.getElementById(`audio-${index}`);
+            const btn = trackContainer.querySelectorAll('.track-play')[index];
+            const card = trackContainer.querySelectorAll('.track-card')[index];
+            
+            audio.pause();
+            card.classList.remove('playing');
+            btn.textContent = "Play Segment";
+            if (currentNarration === index) {
+                currentNarration = null;
+                duckAmbient(false);
+            }
+        }
+
+        function duckAmbient(duck) {
+            const targetVolume = duck ? baseVolume * 0.25 : baseVolume;
+            // Immediate ducking for intensity, could add fade later
+            ambientAudio.volume = targetVolume;
+        }
+
+        function updatePlayPauseIcons(btn, isPlaying) {
+            btn.querySelector('.play-icon').style.display = isPlaying ? 'none' : 'block';
+            btn.querySelector('.pause-icon').style.display = isPlaying ? 'block' : 'none';
+        }
+
+        function formatTime(seconds) {
+            const mins = Math.floor(seconds / 60);
+            const secs = Math.floor(seconds % 60);
+            return `${mins}:${secs.toString().padStart(2, '0')}`;
+        }
+    </script>
+</body>
+
+</html>
