@@ -1,0 +1,459 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>The Digital Foreman</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@100;400;700&family=Space+Grotesk:wght@300;500;700&display=swap');
+
+        :root {
+            --bg: #09090b;
+            --surface: #18181b;
+            --border: #3f3f46;
+            --text: #e4e4e7;
+            --muted: #a1a1aa;
+            --accent-ai: #00e5ff;
+            --accent-warn: #ff4500;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            background-color: var(--bg);
+            color: var(--text);
+            font-family: 'JetBrains Mono', monospace;
+            overflow: hidden;
+            cursor: none;
+            text-transform: uppercase;
+            font-size: 14px;
+            line-height: 1.6;
+        }
+
+        h1,
+        h2,
+        h3 {
+            font-family: 'Space Grotesk', sans-serif;
+            letter-spacing: -0.02em;
+            line-height: 1.1;
+            color: #fff;
+        }
+
+        p {
+            text-transform: none;
+            color: var(--muted);
+            margin-bottom: 1.5rem;
+            font-weight: 400;
+            font-size: clamp(0.85rem, 1vw, 1rem);
+        }
+
+        strong {
+            color: var(--accent-ai);
+            font-weight: 700;
+        }
+
+        #os-ui {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 60px;
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0 2rem;
+            z-index: 100;
+            background: rgba(9, 9, 11, 0.8);
+            backdrop-filter: blur(10px);
+        }
+
+        .ui-label {
+            font-size: 0.75rem;
+            letter-spacing: 0.1em;
+            color: var(--accent-ai);
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .ui-label::before {
+            content: '';
+            display: block;
+            width: 8px;
+            height: 8px;
+            background: var(--accent-ai);
+            animation: pulse 2s infinite;
+        }
+
+        #carousel {
+            display: flex;
+            width: 100vw;
+            height: 100vh;
+            overflow-x: auto;
+            scroll-snap-type: x mandatory;
+            scrollbar-width: none;
+            -ms-overflow-style: none;
+        }
+
+        #carousel::-webkit-scrollbar {
+            display: none;
+        }
+
+        .panel {
+            flex: 0 0 100vw;
+            height: 100vh;
+            scroll-snap-align: start;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            position: relative;
+            padding-top: 60px;
+        }
+
+        .panel-content {
+            padding: 4rem;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            position: relative;
+            border-right: 1px solid var(--border);
+        }
+
+        .panel-media {
+            position: relative;
+            overflow: hidden;
+            background: var(--surface);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .panel-media img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            filter: grayscale(100%) contrast(1.2);
+            transition: all 0.8s cubic-bezier(0.77, 0, 0.175, 1);
+        }
+
+        .panel:hover .panel-media img {
+            filter: grayscale(0%) contrast(1) url(#glitch-filter);
+            transform: scale(1.05);
+        }
+
+        .grid-crosshair {
+            position: absolute;
+            width: 15px;
+            height: 15px;
+            border: 1px solid var(--accent-ai);
+            z-index: 10;
+        }
+
+        .tl {
+            top: 1rem;
+            left: 1rem;
+            border-right: none;
+            border-bottom: none;
+        }
+
+        .tr {
+            top: 1rem;
+            right: 1rem;
+            border-left: none;
+            border-bottom: none;
+        }
+
+        .bl {
+            bottom: 1rem;
+            left: 1rem;
+            border-right: none;
+            border-top: none;
+        }
+
+        .br {
+            bottom: 1rem;
+            right: 1rem;
+            border-left: none;
+            border-top: none;
+        }
+
+        .headline {
+            font-size: clamp(2rem, 4vw, 5rem);
+            margin-bottom: 2rem;
+            position: relative;
+            display: inline-block;
+        }
+
+        .glitch {
+            text-shadow: 2px 0 var(--accent-ai), -2px 0 var(--accent-warn);
+        }
+
+        .data-block {
+            border-left: 2px solid var(--border);
+            padding-left: 1.5rem;
+            margin-top: 2rem;
+        }
+
+        .data-block p:last-child {
+            margin-bottom: 0;
+        }
+
+        .panel-4 .panel-content {
+            border-color: var(--accent-warn);
+        }
+
+        .panel-4 strong,
+        .panel-4 .headline {
+            color: var(--accent-warn);
+            text-shadow: none;
+        }
+
+        .panel-5 {
+            grid-template-columns: 1fr 1fr;
+            grid-template-rows: 1fr 1fr;
+        }
+
+        .panel-5 .panel-media {
+            grid-column: 2;
+            grid-row: 1 / span 2;
+        }
+
+        .panel-5 .p5-top {
+            border-bottom: 1px solid var(--border);
+            padding: 3rem;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+
+        .panel-5 .p5-bottom {
+            padding: 3rem;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            background: var(--accent-ai);
+            color: var(--bg);
+        }
+
+        .panel-5 .p5-bottom p {
+            color: var(--bg);
+            font-weight: 700;
+        }
+
+        .panel-5 .p5-bottom .headline {
+            color: var(--bg);
+            text-shadow: none;
+            font-size: clamp(3rem, 6vw, 8rem);
+            letter-spacing: -0.05em;
+            margin-top: auto;
+        }
+
+        #cursor {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 30px;
+            height: 30px;
+            border: 1px solid var(--text);
+            border-radius: 50%;
+            pointer-events: none;
+            z-index: 9999;
+            transform: translate(-50%, -50%);
+            transition: width 0.2s, height 0.2s, border-color 0.2s;
+            mix-blend-mode: difference;
+        }
+
+        #cursor::after {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 4px;
+            height: 4px;
+            background: var(--accent-warn);
+            transform: translate(-50%, -50%);
+        }
+
+        #noise-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            pointer-events: none;
+            z-index: 9998;
+            opacity: 0.04;
+        }
+
+        @keyframes pulse {
+            0% {
+                opacity: 1;
+            }
+
+            50% {
+                opacity: 0.3;
+            }
+
+            100% {
+                opacity: 1;
+            }
+        }
+
+        .reveal-text {
+            opacity: 0;
+            transform: translateY(20px);
+            transition: opacity 0.8s ease, transform 0.8s cubic-bezier(0.77, 0, 0.175, 1);
+        }
+
+        .reveal-text.active {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        .delay-1 {
+            transition-delay: 0.1s;
+        }
+
+        .delay-2 {
+            transition-delay: 0.2s;
+        }
+
+        .delay-3 {
+            transition-delay: 0.3s;
+        }
+    </style>
+</head>
+
+<body>
+    <div id="cursor"></div><svg id="noise-overlay">
+        <filter id="noise">
+            <feTurbulence type="fractalNoise" baseFrequency="0.8" numOctaves="3" stitchTiles="stitch" />
+        </filter>
+        <rect width="100%" height="100%" filter="url(#noise)" />
+    </svg><svg style="position:absolute;width:0;height:0;">
+        <filter id="glitch-filter">
+            <feTurbulence type="fractalNoise" baseFrequency="0.05 0.95" numOctaves="1" result="warp" />
+            <feDisplacementMap in="SourceGraphic" in2="warp" scale="5" xChannelSelector="R" yChannelSelector="G" />
+        </filter>
+    </svg>
+    <header id="os-ui">
+        <div class="ui-label">MULTIMODAL DIAGNOSTIC PIPELINE // ONLINE</div>
+        <div class="ui-label" style="color:var(--text);">NODE <span id="node-counter"
+                style="color:var(--accent-ai);margin-left:5px;">01</span> / 05</div>
+    </header>
+    <main id="carousel">
+        <section class="panel" data-node="01">
+            <div class="panel-content">
+                <div class="grid-crosshair tl"></div>
+                <div class="grid-crosshair tr"></div>
+                <div class="grid-crosshair bl"></div>
+                <div class="grid-crosshair br"></div>
+                <h1 class="headline glitch reveal-text">The Digital Foreman: The End of Mechanical Guesswork</h1>
+                <div class="data-block reveal-text delay-1">
+                    <p>Every minute a machine sits dead, money burns. Production lines bleed. Frustration mounts.</p>
+                    <p>For a century, mechanical diagnostics has been a dark art relying on intuition. A mechanic
+                        listens to a pump, eyeballs a vibrating belt, and flips through grease-stained manuals, hoping
+                        to guess the root cause before the whole system tears itself apart.</p>
+                    <p>Guesswork is the enemy. It is slow, expensive, and dangerous.</p>
+                    <p>We are eradicating it. We built the world’s first unified Multimodal AI Diagnostic Pipeline—not
+                        just to identify symptoms, but to engineer absolute certainty. We don't build software; we build
+                        a <strong>Digital Foreman</strong>.</p>
+                </div>
+            </div>
+            <div class="panel-media"><img src="./images/scn-11.jpg" alt="Mechanical Guesswork"></div>
+        </section>
+        <section class="panel" data-node="02">
+            <div class="panel-media"><img src="./images/scn-12.jpg" alt="Multimodal Fusion Engine"></div>
+            <div class="panel-content">
+                <div class="grid-crosshair tl"></div>
+                <div class="grid-crosshair tr"></div>
+                <div class="grid-crosshair bl"></div>
+                <div class="grid-crosshair br"></div>
+                <h2 class="headline reveal-text">Hearing the Invisible, Seeing the Imperceptible</h2>
+                <div class="data-block reveal-text delay-1">
+                    <p>A human ear might miss a 2kHz frequency spike. To our Multimodal Fusion Engine, that spike isn't
+                        just noise—it is the dying scream of a secondary drive motor bearing.</p>
+                    <p>By synchronizing acoustic signatures with visual micro-fractures in real-time, we bridge the gap
+                        between human limitation and machine-level precision.</p>
+                    <p>Whether it’s a volatile burst of audio or a massive video payload of a failing hydraulic press,
+                        our ingestion layer captures every frame and frequency, checking it against a 48-million-node
+                        failure database in milliseconds.</p>
+                </div>
+            </div>
+        </section>
+        <section class="panel" data-node="03">
+            <div class="panel-content">
+                <div class="grid-crosshair tl"></div>
+                <div class="grid-crosshair tr"></div>
+                <div class="grid-crosshair bl"></div>
+                <div class="grid-crosshair br"></div>
+                <h2 class="headline reveal-text">The End of the Greasy Manual</h2>
+                <div class="data-block reveal-text delay-1">
+                    <p>Static knowledge bases are dead. Service bulletins change daily; model years evolve faster than
+                        technicians can track.</p>
+                    <p>Our Just-In-Time (JIT) Knowledge Pipeline brings the exact intelligence you need, the exact
+                        second you need it. The moment our AI identifies the machinery, our Document Crawler silently
+                        scours the global web—from iFixit to NHTSA.</p>
+                    <p>It strips away the noise, extracts the critical torque specs and tool requirements, and maps them
+                        into a high-dimensional vector space. You don’t search for the manual. The manual finds you.</p>
+                </div>
+            </div>
+            <div class="panel-media"><img src="./images/scn-13.jpg" alt="AR Intelligence"></div>
+        </section>
+        <section class="panel panel-4" data-node="04">
+            <div class="panel-media"><img src="./images/scn-14.jpg" alt="Safety Protocol"></div>
+            <div class="panel-content">
+                <div class="grid-crosshair tl"></div>
+                <div class="grid-crosshair tr"></div>
+                <div class="grid-crosshair bl"></div>
+                <div class="grid-crosshair br"></div>
+                <h2 class="headline reveal-text">Safety is Not a Feature. It is a Mandate.</h2>
+                <div class="data-block reveal-text delay-1">
+                    <p>We don't just diagnose; we protect. When our engine identifies a failure, it immediately
+                        generates a synthesized, step-by-step repair guide tailored to the technician's exact skill
+                        level.</p>
+                    <p>If the system detects a high-pressure hydraulic failure, our Mandatory Safety Protocol
+                        automatically triggers hard stops for Lockout/Tagout (LOTO).</p>
+                    <p>We don't just tell you what's broken; we make sure you stay alive while fixing it.</p>
+                </div>
+            </div>
+        </section>
+        <section class="panel panel-5" data-node="05">
+            <div class="p5-top">
+                <h2 class="headline reveal-text" style="font-size:clamp(1.5rem,3vw,3rem);">From Diagnosis to Doorstep
+                </h2>
+                <div class="data-block reveal-text delay-1" style="margin-top:1rem;">
+                    <p>A perfect diagnosis is useless if you don't have the parts. While the technician reads the repair
+                        guide, our Automated Sourcing engine acts as a procurement army.</p>
+                    <p>It silently geolocates the user and queries live retail nodes—AutoZone, RockAuto, RepairClinic—in
+                        parallel. Within seconds, it maps the OEM numbers, confirms inventory, and locates the exact
+                        replacement part required, ready for pickup.</p>
+                </div>
+            </div>
+            <div class="p5-bottom">
+                <h2 class="headline reveal-text" style="font-size:clamp(1.5rem,3vw,3rem);">Built Like a Foreman</h2>
+                <div class="reveal-text delay-1" style="margin-top:1rem;">
+                    <p>We engineered the interface with a "Technical Editorial" philosophy. It is built for high-glare
+                        environments and greasy hands. No clutter. No visual noise. Just authoritative typography, calm
+                        tonal architecture, and snapping, mechanical micro-interactions. It looks, feels, and acts like
+                        the smartest foreman you’ve ever met.</p>
+                    <p>Raw, ambiguous sensor data goes in. Certainty comes out. No more guessing. No more downtime.</p>
+                </div>
+                <div class="reveal-text delay-2" style="margin-top:2rem;">
+                    <p style="text-transform:uppercase;font-size:0.8rem;letter-spacing:0.1em;opacity:0.7;">Just three
+                        definitive words:</p>
+                    <h3 class="headline glitch">"I fixed it."</h3>
+                </div>
+            </div>
+            <div class="panel-media"><img src="./images/scn-15.jpg" alt="System Restored"></div>
+        </section>
+    </main>
+    <script>const cursor = document.getElementById('cursor'); document.addEventListener('mousemove', (e) => { cursor.style.transform = `translate(${e.clientX}px, ${e.clientY}px)`; }); const interactiveElements = document.querySelectorAll('.panel-media, a, button'); interactiveElements.forEach(el => { el.addEventListener('mouseenter', () => { cursor.style.width = '50px'; cursor.style.height = '50px'; cursor.style.borderColor = 'var(--accent-ai)'; }); el.addEventListener('mouseleave', () => { cursor.style.width = '30px'; cursor.style.height = '30px'; cursor.style.borderColor = 'var(--text)'; }); }); const nodeCounter = document.getElementById('node-counter'); const panels = document.querySelectorAll('.panel'); const observerOptions = { root: document.getElementById('carousel'), threshold: 0.5 }; const panelObserver = new IntersectionObserver((entries) => { entries.forEach(entry => { if (entry.isIntersecting) { const node = entry.target.getAttribute('data-node'); nodeCounter.textContent = node; const reveals = entry.target.querySelectorAll('.reveal-text'); reveals.forEach(el => el.classList.add('active')); } }); }, observerOptions); panels.forEach(panel => panelObserver.observe(panel));</script>
+</body>
+
+</html>

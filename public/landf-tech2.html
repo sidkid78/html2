@@ -1,0 +1,632 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Technical Integration Blueprint</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&family=Public+Sans:ital,wght@0,300;0,400;0,600;1,400&family=JetBrains+Mono:wght@400;700&display=swap');
+
+    :root {
+      --bg-base: #06090D;
+      --bg-surface: #0D131A;
+      --bg-surface-high: #151C26;
+      --text-primary: #E2E8F0;
+      --text-dim: #8B9BB4;
+      --accent-cyan: #00E5FF;
+      --accent-warning: #5F2200;
+      --accent-warning-high: #FF5A00;
+      --font-auth: 'Inter', sans-serif;
+      --font-intel: 'Public Sans', sans-serif;
+      --font-mono: 'JetBrains Mono', monospace;
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      cursor: none !important;
+    }
+
+    body {
+      background-color: var(--bg-base);
+      color: var(--text-primary);
+      font-family: var(--font-intel);
+      overflow: hidden;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    /* Custom Cursor */
+    #cursor {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 20px;
+      height: 20px;
+      border: 1px solid var(--accent-cyan);
+      border-radius: 50%;
+      pointer-events: none;
+      z-index: 9999;
+      transform: translate(-50%, -50%);
+      transition: width 0.2s, height 0.2s, background 0.2s;
+      mix-blend-mode: difference;
+    }
+
+    #cursor::after {
+      content: '';
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      width: 4px;
+      height: 4px;
+      background: var(--accent-cyan);
+      border-radius: 50%;
+      transform: translate(-50%, -50%);
+    }
+
+    /* SVG Filters Layer */
+    #filter-layer {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
+      pointer-events: none;
+      z-index: 9000;
+      opacity: 0.2;
+      mix-blend-mode: overlay;
+    }
+
+    /* UI HUD Chrome */
+    .hud-header {
+      position: fixed;
+      top: 2rem;
+      left: 2rem;
+      right: 2rem;
+      display: flex;
+      justify-content: space-between;
+      font-family: var(--font-auth);
+      font-size: 0.75rem;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      color: var(--text-dim);
+      z-index: 100;
+      mix-blend-mode: difference;
+    }
+
+    .stage-indicator {
+      color: var(--accent-cyan);
+      font-weight: 800;
+    }
+
+    /* Carousel Container */
+    .carousel {
+      display: flex;
+      width: 100vw;
+      height: 100vh;
+      overflow-x: auto;
+      overflow-y: hidden;
+      scroll-snap-type: x mandatory;
+      scrollbar-width: none;
+    }
+
+    .carousel::-webkit-scrollbar {
+      display: none;
+    }
+
+    /* Panels */
+    .panel {
+      flex: 0 0 100vw;
+      height: 100vh;
+      scroll-snap-align: start;
+      display: grid;
+      padding: 6rem 4rem 4rem 4rem;
+      position: relative;
+    }
+
+    /* Typography */
+    h1,
+    h2,
+    h3,
+    .auth-label {
+      font-family: var(--font-auth);
+      font-weight: 800;
+      text-transform: uppercase;
+      line-height: 1.1;
+    }
+
+    .hero-title {
+      font-size: clamp(3rem, 6vw, 6rem);
+      color: #fff;
+      margin-bottom: 2rem;
+      max-width: 18ch;
+    }
+
+    .section-title {
+      font-size: clamp(2rem, 4vw, 4rem);
+      color: #fff;
+      margin-bottom: 1.5rem;
+    }
+
+    .body-text {
+      font-size: clamp(1rem, 1.2vw, 1.25rem);
+      line-height: 1.6;
+      font-weight: 300;
+      color: var(--text-dim);
+      max-width: 65ch;
+      margin-bottom: 1.5rem;
+    }
+
+    .body-text strong {
+      color: var(--text-primary);
+      font-weight: 600;
+    }
+
+    .mono-text {
+      font-family: var(--font-mono);
+      font-size: 0.85rem;
+      color: var(--accent-cyan);
+    }
+
+    /* Layout Archetypes */
+    /* Asymmetric Grid 1: 60/40 */
+    .layout-asym-right {
+      grid-template-columns: 1.5fr 1fr;
+      gap: 4rem;
+      align-items: center;
+    }
+
+    /* Asymmetric Grid 2: 40/60 */
+    .layout-asym-left {
+      grid-template-columns: 1fr 1.5fr;
+      gap: 4rem;
+      align-items: center;
+    }
+
+    /* Stacked / Float */
+    .layout-float {
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+    }
+
+    /* No-Line Components */
+    .surface-low {
+      background-color: var(--bg-surface);
+      padding: 2rem;
+      margin-bottom: 1rem;
+    }
+
+    .surface-high {
+      background-color: var(--bg-surface-high);
+      padding: 2rem;
+    }
+
+    /* Data Table Alternate */
+    .data-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr;
+      gap: 4px;
+      background: var(--bg-base);
+    }
+
+    .data-cell {
+      background: var(--bg-surface);
+      padding: 1.5rem;
+      font-family: var(--font-intel);
+      font-size: 0.85rem;
+    }
+
+    .data-header {
+      font-family: var(--font-auth);
+      color: var(--accent-cyan);
+      font-size: 0.75rem;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+    }
+
+    /* Lists */
+    .tech-list {
+      list-style: none;
+      margin-top: 1rem;
+    }
+
+    .tech-list li {
+      margin-bottom: 1rem;
+      padding-left: 1.5rem;
+      position: relative;
+      font-family: var(--font-intel);
+      font-size: 0.95rem;
+      color: var(--text-primary);
+    }
+
+    .tech-list li::before {
+      content: '■';
+      position: absolute;
+      left: 0;
+      color: var(--accent-cyan);
+      font-size: 0.6rem;
+      top: 0.3rem;
+    }
+
+    /* Image Treatments */
+    .img-container {
+      width: 100%;
+      height: 100%;
+      max-height: 70vh;
+      position: relative;
+      overflow: hidden;
+      background: var(--bg-surface);
+    }
+
+    .img-container img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      filter: grayscale(80%) contrast(120%);
+      opacity: 0.7;
+      transition: filter 0.5s, opacity 0.5s;
+    }
+
+    .img-container:hover img {
+      filter: grayscale(0%) contrast(110%);
+      opacity: 1;
+    }
+
+    .img-overlay {
+      position: absolute;
+      top: 1rem;
+      right: 1rem;
+      background: var(--bg-base);
+      padding: 0.5rem 1rem;
+      font-family: var(--font-mono);
+      font-size: 0.7rem;
+      color: var(--accent-cyan);
+    }
+
+    /* JSON / Code Block */
+    pre.code-block {
+      background-color: var(--bg-surface-high);
+      padding: 2rem;
+      font-family: var(--font-mono);
+      font-size: 0.8rem;
+      color: var(--text-dim);
+      white-space: pre-wrap;
+      overflow-x: auto;
+    }
+
+    .json-key {
+      color: var(--accent-cyan);
+    }
+
+    .json-str {
+      color: var(--text-primary);
+    }
+
+    .json-num {
+      color: #A78BFA;
+    }
+
+    .json-bool {
+      color: var(--accent-warning-high);
+    }
+
+    /* Warning State */
+    .warning-state {
+      background-color: var(--accent-warning);
+      color: #fff;
+      padding: 2rem;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .warning-state::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 4px;
+      height: 100%;
+      background-color: var(--accent-warning-high);
+    }
+
+    .warning-title {
+      font-family: var(--font-auth);
+      font-weight: 800;
+      color: var(--accent-warning-high);
+      margin-bottom: 0.5rem;
+      letter-spacing: 0.05em;
+    }
+
+    /* Animations */
+    @keyframes slideUp {
+      from {
+        opacity: 0;
+        transform: translateY(40px);
+      }
+
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    @keyframes glitch {
+      0% {
+        transform: translate(0)
+      }
+
+      20% {
+        transform: translate(-2px, 2px)
+      }
+
+      40% {
+        transform: translate(-2px, -2px)
+      }
+
+      60% {
+        transform: translate(2px, 2px)
+      }
+
+      80% {
+        transform: translate(2px, -2px)
+      }
+
+      100% {
+        transform: translate(0)
+      }
+    }
+
+    .panel.in-view .anim-seq-1 {
+      animation: slideUp 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+    }
+
+    .panel.in-view .anim-seq-2 {
+      animation: slideUp 0.8s cubic-bezier(0.16, 1, 0.3, 1) 0.15s forwards;
+      opacity: 0;
+    }
+
+    .panel.in-view .anim-seq-3 {
+      animation: slideUp 0.8s cubic-bezier(0.16, 1, 0.3, 1) 0.3s forwards;
+      opacity: 0;
+    }
+  </style>
+</head>
+
+<body>
+
+  <div id="cursor"></div>
+
+  <svg id="filter-layer">
+    <filter id="noise">
+      <feTurbulence type="fractalNoise" baseFrequency="0.7" numOctaves="3" stitchTiles="stitch">
+        <animate attributeName="baseFrequency" values="0.7;0.75;0.7" dur="0.2s" repeatCount="indefinite" />
+      </feTurbulence>
+      <feColorMatrix type="matrix" values="1 0 0 0 0, 0 1 0 0 0, 0 0 1 0 0, 0 0 0 0.15 0" />
+    </filter>
+    <rect width="100%" height="100%" filter="url(#noise)"></rect>
+  </svg>
+
+  <div class="hud-header">
+    <div class="hud-title">SYSTEM INITIALIZATION: 0X442-A</div>
+    <div class="stage-indicator" id="stage-counter">[ STAGE 01 /// 06 ]</div>
+  </div>
+
+  <div class="carousel">
+
+    <!-- PANEL 1 -->
+    <section class="panel layout-asym-right" data-stage="1">
+      <div class="content-block">
+        <div class="auth-label anim-seq-1" style="color: var(--accent-cyan); margin-bottom: 1rem;">Technical Integration
+          Blueprint</div>
+        <h1 class="hero-title anim-seq-2">Multimodal AI Diagnostic & JIT RAG Pipeline</h1>
+        <div class="surface-low anim-seq-3">
+          <h2 class="section-title" style="font-size: 1.5rem;">1. Architectural Vision and Orchestration Strategy</h2>
+          <p class="body-text">The deployment of a unified multimodal pipeline is a strategic imperative for high-stakes
+            mechanical diagnostics, directly reducing diagnostic latency by correlating disparate sensor data streams
+            with <strong>99.9% precision</strong>. By synchronizing acoustic signatures with visual wear patterns, we
+            bridge the gap between "symptom detection" and "root-cause resolution."</p>
+          <p class="body-text">At the core of this system is the <strong>"Digital Foreman"</strong> orchestration model,
+            where the <em>ListenFixService</em> serves as the primary controller.</p>
+        </div>
+      </div>
+      <div class="img-container anim-seq-3">
+        <div class="img-overlay">FIG 1. ORCHESTRATION</div>
+        <img src="./images/scn-1(1).jpg" alt="Digital Foreman Orchestration">
+      </div>
+    </section>
+
+    <!-- PANEL 2 -->
+    <section class="panel layout-float" data-stage="2">
+      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 4rem; height: 100%;">
+        <div class="img-container anim-seq-1">
+          <div class="img-overlay">FIG 2. MEDIA INGESTION</div>
+          <img src="./images/scn-2(1).jpg" alt="Multimodal Media Capture">
+        </div>
+        <div class="content-block">
+          <h2 class="section-title anim-seq-2">2. Multimodal Media Ingestion Layer</h2>
+          <p class="body-text anim-seq-2">Mechanical diagnostic success is predicated on high-fidelity media capture;
+            the loss of a single 2kHz frequency spike can be the difference between identifying a bearing failure and
+            missing it entirely.</p>
+          <div class="data-grid anim-seq-3">
+            <div class="data-cell data-header">Feature</div>
+            <div class="data-cell data-header">Inline Base64</div>
+            <div class="data-cell data-header">Resumable API</div>
+
+            <div class="data-cell">Use Case</div>
+            <div class="data-cell">Images, small audio</div>
+            <div class="data-cell">Large video (>20MB)</div>
+
+            <div class="data-cell">Lifecycle</div>
+            <div class="data-cell">Volatile (Request)</div>
+            <div class="data-cell">Persistent (48h)</div>
+
+            <div class="data-cell">MIME Types</div>
+            <div class="data-cell mono-text">WAV, MP3, JPEG</div>
+            <div class="data-cell mono-text">MP4, PDF, FLAC</div>
+          </div>
+          <div class="surface-low anim-seq-3" style="margin-top: 1rem;">
+            <p class="body-text" style="margin:0; font-size: 0.9rem;">For volatile processing, APIs capture raw Blob
+              data and convert it to <span class="mono-text">BASE64_ENCODED_STRING</span>. For persistent diagnostic
+              context, the backend enters a polling loop checking the Gemini metadata endpoint until state reaches
+              ACTIVE.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- PANEL 3 -->
+    <section class="panel layout-asym-left" data-stage="3">
+      <div class="content-block anim-seq-1">
+        <h2 class="section-title">3. The Just-In-Time (JIT) Knowledge Pipeline</h2>
+        <p class="body-text">Static knowledge bases are insufficient. Our JIT pipeline provides a competitive edge by
+          performing background discovery of technical documentation the moment equipment is identified via
+          DocumentCrawlerService.</p>
+        <div class="surface-high">
+          <div class="auth-label" style="color: var(--accent-cyan); font-size:0.8rem;">RAG Indexing Parameters</div>
+          <ul class="tech-list">
+            <li><span class="mono-text">chunkSize: 1000</span> (maintains semantic coherence)</li>
+            <li><span class="mono-text">chunkOverlap: 200</span> (preserves continuity)</li>
+            <li><span class="mono-text">embeddingModel: gemini-embedding-2-preview</span></li>
+            <li><span class="mono-text">topK: 5</span> (retrieved segments)</li>
+            <li><span class="mono-text">minScore: 0.5</span> (cosine similarity threshold)</li>
+          </ul>
+        </div>
+      </div>
+      <div class="img-container anim-seq-2">
+        <div class="img-overlay">FIG 3. VECTORIZATION</div>
+        <img src="./images/scn3(1).jpg" alt="JIT Knowledge Pipeline">
+      </div>
+    </section>
+
+    <!-- PANEL 4 -->
+    <section class="panel layout-asym-right" data-stage="4">
+      <div class="content-block anim-seq-1">
+        <h2 class="section-title">4. Multimodal Diagnostic Engine & Fusion Logic</h2>
+        <p class="body-text">The core value lies in "Multimodal Fusion"—correlating high-frequency audio spikes with
+          visual micro-fractures. The engine establishes <span class="mono-text">MULTIMODAL_SYNC: ESTABLISHING VISUAL
+            HANDSHAKE</span> before inference.</p>
+        <pre class="code-block anim-seq-2">
+{
+  <span class="json-key">"confidence"</span>: <span class="json-num">0.89</span>,
+  <span class="json-key">"primaryDiagnosis"</span>: <span class="json-str">"Secondary drive motor bearing failure"</span>,
+  <span class="json-key">"symptoms"</span>: [<span class="json-str">"2kHz frequency spike"</span>, <span class="json-str">"Visual vibration in housing"</span>],
+  <span class="json-key">"possibleCauses"</span>: [<span class="json-str">"Lubrication failure"</span>, <span class="json-str">"Axial misalignment"</span>],
+  <span class="json-key">"severity"</span>: <span class="json-str">"medium-high"</span>,
+  <span class="json-key">"recommendedActions"</span>: [
+    {
+      <span class="json-key">"priority"</span>: <span class="json-num">1</span>,
+      <span class="json-key">"action"</span>: <span class="json-str">"Perform Lockout/Tagout (LOTO) on main pressure relief valve."</span>,
+      <span class="json-key">"difficulty"</span>: <span class="json-str">"moderate"</span>
+    }
+  ],
+  <span class="json-key">"requiresExpertReview"</span>: <span class="json-bool">false</span>
+}</pre>
+      </div>
+      <div class="img-container anim-seq-3">
+        <div class="img-overlay">FIG 4. FUSION LOGIC</div>
+        <img src="./images/scn4(1).jpg" alt="Diagnostic Engine Sync">
+      </div>
+    </section>
+
+    <!-- PANEL 5 -->
+    <section class="panel layout-asym-left" data-stage="5">
+      <div class="img-container anim-seq-1">
+        <div class="img-overlay">FIG 5. REPAIR SYNTHESIS</div>
+        <img src="./images/scn-5(1).jpg" alt="Repair Guide Output">
+      </div>
+      <div class="content-block anim-seq-2">
+        <h2 class="section-title">5. Repair Synthesis & Automated Part Sourcing</h2>
+        <p class="body-text">Repair instructions must be tailored to user skill levels to ensure safety. The system
+          synthesizes sequential steps with difficulty markers.</p>
+        <div class="warning-state anim-seq-3">
+          <div class="warning-title">MANDATORY SAFETY PROTOCOL</div>
+          <p class="body-text" style="color: #fff; margin:0;">In hydraulic systems, the engine enforces
+            <strong>Lockout/Tagout (LOTO)</strong> requirements, warning that "high residual pressure poses an immediate
+            kinetic hazard."
+          </p>
+        </div>
+        <div class="surface-low anim-seq-3" style="margin-top:1rem;">
+          <p class="body-text" style="margin:0;">Parts Locating leverages user location (ZIP/City) to query live retail
+            nodes in parallel (AutoZone, RockAuto, Home Depot, RepairClinic). Deliveries map via NDJSON stream.</p>
+          <div class="mono-text" style="margin-top:1rem;">[08:42:15] RETRIEVING TECHNICAL DOCUMENTATION:
+            PUMP_01_VALVE_MANUAL.PDF</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- PANEL 6 -->
+    <section class="panel layout-float" data-stage="6">
+      <div class="content-block" style="max-width: 900px; margin: 0 auto; text-align: center;">
+        <h2 class="section-title anim-seq-1">6. System Implementation & Design Standards</h2>
+        <p class="body-text anim-seq-2" style="margin: 0 auto 2rem auto;">The "Technical Editorial" design philosophy is
+          a non-negotiable standard to ensure user trust. The UI must feel like a "Digital Foreman"—authoritative, calm,
+          and high-end.</p>
+
+        <div class="data-grid anim-seq-3" style="text-align: left; grid-template-columns: 1fr 1fr;">
+          <div class="data-cell">
+            <div class="auth-label" style="color: var(--accent-cyan); margin-bottom:1rem;">UI Standards</div>
+            <ul class="tech-list">
+              <li><strong>Intentional Asymmetry:</strong> Break the grid to guide the eye.</li>
+              <li><strong>The No-Line Rule:</strong> Prohibit 1px solid borders. Define space through background shifts.
+              </li>
+              <li><strong>Tonal Architecture:</strong> Tertiary burnt-orange (#5f2200) for warnings.</li>
+            </ul>
+          </div>
+          <div class="data-cell">
+            <div class="auth-label" style="color: var(--accent-cyan); margin-bottom:1rem;">Server Constraints</div>
+            <ul class="tech-list">
+              <li>Node.js 22+ runtime for Google AI SDK.</li>
+              <li><span class="mono-text">maxDuration: 120s</span> for multi-stage analysis.</li>
+              <li><span class="mono-text">GEMINI_API_KEY</span> secures RAG infrastructure.</li>
+            </ul>
+          </div>
+        </div>
+        <div class="auth-label anim-seq-3" style="margin-top: 4rem; font-size: 2rem; color: #fff;">"I FIXED IT."</div>
+      </div>
+    </section>
+
+  </div>
+
+  <script>
+    // Custom Cursor Logic
+    const cursor = document.getElementById('cursor');
+    document.addEventListener('mousemove', (e) => {
+      cursor.style.left = e.clientX + 'px';
+      cursor.style.top = e.clientY + 'px';
+    });
+
+    document.querySelectorAll('a, .surface-low, .data-cell').forEach(el => {
+      el.addEventListener('mouseenter', () => {
+        cursor.style.transform = 'translate(-50%, -50%) scale(2)';
+        cursor.style.background = 'rgba(0, 229, 255, 0.1)';
+      });
+      el.addEventListener('mouseleave', () => {
+        cursor.style.transform = 'translate(-50%, -50%) scale(1)';
+        cursor.style.background = 'transparent';
+      });
+    });
+
+    // Intersection Observer for scroll tracking and animation triggering
+    const panels = document.querySelectorAll('.panel');
+    const counter = document.getElementById('stage-counter');
+
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          entry.target.classList.add('in-view');
+          const stage = entry.target.getAttribute('data-stage');
+          counter.innerText = `[ STAGE 0${stage} /// 06 ]`;
+        }
+      });
+    }, {
+      root: document.querySelector('.carousel'),
+      threshold: 0.6
+    });
+
+    panels.forEach(panel => observer.observe(panel));
+  </script>
+</body>
+
+</html>

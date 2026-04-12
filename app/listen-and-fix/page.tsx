@@ -38,6 +38,20 @@ const articles = [
     href: "/documentation.html",
     icon: "📄",
     accent: "from-teal-500/20 to-cyan-500/20"
+  },
+  {
+    title: "The Digital Foreman",
+    description: "The End of Mechanical Guesswork. Explore the world's first unified Multimodal AI Diagnostic Pipeline.",
+    href: "/landf-tech.html",
+    icon: "🤖",
+    accent: "from-emerald-500/20 to-green-500/20"
+  },
+  {
+    title: "Technical Integration Blueprint",
+    description: "Multimodal AI Diagnostic & JIT RAG Pipeline. Architecture, ingestion, and multimodal fusion logic.",
+    href: "/landf-tech2.html",
+    icon: "⚙️",
+    accent: "from-sky-500/20 to-blue-500/20"
   }
 ];
 
