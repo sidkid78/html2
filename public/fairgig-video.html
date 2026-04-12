@@ -1,10 +1,12 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>FAIRGIG: The Origin</title>
-    <link href="https://fonts.googleapis.com/css2?family=Anton&family=Space+Grotesk:wght@400;600;700;900&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Anton&family=Space+Grotesk:wght@400;600;700;900&display=swap"
+        rel="stylesheet">
     <style>
         :root {
             --bg: #050505;
@@ -51,7 +53,7 @@
         .overlay {
             position: absolute;
             inset: 0;
-            background: linear-gradient(180deg, rgba(5,5,5,0.7) 0%, rgba(5,5,5,0.2) 50%, rgba(5,5,5,0.9) 100%);
+            background: linear-gradient(180deg, rgba(5, 5, 5, 0.7) 0%, rgba(5, 5, 5, 0.2) 50%, rgba(5, 5, 5, 0.9) 100%);
             z-index: 2;
             pointer-events: none;
         }
@@ -75,7 +77,7 @@
         .label span {
             color: var(--accent-red);
         }
-        
+
         .audio-toggle {
             position: fixed;
             top: 30px;
@@ -128,16 +130,26 @@
             animation: sound-bar-anim 1s infinite ease-in-out alternate;
         }
 
-        .active .bar:nth-child(2) { animation-delay: 0.2s; }
-        .active .bar:nth-child(3) { animation-delay: 0.4s; }
-
-        @keyframes sound-bar-anim {
-            0% { height: 30%; }
-            100% { height: 100%; }
+        .active .bar:nth-child(2) {
+            animation-delay: 0.2s;
         }
 
+        .active .bar:nth-child(3) {
+            animation-delay: 0.4s;
+        }
+
+        @keyframes sound-bar-anim {
+            0% {
+                height: 30%;
+            }
+
+            100% {
+                height: 100%;
+            }
+        }
     </style>
 </head>
+
 <body>
 
     <div id="audio-control" class="audio-toggle">
@@ -150,7 +162,13 @@
     </div>
 
     <!-- Background Audio -->
-    <audio id="bg-music" src="./audio/fairgigbackground.mp3" preload="auto"></audio>
+    <audio id="bg-music" src="./audio/fairgigbackground2.mp3" preload="auto"></audio>
+    <!-- Spoken Audio Parts -->
+    <audio id="part-1" src="./audio/part-1.wav" preload="auto"></audio>
+    <audio id="part-2" src="./audio/part-2.wav" preload="auto"></audio>
+    <audio id="part-3" src="./audio/part-3.wav" preload="auto"></audio>
+    <audio id="part-4" src="./audio/part-4.wav" preload="auto"></audio>
+    <audio id="part-5" src="./audio/part-5.wav" preload="auto"></audio>
 
     <div class="ui-layer">
         <div class="label">FAIR<span>GIG</span></div>
@@ -159,7 +177,7 @@
     <div class="video-container">
         <div class="overlay"></div>
         <!-- Main Video -->
-        <video id="main-video" src="./video/fairgigvideo.mp4" loop playsinline preload="auto" muted></video>
+        <video id="main-video" src="./video/fairgigvideo2.mp4" playsinline preload="auto" muted></video>
     </div>
 
     <script>
@@ -167,8 +185,49 @@
         const audioStatus = document.getElementById('audio-status');
         const bgMusic = document.getElementById('bg-music');
         const mainVideo = document.getElementById('main-video');
-        
+
+        // Hide video initially while part-1 plays
+        mainVideo.style.opacity = '0';
+        mainVideo.style.transition = 'opacity 1s ease-in-out';
+
         let isPlaying = false;
+        let currentPart = 1;
+        let part2Timeout = null;
+
+        // Sequence logic
+        for (let i = 1; i <= 4; i++) {
+            document.getElementById(`part-${i}`).addEventListener('ended', () => {
+                currentPart = i + 1;
+                if (isPlaying) {
+                    const nextAudio = document.getElementById(`part-${currentPart}`);
+
+                    // Video starts when part-1 ends
+                    if (i === 1) {
+                        mainVideo.style.opacity = '0.8'; // Match original CSS opacity
+                        mainVideo.currentTime = 0;
+                        mainVideo.muted = false; // or true if video has no sound anyway
+                        mainVideo.play().catch(e => console.warn('Video play failed:', e));
+
+                        // Delay part-2 by 8 seconds
+                        if (nextAudio) {
+                            nextAudio.currentTime = 0;
+                            part2Timeout = setTimeout(() => {
+                                if (isPlaying && currentPart === 2) {
+                                    mainVideo.muted = true; // Mute video so narration can take over purely with background music
+                                    nextAudio.play().catch(e => console.warn('Next audio play failed:', e));
+                                    part2Timeout = null;
+                                }
+                            }, 8000);
+                        }
+                    } else {
+                        if (nextAudio) {
+                            nextAudio.currentTime = 0;
+                            nextAudio.play().catch(e => console.warn('Next audio play failed:', e));
+                        }
+                    }
+                }
+            });
+        }
 
         audioToggle.addEventListener('click', () => {
             isPlaying = !isPlaying;
@@ -176,31 +235,58 @@
             if (isPlaying) {
                 audioToggle.classList.add('active');
                 audioStatus.innerText = "Audio On";
-                
+
+                // Restart from beginning if bgMusic ended completely
+                if (bgMusic.ended || (currentPart >= 5 && document.getElementById('part-5').ended)) {
+                    bgMusic.currentTime = 0;
+                    currentPart = 1;
+                    for (let i = 1; i <= 5; i++) document.getElementById(`part-${i}`).currentTime = 0;
+                    mainVideo.currentTime = 0;
+                    mainVideo.style.opacity = '0';
+                    mainVideo.pause();
+                }
+
                 // Play background music
                 bgMusic.volume = 0.5;
-                if (bgMusic.ended) {
-                    bgMusic.currentTime = 0;
-                }
                 bgMusic.play().catch(e => console.warn('Background music play failed:', e));
-                
-                // Play and unmute video
-                mainVideo.muted = false;
-                if (mainVideo.ended) {
-                    mainVideo.currentTime = 0;
+
+                // Resume the current spoken audio track
+                const activeAudio = document.getElementById(`part-${currentPart}`);
+                if (activeAudio) {
+                    activeAudio.play().catch(e => console.warn('Active audio play failed:', e));
+                    if (part2Timeout) {
+                        clearTimeout(part2Timeout);
+                        part2Timeout = null;
+                        mainVideo.muted = true; // Force mute if they paused & resumed during the gap
+                    }
                 }
-                mainVideo.play().catch(e => console.warn('Video play failed:', e));
-                
+
+                // If we are past part-1, also resume the video
+                if (currentPart > 1 && !mainVideo.ended) {
+                    mainVideo.play().catch(e => console.warn('Video play failed:', e));
+                }
+
             } else {
                 audioToggle.classList.remove('active');
                 audioStatus.innerText = "Audio Off";
-                
+
                 // Pause everything
                 bgMusic.pause();
-                mainVideo.muted = true;
+
+                if (part2Timeout) {
+                    clearTimeout(part2Timeout);
+                    part2Timeout = null;
+                }
+
+                for (let i = 1; i <= 5; i++) {
+                    const a = document.getElementById(`part-${i}`);
+                    if (a) a.pause();
+                }
+
                 mainVideo.pause();
             }
         });
     </script>
 </body>
+
 </html>

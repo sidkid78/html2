@@ -45,6 +45,13 @@ const articles = [
     href: "/fairgig7.html",
     icon: "⚡",
     accent: "from-red-500/20 to-orange-500/20"
+  },
+  {
+    title: "FairGig Cinematic Experience",
+    description: "An immersive audiovisual investigation into the gatekeepers of the live music industry.",
+    href: "/fairgig-video.html",
+    icon: "🎬",
+    accent: "from-violet-500/20 to-purple-500/20"
   }
 ];
 
