@@ -855,15 +855,17 @@
       }
     });
 
-    // Autoscroll logic for Scene 1
-    const audio1 = document.getElementById('audio-1');
-    if (audio1) {
-      audio1.addEventListener('ended', () => {
-        const nextPanel = document.getElementById('panel-2');
-        if (nextPanel) {
-          nextPanel.scrollIntoView({ behavior: 'smooth' });
-        }
-      });
+    // Autoscroll logic for all Scenes
+    for (let i = 1; i <= 5; i++) {
+      const audio = document.getElementById(`audio-${i}`);
+      if (audio) {
+        audio.addEventListener('ended', () => {
+          const nextPanel = document.getElementById(`panel-${i + 1}`);
+          if (nextPanel) {
+            nextPanel.scrollIntoView({ behavior: 'smooth' });
+          }
+        });
+      }
     }
   </script>
 </body>

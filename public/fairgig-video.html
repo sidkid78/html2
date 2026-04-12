@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FAIRGIG: The Origin</title>
+    <link href="https://fonts.googleapis.com/css2?family=Anton&family=Space+Grotesk:wght@400;600;700;900&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg: #050505;
+            --fg: #f4f4f5;
+            --accent-red: #ff3333;
+            --font-head: 'Anton', sans-serif;
+            --font-body: 'Space Grotesk', sans-serif;
+            --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            background-color: var(--bg);
+            color: var(--fg);
+            font-family: var(--font-body);
+            overflow: hidden;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        .video-container {
+            position: relative;
+            width: 100vw;
+            height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+        }
+
+        video {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            z-index: 1;
+            opacity: 0.8;
+            filter: contrast(1.1) brightness(0.9);
+        }
+
+        .overlay {
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(180deg, rgba(5,5,5,0.7) 0%, rgba(5,5,5,0.2) 50%, rgba(5,5,5,0.9) 100%);
+            z-index: 2;
+            pointer-events: none;
+        }
+
+        .ui-layer {
+            position: absolute;
+            top: 2rem;
+            left: 2rem;
+            z-index: 10;
+        }
+
+        .label {
+            font-family: var(--font-head);
+            font-size: clamp(2rem, 4vw, 4rem);
+            color: var(--fg);
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            line-height: 1;
+        }
+
+        .label span {
+            color: var(--accent-red);
+        }
+        
+        .audio-toggle {
+            position: fixed;
+            top: 30px;
+            right: 30px;
+            z-index: 10000;
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            padding: 10px 20px;
+            border-radius: 30px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            cursor: pointer;
+            transition: all 0.3s var(--ease-out);
+            color: #888;
+            font-size: 0.8rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+        }
+
+        .audio-toggle:hover {
+            background: rgba(255, 255, 255, 0.1);
+            border-color: rgba(255, 255, 255, 0.3);
+            color: var(--fg);
+        }
+
+        .audio-toggle.active {
+            color: var(--accent-red);
+            border-color: var(--accent-red);
+        }
+
+        .sound-bars {
+            display: flex;
+            align-items: center;
+            gap: 2px;
+            height: 15px;
+        }
+
+        .bar {
+            width: 2px;
+            height: 100%;
+            background: currentColor;
+            border-radius: 2px;
+        }
+
+        .active .bar {
+            animation: sound-bar-anim 1s infinite ease-in-out alternate;
+        }
+
+        .active .bar:nth-child(2) { animation-delay: 0.2s; }
+        .active .bar:nth-child(3) { animation-delay: 0.4s; }
+
+        @keyframes sound-bar-anim {
+            0% { height: 30%; }
+            100% { height: 100%; }
+        }
+
+    </style>
+</head>
+<body>
+
+    <div id="audio-control" class="audio-toggle">
+        <div class="sound-bars">
+            <div class="bar"></div>
+            <div class="bar"></div>
+            <div class="bar"></div>
+        </div>
+        <span id="audio-status">Start Experience</span>
+    </div>
+
+    <!-- Background Audio -->
+    <audio id="bg-music" src="./audio/fairgigbackground.mp3" loop preload="auto"></audio>
+
+    <div class="ui-layer">
+        <div class="label">FAIR<span>GIG</span></div>
+    </div>
+
+    <div class="video-container">
+        <div class="overlay"></div>
+        <!-- Main Video -->
+        <video id="main-video" src="./video/fairgigvideo.mp4" loop playsinline preload="auto" muted></video>
+    </div>
+
+    <script>
+        const audioToggle = document.getElementById('audio-control');
+        const audioStatus = document.getElementById('audio-status');
+        const bgMusic = document.getElementById('bg-music');
+        const mainVideo = document.getElementById('main-video');
+        
+        let isPlaying = false;
+
+        audioToggle.addEventListener('click', () => {
+            isPlaying = !isPlaying;
+
+            if (isPlaying) {
+                audioToggle.classList.add('active');
+                audioStatus.innerText = "Audio On";
+                
+                // Play background music
+                bgMusic.volume = 0.5;
+                bgMusic.play().catch(e => console.warn('Background music play failed:', e));
+                
+                // Play and unmute video
+                mainVideo.muted = false;
+                mainVideo.play().catch(e => console.warn('Video play failed:', e));
+                
+            } else {
+                audioToggle.classList.remove('active');
+                audioStatus.innerText = "Audio Off";
+                
+                // Pause everything
+                bgMusic.pause();
+                mainVideo.muted = true;
+                mainVideo.pause();
+            }
+        });
+    </script>
+</body>
+</html>

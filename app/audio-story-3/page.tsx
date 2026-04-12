@@ -20,7 +20,7 @@ function formatTime(seconds: number) {
 }
 
 const TrackCard = ({ track, isPlaying, isQueued, isExcluded, onToggle, onEnded }: { 
-  track: any, 
+  track: { id: number; name: string; file: string }, 
   isPlaying: boolean,
   isQueued: boolean,
   isExcluded: boolean,

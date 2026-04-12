@@ -1,0 +1,517 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>The Artist's Manifesto</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Anton&family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #0a0a0c;
+  --text: #f0f0f0;
+  --accent: #E63946;
+  --accent-glow: rgba(230, 57, 70, 0.4);
+  --muted: #6c757d;
+  --font-head: 'Anton', sans-serif;
+  --font-body: 'Inter', sans-serif;
+  --ease: cubic-bezier(0.25, 1, 0.5, 1);
+}
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  cursor: none;
+}
+
+body {
+  background-color: var(--bg);
+  color: var(--text);
+  font-family: var(--font-body);
+  overflow: hidden;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* Custom Cursor */
+#cursor-dot {
+  position: fixed;
+  width: 8px;
+  height: 8px;
+  background: var(--accent);
+  border-radius: 50%;
+  pointer-events: none;
+  z-index: 9999;
+  transform: translate(-50%, -50%);
+  transition: width 0.2s, height 0.2s, background 0.2s;
+}
+#cursor-ring {
+  position: fixed;
+  width: 40px;
+  height: 40px;
+  border: 1px solid rgba(255,255,255,0.3);
+  border-radius: 50%;
+  pointer-events: none;
+  z-index: 9998;
+  transform: translate(-50%, -50%);
+  transition: transform 0.1s ease-out, width 0.2s, height 0.2s;
+}
+body:active #cursor-ring { transform: translate(-50%, -50%) scale(0.8); }
+
+/* SVG Filter Overlay */
+.noise-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  pointer-events: none;
+  z-index: 9000;
+  mix-blend-mode: overlay;
+  opacity: 0.15;
+}
+
+/* UI Elements */
+.ui-layer {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  pointer-events: none;
+  z-index: 100;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  padding: 2rem;
+}
+.progress-indicator {
+  font-family: var(--font-head);
+  font-size: clamp(2rem, 4vw, 4rem);
+  color: var(--accent);
+  display: flex;
+  align-items: baseline;
+  gap: 0.5rem;
+  mix-blend-mode: exclusion;
+}
+.progress-total {
+  font-size: 0.4em;
+  color: var(--muted);
+}
+.instruction {
+  font-family: var(--font-head);
+  font-size: 0.8rem;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--text);
+  opacity: 0.5;
+  align-self: flex-end;
+}
+
+/* Carousel Container */
+.carousel {
+  display: flex;
+  width: 100vw;
+  height: 100vh;
+  overflow-x: auto;
+  overflow-y: hidden;
+  scroll-snap-type: x mandatory;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+.carousel::-webkit-scrollbar { display: none; }
+
+/* Panel Base */
+.panel {
+  flex: 0 0 100vw;
+  height: 100vh;
+  scroll-snap-align: start;
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+}
+
+.panel-inner {
+  width: 100%;
+  height: 100%;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 4rem;
+  padding: 6rem 4rem;
+  max-width: 1800px;
+  margin: 0 auto;
+  position: relative;
+  z-index: 2;
+}
+
+@media (max-width: 1024px) {
+  .panel-inner {
+    grid-template-columns: 1fr;
+    grid-template-rows: auto 1fr;
+    padding: 6rem 2rem 2rem 2rem;
+    gap: 2rem;
+  }
+}
+
+/* Typography */
+.title-main {
+  position: absolute;
+  top: 50%;
+  left: 4rem;
+  transform: translateY(-50%);
+  font-family: var(--font-head);
+  font-size: clamp(4rem, 8vw, 10rem);
+  line-height: 0.85;
+  text-transform: uppercase;
+  color: transparent;
+  -webkit-text-stroke: 2px rgba(255,255,255,0.1);
+  z-index: 0;
+  white-space: nowrap;
+  pointer-events: none;
+}
+.panel.is-active .title-main {
+  animation: slideRight 1.5s var(--ease) forwards;
+}
+
+.section-num {
+  font-family: var(--font-head);
+  color: var(--accent);
+  font-size: clamp(3rem, 5vw, 6rem);
+  line-height: 1;
+  margin-bottom: 1rem;
+  display: block;
+}
+
+h2 {
+  font-family: var(--font-head);
+  font-size: clamp(2.5rem, 4vw, 5rem);
+  line-height: 1;
+  text-transform: uppercase;
+  margin-bottom: 2rem;
+  letter-spacing: 0.02em;
+}
+
+p {
+  font-size: clamp(1rem, 1.2vw, 1.5rem);
+  line-height: 1.6;
+  color: #b0b0b0;
+  margin-bottom: 1.5rem;
+  max-width: 600px;
+  font-weight: 300;
+}
+
+strong {
+  color: var(--text);
+  font-weight: 700;
+}
+
+.highlight-text {
+  color: var(--accent);
+  font-weight: 700;
+}
+
+.quote {
+  font-style: italic;
+  color: var(--accent);
+  border-left: 2px solid var(--accent);
+  padding-left: 1.5rem;
+  margin: 2rem 0;
+  font-size: 1.2em;
+  font-weight: 400;
+}
+
+/* Image Containers */
+.img-wrapper {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  border-radius: 4px;
+}
+.img-wrapper img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transform: scale(1.1);
+  transition: transform 2s var(--ease);
+  filter: grayscale(80%) contrast(1.2);
+}
+.panel.is-active .img-wrapper img {
+  transform: scale(1);
+}
+
+/* Animations */
+.anim-up {
+  opacity: 0;
+  transform: translateY(40px);
+  transition: opacity 0.8s var(--ease), transform 0.8s var(--ease);
+}
+.panel.is-active .anim-up {
+  opacity: 1;
+  transform: translateY(0);
+}
+.d-1 { transition-delay: 0.1s; }
+.d-2 { transition-delay: 0.2s; }
+.d-3 { transition-delay: 0.3s; }
+.d-4 { transition-delay: 0.4s; }
+
+@keyframes slideRight {
+  from { transform: translate(-10%, -50%); opacity: 0; }
+  to { transform: translate(0, -50%); opacity: 1; }
+}
+
+/* Panel Specific Styling */
+#p1 .img-wrapper {
+  filter: url(#duotone-red);
+}
+#p1 .text-col { justify-self: end; }
+
+#p2 .panel-inner {
+  grid-template-columns: 1fr;
+  text-align: center;
+}
+#p2 .img-bg {
+  position: absolute;
+  top: 0; left: 0; width: 100%; height: 100%;
+  background-image: url('./images/scn-2(2).jpg');
+  background-size: cover;
+  background-position: center;
+  opacity: 0.3;
+  z-index: 0;
+  filter: url(#glow);
+}
+#p2 p { margin: 0 auto 1.5rem auto; }
+
+#p3 .img-wrapper {
+  height: 80%;
+  align-self: center;
+}
+#p3 .img-wrapper img { filter: none; }
+
+#p4 .panel-inner {
+  grid-template-columns: 1fr 1.5fr;
+}
+#p4 .img-wrapper img {
+  filter: sepia(100%) hue-rotate(180deg) saturate(200%) contrast(1.5);
+}
+
+#p5 .img-bg {
+  position: absolute;
+  top: 0; left: 0; width: 100%; height: 100%;
+  background-image: url('./images/scn-5(2).jpg');
+  background-size: cover;
+  background-position: center;
+  z-index: 0;
+}
+#p5 .img-bg::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(to top, #0a0a0c 10%, transparent 80%);
+}
+#p5 .content-box {
+  position: absolute;
+  bottom: 10vh;
+  left: 4rem;
+  z-index: 2;
+  max-width: 800px;
+}
+#p5 h2 { font-size: clamp(3rem, 6vw, 7rem); color: #fff; text-shadow: 0 4px 20px rgba(0,0,0,0.8); }
+#p5 p { color: #f0f0f0; text-shadow: 0 2px 10px rgba(0,0,0,0.8); font-weight: 400; }
+.outro-hook {
+  font-family: var(--font-head);
+  font-size: clamp(2rem, 3vw, 4rem);
+  color: var(--accent);
+  text-transform: uppercase;
+  margin-top: 2rem;
+  display: block;
+  line-height: 1.1;
+}
+
+/* SVG Filters hidden */
+.svg-defs { position: absolute; width: 0; height: 0; }
+
+</style>
+</head>
+<body>
+
+<svg class="svg-defs">
+  <defs>
+    <!-- Animated Noise -->
+    <filter id="noise">
+      <feTurbulence type="fractalNoise" baseFrequency="0.8" numOctaves="3" stitchTiles="stitch">
+        <animate attributeName="seed" values="0;10;0" dur="1s" repeatCount="indefinite" />
+      </feTurbulence>
+      <feColorMatrix type="matrix" values="1 0 0 0 0, 0 1 0 0 0, 0 0 1 0 0, 0 0 0 0.5 0" />
+    </filter>
+    <!-- Duotone Red/Black -->
+    <filter id="duotone-red">
+      <feColorMatrix type="matrix" values=
+        "0.2126 0.7152 0.0722 0 0
+         0.2126 0.7152 0.0722 0 0
+         0.2126 0.7152 0.0722 0 0
+         0 0 0 1 0" result="gray" />
+      <feComponentTransfer color-interpolation-filters="sRGB">
+        <feFuncR type="table" tableValues="0.04 0.9" />
+        <feFuncG type="table" tableValues="0.03 0.22" />
+        <feFuncB type="table" tableValues="0.04 0.27" />
+      </feComponentTransfer>
+    </filter>
+  </defs>
+</svg>
+
+<div class="noise-overlay" style="filter: url(#noise);"></div>
+
+<div id="cursor-dot"></div>
+<div id="cursor-ring"></div>
+
+<div class="ui-layer">
+  <div class="progress-indicator">
+    <span id="current-panel">01</span><span class="progress-total">/05</span>
+  </div>
+  <div class="instruction">Scroll / Swipe to navigate</div>
+</div>
+
+<div class="carousel" id="scroll-container">
+
+  <!-- Panel 1 -->
+  <section class="panel" id="p1" data-index="01">
+    <div class="title-main">Stop Bleeding<br>For The House</div>
+    <div class="panel-inner">
+      <div class="text-col">
+        <h2 class="anim-up d-1"><span class="section-num">1.</span>The Big Lie of Live Music</h2>
+        <p class="anim-up d-2"><strong>The Artist’s Manifesto: Stop Bleeding for the House</strong></p>
+        <p class="anim-up d-2">Every independent artist knows the feeling. You spent months writing. You rehearsed until your fingers bled. You hauled your gear in the rain, played your heart out, and brought the crowd to life. Then, at 1:00 AM, you walk into the back office to settle up—and the promoter hands you a crumpled twenty-dollar bill.</p>
+        <p class="quote anim-up d-3">*"Sound guy was expensive tonight, guys. Door didn't really cover it."*</p>
+        <p class="anim-up d-4">This is the <span class="highlight-text">Big Lie</span> of the live music industry: the illusion that a booked gig is a fair gig. For decades, a parasitic system has thrived by exploiting your passion. Venues and shady promoters use your art as a shield, offloading 100% of the financial risk onto your shoulders while taking the lion's share of the reward. They gamble with your money, and when they lose, you pay the bill.</p>
+        <p class="anim-up d-4 highlight-text">You aren't operating a business. You are being used as unpaid labor to keep their lights on.</p>
+      </div>
+      <div class="img-col anim-up">
+        <div class="img-wrapper">
+          <img src="./images/scn-1(2).jpg" alt="Gritty back room payout">
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Panel 2 -->
+  <section class="panel" id="p2" data-index="02">
+    <div class="img-bg"></div>
+    <div class="panel-inner">
+      <div style="z-index: 2; position: relative;">
+        <h2 class="anim-up d-1"><span class="section-num">2.</span>The Weapon of Financial Truth</h2>
+        <p class="anim-up d-2">You cannot fight a shadow. As long as venue costs are hidden, verbal agreements are vague, and "production fees" remain a mystery, you will always be the victim of the payout.</p>
+        <p class="anim-up d-3">To take back your power, you don't need to become an accountant. You need a weapon. That weapon is <span class="highlight-text">Financial Truth</span>.</p>
+        <p class="anim-up d-3">When a fan buys a ticket, that money doesn't belong to the venue—it belongs to the show. But before a single dollar reaches your pocket, it is scavenged. Ticketing fees. House bills. Mysterious "marketing" costs. If you cannot see exactly where every penny is going, you are already being robbed.</p>
+        <p class="anim-up d-4 highlight-text">By demanding absolute, mathematical transparency, you force the industry into the light. You stop hoping for a fair payout and start demanding it.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- Panel 3 -->
+  <section class="panel" id="p3" data-index="03">
+    <div class="panel-inner">
+      <div class="img-col anim-up">
+         <div class="img-wrapper">
+          <img src="./images/scn-3(2).jpg" alt="Data App">
+        </div>
+      </div>
+      <div class="text-col">
+        <h2 class="anim-up d-1"><span class="section-num">3.</span>The Line in the Sand</h2>
+        <p class="anim-up d-2">You should never load an amp until you know your <span class="highlight-text">Break-Even</span> point. This isn't just a number; it is your line in the sand. It is the exact number of tickets required to cover the house costs.</p>
+        <p class="anim-up d-3">If a venue hides their costs, inflates their room fees, or refuses to give you the math upfront, they are waving a massive red flag. They aren't looking for a partner; they are looking for a sponsor.</p>
+        <p class="anim-up d-4">We built FairGig so you never have to guess again. We simulate the economics of the room before you ever sign the contract. We show you the floor, the realistic crowd, and the sold-out ceiling. If your known draw can't cover the venue's bloated overhead, you don't beg for the gig. You walk away. You take your fans to a venue that respects your craft.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- Panel 4 -->
+  <section class="panel" id="p4" data-index="04">
+    <div class="panel-inner">
+      <div class="text-col">
+        <h2 class="anim-up d-1"><span class="section-num">4.</span>The Truth Tax</h2>
+        <p class="anim-up d-2">For too long, bad venues operated in the dark. No longer.</p>
+        <p class="anim-up d-3">By uniting artists through verified, data-backed reputations, we are enforcing a <span class="highlight-text">Truth Tax</span> on the live music industry. Venues must now choose: operate with total transparency and fairness, or lose access to quality artists entirely.</p>
+        <p class="anim-up d-4">If a venue has a history of changing the math after the doors close, the FairGig network will flag them. We are replacing the old boys club of "who you know" with a cartel of empowered artists who protect their own.</p>
+      </div>
+      <div class="img-col anim-up d-2">
+        <div class="img-wrapper">
+          <img src="./images/scn-4(2).jpg" alt="Tactical Map">
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Panel 5 -->
+  <section class="panel" id="p5" data-index="05">
+    <div class="img-bg"></div>
+    <div class="content-box">
+        <h2 class="anim-up d-1"><span class="section-num" style="color: #fff;">5.</span>Protecting the Sanctuary</h2>
+        <p class="anim-up d-2">Music is not just a hustle. As veteran musicians like Cliff Franco learned after 15+ years of fighting it out in bands like The Pursuit and The Struggs, music is a personal sanctuary. It is a sacred space that deserves to be protected from the grinding, predatory nature of the industry.</p>
+        <p class="anim-up d-3">But you cannot protect your sanctuary with blind hope. You protect it with cold, hard data.</p>
+        <p class="anim-up d-4">When you master the math of the room, the anxiety disappears. You stop wondering if you're being scammed. You stop worrying about the settlement at the end of the night. You take command, demand what you are worth, and return your focus to the only thing that ever mattered: the music.</p>
+        <span class="outro-hook anim-up d-4">Real Gigs. Real Pay.<br>Never play in the dark again.</span>
+    </div>
+  </section>
+
+</div>
+
+<script>
+  // Custom Cursor
+  const dot = document.getElementById('cursor-dot');
+  const ring = document.getElementById('cursor-ring');
+  
+  window.addEventListener('mousemove', (e) => {
+    dot.style.left = e.clientX + 'px';
+    dot.style.top = e.clientY + 'px';
+    
+    // Slight delay for the ring for smooth organic feel
+    setTimeout(() => {
+      ring.style.left = e.clientX + 'px';
+      ring.style.top = e.clientY + 'px';
+    }, 50);
+  });
+
+  // Horizontal Scroll Hijack for desktop wheel events
+  const container = document.getElementById('scroll-container');
+  container.addEventListener('wheel', (evt) => {
+    if (evt.deltaY != 0) {
+      evt.preventDefault();
+      container.scrollBy({
+        left: evt.deltaY > 0 ? window.innerWidth : -window.innerWidth,
+        behavior: 'smooth'
+      });
+    }
+  }, { passive: false });
+
+  // Intersection Observer for scroll triggers and UI updates
+  const panels = document.querySelectorAll('.panel');
+  const currentUI = document.getElementById('current-panel');
+
+  const observerOptions = {
+    root: container,
+    threshold: 0.5
+  };
+
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        entry.target.classList.add('is-active');
+        currentUI.textContent = entry.target.getAttribute('data-index');
+      }
+    });
+  }, observerOptions);
+
+  panels.forEach(panel => observer.observe(panel));
+
+  // Initial trigger for first panel
+  setTimeout(() => {
+    if(panels[0]) panels[0].classList.add('is-active');
+  }, 100);
+
+</script>
+</body>
+</html>
