@@ -150,7 +150,7 @@
     </div>
 
     <!-- Background Audio -->
-    <audio id="bg-music" src="./audio/fairgigbackground.mp3" loop preload="auto"></audio>
+    <audio id="bg-music" src="./audio/fairgigbackground.mp3" preload="auto"></audio>
 
     <div class="ui-layer">
         <div class="label">FAIR<span>GIG</span></div>
@@ -179,10 +179,16 @@
                 
                 // Play background music
                 bgMusic.volume = 0.5;
+                if (bgMusic.ended) {
+                    bgMusic.currentTime = 0;
+                }
                 bgMusic.play().catch(e => console.warn('Background music play failed:', e));
                 
                 // Play and unmute video
                 mainVideo.muted = false;
+                if (mainVideo.ended) {
+                    mainVideo.currentTime = 0;
+                }
                 mainVideo.play().catch(e => console.warn('Video play failed:', e));
                 
             } else {
