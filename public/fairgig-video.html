@@ -246,8 +246,8 @@
                     mainVideo.pause();
                 }
 
-                // Play background music
-                bgMusic.volume = 0.5;
+                // Play background music (reduced by 20%)
+                bgMusic.volume = 0.3;
                 bgMusic.play().catch(e => console.warn('Background music play failed:', e));
 
                 // Resume the current spoken audio track
