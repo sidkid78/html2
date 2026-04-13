@@ -215,7 +215,7 @@
                             part2Timeout = setTimeout(() => {
                                 if (isPlaying && currentPart === 2) {
                                     mainVideo.muted = true; // Mute video so narration can take over purely with background music
-                                    mainVideo.playbackRate = 0.5; // Stretch remaining video to cover the rest of the narration
+                                    mainVideo.playbackRate = 0.75; // Stretch remaining video to cover the rest of the narration
                                     nextAudio.play().catch(e => console.warn('Next audio play failed:', e));
                                     part2Timeout = null;
                                 }
