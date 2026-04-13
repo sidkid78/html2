@@ -205,6 +205,7 @@
                     if (i === 1) {
                         mainVideo.style.opacity = '0.8'; // Match original CSS opacity
                         mainVideo.currentTime = 0;
+                        mainVideo.playbackRate = 1.0; // Play normal speed for the first 8 seconds
                         mainVideo.muted = false; // or true if video has no sound anyway
                         mainVideo.play().catch(e => console.warn('Video play failed:', e));
 
@@ -214,6 +215,7 @@
                             part2Timeout = setTimeout(() => {
                                 if (isPlaying && currentPart === 2) {
                                     mainVideo.muted = true; // Mute video so narration can take over purely with background music
+                                    mainVideo.playbackRate = 0.5; // Stretch remaining video to cover the rest of the narration
                                     nextAudio.play().catch(e => console.warn('Next audio play failed:', e));
                                     part2Timeout = null;
                                 }
@@ -242,6 +244,7 @@
                     currentPart = 1;
                     for (let i = 1; i <= 5; i++) document.getElementById(`part-${i}`).currentTime = 0;
                     mainVideo.currentTime = 0;
+                    mainVideo.playbackRate = 1.0;
                     mainVideo.style.opacity = '0';
                     mainVideo.pause();
                 }
