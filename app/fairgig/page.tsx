@@ -52,6 +52,13 @@ const articles = [
     href: "/fairgig-video.html",
     icon: "🎬",
     accent: "from-violet-500/20 to-purple-500/20"
+  },
+  {
+    title: "The Artist's Manifesto",
+    description: "Stop Bleeding For The House. The definitive declaration against the Big Lie of the live music industry and the weaponization of Financial Truth.",
+    href: "/fairgig10.html",
+    icon: "🔥",
+    accent: "from-red-600/20 to-orange-500/20"
   }
 ];
 

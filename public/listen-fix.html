@@ -1,0 +1,2019 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Listen & Fix — AI Diagnostic & Repair</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=Public+Sans:wght@300;400;500;600&display=swap" rel="stylesheet" />
+  <style>
+    /* ============================================================
+       DESIGN TOKENS — "Digital Foreman" System
+    ============================================================ */
+    :root {
+      --bg-base:             #04091a;
+      --surface-main:        #080f22;
+      --surface-low:         #0c162e;
+      --surface-mid:         #111e3a;
+      --surface-raised:      #172444;
+
+      --primary:             #00346f;
+      --primary-bright:      #0c52a8;
+      --primary-glow:        #1a6fd4;
+      --primary-dim:         #00224a;
+
+      --text-primary:        #dde6f5;
+      --text-secondary:      #7a95b8;
+      --text-muted:          #4a6080;
+      --text-inverse:        #04091a;
+
+      --warning-bg:          #1a0800;
+      --warning-border:      #5f2200;
+      --warning-text:        #d4622a;
+      --warning-accent:      #e8773f;
+
+      --success:             #1a6a3e;
+      --success-text:        #4dd68c;
+
+      --accent-cyan:         #0fa8c2;
+      --accent-cyan-dim:     #0a6878;
+
+      --radius-sm:           4px;
+      --radius-md:           8px;
+      --radius-lg:           16px;
+      --radius-xl:           24px;
+
+      --font-authority:      'Inter', sans-serif;
+      --font-intelligence:   'Public Sans', sans-serif;
+
+      --shadow-ambient:      0 4px 32px rgba(0, 52, 111, 0.15);
+      --shadow-raised:       0 8px 48px rgba(0, 52, 111, 0.25);
+      --shadow-glow:         0 0 60px rgba(26, 111, 212, 0.12);
+    }
+
+    /* ============================================================
+       IMAGE STYLES
+    ============================================================ */
+    .img-hero-capture {
+      width: 100%;
+      max-width: 920px;
+      margin: 56px auto 0;
+      display: block;
+      border-radius: var(--radius-xl);
+      overflow: hidden;
+      position: relative;
+      background: var(--surface-mid);
+      box-shadow: 0 42px 100px rgba(0,0,0,0.7), 0 0 0 1px rgba(26,111,212,0.15);
+    }
+    .img-hero-capture img {
+      width: 100%;
+      height: 480px;
+      object-fit: cover;
+      object-position: center 20%;
+      display: block;
+    }
+    .img-hero-capture::after {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(to top, var(--bg-base) 0%, transparent 40%);
+      pointer-events: none;
+    }
+
+    .img-step-guide {
+      margin-top: 24px;
+      border-radius: var(--radius-md);
+      overflow: hidden;
+      background: var(--surface-mid);
+      border: 1px solid rgba(26,111,212,0.1);
+    }
+    .img-step-guide img {
+      width: 100%;
+      height: 180px;
+      object-fit: cover;
+      object-position: center;
+      display: block;
+      opacity: 0.8;
+      transition: opacity 0.3s ease;
+    }
+    .how-step:hover .img-step-guide img { opacity: 1; }
+
+    .img-librarian {
+      border-radius: var(--radius-md);
+      overflow: hidden;
+      margin-top: 24px;
+      background: var(--surface-mid);
+      border: 1px solid rgba(26,111,212,0.1);
+    }
+    .img-librarian img {
+      width: 100%;
+      height: 200px;
+      object-fit: cover;
+      object-position: center;
+      display: block;
+      opacity: 0.8;
+      transition: opacity 0.3s ease;
+    }
+    .rag-member:hover .img-librarian img { opacity: 1; }
+
+    .img-diag-banner {
+      max-width: 820px;
+      margin: 0 auto 32px;
+      border-radius: var(--radius-xl);
+      overflow: hidden;
+      box-shadow: 0 24px 64px rgba(0,0,0,0.5), 0 0 0 1px rgba(26,111,212,0.1);
+      background: var(--surface-mid);
+    }
+    .img-diag-banner img {
+      width: 100%;
+      height: 380px;
+      object-fit: cover;
+      object-position: center;
+      display: block;
+    }
+
+    .sectors-visual-header {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 48px;
+      align-items: center;
+      margin-bottom: 64px;
+      text-align: left;
+    }
+    .sectors-visual-img {
+      width: 100%;
+      height: 340px;
+      object-fit: cover;
+      border-radius: var(--radius-xl);
+      box-shadow: var(--shadow-raised);
+      border: 1px solid rgba(26,111,212,0.1);
+    }
+
+    .sector-card-img {
+      width: 100%;
+      height: 140px;
+      object-fit: cover;
+      object-position: center 40%;
+      display: block;
+      border-radius: var(--radius-md);
+      margin-bottom: 16px;
+      opacity: 0.85;
+      transition: opacity 0.2s;
+    }
+    .sector-card:hover .sector-card-img { opacity: 1; }
+
+    /* ============================================================
+       RESET & BASE
+    ============================================================ */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      background: var(--bg-base);
+      color: var(--text-primary);
+      font-family: var(--font-intelligence);
+      font-size: 16px;
+      line-height: 1.6;
+      -webkit-font-smoothing: antialiased;
+      overflow-x: hidden;
+    }
+
+    /* ============================================================
+       TYPOGRAPHY
+    ============================================================ */
+    .t-display {
+      font-family: var(--font-authority);
+      font-weight: 900;
+      line-height: 1.05;
+      letter-spacing: -0.03em;
+    }
+    .t-headline {
+      font-family: var(--font-authority);
+      font-weight: 700;
+      line-height: 1.15;
+      letter-spacing: -0.02em;
+    }
+    .t-subhead {
+      font-family: var(--font-authority);
+      font-weight: 600;
+      line-height: 1.3;
+      letter-spacing: -0.01em;
+    }
+    .t-label {
+      font-family: var(--font-authority);
+      font-weight: 600;
+      font-size: 11px;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+    }
+    .t-body {
+      font-family: var(--font-intelligence);
+      font-weight: 400;
+      line-height: 1.7;
+    }
+
+    /* ============================================================
+       LAYOUT UTILITIES
+    ============================================================ */
+    .container {
+      max-width: 1120px;
+      margin: 0 auto;
+      padding: 0 32px;
+    }
+    .container--narrow {
+      max-width: 760px;
+      margin: 0 auto;
+      padding: 0 32px;
+    }
+
+    /* ============================================================
+       NAV
+    ============================================================ */
+    nav {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      z-index: 100;
+      padding: 20px 32px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      background: rgba(4, 9, 26, 0.8);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      border-bottom: 1px solid rgba(26, 111, 212, 0.08);
+    }
+
+    .nav-logo {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      text-decoration: none;
+    }
+    .nav-logo-icon {
+      width: 32px;
+      height: 32px;
+      background: var(--primary-bright);
+      border-radius: var(--radius-sm);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+    }
+    .nav-logo-icon svg { display: block; }
+    .nav-logo-text {
+      font-family: var(--font-authority);
+      font-weight: 800;
+      font-size: 18px;
+      letter-spacing: -0.03em;
+      color: var(--text-primary);
+    }
+    .nav-logo-text span { color: var(--primary-glow); }
+
+    .nav-badge {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .nav-badge .dot {
+      width: 7px;
+      height: 7px;
+      border-radius: 50%;
+      background: var(--success-text);
+      animation: pulse-dot 2s ease-in-out infinite;
+    }
+    @keyframes pulse-dot {
+      0%, 100% { opacity: 1; transform: scale(1); }
+      50% { opacity: 0.6; transform: scale(0.85); }
+    }
+    .nav-badge-text {
+      font-family: var(--font-authority);
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--success-text);
+      letter-spacing: 0.05em;
+    }
+
+    .nav-cta {
+      background: var(--primary-bright);
+      color: #fff;
+      font-family: var(--font-authority);
+      font-weight: 600;
+      font-size: 13px;
+      padding: 9px 20px;
+      border-radius: var(--radius-sm);
+      border: none;
+      cursor: pointer;
+      transition: background 0.15s linear, transform 0.1s linear;
+      text-decoration: none;
+    }
+    .nav-cta:hover {
+      background: var(--primary-glow);
+      transform: translateY(-1px);
+    }
+
+    /* ============================================================
+       HERO
+    ============================================================ */
+    #hero {
+      position: relative;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      padding: 140px 0 100px;
+      overflow: hidden;
+    }
+
+    .hero-bg {
+      position: absolute;
+      inset: 0;
+      background:
+        radial-gradient(ellipse 80% 60% at 50% 0%, rgba(0, 52, 111, 0.35) 0%, transparent 65%),
+        radial-gradient(ellipse 40% 40% at 80% 60%, rgba(12, 82, 168, 0.12) 0%, transparent 60%),
+        var(--bg-base);
+      pointer-events: none;
+    }
+
+    .hero-grid {
+      position: absolute;
+      inset: 0;
+      background-image:
+        linear-gradient(rgba(26, 111, 212, 0.04) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(26, 111, 212, 0.04) 1px, transparent 1px);
+      background-size: 48px 48px;
+      mask-image: radial-gradient(ellipse 80% 60% at 50% 30%, black 30%, transparent 75%);
+      pointer-events: none;
+    }
+
+    .hero-content {
+      position: relative;
+      z-index: 1;
+      text-align: center;
+    }
+
+    .hero-eyebrow {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      background: rgba(26, 111, 212, 0.1);
+      border: 1px solid rgba(26, 111, 212, 0.2);
+      border-radius: 100px;
+      padding: 6px 16px;
+      margin-bottom: 32px;
+    }
+    .hero-eyebrow svg { flex-shrink: 0; }
+    .hero-eyebrow-text {
+      font-family: var(--font-authority);
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--primary-glow);
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+    }
+
+    .hero-headline {
+      font-size: clamp(48px, 7vw, 88px);
+      color: var(--text-primary);
+      margin-bottom: 8px;
+    }
+    .hero-headline .accent {
+      background: linear-gradient(135deg, #1a6fd4 0%, #0fa8c2 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    .hero-tagline {
+      font-family: var(--font-authority);
+      font-size: clamp(20px, 2.5vw, 28px);
+      font-weight: 400;
+      color: var(--text-secondary);
+      margin-bottom: 24px;
+      letter-spacing: -0.01em;
+    }
+    .hero-tagline strong {
+      color: var(--text-primary);
+      font-weight: 600;
+    }
+
+    .hero-sub {
+      font-size: 17px;
+      color: var(--text-secondary);
+      max-width: 520px;
+      margin: 0 auto 48px;
+      line-height: 1.65;
+    }
+
+    .hero-form {
+      display: flex;
+      gap: 12px;
+      max-width: 480px;
+      margin: 0 auto 24px;
+    }
+    .hero-input {
+      flex: 1;
+      background: rgba(255,255,255,0.05);
+      border: 1px solid rgba(26, 111, 212, 0.25);
+      border-radius: var(--radius-sm);
+      padding: 14px 18px;
+      font-family: var(--font-intelligence);
+      font-size: 15px;
+      color: var(--text-primary);
+      outline: none;
+      transition: border-color 0.15s;
+    }
+    .hero-input::placeholder { color: var(--text-muted); }
+    .hero-input:focus { border-color: var(--primary-glow); }
+
+    .btn-primary {
+      background: var(--primary-bright);
+      color: #fff;
+      font-family: var(--font-authority);
+      font-weight: 700;
+      font-size: 14px;
+      padding: 14px 24px;
+      border-radius: var(--radius-sm);
+      border: none;
+      cursor: pointer;
+      white-space: nowrap;
+      transition: background 0.15s linear, transform 0.1s linear, box-shadow 0.15s;
+      letter-spacing: 0.01em;
+    }
+    .btn-primary:hover {
+      background: var(--primary-glow);
+      transform: translateY(-1px);
+      box-shadow: 0 8px 24px rgba(26, 111, 212, 0.35);
+    }
+    .btn-primary:active { transform: translateY(0); }
+
+    .hero-note {
+      font-size: 12px;
+      color: var(--text-muted);
+      letter-spacing: 0.02em;
+    }
+    .hero-note strong { color: var(--text-secondary); }
+
+    /* Waveform animation */
+    .hero-waveform {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 4px;
+      margin: 56px auto 0;
+      height: 48px;
+      width: fit-content;
+    }
+    .wave-bar {
+      width: 3px;
+      border-radius: 2px;
+      background: var(--primary-glow);
+      opacity: 0.5;
+      animation: wave-anim var(--dur, 1.2s) ease-in-out infinite;
+      animation-delay: var(--delay, 0s);
+    }
+    @keyframes wave-anim {
+      0%, 100% { transform: scaleY(0.3); opacity: 0.3; }
+      50%       { transform: scaleY(1);   opacity: 0.7; }
+    }
+
+    .hero-stats {
+      display: flex;
+      justify-content: center;
+      gap: 48px;
+      margin-top: 64px;
+    }
+    .hero-stat {
+      text-align: center;
+    }
+    .hero-stat-value {
+      font-family: var(--font-authority);
+      font-size: 28px;
+      font-weight: 800;
+      color: var(--text-primary);
+      letter-spacing: -0.03em;
+    }
+    .hero-stat-label {
+      font-size: 12px;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      margin-top: 4px;
+    }
+    .hero-stat-divider {
+      width: 1px;
+      background: rgba(26, 111, 212, 0.15);
+      align-self: stretch;
+    }
+
+    /* ============================================================
+       SECTION SHARED
+    ============================================================ */
+    section { position: relative; }
+
+    .section-label {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 20px;
+    }
+    .section-label-line {
+      width: 24px;
+      height: 2px;
+      background: var(--primary-glow);
+      border-radius: 1px;
+    }
+
+    /* ============================================================
+       PROBLEM
+    ============================================================ */
+    #problem {
+      padding: 120px 0;
+      background: var(--surface-main);
+    }
+    .problem-inner {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 80px;
+      align-items: center;
+    }
+    .problem-headline {
+      font-size: clamp(32px, 4vw, 48px);
+      color: var(--text-primary);
+      margin-bottom: 24px;
+    }
+    .problem-body {
+      font-size: 17px;
+      color: var(--text-secondary);
+      line-height: 1.75;
+      margin-bottom: 20px;
+    }
+    .problem-quote {
+      border-left: 3px solid var(--primary-glow);
+      padding-left: 20px;
+      margin: 32px 0;
+      font-family: var(--font-authority);
+      font-size: 18px;
+      font-weight: 500;
+      color: var(--text-primary);
+      font-style: italic;
+      line-height: 1.5;
+    }
+    .problem-quote span { color: var(--primary-glow); font-style: normal; }
+
+    /* "Before / After" tonal cards */
+    .problem-cards {
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+    .problem-card {
+      background: var(--surface-low);
+      border-radius: var(--radius-lg);
+      padding: 24px 28px;
+      position: relative;
+      overflow: hidden;
+    }
+    .problem-card::before {
+      content: '';
+      position: absolute;
+      top: 0; left: 0;
+      width: 3px; height: 100%;
+      border-radius: 0;
+    }
+    .problem-card--before::before { background: var(--warning-border); }
+    .problem-card--after::before  { background: var(--success); }
+
+    .problem-card-tag {
+      font-size: 10px;
+      font-family: var(--font-authority);
+      font-weight: 700;
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+      margin-bottom: 10px;
+    }
+    .problem-card--before .problem-card-tag { color: var(--warning-text); }
+    .problem-card--after  .problem-card-tag { color: var(--success-text); }
+
+    .problem-card-text {
+      font-size: 15px;
+      color: var(--text-secondary);
+      line-height: 1.6;
+    }
+    .problem-card-text strong { color: var(--text-primary); }
+
+    /* ============================================================
+       HOW IT WORKS
+    ============================================================ */
+    #how {
+      padding: 120px 0;
+      background: var(--bg-base);
+    }
+    .how-header {
+      text-align: center;
+      margin-bottom: 72px;
+    }
+    .how-headline {
+      font-size: clamp(28px, 3.5vw, 42px);
+      color: var(--text-primary);
+      margin-bottom: 16px;
+    }
+    .how-sub {
+      font-size: 17px;
+      color: var(--text-secondary);
+      max-width: 520px;
+      margin: 0 auto;
+    }
+    .how-steps {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 2px;
+      position: relative;
+    }
+    .how-connector {
+      position: absolute;
+      top: 44px;
+      left: calc(33.33% - 0px);
+      width: 33.33%;
+      height: 1px;
+      background: linear-gradient(90deg, var(--primary-bright) 0%, var(--accent-cyan) 100%);
+      opacity: 0.4;
+    }
+    .how-connector:nth-of-type(2) { left: calc(66.66%); }
+
+    .how-step {
+      background: var(--surface-low);
+      border-radius: var(--radius-lg);
+      padding: 40px 32px;
+      position: relative;
+      transition: background 0.2s, transform 0.2s;
+    }
+    .how-step:hover {
+      background: var(--surface-mid);
+      transform: translateY(-4px);
+    }
+    .how-step-number {
+      width: 40px;
+      height: 40px;
+      border-radius: var(--radius-sm);
+      background: var(--primary-dim);
+      border: 1px solid rgba(26, 111, 212, 0.3);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-family: var(--font-authority);
+      font-size: 14px;
+      font-weight: 700;
+      color: var(--primary-glow);
+      margin-bottom: 24px;
+    }
+    .how-step-icon {
+      margin-bottom: 20px;
+    }
+    .how-step-title {
+      font-family: var(--font-authority);
+      font-size: 20px;
+      font-weight: 700;
+      color: var(--text-primary);
+      margin-bottom: 12px;
+      letter-spacing: -0.02em;
+    }
+    .how-step-body {
+      font-size: 15px;
+      color: var(--text-secondary);
+      line-height: 1.65;
+    }
+    .how-step-detail {
+      margin-top: 20px;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+    .how-step-chip {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      background: rgba(26, 111, 212, 0.08);
+      border-radius: 100px;
+      padding: 4px 12px;
+      font-size: 12px;
+      font-family: var(--font-authority);
+      font-weight: 500;
+      color: var(--primary-glow);
+      width: fit-content;
+    }
+
+    /* ============================================================
+       SECTORS
+    ============================================================ */
+    #sectors {
+      padding: 120px 0;
+      background: var(--surface-main);
+    }
+    .sectors-header {
+      text-align: center;
+      margin-bottom: 64px;
+    }
+    .sectors-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 16px;
+    }
+    .sector-card {
+      background: var(--surface-low);
+      border-radius: var(--radius-lg);
+      padding: 36px 28px;
+      position: relative;
+      overflow: hidden;
+      transition: transform 0.2s, background 0.2s;
+      cursor: default;
+    }
+    .sector-card:hover {
+      transform: translateY(-6px);
+      background: var(--surface-mid);
+    }
+    .sector-card::after {
+      content: '';
+      position: absolute;
+      bottom: 0; left: 0; right: 0;
+      height: 2px;
+      background: linear-gradient(90deg, var(--primary-bright), var(--accent-cyan));
+      transform: scaleX(0);
+      transform-origin: left;
+      transition: transform 0.3s linear;
+    }
+    .sector-card:hover::after { transform: scaleX(1); }
+
+    .sector-icon {
+      width: 48px;
+      height: 48px;
+      background: var(--primary-dim);
+      border-radius: var(--radius-md);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-bottom: 20px;
+      font-size: 22px;
+    }
+    .sector-name {
+      font-family: var(--font-authority);
+      font-size: 18px;
+      font-weight: 700;
+      color: var(--text-primary);
+      margin-bottom: 10px;
+      letter-spacing: -0.02em;
+    }
+    .sector-items {
+      font-size: 13px;
+      color: var(--text-muted);
+      line-height: 1.8;
+    }
+
+    /* ============================================================
+       UNDER THE HOOD (RAG)
+    ============================================================ */
+    #rag {
+      padding: 120px 0;
+      background: var(--bg-base);
+    }
+    .rag-inner {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 80px;
+      align-items: start;
+    }
+    .rag-headline {
+      font-size: clamp(28px, 3.5vw, 42px);
+      color: var(--text-primary);
+      margin-bottom: 20px;
+    }
+    .rag-body {
+      font-size: 16px;
+      color: var(--text-secondary);
+      line-height: 1.75;
+      margin-bottom: 32px;
+    }
+    .rag-comparison {
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+    .rag-row {
+      display: grid;
+      grid-template-columns: auto 1fr 1fr;
+      gap: 12px;
+      align-items: start;
+      background: var(--surface-low);
+      border-radius: var(--radius-md);
+      padding: 16px 20px;
+    }
+    .rag-row-icon {
+      font-size: 18px;
+      margin-top: 2px;
+    }
+    .rag-row-label {
+      font-size: 12px;
+      font-family: var(--font-authority);
+      font-weight: 600;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      margin-bottom: 4px;
+    }
+    .rag-row-value {
+      font-size: 14px;
+      color: var(--text-secondary);
+      line-height: 1.5;
+    }
+    .rag-row-value.highlight { color: var(--success-text); font-weight: 500; }
+
+    /* Team cards */
+    .rag-team {
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+    }
+    .rag-team-header {
+      font-family: var(--font-authority);
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      margin-bottom: 4px;
+    }
+    .rag-member {
+      background: var(--surface-low);
+      border-radius: var(--radius-lg);
+      padding: 28px;
+      position: relative;
+      overflow: hidden;
+    }
+    .rag-member::before {
+      content: '';
+      position: absolute;
+      top: 0; left: 0;
+      width: 100%; height: 2px;
+    }
+    .rag-member--scout::before  { background: linear-gradient(90deg, var(--primary-bright), var(--accent-cyan)); }
+    .rag-member--lib::before { background: linear-gradient(90deg, var(--accent-cyan), var(--success)); }
+
+    .rag-member-role {
+      font-size: 11px;
+      font-family: var(--font-authority);
+      font-weight: 700;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      margin-bottom: 6px;
+    }
+    .rag-member--scout .rag-member-role { color: var(--accent-cyan); }
+    .rag-member--lib   .rag-member-role { color: var(--success-text); }
+
+    .rag-member-name {
+      font-family: var(--font-authority);
+      font-size: 20px;
+      font-weight: 800;
+      color: var(--text-primary);
+      margin-bottom: 12px;
+      letter-spacing: -0.02em;
+    }
+    .rag-member-desc {
+      font-size: 14px;
+      color: var(--text-secondary);
+      line-height: 1.65;
+    }
+    .rag-pipeline {
+      margin-top: 16px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      flex-wrap: wrap;
+    }
+    .rag-pipeline-step {
+      font-size: 11px;
+      font-family: var(--font-authority);
+      font-weight: 600;
+      color: var(--text-muted);
+      background: rgba(255,255,255,0.04);
+      padding: 4px 10px;
+      border-radius: 4px;
+    }
+    .rag-pipeline-arrow {
+      font-size: 11px;
+      color: var(--text-muted);
+      opacity: 0.5;
+    }
+
+    /* ============================================================
+       SAMPLE DIAGNOSIS
+    ============================================================ */
+    #diagnosis {
+      padding: 120px 0;
+      background: var(--surface-main);
+    }
+    .diag-header {
+      text-align: center;
+      margin-bottom: 64px;
+    }
+    .diag-headline {
+      font-size: clamp(28px, 3.5vw, 42px);
+      color: var(--text-primary);
+      margin-bottom: 16px;
+    }
+    .diag-sub {
+      font-size: 17px;
+      color: var(--text-secondary);
+      max-width: 520px;
+      margin: 0 auto;
+    }
+
+    /* Glass result card */
+    .diag-card {
+      max-width: 820px;
+      margin: 0 auto;
+      background: rgba(17, 30, 58, 0.7);
+      backdrop-filter: blur(24px);
+      -webkit-backdrop-filter: blur(24px);
+      border-radius: var(--radius-xl);
+      border: 1px solid rgba(26, 111, 212, 0.15);
+      overflow: hidden;
+      box-shadow: var(--shadow-glow);
+    }
+
+    .diag-card-header {
+      background: var(--surface-mid);
+      padding: 20px 28px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .diag-card-title {
+      font-family: var(--font-authority);
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--text-secondary);
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .diag-card-title .dot {
+      width: 8px; height: 8px;
+      border-radius: 50%;
+      background: var(--success-text);
+      animation: pulse-dot 2s ease-in-out infinite;
+    }
+    .diag-status-chip {
+      font-size: 11px;
+      font-family: var(--font-authority);
+      font-weight: 700;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      padding: 4px 12px;
+      border-radius: 100px;
+      background: rgba(77, 214, 140, 0.1);
+      color: var(--success-text);
+    }
+
+    .diag-card-body {
+      padding: 32px 28px;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 24px;
+    }
+
+    .diag-section-label {
+      font-size: 10px;
+      font-family: var(--font-authority);
+      font-weight: 700;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      color: var(--text-muted);
+      margin-bottom: 8px;
+    }
+
+    .diag-finding {
+      font-family: var(--font-authority);
+      font-size: 18px;
+      font-weight: 700;
+      color: var(--text-primary);
+      letter-spacing: -0.02em;
+      margin-bottom: 16px;
+    }
+
+    .diag-confidence {
+      margin-bottom: 20px;
+    }
+    .diag-confidence-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 6px;
+    }
+    .diag-confidence-label {
+      font-size: 12px;
+      color: var(--text-muted);
+      font-family: var(--font-authority);
+    }
+    .diag-confidence-value {
+      font-size: 13px;
+      font-family: var(--font-authority);
+      font-weight: 700;
+      color: var(--success-text);
+    }
+    .diag-bar-track {
+      height: 5px;
+      background: rgba(255,255,255,0.06);
+      border-radius: 3px;
+      overflow: hidden;
+    }
+    .diag-bar-fill {
+      height: 100%;
+      border-radius: 3px;
+      background: linear-gradient(90deg, var(--primary-glow), var(--accent-cyan));
+      transition: width 1s ease-out;
+    }
+
+    .diag-severity {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 5px 14px;
+      border-radius: 4px;
+      font-size: 12px;
+      font-family: var(--font-authority);
+      font-weight: 700;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+    }
+    .diag-severity--medium {
+      background: rgba(214, 148, 77, 0.1);
+      color: #d69444;
+    }
+    .diag-severity--critical {
+      background: rgba(95, 34, 0, 0.2);
+      color: var(--warning-accent);
+    }
+
+    .diag-meta-grid {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+    .diag-meta-item {
+      display: flex;
+      flex-direction: column;
+      gap: 3px;
+    }
+    .diag-meta-value {
+      font-size: 14px;
+      color: var(--text-primary);
+      font-family: var(--font-authority);
+      font-weight: 600;
+    }
+
+    .diag-steps {
+      grid-column: 1 / -1;
+      background: var(--surface-low);
+      border-radius: var(--radius-md);
+      padding: 20px;
+    }
+    .diag-steps-list {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      margin-top: 12px;
+    }
+    .diag-step-row {
+      display: flex;
+      gap: 14px;
+      align-items: flex-start;
+    }
+    .diag-step-num {
+      width: 24px;
+      height: 24px;
+      border-radius: 4px;
+      background: var(--primary-dim);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 11px;
+      font-family: var(--font-authority);
+      font-weight: 700;
+      color: var(--primary-glow);
+      flex-shrink: 0;
+    }
+    .diag-step-text {
+      font-size: 14px;
+      color: var(--text-secondary);
+      line-height: 1.5;
+    }
+    .diag-step-text strong { color: var(--text-primary); }
+
+    .diag-parts {
+      grid-column: 1 / -1;
+    }
+    .diag-parts-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 12px;
+      margin-top: 12px;
+    }
+    .diag-part-card {
+      background: var(--surface-low);
+      border-radius: var(--radius-md);
+      padding: 14px 16px;
+    }
+    .diag-part-name {
+      font-size: 13px;
+      font-family: var(--font-authority);
+      font-weight: 600;
+      color: var(--text-primary);
+      margin-bottom: 4px;
+    }
+    .diag-part-price {
+      font-size: 12px;
+      color: var(--success-text);
+      font-family: var(--font-authority);
+      font-weight: 600;
+    }
+    .diag-part-source {
+      font-size: 11px;
+      color: var(--text-muted);
+      margin-top: 4px;
+    }
+    .diag-part-priority {
+      display: inline-block;
+      font-size: 10px;
+      font-family: var(--font-authority);
+      font-weight: 700;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      padding: 2px 8px;
+      border-radius: 3px;
+      margin-top: 6px;
+    }
+    .diag-part-priority--required {
+      background: rgba(26, 111, 212, 0.15);
+      color: var(--primary-glow);
+    }
+    .diag-part-priority--recommended {
+      background: rgba(77, 214, 140, 0.08);
+      color: var(--success-text);
+    }
+
+    /* ============================================================
+       METRICS
+    ============================================================ */
+    #metrics {
+      padding: 80px 0;
+      background: var(--bg-base);
+    }
+    .metrics-grid {
+      display: grid;
+      grid-template-columns: repeat(5, 1fr);
+      gap: 2px;
+    }
+    .metric-card {
+      background: var(--surface-low);
+      padding: 40px 28px;
+      text-align: center;
+      transition: background 0.2s;
+    }
+    .metric-card:first-child { border-radius: var(--radius-lg) 0 0 var(--radius-lg); }
+    .metric-card:last-child  { border-radius: 0 var(--radius-lg) var(--radius-lg) 0; }
+    .metric-card:hover { background: var(--surface-mid); }
+    .metric-value {
+      font-family: var(--font-authority);
+      font-size: 32px;
+      font-weight: 900;
+      color: var(--text-primary);
+      letter-spacing: -0.03em;
+      margin-bottom: 6px;
+    }
+    .metric-value .metric-accent { color: var(--primary-glow); }
+    .metric-label {
+      font-size: 12px;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      line-height: 1.5;
+    }
+
+    /* ============================================================
+       SAFETY BAR
+    ============================================================ */
+    #safety {
+      background: var(--warning-bg);
+      padding: 40px 0;
+      border-top: 1px solid rgba(95, 34, 0, 0.4);
+      border-bottom: 1px solid rgba(95, 34, 0, 0.4);
+    }
+    .safety-inner {
+      display: flex;
+      align-items: flex-start;
+      gap: 20px;
+    }
+    .safety-icon {
+      flex-shrink: 0;
+      width: 40px;
+      height: 40px;
+      background: rgba(95, 34, 0, 0.4);
+      border-radius: var(--radius-sm);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 18px;
+      margin-top: 2px;
+    }
+    .safety-title {
+      font-family: var(--font-authority);
+      font-size: 13px;
+      font-weight: 700;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--warning-accent);
+      margin-bottom: 6px;
+    }
+    .safety-text {
+      font-size: 14px;
+      color: rgba(212, 98, 42, 0.8);
+      line-height: 1.6;
+    }
+    .safety-text strong { color: var(--warning-accent); }
+    .safety-protocols {
+      display: flex;
+      gap: 12px;
+      margin-top: 12px;
+      flex-wrap: wrap;
+    }
+    .safety-chip {
+      font-size: 11px;
+      font-family: var(--font-authority);
+      font-weight: 600;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      padding: 4px 12px;
+      border-radius: 4px;
+      background: rgba(95, 34, 0, 0.3);
+      color: var(--warning-text);
+    }
+
+    /* ============================================================
+       FINAL CTA
+    ============================================================ */
+    #cta {
+      padding: 140px 0;
+      background: var(--surface-main);
+      position: relative;
+      overflow: hidden;
+    }
+    #cta::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: radial-gradient(ellipse 60% 70% at 50% 50%, rgba(0, 52, 111, 0.3) 0%, transparent 70%);
+      pointer-events: none;
+    }
+    .cta-inner {
+      position: relative;
+      text-align: center;
+    }
+    .cta-headline {
+      font-size: clamp(36px, 5vw, 60px);
+      color: var(--text-primary);
+      margin-bottom: 20px;
+    }
+    .cta-sub {
+      font-size: 18px;
+      color: var(--text-secondary);
+      max-width: 480px;
+      margin: 0 auto 48px;
+      line-height: 1.65;
+    }
+    .cta-form {
+      display: flex;
+      gap: 12px;
+      max-width: 480px;
+      margin: 0 auto 20px;
+    }
+    .cta-note {
+      font-size: 13px;
+      color: var(--text-muted);
+    }
+    .cta-note strong { color: var(--primary-glow); }
+
+    /* ============================================================
+       FOOTER
+    ============================================================ */
+    footer {
+      background: var(--bg-base);
+      padding: 48px 0;
+      border-top: 1px solid rgba(26, 111, 212, 0.07);
+    }
+    .footer-inner {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .footer-copy {
+      font-size: 13px;
+      color: var(--text-muted);
+    }
+    .footer-links {
+      display: flex;
+      gap: 24px;
+    }
+    .footer-link {
+      font-size: 13px;
+      color: var(--text-muted);
+      text-decoration: none;
+      transition: color 0.15s;
+    }
+    .footer-link:hover { color: var(--text-secondary); }
+
+    /* ============================================================
+       RESPONSIVE
+    ============================================================ */
+    @media (max-width: 900px) {
+      .problem-inner,
+      .rag-inner { grid-template-columns: 1fr; gap: 40px; }
+      .sectors-grid { grid-template-columns: repeat(2, 1fr); }
+      .how-steps { grid-template-columns: 1fr; }
+      .how-connector { display: none; }
+      .metrics-grid { grid-template-columns: repeat(3, 1fr); }
+      .metrics-grid .metric-card:first-child { border-radius: var(--radius-lg) var(--radius-lg) 0 0; }
+      .metrics-grid .metric-card:last-child  { border-radius: 0 0 var(--radius-lg) var(--radius-lg); }
+      .hero-stats { gap: 24px; }
+      .diag-card-body { grid-template-columns: 1fr; }
+      .diag-parts-grid { grid-template-columns: 1fr 1fr; }
+    }
+    @media (max-width: 600px) {
+      .container, .container--narrow { padding: 0 20px; }
+      nav { padding: 16px 20px; }
+      .nav-badge { display: none; }
+      .hero-form, .cta-form {
+        flex-direction: column;
+      }
+      .hero-stats { flex-direction: column; gap: 16px; }
+      .hero-stat-divider { width: 40px; height: 1px; }
+      .sectors-grid { grid-template-columns: 1fr; }
+      .metrics-grid { grid-template-columns: repeat(2, 1fr); }
+      .diag-parts-grid { grid-template-columns: 1fr; }
+      .footer-inner { flex-direction: column; gap: 20px; text-align: center; }
+      .footer-links { justify-content: center; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- ============================================================
+     NAV
+============================================================ -->
+<nav>
+  <a href="#" class="nav-logo">
+    <div class="nav-logo-icon">
+      <svg width="18" height="18" viewBox="0 0 18 18" fill="none">
+        <path d="M2 9 Q2 3 9 3 Q16 3 16 9 Q16 15 9 15 Q2 15 2 9Z" stroke="white" stroke-width="1.5" fill="none"/>
+        <path d="M5 9 L7 7 L9 11 L11 8 L13 9" stroke="white" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+      </svg>
+    </div>
+    <span class="nav-logo-text">Listen<span> & Fix</span></span>
+  </a>
+
+  <div class="nav-badge">
+    <div class="dot"></div>
+    <span class="nav-badge-text">Pre-launch</span>
+  </div>
+
+  <a href="#cta" class="nav-cta">Get Early Access</a>
+</nav>
+
+<!-- ============================================================
+     HERO
+============================================================ -->
+<section id="hero">
+  <div class="hero-bg"></div>
+  <div class="hero-grid"></div>
+
+  <div class="container">
+    <div class="hero-content">
+      <div class="hero-eyebrow">
+        <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
+          <circle cx="7" cy="7" r="6" stroke="#1a6fd4" stroke-width="1.5"/>
+          <path d="M4 7 L6 5 L7 8 L9 6 L10 7" stroke="#1a6fd4" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+        <span class="hero-eyebrow-text">Multimodal AI Diagnostics · Pre-Launch</span>
+      </div>
+
+      <h1 class="t-display hero-headline">
+        Shazam for<br><span class="accent">Engines & Appliances.</span>
+      </h1>
+
+      <p class="hero-tagline">
+        <strong>Record the noise. Upload the photo.</strong> Get the fix.
+      </p>
+
+      <p class="hero-sub">
+        Listen & Fix hears engine knocks, sees frayed wires, and cross-references
+        your exact make and model against real service manuals — then hands you
+        a step-by-step repair guide calibrated to your skill level.
+      </p>
+
+      <form class="hero-form" onsubmit="handleSignup(event)">
+        <input type="email" class="hero-input" placeholder="your@email.com" required />
+        <button type="submit" class="btn-primary">Start Free Diagnosis →</button>
+      </form>
+
+      <p class="hero-note">No credit card. No account required. <strong>First 500 users get unlimited free diagnoses.</strong></p>
+
+      <!-- IMAGE 3: Turbocharger wireframe + 92% confidence phone UI (THE MAGIC) -->
+      <div class="img-hero-capture">
+        <img src="./images/image-3-turbo-diagnosis.jpg" alt="Listen & Fix AI Diagnosis UI showing 92% confidence" />
+      </div>
+
+      <div class="hero-waveform" id="waveform"></div>
+
+      <div class="hero-stats">
+        <div class="hero-stat">
+          <div class="hero-stat-value">99.9%</div>
+          <div class="hero-stat-label">Diagnostic Precision</div>
+        </div>
+        <div class="hero-stat-divider"></div>
+        <div class="hero-stat">
+          <div class="hero-stat-value">48M+</div>
+          <div class="hero-stat-label">Failure Patterns</div>
+        </div>
+        <div class="hero-stat-divider"></div>
+        <div class="hero-stat">
+          <div class="hero-stat-value">94.2%</div>
+          <div class="hero-stat-label">Success Rate</div>
+        </div>
+        <div class="hero-stat-divider"></div>
+        <div class="hero-stat">
+          <div class="hero-stat-value">4</div>
+          <div class="hero-stat-label">Equipment Sectors</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================================
+     PROBLEM
+============================================================ -->
+<section id="problem">
+  <div class="container">
+    <div class="problem-inner">
+      <div>
+        <div class="section-label">
+          <div class="section-label-line"></div>
+          <span class="t-label" style="color: var(--text-muted);">The Mechanic's Dilemma</span>
+        </div>
+        <h2 class="t-headline problem-headline">
+          You know something's wrong.<br>You just don't know what.
+        </h2>
+        <p class="problem-body">
+          The weird knock at 3,000 RPM. The appliance that cycles but doesn't cool.
+          The HVAC that runs all night and still doesn't reach temperature.
+          You're not guessing about whether there's a problem — you're guessing about what it is.
+        </p>
+        <blockquote class="problem-quote">
+          "Even a high-performance AI knows how internal combustion works — but it doesn't have
+          every specific shop manual for every machine ever built memorized.
+          <span>RAG is the process of putting that service manual into the AI's hands
+          the moment the machine rolls onto the lift."</span>
+        </blockquote>
+        <p class="problem-body">
+          Listen & Fix is the master technician in your pocket — one that arrives already
+          holding the factory manual for your specific serial number.
+        </p>
+      </div>
+
+      <div class="problem-cards">
+        <div class="problem-card problem-card--before">
+          <div class="problem-card-tag">Without Listen & Fix</div>
+          <div class="problem-card-text">
+            You're watching YouTube videos that <strong>might</strong> match your model,
+            getting quotes you can't evaluate, and hoping the part you ordered is the right one.
+            Three trips to AutoZone later, the noise is still there.
+          </div>
+        </div>
+        <div class="problem-card problem-card--after">
+          <div class="problem-card-tag">With Listen & Fix</div>
+          <div class="problem-card-text">
+            Record 10 seconds of audio. The AI identifies a <strong>turbocharger impeller imbalance
+            at 92% confidence</strong>, cross-references the factory spec (0.05mm deflection tolerance),
+            and shows you exactly which M12 bolts to torque — in the order that matters.
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================================
+     HOW IT WORKS
+============================================================ -->
+<section id="how">
+  <div class="container">
+    <div class="how-header">
+      <div class="section-label" style="justify-content: center;">
+        <div class="section-label-line"></div>
+        <span class="t-label" style="color: var(--text-muted);">The Workflow</span>
+        <div class="section-label-line"></div>
+      </div>
+      <h2 class="t-headline how-headline">From weird noise to fixed machine<br>in three moves.</h2>
+      <p class="how-sub">
+        No setup. No account. Just capture the symptom and let the pipeline do its work.
+      </p>
+    </div>
+
+    <div class="how-steps">
+      <div class="how-step">
+        <div class="how-step-number">01</div>
+        <div class="how-step-title">Capture the Symptom</div>
+        <p class="how-step-body">
+          Record audio of the knock, whine, or rattle. Upload a photo of the leak, the burn mark,
+          or the worn belt. Or drop in a video clip. The system handles everything up to 2GB.
+        </p>
+        <div class="how-step-detail">
+          <span class="how-step-chip">🎙 Audio / Video / Photo</span>
+          <span class="how-step-chip">📋 Equipment context wizard</span>
+        </div>
+        <!-- IMAGE 5: Hands recording engine with phone — the product in action -->
+        <div class="img-step-guide">
+          <img src="./images/image-5-engine-capture.jpg" alt="Mechanic recording engine audio with Listen & Fix app" />
+        </div>
+      </div>
+
+      <div class="how-step">
+        <div class="how-step-number">02</div>
+        <div class="how-step-title">AI Reads the Manual</div>
+        <p class="how-step-body">
+          While you finish filling in the model number, the Scout is already crawling iFixit,
+          NHTSA, and RepairPal for your exact machine. The Librarian indexes every torque spec
+          and safety warning before the diagnosis begins.
+        </p>
+        <div class="how-step-detail">
+          <span class="how-step-chip">📡 Just-in-time RAG pipeline</span>
+          <span class="how-step-chip">🔍 Trusted source weighting</span>
+        </div>
+        <!-- IMAGE 4: Librarian AI knowledge web visualization -->
+        <div class="img-step-guide">
+          <img src="./images/image-4-librarian-ai.jpg" alt="AI Librarian processing technical knowledge" />
+        </div>
+      </div>
+
+      <div class="how-step">
+        <div class="how-step-number">03</div>
+        <div class="how-step-title">Get Your Repair Guide</div>
+        <p class="how-step-body">
+          A structured repair guide arrives — calibrated to your skill level, with exact part numbers,
+          local sourcing, and step-by-step instructions that actually match your machine's serial number.
+        </p>
+        <!-- IMAGE 2: Man consulting tablet at Snap-on chest — guide in use -->
+        <div class="img-step-guide">
+          <img src="./images/image-2-tablet-snapon.jpg" alt="Mechanic consulting Listen & Fix repair guide on tablet" />
+        </div>
+        <div class="how-step-detail">
+          <span class="how-step-chip">🔧 Skill-level tuned steps</span>
+          <span class="how-step-chip">📦 Live parts & pricing</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================================
+     SECTORS
+============================================================ -->
+<section id="sectors">
+  <div class="container">
+    <div class="sectors-visual-header">
+      <div>
+        <div class="section-label">
+          <div class="section-label-line"></div>
+          <span class="t-label" style="color: var(--text-muted);">Equipment Coverage</span>
+        </div>
+        <h2 class="t-headline" style="font-size: clamp(28px, 3.5vw, 48px); margin-bottom: 16px;">
+          If it breaks,<br>we diagnose it.
+        </h2>
+        <p style="font-size: 17px; color: var(--text-secondary); max-width: 440px;">
+          From a 2008 F-150 to an industrial backup generator. Our pipeline is calibrated across four core high-precision sectors.
+        </p>
+      </div>
+      <!-- IMAGE 1: Woman working on Caterpillar industrial generator (INDUSTRIAL GRADE) -->
+      <img src="./images/image-1-generator-technician.jpg" alt="Technician servicing an industrial generator" class="sectors-visual-img" />
+    </div>
+
+    <div class="sectors-grid">
+      <div class="sector-card">
+        <div class="sector-icon">🚗</div>
+        <div class="sector-name">Vehicles</div>
+        <div class="sector-items">
+          Drivetrains · Engine knock<br>
+          Sensor faults · ECU codes<br>
+          Braking systems · Exhaust
+        </div>
+      </div>
+      <div class="sector-card">
+        <div class="sector-icon">🏠</div>
+        <div class="sector-name">Appliances</div>
+        <div class="sector-items">
+          Washers & dryers<br>
+          Refrigerators · Dishwashers<br>
+          Ovens · Garbage disposals
+        </div>
+      </div>
+      <div class="sector-card">
+        <div class="sector-icon">❄️</div>
+        <div class="sector-name">HVAC</div>
+        <div class="sector-items">
+          Compressors · Airflow<br>
+          Refrigerant systems<br>
+          Valves · Heat exchangers
+        </div>
+      </div>
+      <div class="sector-card">
+        <div class="sector-icon">🔌</div>
+        <div class="sector-name">Plumbing & Electrical</div>
+        <div class="sector-items">
+          Circuit boards · Leaks<br>
+          Hydraulic systems<br>
+          Generators · Pumps
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================================
+     UNDER THE HOOD (RAG)
+============================================================ -->
+<section id="rag">
+  <div class="container">
+    <div class="rag-inner">
+      <div>
+        <div class="section-label">
+          <div class="section-label-line"></div>
+          <span class="t-label" style="color: var(--text-muted);">Under the Hood</span>
+        </div>
+        <h2 class="t-headline rag-headline">
+          Not just any AI.<br>The AI holding<br>your factory manual.
+        </h2>
+        <p class="rag-body">
+          Most AI tools carry the general knowledge of a master mechanic who's read every textbook.
+          That's useful — but it won't tell you the exact torque spec for a 2018 Camry's cylinder head,
+          or the clearance tolerance for your specific industrial generator's impeller bearing.
+        </p>
+        <p class="rag-body">
+          Our Retrieval-Augmented Generation (RAG) pipeline solves this. The moment you tell us
+          what you're working on, a specialized pit crew fires up in the background and builds
+          a custom technical library — just for your machine, just for this job.
+        </p>
+
+        <div class="rag-comparison">
+          <div class="rag-row">
+            <div class="rag-row-icon">📚</div>
+            <div>
+              <div class="rag-row-label">Base AI Model</div>
+              <div class="rag-row-value">General theory. Great at "how engines work." Can miss exact specs for niche equipment.</div>
+            </div>
+            <div>
+              <div class="rag-row-label">With RAG</div>
+              <div class="rag-row-value highlight">Specific torque settings, OEM part numbers, and factory clearance tolerances for your serial number.</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="rag-team">
+        <div class="rag-team-header">Meet the Pit Crew</div>
+
+        <div class="rag-member rag-member--scout">
+          <div class="rag-member-role">DocumentCrawlerService</div>
+          <div class="rag-member-name">The Shop Scout</div>
+          <div class="rag-member-desc">
+            Our Just-in-Time intelligence pipeline. The moment you enter your make and model,
+            the Scout scours iFixit, NHTSA, RepairPal, and manufacturer portals — pulling
+            the exact manuals, TSBs, and forum threads that match your machine.
+          </div>
+          <div class="rag-pipeline">
+            <span class="rag-pipeline-step">Search</span>
+            <span class="rag-pipeline-arrow">→</span>
+            <span class="rag-pipeline-step">Crawl</span>
+            <span class="rag-pipeline-arrow">→</span>
+            <span class="rag-pipeline-step">Clean</span>
+            <span class="rag-pipeline-arrow">→</span>
+            <span class="rag-pipeline-step">Chunk</span>
+            <span class="rag-pipeline-arrow">→</span>
+            <span class="rag-pipeline-step">Embed</span>
+          </div>
+        </div>
+
+        <div class="rag-member rag-member--lib">
+          <div class="rag-member-role">RAGService</div>
+          <div class="rag-member-name">The Librarian</div>
+          <div class="rag-member-desc">
+            Tears the manual down to the block. Converts every torque spec and safety warning
+            into a mathematical vector — a universal index the AI can search at the speed of thought.
+            It finds "connecting rod clearance" when you say "engine knock."
+          </div>
+          <!-- IMAGE 4: Librarian AI knowledge web visualization -->
+          <div class="img-librarian">
+            <img src="./images/image-4-librarian-ai.jpg" alt="AI Librarian processing technical knowledge" />
+          </div>
+          <div class="rag-pipeline">
+            <span class="rag-pipeline-step">Index</span>
+            <span class="rag-pipeline-arrow">→</span>
+            <span class="rag-pipeline-step">Embed</span>
+            <span class="rag-pipeline-arrow">→</span>
+            <span class="rag-pipeline-step">Query</span>
+            <span class="rag-pipeline-arrow">→</span>
+            <span class="rag-pipeline-step">Retrieve</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================================
+     SAMPLE DIAGNOSIS
+============================================================ -->
+<section id="diagnosis">
+  <div class="container">
+    <div class="diag-header">
+      <div class="section-label" style="justify-content: center;">
+        <div class="section-label-line"></div>
+        <span class="t-label" style="color: var(--text-muted);">Live Example</span>
+        <div class="section-label-line"></div>
+      </div>
+      <h2 class="t-headline diag-headline">From "weird noise"<br>to fixed.</h2>
+      <p class="diag-sub">
+        A 10-second audio clip of a high-pitched whine from an industrial generator.
+        Here's what the system returns.
+      </p>
+    </div>
+
+    <!-- DIAGNOSTIC BOARD VISUAL -->
+    <div class="img-diag-banner">
+      <img src="./images/shadow_board_hero.png" alt="Listen & Fix diagnostic dashboard visualization" />
+    </div>
+
+    <div class="diag-card">
+      <div class="diag-card-header">
+        <div class="diag-card-title">
+          <div class="dot"></div>
+          Diagnosis Complete · GenX-5000 Industrial Generator
+        </div>
+        <div class="diag-status-chip">System Nominal</div>
+      </div>
+
+      <div class="diag-card-body">
+        <!-- Primary Finding -->
+        <div>
+          <div class="diag-section-label">Primary Diagnosis</div>
+          <div class="diag-finding">Turbocharger Impeller Imbalance</div>
+          <div class="diag-confidence">
+            <div class="diag-confidence-row">
+              <span class="diag-confidence-label">Confidence Score</span>
+              <span class="diag-confidence-value">92%</span>
+            </div>
+            <div class="diag-bar-track">
+              <div class="diag-bar-fill" style="width: 92%;"></div>
+            </div>
+          </div>
+          <div style="display: flex; gap: 8px; align-items: center; flex-wrap: wrap;">
+            <div class="diag-severity diag-severity--medium">● Medium Severity</div>
+          </div>
+        </div>
+
+        <!-- Metadata -->
+        <div class="diag-meta-grid">
+          <div class="diag-meta-item">
+            <div class="diag-section-label">Technical Context</div>
+            <div class="diag-meta-value">Factory clearance spec: 0.05mm deflection</div>
+          </div>
+          <div class="diag-meta-item">
+            <div class="diag-section-label">Observed Symptom</div>
+            <div class="diag-meta-value">High-pitched whistling/whining, 3,000 RPM</div>
+          </div>
+          <div class="diag-meta-item">
+            <div class="diag-section-label">Root Cause</div>
+            <div class="diag-meta-value">Bearing wear causing radial play beyond tolerance</div>
+          </div>
+          <div class="diag-meta-item">
+            <div class="diag-section-label">Skill Level</div>
+            <div class="diag-meta-value">Intermediate · ~45 min estimated</div>
+          </div>
+        </div>
+
+        <!-- Steps -->
+        <div class="diag-steps">
+          <div class="diag-section-label">Repair Steps (Intermediate)</div>
+          <div class="diag-steps-list">
+            <div class="diag-step-row">
+              <div class="diag-step-num">1</div>
+              <div class="diag-step-text"><strong>Lock-Out / Tag-Out.</strong> De-energize the generator and affix LOTO tags before any contact with the turbo housing.</div>
+            </div>
+            <div class="diag-step-row">
+              <div class="diag-step-num">2</div>
+              <div class="diag-step-text"><strong>Secondary Seal Extraction.</strong> Remove the M12 retaining bolts (torque: 42 Nm) using a 19mm deep socket. Do not reuse the crush washers.</div>
+            </div>
+            <div class="diag-step-row">
+              <div class="diag-step-num">3</div>
+              <div class="diag-step-text"><strong>Impeller Inspection.</strong> Measure radial play with a dial indicator. Replace if deflection exceeds 0.05mm per factory spec.</div>
+            </div>
+            <div class="diag-step-row">
+              <div class="diag-step-num">4</div>
+              <div class="diag-step-text"><strong>Reassemble & Verify.</strong> Torque M12 bolts to 42 Nm in a star pattern. Run at idle for 5 minutes; confirm whine is absent at 3,000 RPM.</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Parts -->
+        <div class="diag-parts">
+          <div class="diag-section-label">Parts & Sourcing — ZIP 90210</div>
+          <div class="diag-parts-grid">
+            <div class="diag-part-card">
+              <div class="diag-part-name">Turbo Bearing Kit</div>
+              <div class="diag-part-price">$38 – $62</div>
+              <div class="diag-part-source">Grainger · In stock, 2.1 mi</div>
+              <div class="diag-part-priority diag-part-priority--required">Required</div>
+            </div>
+            <div class="diag-part-card">
+              <div class="diag-part-name">M12 Crush Washers (×4)</div>
+              <div class="diag-part-price">$6 – $12</div>
+              <div class="diag-part-source">AutoZone · In stock, 0.8 mi</div>
+              <div class="diag-part-priority diag-part-priority--required">Required</div>
+            </div>
+            <div class="diag-part-card">
+              <div class="diag-part-name">High-Temp Gasket Sealant</div>
+              <div class="diag-part-price">$9 – $14</div>
+              <div class="diag-part-source">Home Depot · In stock, 1.4 mi</div>
+              <div class="diag-part-priority diag-part-priority--recommended">Recommended</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================================
+     METRICS
+============================================================ -->
+<section id="metrics">
+  <div class="container">
+    <div class="metrics-grid">
+      <div class="metric-card">
+        <div class="metric-value">99.<span class="metric-accent">9%</span></div>
+        <div class="metric-label">Diagnostic<br>Precision</div>
+      </div>
+      <div class="metric-card">
+        <div class="metric-value">94.<span class="metric-accent">2%</span></div>
+        <div class="metric-label">Repair<br>Success Rate</div>
+      </div>
+      <div class="metric-card">
+        <div class="metric-value">48<span class="metric-accent">M+</span></div>
+        <div class="metric-label">Failure<br>Patterns</div>
+      </div>
+      <div class="metric-card">
+        <div class="metric-value">0.<span class="metric-accent">02ms</span></div>
+        <div class="metric-label">System<br>Latency</div>
+      </div>
+      <div class="metric-card">
+        <div class="metric-value">2<span class="metric-accent">GB</span></div>
+        <div class="metric-label">Max Media<br>Upload</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================================
+     SAFETY BAR
+============================================================ -->
+<section id="safety">
+  <div class="container">
+    <div class="safety-inner">
+      <div class="safety-icon">⚠️</div>
+      <div>
+        <div class="safety-title">Professional Safety Advisory</div>
+        <div class="safety-text">
+          <strong>AI-generated diagnostics are a DIY assist tool — not a replacement for certified professionals.</strong>
+          High-severity findings involving kinetic, electrical, or chemical hazards require expert review.
+          Always verify AI recommendations against the official manufacturer safety manual before proceeding.
+        </div>
+        <div class="safety-protocols">
+          <span class="safety-chip">🚗 Jack Stands Required</span>
+          <span class="safety-chip">⚡ LOTO for Electrical</span>
+          <span class="safety-chip">❄️ EPA Cert for Refrigerants</span>
+          <span class="safety-chip">🏭 Pressure Relief for Industrial</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================================
+     FINAL CTA
+============================================================ -->
+<section id="cta">
+  <div class="container">
+    <div class="cta-inner">
+      <div class="section-label" style="justify-content: center; margin-bottom: 24px;">
+        <div class="section-label-line"></div>
+        <span class="t-label" style="color: var(--text-muted);">Early Access</span>
+        <div class="section-label-line"></div>
+      </div>
+      <h2 class="t-display cta-headline">
+        The master technician<br>in your pocket.
+      </h2>
+      <p class="cta-sub">
+        Join the waitlist. Get early access to free unlimited diagnoses
+        and be first on the lift when we launch.
+      </p>
+      <form class="cta-form" onsubmit="handleSignup(event)">
+        <input type="email" class="hero-input" placeholder="your@email.com" required />
+        <button type="submit" class="btn-primary">Get Early Access →</button>
+      </form>
+      <p class="cta-note">
+        <strong>First 500 users:</strong> unlimited free diagnoses at launch. No spam. Unsubscribe anytime.
+      </p>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================================
+     FOOTER
+============================================================ -->
+<footer>
+  <div class="container">
+    <div class="footer-inner">
+      <div class="footer-copy">
+        © 2026 Listen & Fix. AI-assisted diagnostics. Not a substitute for professional service.
+      </div>
+      <div class="footer-links">
+        <a href="#" class="footer-link">Privacy</a>
+        <a href="#" class="footer-link">Terms</a>
+        <a href="#" class="footer-link">Contact</a>
+      </div>
+    </div>
+  </div>
+</footer>
+
+<!-- ============================================================
+     SCRIPTS
+============================================================ -->
+<script>
+  // Waveform bars
+  (function() {
+    const wf = document.getElementById('waveform');
+    const heights = [12, 20, 32, 24, 40, 28, 44, 36, 48, 30, 44, 24, 38, 20, 32, 28, 44, 36, 28, 20, 32, 44, 24, 38, 28, 20, 36, 48, 28, 44];
+    heights.forEach((h, i) => {
+      const bar = document.createElement('div');
+      bar.className = 'wave-bar';
+      bar.style.height = h + 'px';
+      bar.style.setProperty('--dur', (0.9 + Math.random() * 0.7).toFixed(2) + 's');
+      bar.style.setProperty('--delay', (i * 0.06).toFixed(2) + 's');
+      wf.appendChild(bar);
+    });
+  })();
+
+  // Signup handler
+  function handleSignup(e) {
+    e.preventDefault();
+    const form = e.target;
+    const input = form.querySelector('input[type=email]');
+    const btn = form.querySelector('button');
+    btn.textContent = '✓ You\'re on the list';
+    btn.style.background = 'var(--success)';
+    btn.style.pointerEvents = 'none';
+    input.disabled = true;
+  }
+
+  // Scroll fade-in
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        entry.target.style.opacity = '1';
+        entry.target.style.transform = 'translateY(0)';
+      }
+    });
+  }, { threshold: 0.1 });
+
+  document.querySelectorAll('.how-step, .sector-card, .rag-member, .diag-card, .metric-card').forEach(el => {
+    el.style.opacity = '0';
+    el.style.transform = 'translateY(20px)';
+    el.style.transition = 'opacity 0.5s ease, transform 0.5s ease';
+    observer.observe(el);
+  });
+</script>
+</body>
+</html>
