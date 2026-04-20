@@ -119,6 +119,15 @@ const hubs = [
     color: "from-cyan-500 to-blue-600",
     border: "hover:border-cyan-400/50",
     shadow: "hover:shadow-[0_0_40px_-10px_rgba(6,182,212,0.3)]"
+  },
+  {
+    title: "Strategic Mycology & Cultivation",
+    description: "High-precision commercial cultivation architecture. Biological, hardware, and infrastructure domain reports.",
+    href: "/index.html",
+    icon: "🍄",
+    color: "from-emerald-500 to-teal-600",
+    border: "hover:border-emerald-400/50",
+    shadow: "hover:shadow-[0_0_40px_-10px_rgba(16,185,129,0.3)]"
   }
 ];
 
