@@ -74,17 +74,17 @@ export default function ListenAndFixHub() {
         </nav>
 
         {/* Header */}
-        <header className="mb-20">
-          <div className="inline-flex items-center px-3 py-1 rounded-full bg-red-500/10 border border-red-500/20 text-[#ff3333] text-xs font-bold tracking-widest uppercase mb-6 shadow-[0_0_10px_rgba(255,51,51,0.1)]">
+        <header className="mb-16 md:mb-20">
+          <div className="inline-flex items-center px-3 py-1 rounded-full bg-red-500/10 border border-red-500/20 text-[#ff3333] text-[10px] md:text-xs font-bold tracking-widest uppercase mb-6 shadow-[0_0_10px_rgba(255,51,51,0.1)]">
             A Right-To-Repair Revolution
           </div>
-          <h1 className="text-5xl md:text-7xl font-bold tracking-tight text-white mb-6 leading-tight font-(family-name:--font-space-grotesk) uppercase">
+          <h1 className="text-[clamp(2.5rem,12vw,4.5rem)] font-bold tracking-tight text-white mb-6 leading-[0.9] font-(family-name:--font-space-grotesk) uppercase">
             Listen & <br />
             <span className="text-transparent bg-clip-text bg-linear-to-r from-[#ff3333] to-orange-500 drop-shadow-[0_0_20px_rgba(255,51,51,0.2)]">
               Fix
             </span>
           </h1>
-          <p className="text-xl text-slate-400 max-w-2xl leading-relaxed">
+          <p className="text-lg md:text-xl text-slate-400 max-w-2xl leading-relaxed">
             We are tearing down the walls of technical gatekeeping. If you bought it, you should be able to fix it. Turn intimidated consumers into empowered owners, one broken machine at a time.
           </p>
         </header>
@@ -95,21 +95,21 @@ export default function ListenAndFixHub() {
               <a
                 key={idx}
                 href={article.href}
-                className="group relative block p-8 md:p-12 rounded-[2.5rem] bg-[#0a0a0c]/80 border border-slate-800 transition-all duration-500 overflow-hidden shadow-2xl backdrop-blur-md hover:border-[#ff3333]/50 hover:shadow-[0_0_50px_-10px_rgba(255,51,51,0.2)]"
+                className="group relative block p-6 md:p-12 rounded-[1.5rem] md:rounded-[2.5rem] bg-[#0a0a0c]/80 border border-slate-800 transition-all duration-500 overflow-hidden shadow-2xl backdrop-blur-md hover:border-[#ff3333]/50 hover:shadow-[0_0_50px_-10px_rgba(255,51,51,0.2)]"
               >
-                <div className="absolute top-6 right-6 z-20 px-4 py-1.5 rounded-full bg-[#ff3333] text-white text-xs font-black tracking-widest uppercase shadow-[0_0_20px_rgba(255,51,51,0.5)]">
+                <div className="absolute top-4 right-4 md:top-6 md:right-6 z-20 px-3 py-1 md:px-4 md:py-1.5 rounded-full bg-[#ff3333] text-white text-[9px] md:text-xs font-black tracking-widest uppercase shadow-[0_0_20px_rgba(255,51,51,0.5)]">
                   Diagnostic App
                 </div>
                 
-                <div className={`absolute inset-0 rounded-[2.5rem] bg-linear-to-br ${article.accent} opacity-0 group-hover:opacity-100 transition-opacity duration-500`} />
+                <div className={`absolute inset-0 rounded-[1.5rem] md:rounded-[2.5rem] bg-linear-to-br ${article.accent} opacity-0 group-hover:opacity-100 transition-opacity duration-500`} />
                 
                 <div className="relative z-10 h-full flex flex-col items-start">
-                  <div className="flex items-center justify-between w-full mb-8">
-                    <div className="text-6xl group-hover:scale-110 transition-transform duration-500">{article.icon}</div>
-                    <div className="text-[#ff3333]/60 font-mono text-sm tracking-widest">APP: L&F-01</div>
+                  <div className="flex items-center justify-between w-full mb-6 md:mb-8">
+                    <div className="text-5xl md:text-6xl group-hover:scale-110 transition-transform duration-500">{article.icon}</div>
+                    <div className="text-[#ff3333]/60 font-mono text-[10px] md:text-sm tracking-widest">APP: L&F-01</div>
                   </div>
                   
-                  <h2 className="font-bold text-white mb-4 group-hover:text-[#ff3333] transition-colors font-(family-name:--font-space-grotesk) uppercase tracking-wide text-4xl md:text-5xl leading-tight">
+                  <h2 className="font-bold text-white mb-4 group-hover:text-[#ff3333] transition-colors font-(family-name:--font-space-grotesk) uppercase tracking-wide text-3xl md:text-5xl leading-tight">
                     {article.title}
                   </h2>
                   <p className="text-slate-400 leading-relaxed max-w-2xl text-lg md:text-xl font-light">

@@ -372,6 +372,35 @@
         text-transform: uppercase;
       }
     }
+
+    @media (max-width: 600px) {
+      h1 {
+        font-size: clamp(1.8rem, 10vw, 3.5rem);
+      }
+
+      .sys-overlay {
+        bottom: auto;
+        top: 1rem;
+        left: 1rem;
+        right: 1rem;
+        display: flex;
+        justify-content: space-between;
+        background: rgba(0, 0, 0, 0.4);
+        padding: 0.5rem;
+        -webkit-backdrop-filter: blur(4px);
+        backdrop-filter: blur(4px);
+        border: 1px solid rgba(0, 240, 255, 0.2);
+      }
+
+      .sys-overlay span {
+        margin-bottom: 0;
+        font-size: 0.65rem;
+      }
+
+      #coord-display {
+        display: none;
+      }
+    }
   </style>
 </head>
 

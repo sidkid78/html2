@@ -145,6 +145,44 @@
       }
     }
 
+    @media (max-width: 1023px) {
+      .panel {
+        display: flex;
+        flex-direction: column;
+        overflow-y: auto;
+        padding-bottom: 2rem;
+      }
+
+      .content-col {
+        padding: 7.5rem 1.5rem 2rem 1.5rem; /* Safe padding for HUD */
+        background: rgba(0, 0, 0, 0.7);
+        -webkit-backdrop-filter: blur(12px);
+        backdrop-filter: blur(12px);
+        width: 100%;
+      }
+
+      .image-col {
+        min-height: 250px;
+        width: 100%;
+        display: block !important;
+        flex: none;
+      }
+
+      .ui-elements {
+        bottom: 1rem !important;
+        padding: 0 1rem;
+      }
+
+      h1 {
+        font-size: clamp(2.1rem, 10vw, 3.2rem);
+        line-height: 1;
+      }
+
+      h2 {
+        font-size: 1.6rem;
+      }
+    }
+
     /* Panel Content */
     .content-col {
       padding: 6rem 3rem 4rem 3rem;

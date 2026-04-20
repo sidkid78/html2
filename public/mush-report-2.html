@@ -307,6 +307,61 @@
             padding: 2rem;
             font-family: var(--font-mono);
         }
+
+        @media (max-width: 900px) {
+            #cursor { display: none; }
+            * { cursor: auto !important; }
+
+            .ui-layer {
+                padding: 1rem;
+            }
+
+            .header, .footer {
+                font-size: 0.6rem;
+            }
+
+            .panel {
+                display: flex;
+                flex-direction: column;
+                padding: 14vh 1.5rem 5vh 1.5rem; /* Safe padding for HUD */
+                gap: 2.5rem;
+                overflow-y: auto;
+            }
+
+            .col-left, .col-right, .col-full {
+                grid-column: span 12;
+                width: 100%;
+            }
+
+            h1 {
+                font-size: clamp(2.2rem, 10vw, 3.8rem);
+                margin-top: 2vh;
+            }
+
+            .reveal.delay-1, .reveal.delay-2 {
+                background: rgba(0, 0, 0, 0.75);
+                border-left: 2px solid var(--accent-cyan);
+                padding: 1.5rem !important;
+                border-radius: 1rem;
+                -webkit-backdrop-filter: blur(10px);
+                backdrop-filter: blur(10px);
+                margin-top: 2rem !important;
+            }
+
+            .terminal-box {
+                padding: 1.5rem;
+                background: rgba(0, 0, 0, 0.7);
+                border-color: var(--accent-cyan);
+                -webkit-backdrop-filter: blur(10px);
+                backdrop-filter: blur(10px);
+            }
+
+            .img-container {
+                max-height: 40vh;
+                width: 100%;
+                margin-bottom: 2rem;
+            }
+        }
     </style>
 </head>
 

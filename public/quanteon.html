@@ -222,6 +222,31 @@
   }
   @keyframes pulse { 0%, 100% { opacity: 0.3; } 50% { opacity: 1; } }
 
+  /* --- Mobile Responsive --- */
+  @media (max-width: 768px) {
+    #cursor { display: none; }
+    * { cursor: auto !important; }
+
+    .section {
+      padding: 5vh 1.5rem;
+      min-height: initial;
+    }
+
+    .hero-text {
+      font-size: clamp(2rem, 10vw, 3.5rem);
+      max-width: none;
+    }
+
+    .body-text {
+      font-size: 1.1rem;
+      max-width: none;
+    }
+
+    .scroll-hint {
+      left: 1.5rem;
+      bottom: 2vh;
+    }
+  }
 </style>
 </head>
 <body>
