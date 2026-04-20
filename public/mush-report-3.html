@@ -1,0 +1,560 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Domain Report: Physical Infrastructure</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link
+    href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;700&family=Space+Grotesk:wght@400;600;700&display=swap"
+    rel="stylesheet">
+  <style>
+    :root {
+      --bg: #050608;
+      --grid: rgba(0, 229, 255, 0.15);
+      --accent: #00e5ff;
+      --text-main: #f0f6fc;
+      --text-muted: #8b9eb5;
+      --font-heading: 'Space Grotesk', sans-serif;
+      --font-mono: 'JetBrains Mono', monospace;
+      --transition: cubic-bezier(0.19, 1, 0.22, 1);
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      background-color: var(--bg);
+      color: var(--text-main);
+      font-family: var(--font-mono);
+      overflow: hidden;
+      cursor: crosshair;
+    }
+
+    /* Background Grid */
+    .bg-grid {
+      position: fixed;
+      inset: 0;
+      background-image: linear-gradient(to right, var(--grid) 1px, transparent 1px), linear-gradient(to bottom, var(--grid) 1px, transparent 1px);
+      background-size: 4rem 4rem;
+      z-index: 0;
+      opacity: 0.3;
+      pointer-events: none;
+    }
+
+    /* SVG Noise overlay */
+    .noise-overlay {
+      position: fixed;
+      inset: 0;
+      z-index: 50;
+      pointer-events: none;
+      opacity: 0.04;
+      mix-blend-mode: screen;
+    }
+
+    /* UI Chrome */
+    .ui-chrome {
+      position: fixed;
+      z-index: 40;
+      font-size: 0.75rem;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      color: var(--accent);
+      pointer-events: none;
+    }
+
+    .ui-top-left {
+      top: 2rem;
+      left: 2rem;
+    }
+
+    .ui-top-right {
+      top: 2rem;
+      right: 2rem;
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+    }
+
+    .ui-bottom-left {
+      bottom: 2rem;
+      left: 2rem;
+    }
+
+    .ui-bottom-right {
+      bottom: 2rem;
+      right: 2rem;
+    }
+
+    .progress-track {
+      width: 100px;
+      height: 1px;
+      background: rgba(0, 229, 255, 0.2);
+      position: relative;
+    }
+
+    .progress-bar {
+      position: absolute;
+      top: 0;
+      left: 0;
+      height: 100%;
+      background: var(--accent);
+      width: 0%;
+      transition: width 0.1s linear;
+    }
+
+    /* Carousel Layout */
+    .carousel {
+      display: flex;
+      width: 100vw;
+      height: 100vh;
+      overflow-x: auto;
+      overflow-y: hidden;
+      scroll-snap-type: x mandatory;
+      scrollbar-width: none;
+      position: relative;
+      z-index: 10;
+    }
+
+    .carousel::-webkit-scrollbar {
+      display: none;
+    }
+
+    .panel {
+      flex: 0 0 100vw;
+      height: 100vh;
+      scroll-snap-align: start;
+      display: grid;
+      grid-template-columns: 1fr;
+      position: relative;
+      border-right: 1px solid var(--grid);
+    }
+
+    @media (min-width: 1024px) {
+      .panel.split {
+        grid-template-columns: 1fr 1fr;
+      }
+
+      .panel.split-reverse {
+        grid-template-columns: 1fr 1fr;
+      }
+    }
+
+    /* Panel Content */
+    .content-col {
+      padding: 6rem 3rem 4rem 3rem;
+      height: 100vh;
+      overflow-y: auto;
+      scrollbar-width: none;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      position: relative;
+    }
+
+    @media (min-width: 1024px) {
+      .content-col {
+        padding: 8rem 4rem 4rem 4rem;
+      }
+
+      .panel.split .content-col {
+        border-right: 1px solid var(--grid);
+      }
+
+      .panel.split-reverse .content-col {
+        order: 2;
+        border-left: 1px solid var(--grid);
+      }
+    }
+
+    /* Images */
+    .image-col {
+      display: none;
+      position: relative;
+      height: 100vh;
+      overflow: hidden;
+      background: var(--bg);
+    }
+
+    @media (min-width: 1024px) {
+      .image-col {
+        display: block;
+      }
+
+      .panel.split-reverse .image-col {
+        order: 1;
+      }
+    }
+
+    .image-wrapper {
+      width: 100%;
+      height: 100%;
+      position: relative;
+    }
+
+    .image-wrapper img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      filter: grayscale(1) contrast(1.2) sepia(1) hue-rotate(140deg) saturate(2);
+      opacity: 0.6;
+      transition: all 0.8s var(--transition);
+    }
+
+    .image-wrapper::after {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(0deg, rgba(5, 6, 8, 0.8) 0%, transparent 50%, rgba(5, 6, 8, 0.8) 100%);
+      pointer-events: none;
+    }
+
+    .image-col:hover img {
+      filter: grayscale(0) contrast(1) sepia(0);
+      opacity: 1;
+      transform: scale(1.02);
+    }
+
+    /* Cover Specific */
+    .cover-panel .content-col {
+      justify-content: flex-end;
+      background: linear-gradient(to top, var(--bg) 0%, transparent 100%);
+    }
+
+    .cover-bg {
+      position: absolute;
+      inset: 0;
+      z-index: -1;
+    }
+
+    .cover-bg img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      filter: grayscale(1) opacity(0.3);
+    }
+
+    /* Typography */
+    h1 {
+      font-family: var(--font-heading);
+      font-size: clamp(3rem, 6vw, 6rem);
+      line-height: 1;
+      font-weight: 700;
+      text-transform: uppercase;
+      margin-bottom: 2rem;
+    }
+
+    h2 {
+      font-family: var(--font-heading);
+      font-size: clamp(1.5rem, 3vw, 2.5rem);
+      color: var(--accent);
+      margin-bottom: 2rem;
+      font-weight: 600;
+      text-transform: uppercase;
+    }
+
+    h3 {
+      font-size: 0.85rem;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.15em;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+      padding-bottom: 0.5rem;
+      margin: 2rem 0 1rem 0;
+    }
+
+    p {
+      font-size: 0.9rem;
+      line-height: 1.6;
+      margin-bottom: 1rem;
+      color: var(--text-muted);
+    }
+
+    strong {
+      color: var(--text-main);
+      font-weight: 700;
+    }
+
+    ul {
+      list-style: none;
+      margin-bottom: 1rem;
+    }
+
+    li {
+      font-size: 0.9rem;
+      line-height: 1.6;
+      margin-bottom: 0.75rem;
+      color: var(--text-muted);
+      padding-left: 1.5rem;
+      position: relative;
+    }
+
+    li::before {
+      content: '>';
+      position: absolute;
+      left: 0;
+      color: var(--accent);
+      font-weight: bold;
+    }
+
+    /* Animations */
+    .reveal {
+      opacity: 0;
+      transform: translateY(20px);
+      transition: opacity 0.8s var(--transition), transform 0.8s var(--transition);
+    }
+
+    .reveal.active {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    .delay-1 {
+      transition-delay: 100ms;
+    }
+
+    .delay-2 {
+      transition-delay: 200ms;
+    }
+
+    .delay-3 {
+      transition-delay: 300ms;
+    }
+  </style>
+</head>
+
+<body>
+
+  <svg class="noise-overlay">
+    <filter id="noiseFilter">
+      <feTurbulence type="fractalNoise" baseFrequency="0.7" numOctaves="3" stitchTiles="stitch" />
+    </filter>
+    <rect width="100%" height="100%" filter="url(#noiseFilter)" />
+  </svg>
+
+  <div class="bg-grid"></div>
+
+  <div class="ui-chrome ui-top-left">SYS.DIR // PRECISION_GROWTH</div>
+  <div class="ui-chrome ui-top-right">
+    <span id="section-indicator">SEC.01/05</span>
+    <div class="progress-track">
+      <div class="progress-bar" id="progress"></div>
+    </div>
+  </div>
+  <div class="ui-chrome ui-bottom-left">[ SHIFT AXIS: SCROLL/SWIPE &rarr; ]</div>
+  <div class="ui-chrome ui-bottom-right">STATUS: OPTIMAL</div>
+
+  <main class="carousel" id="carousel">
+
+    <!-- Panel 1: Cover -->
+    <section class="panel cover-panel">
+      <div class="cover-bg">
+        <img src="./images/infrastructure-mood.png" alt="Atmosphere">
+      </div>
+      <div class="content-col">
+        <div class="reveal delay-1">
+          <h3 style="border:none; color:var(--accent);">Executive Summary</h3>
+          <h1>Domain Report:<br>Physical Infrastructure<br>& Hardware</h1>
+        </div>
+        <div class="reveal delay-2"
+          style="max-width: 800px; border-left: 2px solid var(--accent); padding-left: 1.5rem;">
+          <p><strong>Goal:</strong> Design the physical architecture of the growing system, selecting the appropriate
+            structural materials, modular enclosures, HVAC components, humidification systems, and environmental sensors
+            capable of strictly maintaining and scaling any specified microclimate.</p>
+          <p>This report details the architectural requirements for a modular, high-precision growing environment
+            capable of maintaining strict microclimate tolerances (±0.5°C and ±2% RH). The design integrates heavy-duty
+            structural aluminum framing with advanced vacuum-insulation technology, inverter-driven climate control
+            hardware, and a high-fidelity sensor suite. Scalability is achieved through a standardized central trunk
+            utility topology, allowing for seamless expansion without compromising environmental integrity.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- Panel 2: Framework -->
+    <section class="panel split">
+      <div class="content-col">
+        <h2 class="reveal delay-1">1. Structural Framework<br>and Enclosure Design</h2>
+        <p class="reveal delay-2">The foundation of the system rests on a modular, high-rigidity framework designed for
+          thermal isolation and structural stacking.</p>
+
+        <h3 class="reveal delay-2">Framework and Insulation</h3>
+        <p class="reveal delay-3">The primary structure utilizes <strong>45 Series (45mm) or 15 Series (1.5 inch) T-slot
+            aluminum (6063-T5)</strong>. This material selection provides the necessary mechanical strength for vertical
+          stacking while offering the flexibility required for modular adjustments. To achieve extreme thermal
+          isolation, the design specifies <strong>Vacuum Insulated Panels (VIP)</strong> with a Polyurethane layer,
+          achieving an industry-leading R-60 per inch. For standard modular builds, <strong>Polyisocyanurate (PIR) Metal
+            Panels</strong> (R-14 at 2" thickness) serve as a high-performance alternative.</p>
+
+        <h3 class="reveal delay-3">Sealing and Thermal Integrity</h3>
+        <p class="reveal delay-3">To maintain airtightness, a three-path sealing strategy is employed:</p>
+        <ul class="reveal delay-3">
+          <li><strong>Primary Seals:</strong> EPDM rubber panel gaskets with V-cut corners.</li>
+          <li><strong>Interface Sealing:</strong> Silicone RTV or Butyl tape at frame joints.</li>
+          <li><strong>Exterior Reinforcement:</strong> Mechanical T-seals for exterior slots.</li>
+        </ul>
+        <p class="reveal delay-3">Vertical expansion requires the use of <strong>PVC or Phenolic thermal break
+            strips</strong> between modules to interrupt thermal bridging through the aluminum framework. Horizontal
+          expansion is managed via linear bar connectors and 1/4 inch closed-cell neoprene gaskets, compressed to 30% by
+          external joining plates to prevent thermal leaks.</p>
+      </div>
+      <div class="image-col">
+        <div class="image-wrapper">
+          <img src="./images/mush-1(2).jpg" alt="Structural Framework">
+        </div>
+      </div>
+    </section>
+
+    <!-- Panel 3: HVAC -->
+    <section class="panel split-reverse">
+      <div class="content-col">
+        <h2 class="reveal delay-1">2. Advanced HVAC and<br>Microclimate Control</h2>
+        <p class="reveal delay-2">Maintaining a target stability of ±0.5°C and ±2% RH requires a departure from
+          traditional on/off climate systems in favor of fully modulating hardware.</p>
+
+        <h3 class="reveal delay-2">Sensible and Latent Load Management</h3>
+        <ul class="reveal delay-3">
+          <li><strong>Cooling and Heating:</strong> Precision mini-splits (e.g., Mitsubishi Electric P-Series or Vertiv
+            Liebert SRC) are required. These must utilize inverter-driven compressors and EC fans to provide continuous,
+            modulated output.</li>
+          <li><strong>Dehumidification:</strong> To avoid the temperature fluctuations associated with standard direct
+            expansion (DX) units, <strong>desiccant dehumidifiers</strong> (e.g., Munters ML Series) are specified for
+            latent load management.</li>
+          <li><strong>Humidification:</strong> Ultrasonic (adiabatic) systems, such as the Carel humiSonic, are
+            essential. Unlike steam-based isothermal systems, ultrasonic units prevent unwanted sensible heat injection.
+            These systems require RO/DI water to maintain operational longevity and air purity.</li>
+        </ul>
+
+        <h3 class="reveal delay-3">System Integration</h3>
+        <p class="reveal delay-3">Hardware must be managed by a <strong>Direct Digital Control (DDC)</strong> system
+          (e.g., Carel c.pCO) utilizing 0-10V PID loops. This centralized logic prevents hardware conflict—such as
+          simultaneous cooling and humidification—ensuring energy efficiency and atmospheric stability.</p>
+      </div>
+      <div class="image-col">
+        <div class="image-wrapper">
+          <img src="./images/mush-2(2).jpg" alt="Advanced HVAC">
+        </div>
+      </div>
+    </section>
+
+    <!-- Panel 4: Sensors -->
+    <section class="panel split">
+      <div class="content-col">
+        <h2 class="reveal delay-1">3. Environmental Sensor<br>Suite & Feedback Loop</h2>
+        <p class="reveal delay-2">Data integrity is maintained through research-grade sensors strategically positioned
+          to eliminate environmental bias.</p>
+
+        <h3 class="reveal delay-2">Sensor Manifest</h3>
+        <ul class="reveal delay-3">
+          <li><strong>CO2:</strong> Sensirion SCD30 (NDIR) for high accuracy (±30ppm).</li>
+          <li><strong>Photosynthetic Active Radiation (PAR):</strong> Apogee SQ-522-SS (Modbus RS-485).</li>
+          <li><strong>Temperature/Humidity:</strong> Sensirion SHT45 (±1.0% RH) and PT100 Class AA RTDs (±0.1°C).</li>
+        </ul>
+
+        <h3 class="reveal delay-3">Spatial Mapping and Placement</h3>
+        <p class="reveal delay-3">Proper placement is critical for feedback accuracy. Temperature and Humidity (T/H)
+          probes must be housed in <strong>aspirated radiation shields</strong> to prevent radiative heating from
+          lighting systems. PAR sensors should be mounted on adjustable leveling plates at the top of the canopy, moving
+          upward as the crop matures. CO2 sensors are positioned at mid-canopy but must remain isolated from intake
+          vents and high-velocity airflows to prevent pressure-broadening errors.</p>
+      </div>
+      <div class="image-col">
+        <div class="image-wrapper">
+          <img src="./images/mush-3(2).jpg" alt="Environmental Sensors">
+        </div>
+      </div>
+    </section>
+
+    <!-- Panel 5: Scaling -->
+    <section class="panel split-reverse">
+      <div class="content-col">
+        <h2 class="reveal delay-1">4. Modular Scaling<br>& Utility Distribution</h2>
+        <p class="reveal delay-2">The system utilizes a <strong>Central Backbone (Trunk) Topology</strong> to support
+          plug-and-play modularity.</p>
+
+        <h3 class="reveal delay-2">Utility Segregation and Safety</h3>
+        <p class="reveal delay-3">To ensure safety and data integrity, utilities are physically segregated:</p>
+        <ul class="reveal delay-3">
+          <li><strong>High-Level Routing:</strong> Power and data are positioned high to prevent water ingress and
+            reduce electromagnetic interference (EMI).</li>
+          <li><strong>Low-Level Routing:</strong> Water supply and drainage are positioned at the base.</li>
+        </ul>
+
+        <h3 class="reveal delay-3">Connection Architecture</h3>
+        <ul class="reveal delay-3">
+          <li><strong>Power:</strong> Distributed via an overhead busbar system using IP67-rated industrial connectors.
+          </li>
+          <li><strong>Fluids:</strong> Water systems feature dry-break quick-disconnect couplings to allow module
+            swapping without system leaks. Drainage uses a gravity-fed PVC trunk with P-traps to maintain bio-security.
+          </li>
+          <li><strong>Data:</strong> A hybrid star/daisy-chain configuration using M12/RJ45 connectors with PoE+
+            capabilities ensures robust communication.</li>
+        </ul>
+        <p class="reveal delay-3">Expansion is facilitated by a standardized <strong>four-step docking protocol</strong>
+          (Mechanical, Plumbing, Data, and Power), ensuring that new modules can be integrated into the central
+          infrastructure with zero system downtime.</p>
+      </div>
+      <div class="image-col">
+        <div class="image-wrapper">
+          <img src="./images/mush-4(2).jpg" alt="Modular Scaling">
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <script>
+    // Scroll Progress and Section Logic
+    const carousel = document.getElementById('carousel');
+    const progressBar = document.getElementById('progress');
+    const sectionIndicator = document.getElementById('section-indicator');
+    const panels = document.querySelectorAll('.panel');
+
+    carousel.addEventListener('scroll', () => {
+      // Update Progress Bar
+      const maxScrollLeft = carousel.scrollWidth - carousel.clientWidth;
+      const scrollPercentage = (carousel.scrollLeft / maxScrollLeft) * 100;
+      progressBar.style.width = scrollPercentage + '%';
+    });
+
+    // Intersection Observer for active section and text reveals
+    const observerOptions = {
+      root: carousel,
+      threshold: 0.5
+    };
+
+    const textObserverOptions = {
+      root: null,
+      threshold: 0.2
+    };
+
+    const panelObserver = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          const index = Array.from(panels).indexOf(entry.target) + 1;
+          sectionIndicator.innerText = `SEC.0${index}/05`;
+        }
+      });
+    }, observerOptions);
+
+    const textObserver = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          entry.target.classList.add('active');
+        }
+      });
+    }, textObserverOptions);
+
+    panels.forEach(panel => {
+      panelObserver.observe(panel);
+      const reveals = panel.querySelectorAll('.reveal');
+      reveals.forEach(el => textObserver.observe(el));
+    });
+  </script>
+</body>
+
+</html>

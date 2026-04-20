@@ -1,0 +1,659 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Agentic Engineering Master | The Future of Software</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600&family=Space+Grotesk:wght@300;500;700;800&family=JetBrains+Mono:wght@400;700&display=swap');
+
+    :root {
+      --bg: #020408;
+      --surface: #0a0c10;
+      --surface-alt: #121620;
+      --text-main: #e2e8f0;
+      --text-muted: #8b949e;
+      --accent: #00f0ff;
+      --accent-glow: rgba(0, 240, 255, 0.2);
+      --border: #1f2937;
+      --font-body: 'Inter', sans-serif;
+      --font-display: 'Space Grotesk', sans-serif;
+      --font-mono: 'JetBrains Mono', monospace;
+      --ease: cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      cursor: none;
+    }
+
+    body {
+      background-color: var(--bg);
+      color: var(--text-main);
+      font-family: var(--font-body);
+      line-height: 1.6;
+      overflow-x: hidden;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    /* SVG Filter Overlays */
+    .noise-layer {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
+      pointer-events: none;
+      z-index: 9999;
+      opacity: 0.3;
+      mix-blend-mode: overlay;
+    }
+
+    /* Custom Cursor */
+    .cursor-dot,
+    .cursor-outline {
+      position: fixed;
+      top: 0;
+      left: 0;
+      transform: translate(-50%, -50%);
+      border-radius: 50%;
+      z-index: 10000;
+      pointer-events: none;
+    }
+
+    .cursor-dot {
+      width: 6px;
+      height: 6px;
+      background-color: var(--accent);
+      box-shadow: 0 0 10px var(--accent);
+    }
+
+    .cursor-outline {
+      width: 40px;
+      height: 40px;
+      border: 1px solid var(--accent);
+      transition: width 0.3s var(--ease), height 0.3s var(--ease), opacity 0.3s;
+    }
+
+    /* Layout System */
+    .container {
+      display: flex;
+      width: 100%;
+    }
+
+    /* Visual Pane (Sticky Left) */
+    .visual-pane {
+      width: 50vw;
+      height: 100vh;
+      position: sticky;
+      top: 0;
+      overflow: hidden;
+      border-right: 1px solid var(--border);
+      background: #000;
+    }
+
+    .visual-pane::after {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: linear-gradient(to right, rgba(2, 4, 8, 0.4), var(--bg));
+      pointer-events: none;
+      z-index: 2;
+    }
+
+    .bg-img {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-size: cover;
+      background-position: center;
+      opacity: 0;
+      transform: scale(1.1);
+      transition: opacity 1.5s var(--ease), transform 2.5s var(--ease);
+      filter: grayscale(40%) contrast(1.1) brightness(0.7);
+    }
+
+    .bg-img.active {
+      opacity: 1;
+      transform: scale(1);
+    }
+
+    /* UI Chrome */
+    .sys-overlay {
+      position: absolute;
+      bottom: 3rem;
+      left: 3rem;
+      font-family: var(--font-mono);
+      font-size: 0.75rem;
+      color: var(--accent);
+      z-index: 3;
+      text-transform: uppercase;
+      letter-spacing: 0.15em;
+      text-shadow: 0 0 10px rgba(0, 240, 255, 0.5);
+    }
+
+    .sys-overlay span {
+      display: block;
+      margin-bottom: 0.4rem;
+      opacity: 0.8;
+    }
+
+    .progress-wrap {
+      position: absolute;
+      top: 3rem;
+      left: 3rem;
+      z-index: 3;
+      display: flex;
+      align-items: center;
+      gap: 1.5rem;
+      font-family: var(--font-mono);
+      font-size: 0.7rem;
+      color: var(--accent);
+    }
+
+    .progress-track {
+      width: 150px;
+      height: 1px;
+      background: rgba(255, 255, 255, 0.1);
+      position: relative;
+    }
+
+    .progress-fill {
+      position: absolute;
+      top: 0;
+      left: 0;
+      height: 100%;
+      background: var(--accent);
+      width: 0%;
+      transition: width 0.5s var(--ease);
+      box-shadow: 0 0 10px var(--accent);
+    }
+
+    /* Content Pane (Scrolling Right) */
+    .content-pane {
+      width: 50vw;
+      padding: 0 5vw 15vh 5vw;
+      background: var(--bg);
+    }
+
+    /* Typography & Blocks */
+    .step {
+      padding: 20vh 0;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+    }
+
+    .label {
+      font-family: var(--font-mono);
+      font-size: 0.8rem;
+      color: var(--accent);
+      text-transform: uppercase;
+      letter-spacing: 0.3em;
+      margin-bottom: 2rem;
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+    }
+
+    .label::before {
+      content: '';
+      width: 20px;
+      height: 1px;
+      background: var(--accent);
+    }
+
+    h1 {
+      font-family: var(--font-display);
+      font-size: clamp(3rem, 5vw, 6rem);
+      line-height: 0.95;
+      letter-spacing: -0.04em;
+      font-weight: 800;
+      margin-bottom: 2.5rem;
+      color: #fff;
+      text-transform: uppercase;
+    }
+
+    h2 {
+      font-family: var(--font-display);
+      font-size: clamp(1.8rem, 2.5vw, 3rem);
+      line-height: 1.1;
+      margin-bottom: 2rem;
+      font-weight: 700;
+      color: #fff;
+      letter-spacing: -0.02em;
+    }
+
+    h3 {
+      font-family: var(--font-display);
+      font-size: 1.4rem;
+      color: var(--accent);
+      margin: 2.5rem 0 1.25rem 0;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+
+    p {
+      font-size: 1.15rem;
+      color: var(--text-muted);
+      margin-bottom: 1.75rem;
+      max-width: 60ch;
+      font-weight: 300;
+    }
+
+    strong {
+      color: #fff;
+      font-weight: 600;
+    }
+
+    .separator {
+      width: 100%;
+      height: 1px;
+      background: linear-gradient(to right, var(--accent), transparent);
+      margin: 5rem 0;
+      opacity: 0.2;
+    }
+
+    /* Data Visualization Components */
+    .data-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      padding: 2.5rem;
+      margin: 2rem 0;
+      position: relative;
+      overflow: hidden;
+      transition: border-color 0.4s var(--ease);
+    }
+
+    .data-card:hover {
+      border-color: var(--accent);
+    }
+
+    .data-card::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 2px;
+      height: 100%;
+      background: var(--accent);
+    }
+
+    .grid-3 {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+      gap: 1.5rem;
+      margin: 2rem 0;
+    }
+
+    .mini-card {
+      background: var(--surface-alt);
+      border: 1px solid var(--border);
+      padding: 1.5rem;
+      transition: transform 0.3s var(--ease);
+    }
+
+    .mini-card:hover {
+      transform: translateY(-5px);
+      border-color: var(--accent);
+    }
+
+    .stat-num {
+      font-family: var(--font-mono);
+      font-size: 2.5rem;
+      color: var(--accent);
+      opacity: 0.2;
+      position: absolute;
+      top: 1rem;
+      right: 1.5rem;
+    }
+
+    /* Lists */
+    ul {
+      list-style: none;
+      margin-bottom: 2rem;
+    }
+
+    li {
+      position: relative;
+      padding-left: 2rem;
+      margin-bottom: 1.25rem;
+      color: var(--text-muted);
+      font-size: 1.1rem;
+    }
+
+    li::before {
+      content: '0' attr(data-index);
+      position: absolute;
+      left: 0;
+      color: var(--accent);
+      font-family: var(--font-mono);
+      font-size: 0.7rem;
+      top: 0.3rem;
+    }
+
+    /* Quotes */
+    blockquote {
+      background: rgba(0, 240, 255, 0.03);
+      border-left: 2px solid var(--accent);
+      padding: 3rem;
+      margin: 3rem 0;
+      position: relative;
+    }
+
+    blockquote p {
+      font-family: var(--font-display);
+      font-size: 1.5rem;
+      color: #fff;
+      font-style: italic;
+      margin-bottom: 0;
+      line-height: 1.4;
+    }
+
+    /* Animations */
+    .reveal {
+      opacity: 0;
+      transform: translateY(40px);
+      transition: opacity 1s var(--ease), transform 1s var(--ease);
+    }
+
+    .reveal.is-visible {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    /* Responsive */
+    @media (max-width: 1100px) {
+      .container { flex-direction: column; }
+      .visual-pane {
+        width: 100vw;
+        height: 50vh;
+        position: relative;
+      }
+      .content-pane {
+        width: 100vw;
+        padding: 4rem 2rem;
+      }
+      .sys-overlay, .progress-wrap { display: none; }
+    }
+  </style>
+</head>
+
+<body>
+
+  <svg width="0" height="0" style="position:absolute;z-index:-1;">
+    <filter id="flicker">
+      <feTurbulence type="fractalNoise" baseFrequency="0.9" numOctaves="3" result="noise">
+        <animate attributeName="baseFrequency" values="0.9;0.95;0.9" dur="0.1s" repeatCount="indefinite" />
+      </feTurbulence>
+      <feColorMatrix type="matrix" values="1 0 0 0 0  0 1 0 0 0  0 0 1 0 0  0 0 0 0.1 0" />
+    </filter>
+  </svg>
+
+  <div class="noise-layer" style="filter: url(#flicker);"></div>
+
+  <div class="cursor-dot"></div>
+  <div class="cursor-outline"></div>
+
+  <div class="container">
+    <!-- Visual Context -->
+    <div class="visual-pane">
+      <div class="bg-img active" data-target="0" style="background-image: url('./images/agentic-hero.png');"></div>
+      <div class="bg-img" data-target="1" style="background-image: url('./images/sne-1(1).jpg');"></div>
+      <div class="bg-img" data-target="2" style="background-image: url('./images/agent-orchestration.png');"></div>
+      <div class="bg-img" data-target="3" style="background-image: url('./images/scen3(3).jpg');"></div>
+      <div class="bg-img" data-target="4" style="background-image: url('./images/scn-4(3).jpg');"></div>
+      <div class="bg-img" data-target="5" style="background-image: url('./images/scn-5(3).jpg');"></div>
+
+      <div class="progress-wrap">
+        <span id="loc-display">LOC.00.00</span>
+        <div class="progress-track">
+          <div class="progress-fill" id="progress-fill"></div>
+        </div>
+        <span id="step-display">STEP 01/06</span>
+      </div>
+
+      <div class="sys-overlay">
+        <span>STATUS: SYSTEM_READY</span>
+        <span>PROTOCOL: AGENTIC_MASTERY_V1</span>
+        <span>AUTH: DIGITAL_FOREMAN</span>
+      </div>
+    </div>
+
+    <!-- Scrolling Content -->
+    <div class="content-pane">
+
+      <!-- Section 0: Hero -->
+      <section class="step" data-index="0">
+        <div class="reveal">
+          <span class="label">Initiating // Neural Link</span>
+          <h1>Agentic<br>Engineering</h1>
+          <h2>Architecting the Era of Autonomous Code</h2>
+          <p>The software engineering landscape is undergoing a fundamental shift: moving from <strong>"vibe coding"</strong>—the practice of prompting without deep system knowledge—to <strong>"agentic engineering."</strong></p>
+          <p>This transition is defined by the creation of specialized agent harnesses, custom architectures, and workflows optimized specifically for AI consumption. Mastery of these systems is the new architectural frontier.</p>
+        </div>
+      </section>
+
+      <!-- Section 1: Paradigm Shift -->
+      <section class="step" data-index="1">
+        <div class="separator reveal"></div>
+        <div class="reveal">
+          <span class="label">Step 01 // The Paradigm Shift</span>
+          <h2>Vibe Coding vs. Engineering</h2>
+          <p>The distinction between basic AI assistance and true agentic engineering resides in the level of control and deterministic predictability.</p>
+          
+          <div class="grid-3">
+            <div class="mini-card">
+              <h3>Vibe Coding</h3>
+              <p>Prompting without knowing the inner workings. Low predictability, high human overhead.</p>
+            </div>
+            <div class="mini-card" style="border-color: var(--accent);">
+              <h3>Agentic Engineering</h3>
+              <p>Creating systems so optimized that agents operate autonomously with zero human intervention.</p>
+            </div>
+          </div>
+
+          <p>Leading teams, like **Stripe**, are already merging over 1,300 PRs weekly with zero human-written code by leveraging "outloop" agentic systems.</p>
+        </div>
+      </section>
+
+      <!-- Section 2: Orchestration -->
+      <section class="step" data-index="2">
+        <div class="separator reveal"></div>
+        <div class="reveal">
+          <span class="label">Step 02 // 3-Tier Orchestration</span>
+          <h2>The Agent Harness</h2>
+          <p>The "agent harness" is the core product. While models are commoditized, the harness—providing deterministic logic, orchestration, and model control—is where the value resides.</p>
+
+          <div class="data-card">
+            <div class="stat-num">01</div>
+            <h3>Orchestrators</h3>
+            <p>Single points of entry. They plan, manage the "till done" list, and coordinate specialized sub-agents.</p>
+          </div>
+
+          <div class="data-card">
+            <div class="stat-num">02</div>
+            <h3>Team Leads</h3>
+            <p>Intermediate supervisors that delegate tasks and handle failure cases if a worker agent hits a bottleneck.</p>
+          </div>
+
+          <div class="data-card">
+            <div class="stat-num">03</div>
+            <h3>Workers</h3>
+            <p>Hyper-specialized executors: Animation Specialists, Security Validators, or Database Crafters.</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- Section 3: Architecture -->
+      <section class="step" data-index="3">
+        <div class="separator reveal"></div>
+        <div class="reveal">
+          <span class="label">Step 03 // AI-Centric Architecture</span>
+          <h2>Optimal Codebase Structures</h2>
+          <p>To maximize AI efficiency, architectures must prioritize **AI Readability** and token economy. Traditional layered structures are often suboptimal.</p>
+
+          <div class="grid-3">
+            <div class="mini-card" style="border-top: 2px solid var(--accent);">
+              <strong>Vertical Slices</strong>
+              <p>Everything in one directory. Minimal token waste searching for files. The "Gold Standard" for agents.</p>
+            </div>
+            <div class="mini-card">
+              <strong>Atomic Structure</strong>
+              <p>Highly reusable components. Good for testing, but can lead to "modification chain" complexity.</p>
+            </div>
+            <div class="mini-card">
+              <strong>Single File Agent</strong>
+              <p>Large, self-contained files. Controversial for humans but extremely fast for AI editing.</p>
+            </div>
+          </div>
+
+          <blockquote>
+            <p>"If you manage your context, you manage your results. Context management is the most important skill in the age of generative AI."</p>
+          </blockquote>
+        </div>
+      </section>
+
+      <!-- Section 4: Tools & Loops -->
+      <section class="step" data-index="4">
+        <div class="separator reveal"></div>
+        <div class="reveal">
+          <span class="label">Step 04 // Infinite Loops & Tools</span>
+          <h2>The Tactical Arsenal</h2>
+          <p>Modern agentic tools increase the "information rate" between the developer and the model.</p>
+          
+          <ul style="margin-top: 2rem;">
+            <li data-index="1"><strong>Claude Trace:</strong> Inspecting raw tool definitions and hidden system prompts.</li>
+            <li data-index="2"><strong>Infinite Agentic Loops:</strong> Firing waves of sub-agents to explore unlimited architectural variations.</li>
+            <li data-index="3"><strong>Collector vs. Executor:</strong> Tools that either scrape context or precisely edit files (e.g., Sonnet 3.7 editor).</li>
+          </ul>
+
+          <div class="mini-card" style="margin-top: 2rem; background: rgba(0, 240, 255, 0.05);">
+            <h3>Strategic Bet</h3>
+            <p>Owning the harness allows for specialized logic. "Agentic Security Command Centers" are now essential to counter AI-driven threats.</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- Section 5: Roadmap -->
+      <section class="step" data-index="5">
+        <div class="separator reveal"></div>
+        <div class="reveal">
+          <span class="label">Step 05 // Roadmap 2026</span>
+          <h2>Final Outlook: Five Strategic Bets</h2>
+          
+          <div class="grid-3" style="grid-template-columns: 1fr;">
+            <div class="mini-card">
+              <strong>01 // Custom Agents:</strong> Moving to the top 1% by deploying domain-specific agents for niche complexity.
+            </div>
+            <div class="mini-card">
+              <strong>02 // Skill Deprecation:</strong> Letting go of manual coding to focus on teaching your agents.
+            </div>
+            <div class="mini-card">
+              <strong>03 // ADW Workflows:</strong> Implementing "Always-On" Developer Workflows for 24/7 productivity.
+            </div>
+            <div class="mini-card">
+              <strong>04 // Compute Maxing:</strong> Scaling impact by spinning up parallel agent teams.
+            </div>
+            <div class="mini-card">
+              <strong>05 // Zero Touch Engineering:</strong> The North Star goal—shipping from prompt to production with no oversight.
+            </div>
+          </div>
+
+          <div class="separator" style="margin: 3rem 0;"></div>
+          <p style="text-align: center; font-family: var(--font-display); font-size: 1.5rem; color: #fff;">
+            "The goal is not to solve tasks, but to build the system that builds the system."
+          </p>
+        </div>
+      </section>
+
+    </div>
+  </div>
+
+  <script>
+    // Custom Cursor Logic
+    const cursorDot = document.querySelector('.cursor-dot');
+    const cursorOutline = document.querySelector('.cursor-outline');
+    
+    window.addEventListener('mousemove', (e) => {
+      const { clientX: x, clientY: y } = e;
+      cursorDot.style.left = `${x}px`;
+      cursorDot.style.top = `${y}px`;
+      
+      setTimeout(() => {
+        cursorOutline.style.left = `${x}px`;
+        cursorOutline.style.top = `${y}px`;
+      }, 50);
+    });
+
+    // Hover effect
+    document.querySelectorAll('.mini-card, .data-card, blockquote').forEach(el => {
+      el.addEventListener('mouseenter', () => {
+        cursorOutline.style.width = '60px';
+        cursorOutline.style.height = '60px';
+        cursorOutline.style.background = 'rgba(0, 240, 255, 0.05)';
+      });
+      el.addEventListener('mouseleave', () => {
+        cursorOutline.style.width = '40px';
+        cursorOutline.style.height = '40px';
+        cursorOutline.style.background = 'transparent';
+      });
+    });
+
+    // Scrollytelling
+    const steps = document.querySelectorAll('.step');
+    const bgImages = document.querySelectorAll('.bg-img');
+    const progressFill = document.getElementById('progress-fill');
+    const stepDisplay = document.getElementById('step-display');
+    const locDisplay = document.getElementById('loc-display');
+
+    const observerOptions = {
+      threshold: 0.5,
+      rootMargin: "0px"
+    };
+
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          const index = entry.target.getAttribute('data-index');
+          
+          // Image Transition
+          bgImages.forEach(img => {
+            img.classList.toggle('active', img.getAttribute('data-target') === index);
+          });
+
+          // Text Reveal
+          entry.target.querySelectorAll('.reveal').forEach(el => el.classList.add('is-visible'));
+
+          // UI Update
+          const percent = ((parseInt(index) + 1) / steps.length) * 100;
+          progressFill.style.width = `${percent}%`;
+          stepDisplay.innerText = `STEP 0${parseInt(index) + 1}/0${steps.length}`;
+        }
+      });
+    }, observerOptions);
+
+    steps.forEach(step => observer.observe(step));
+
+    // Dynamic LOC display on scroll
+    window.addEventListener('scroll', () => {
+      const scrolled = window.scrollY;
+      const total = document.documentElement.scrollHeight - window.innerHeight;
+      const progress = (scrolled / total * 100).toFixed(2);
+      const major = Math.floor(progress);
+      const minor = Math.round((progress - major) * 100);
+      locDisplay.innerText = `LOC.${major.toString().padStart(2, '0')}.${minor.toString().padStart(2, '0')}`;
+    });
+  </script>
+</body>
+
+</html>

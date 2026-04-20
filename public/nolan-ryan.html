@@ -1,0 +1,564 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>The Ryan Express</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Anton&family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=Space+Mono:wght@400;700&display=swap');
+
+    :root {
+      --c-bg: #050608;
+      --c-text: #f4f1ea;
+      --c-accent: #d62828;
+      --c-muted: #8a8d91;
+      --f-hero: 'Anton', sans-serif;
+      --f-body: 'Playfair Display', serif;
+      --f-mono: 'Space Mono', monospace;
+      --ease-spring: cubic-bezier(0.175, 0.885, 0.32, 1.1);
+      --ease-out: cubic-bezier(0.215, 0.61, 0.355, 1);
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      cursor: none;
+    }
+
+    body {
+      background-color: var(--c-bg);
+      color: var(--c-text);
+      font-family: var(--f-body);
+      overflow-x: hidden;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    /* Custom Cursor */
+    #cursor {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 12px;
+      height: 12px;
+      background-color: var(--c-accent);
+      border-radius: 50%;
+      transform: translate(-50%, -50%);
+      pointer-events: none;
+      z-index: 9999;
+      mix-blend-mode: exclusion;
+      transition: width 0.2s, height 0.2s;
+    }
+
+    body:hover #cursor {
+      width: 24px;
+      height: 24px;
+    }
+
+    /* Global Noise Overlay */
+    .noise-layer {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
+      pointer-events: none;
+      z-index: 50;
+      opacity: 0.08;
+      filter: url(#grain);
+    }
+
+    /* Typography */
+    h1,
+    h2,
+    h3,
+    .hero-font {
+      font-family: var(--f-hero);
+      text-transform: uppercase;
+      line-height: 0.85;
+      letter-spacing: 0.02em;
+    }
+
+    .mono-label {
+      font-family: var(--f-mono);
+      text-transform: uppercase;
+      font-size: 0.75rem;
+      letter-spacing: 0.1em;
+      color: var(--c-muted);
+    }
+
+    /* Scrollytelling Structure */
+    .section {
+      position: relative;
+      min-height: 100vh;
+      width: 100vw;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      padding: 10vw;
+      z-index: 2;
+    }
+
+    .section-bg {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
+      background-size: cover;
+      background-position: center;
+      z-index: 1;
+      opacity: 0;
+      transition: opacity 1.2s var(--ease-out), transform 1.5s var(--ease-out);
+      transform: scale(1.05);
+    }
+
+    .section-bg.active {
+      opacity: 0.4;
+      transform: scale(1);
+    }
+
+    /* Reveal Animations */
+    .reveal-text {
+      clip-path: polygon(0 100%, 100% 100%, 100% 100%, 0 100%);
+      transform: translateY(20px);
+      opacity: 0;
+      transition: clip-path 1s var(--ease-spring), transform 1s var(--ease-spring), opacity 1s;
+    }
+
+    .is-visible .reveal-text {
+      clip-path: polygon(0 0, 100% 0, 100% 100%, 0 100%);
+      transform: translateY(0);
+      opacity: 1;
+    }
+
+    .stagger-1 {
+      transition-delay: 0.1s;
+    }
+
+    .stagger-2 {
+      transition-delay: 0.2s;
+    }
+
+    .stagger-3 {
+      transition-delay: 0.3s;
+    }
+
+    /* Specific Scenes */
+    #scene-hero {
+      text-align: center;
+      align-items: center;
+      background: var(--c-bg);
+      z-index: 10;
+    }
+
+    .hero-title {
+      font-size: clamp(4rem, 12vw, 15rem);
+      color: var(--c-text);
+      margin-bottom: 2rem;
+      mix-blend-mode: difference;
+    }
+
+    .hero-sub {
+      font-size: clamp(1.5rem, 4vw, 3rem);
+      color: var(--c-accent);
+      max-width: 800px;
+    }
+
+    #scene-artifact {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 4rem;
+      align-items: center;
+    }
+
+    .artifact-text {
+      font-size: clamp(1.2rem, 3vw, 2.5rem);
+      line-height: 1.4;
+    }
+
+    .artifact-img-container {
+      position: relative;
+      transform-style: preserve-3d;
+      perspective: 1000px;
+    }
+
+    .artifact-img {
+      width: 100%;
+      max-width: 450px;
+      box-shadow: 0 20px 50px rgba(0, 0, 0, 0.8);
+      transition: transform 0.5s var(--ease-out);
+    }
+
+    #scene-speed {
+      justify-content: flex-end;
+      padding-bottom: 15vh;
+    }
+
+    .speed-text-block {
+      max-width: 800px;
+      font-size: clamp(1.2rem, 2.5vw, 2rem);
+      line-height: 1.5;
+      text-shadow: 0 4px 20px rgba(0, 0, 0, 0.8);
+    }
+
+    .fastball-highlight {
+      font-family: var(--f-hero);
+      font-size: clamp(3rem, 6vw, 6rem);
+      color: var(--c-accent);
+      display: block;
+      margin: 1rem 0;
+      filter: url(#motion-blur);
+      opacity: 0;
+      transform: translateX(-100px);
+      transition: opacity 0.8s, transform 0.8s var(--ease-out), filter 1s;
+    }
+
+    .is-visible .fastball-highlight {
+      opacity: 1;
+      transform: translateX(0);
+      filter: blur(0px);
+    }
+
+    #scene-dread {
+      align-items: center;
+      text-align: center;
+    }
+
+    .dread-text {
+      font-size: clamp(1.5rem, 4vw, 3rem);
+      line-height: 1.3;
+      max-width: 900px;
+      font-style: italic;
+      color: #fff;
+      mix-blend-mode: overlay;
+    }
+
+    #scene-valuation {
+      background: var(--c-bg);
+      z-index: 10;
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 3rem;
+      text-align: center;
+    }
+
+    .val-text {
+      font-size: clamp(1.2rem, 2.5vw, 2rem);
+      max-width: 800px;
+      margin: 0 auto;
+    }
+
+    .ledger {
+      border-top: 1px solid var(--c-muted);
+      border-bottom: 1px solid var(--c-muted);
+      padding: 2rem 0;
+      display: flex;
+      justify-content: center;
+      gap: 4rem;
+      flex-wrap: wrap;
+    }
+
+    .ledger-item {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .ledger-val {
+      font-family: var(--f-mono);
+      font-size: clamp(1.5rem, 3vw, 2.5rem);
+      color: var(--c-accent);
+    }
+
+    .cta-btn {
+      display: inline-block;
+      margin: 2rem auto;
+      font-family: var(--f-hero);
+      font-size: clamp(1.5rem, 3vw, 3rem);
+      color: var(--c-bg);
+      background: var(--c-text);
+      padding: 1rem 2rem;
+      text-decoration: none;
+      transition: background 0.3s, color 0.3s, transform 0.3s;
+    }
+
+    .cta-btn:hover {
+      background: var(--c-accent);
+      color: var(--c-text);
+      transform: scale(1.05);
+    }
+
+    .tags {
+      font-family: var(--f-mono);
+      font-size: 0.7rem;
+      color: var(--c-muted);
+      margin-top: 2rem;
+      line-height: 1.6;
+    }
+
+    .record-list {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 1.5rem;
+      margin-top: 3rem;
+      width: 100%;
+    }
+
+    .record-item {
+      background: rgba(255, 255, 255, 0.03);
+      border-left: 3px solid var(--c-muted);
+      padding: 1.5rem;
+      text-align: left;
+      transition: border-color 0.3s, transform 0.3s;
+    }
+
+    .record-item:hover {
+      border-color: var(--c-accent);
+      transform: translateX(10px);
+    }
+
+    .record-date {
+      font-family: var(--f-mono);
+      color: var(--c-accent);
+      font-size: 0.8rem;
+      margin-bottom: 0.5rem;
+      display: block;
+    }
+
+    .record-opponent {
+      font-family: var(--f-hero);
+      font-size: 1.2rem;
+      letter-spacing: 0.05em;
+    }
+
+    @media (max-width: 768px) {
+      #scene-artifact {
+        grid-template-columns: 1fr;
+        text-align: center;
+      }
+
+      .section {
+        padding: 15vw 5vw;
+      }
+
+      .ledger {
+        flex-direction: column;
+        gap: 1.5rem;
+      }
+    }
+  </style>
+</head>
+
+<body>
+
+  <div id="cursor"></div>
+
+  <!-- SVG Filters -->
+  <svg style="display: none;">
+    <defs>
+      <filter id="grain">
+        <feTurbulence type="fractalNoise" baseFrequency="0.7" numOctaves="3" stitchTiles="stitch">
+          <animate attributeName="seed" from="0" to="100" dur="10s" repeatCount="indefinite" />
+        </feTurbulence>
+        <feColorMatrix type="matrix" values="1 0 0 0 0, 0 1 0 0 0, 0 0 1 0 0, 0 0 0 0.25 0" />
+      </filter>
+      <filter id="motion-blur">
+        <feGaussianBlur in="SourceGraphic" stdDeviation="30 0" id="blur-val">
+          <animate attributeName="stdDeviation" values="40 0; 0 0" dur="1s" begin="indefinite" fill="freeze"
+            id="blur-anim" />
+        </feGaussianBlur>
+      </filter>
+    </defs>
+  </svg>
+
+  <div class="noise-layer"></div>
+
+  <div class="section-bg" id="bg-speed" style="background-image: url('./images/nolan-2.jpg');"></div>
+  <div class="section-bg" id="bg-dread" style="background-image: url('./images/nolan-ryan2.jpg');"></div>
+  <div class="section-bg" id="bg-seven" style="background-image: url('./images/nolan-stadium.png');"></div>
+  <div class="section-bg" id="bg-val" style="background-image: url('./images/nolan-valuation.png'); opacity: 0.25;"></div>
+
+  <main>
+    <!-- Hero -->
+    <section class="section io-target" id="scene-hero">
+      <div class="mono-label reveal-text">1973 Topps Nolan Ryan (#220)</div>
+      <h1 class="hero-title reveal-text stagger-1">Immortal</h1>
+      <h2 class="hero-sub reveal-text stagger-2">The Year the Ryan Express Arrived</h2>
+    </section>
+
+    <!-- Artifact -->
+    <section class="section io-target" id="scene-artifact">
+      <div class="artifact-text reveal-text">
+        You aren’t just looking at 2.5 by 3.5 inches of vintage cardboard. You are looking at the exact moment a Texas
+        farm boy transformed into a baseball god.
+      </div>
+      <div class="artifact-img-container reveal-text stagger-1">
+        <img src="./images/nolan_ryan.png" alt="1973 Topps Nolan Ryan Card" class="artifact-img" id="card-tilt">
+      </div>
+    </section>
+
+    <!-- The Speed -->
+    <section class="section io-target" id="scene-speed" data-bg="bg-speed">
+      <div class="speed-text-block">
+        <p class="reveal-text">This pristine 1973 Topps #220 captures Nolan Ryan at the dawn of his most terrifying era
+          with the California Angels. Turn it over, and the back hints at the sheer dominance of his 1972 season. But
+          true historians know what was coming next: 1973 was the year Ryan would unleash an untouchable</p>
+        <span class="fastball-highlight io-trigger-blur">100-mph fastball</span>
+        <p class="reveal-text stagger-1">shattering the single-season record with a mythical 383 strikeouts.</p>
+      </div>
+    </section>
+
+    <!-- The Dread -->
+    <section class="section io-target" id="scene-dread" data-bg="bg-dread">
+      <p class="dread-text reveal-text">
+        When you hold this card, you can almost hear the agonizing pop of the catcher’s mitt. You can feel the quiet
+        dread of the batter stepping into the box, knowing they didn’t stand a chance.
+      </p>
+    </section>
+
+    <!-- The Seven -->
+    <section class="section io-target" id="scene-seven" data-bg="bg-seven">
+      <div class="mono-label reveal-text">The Impossible Record</div>
+      <h2 class="hero-title reveal-text stagger-1" style="font-size: clamp(3rem, 8vw, 10rem);">The Seven</h2>
+      <p class="reveal-text stagger-2" style="max-width: 700px; margin-bottom: 2rem;">
+        No pitcher in the history of the game has ever come close. Seven times, Nolan Ryan stepped onto the rubber and
+        simply refused to give up a single hit.
+      </p>
+      
+      <div class="record-list reveal-text stagger-3">
+        <div class="record-item">
+          <span class="record-date">May 15, 1973</span>
+          <span class="record-opponent">vs Kansas City</span>
+        </div>
+        <div class="record-item">
+          <span class="record-date">July 15, 1973</span>
+          <span class="record-opponent">vs Detroit</span>
+        </div>
+        <div class="record-item">
+          <span class="record-date">Sept 28, 1974</span>
+          <span class="record-opponent">vs Minnesota</span>
+        </div>
+        <div class="record-item">
+          <span class="record-date">June 1, 1975</span>
+          <span class="record-opponent">vs Baltimore</span>
+        </div>
+        <div class="record-item">
+          <span class="record-date">Sept 26, 1981</span>
+          <span class="record-opponent">vs LA Dodgers</span>
+        </div>
+        <div class="record-item">
+          <span class="record-date">June 11, 1990</span>
+          <span class="record-opponent">vs Oakland</span>
+        </div>
+        <div class="record-item">
+          <span class="record-date">May 1, 1991</span>
+          <span class="record-opponent">vs Toronto</span>
+        </div>
+      </div>
+    </section>
+
+    <!-- Valuation & CTA -->
+    <section class="section io-target" id="scene-valuation" data-bg="bg-val">
+      <p class="val-text reveal-text">
+        Finding this card in <strong
+          style="color:var(--c-accent); font-family:var(--f-hero); letter-spacing: 0.05em; font-weight:normal;">Excellent
+          condition</strong> isn’t just a rare pull—it’s an anchor piece for the serious curator. Don't let a piece of
+        raw baseball mythology slip through your fingers.
+      </p>
+
+      <div class="ledger reveal-text stagger-1">
+        <div class="ledger-item">
+          <span class="mono-label">Current Market Valuation</span>
+          <span class="ledger-val">$90.00</span>
+        </div>
+        <div class="ledger-item">
+          <span class="mono-label">Historical Value</span>
+          <span class="ledger-val" style="color: var(--c-text);">Priceless.</span>
+        </div>
+      </div>
+
+      <a href="#" class="cta-btn reveal-text stagger-2">[ Claim Your Piece of the Legend ]</a>
+
+      <div class="tags reveal-text stagger-3">
+        *Tags: Ryan Express, 383 Strikeouts, Vintage Angels, Hall of Fame Pitching Legend, 1973 Baseball History*
+      </div>
+    </section>
+
+  </main>
+
+  <script>
+    // Custom Cursor Logic
+    const cursor = document.getElementById('cursor');
+    document.addEventListener('mousemove', (e) => {
+      cursor.style.left = e.clientX + 'px';
+      cursor.style.top = e.clientY + 'px';
+    });
+
+    // 3D Card Tilt Effect
+    const card = document.getElementById('card-tilt');
+    const artifactScene = document.getElementById('scene-artifact');
+
+    artifactScene.addEventListener('mousemove', (e) => {
+      const rect = card.getBoundingClientRect();
+      const x = e.clientX - rect.left;
+      const y = e.clientY - rect.top;
+
+      const centerX = rect.width / 2;
+      const centerY = rect.height / 2;
+
+      const rotateX = ((y - centerY) / centerY) * -15;
+      const rotateY = ((x - centerX) / centerX) * 15;
+
+      card.style.transform = `perspective(1000px) rotateX(${rotateX}deg) rotateY(${rotateY}deg) scale3d(1.05, 1.05, 1.05)`;
+    });
+
+    artifactScene.addEventListener('mouseleave', () => {
+      card.style.transform = `perspective(1000px) rotateX(0deg) rotateY(0deg) scale3d(1, 1, 1)`;
+    });
+
+    // Intersection Observer for Scrollytelling Reveals & Backgrounds
+    const sections = document.querySelectorAll('.io-target');
+    const backgrounds = document.querySelectorAll('.section-bg');
+
+    const observerOptions = {
+      root: null,
+      rootMargin: '0px',
+      threshold: 0.3
+    };
+
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          // Add text reveal class
+          entry.target.classList.add('is-visible');
+
+          // Trigger specific blur animation if present
+          const blurTrigger = entry.target.querySelector('.io-trigger-blur');
+          if (blurTrigger) {
+            document.getElementById('blur-anim').beginElement();
+          }
+
+          // Manage Backgrounds
+          const bgId = entry.target.getAttribute('data-bg');
+          backgrounds.forEach(bg => bg.classList.remove('active'));
+          if (bgId) {
+            const activeBg = document.getElementById(bgId);
+            if (activeBg) activeBg.classList.add('active');
+          }
+        }
+      });
+    }, observerOptions);
+
+    sections.forEach(sec => observer.observe(sec));
+
+    // Trigger hero animations on load
+    window.addEventListener('load', () => {
+      document.getElementById('scene-hero').classList.add('is-visible');
+    });
+  </script>
+</body>
+
+</html>

@@ -1,0 +1,692 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Agentic Engineering</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600&family=Space+Grotesk:wght@300;500;700&family=JetBrains+Mono:wght@400;700&display=swap');
+
+    :root {
+      --bg: #030406;
+      --surface: #0a0c10;
+      --text-main: #e2e8f0;
+      --text-muted: #8b949e;
+      --accent: #00f0ff;
+      --accent-glow: rgba(0, 240, 255, 0.2);
+      --border: #1f2937;
+      --font-body: 'Inter', sans-serif;
+      --font-display: 'Space Grotesk', sans-serif;
+      --font-mono: 'JetBrains Mono', monospace;
+      --ease: cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      cursor: none;
+    }
+
+    body {
+      background-color: var(--bg);
+      color: var(--text-main);
+      font-family: var(--font-body);
+      line-height: 1.6;
+      overflow-x: hidden;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    /* SVG Filter Overlay */
+    .noise-layer {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
+      pointer-events: none;
+      z-index: 9999;
+      opacity: 0.4;
+      mix-blend-mode: overlay;
+    }
+
+    /* Custom Cursor */
+    .cursor-dot,
+    .cursor-outline {
+      position: fixed;
+      top: 0;
+      left: 0;
+      transform: translate(-50%, -50%);
+      border-radius: 50%;
+      z-index: 10000;
+      pointer-events: none;
+    }
+
+    .cursor-dot {
+      width: 4px;
+      height: 4px;
+      background-color: var(--accent);
+    }
+
+    .cursor-outline {
+      width: 30px;
+      height: 30px;
+      border: 1px solid var(--accent);
+      transition: width 0.2s, height 0.2s;
+    }
+
+    /* Layout System */
+    .container {
+      display: flex;
+      width: 100%;
+    }
+
+    /* Visual Pane (Sticky Left) */
+    .visual-pane {
+      width: 50vw;
+      height: 100vh;
+      position: sticky;
+      top: 0;
+      overflow: hidden;
+      border-right: 1px solid var(--border);
+      background: var(--surface);
+    }
+
+    .visual-pane::after {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: linear-gradient(to right, rgba(3, 4, 6, 0.1), var(--bg));
+      pointer-events: none;
+      z-index: 2;
+    }
+
+    .bg-img {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-size: cover;
+      background-position: center;
+      opacity: 0;
+      transform: scale(1.05);
+      transition: opacity 1.2s var(--ease), transform 2s var(--ease);
+      filter: grayscale(80%) contrast(1.2) brightness(0.8);
+    }
+
+    .bg-img.active {
+      opacity: 1;
+      transform: scale(1);
+    }
+
+    /* System Overlay Specs */
+    .sys-overlay {
+      position: absolute;
+      bottom: 2rem;
+      left: 2rem;
+      font-family: var(--font-mono);
+      font-size: 0.75rem;
+      color: var(--accent);
+      z-index: 3;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+    }
+
+    .sys-overlay span {
+      display: block;
+      margin-bottom: 0.25rem;
+      opacity: 0.7;
+    }
+
+    /* Content Pane (Scrolling Right) */
+    .content-pane {
+      width: 50vw;
+      padding: 0 4vw 10vh 4vw;
+    }
+
+    /* Typography & Blocks */
+    .step {
+      padding: 15vh 0;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+    }
+
+    .label {
+      font-family: var(--font-mono);
+      font-size: 0.75rem;
+      color: var(--accent);
+      text-transform: uppercase;
+      letter-spacing: 0.2em;
+      margin-bottom: 1.5rem;
+      display: block;
+    }
+
+    h1 {
+      font-family: var(--font-display);
+      font-size: clamp(2.5rem, 4vw, 5rem);
+      line-height: 1.05;
+      letter-spacing: -0.03em;
+      font-weight: 700;
+      margin-bottom: 2rem;
+      color: #fff;
+    }
+
+    h2 {
+      font-family: var(--font-display);
+      font-size: clamp(1.5rem, 2vw, 2.5rem);
+      line-height: 1.2;
+      margin-bottom: 1.5rem;
+      font-weight: 500;
+    }
+
+    h3 {
+      font-family: var(--font-display);
+      font-size: 1.25rem;
+      color: #fff;
+      margin: 2rem 0 1rem 0;
+      border-left: 2px solid var(--accent);
+      padding-left: 1rem;
+    }
+
+    p {
+      font-size: 1.1rem;
+      color: var(--text-muted);
+      margin-bottom: 1.5rem;
+      max-width: 65ch;
+    }
+
+    strong {
+      color: var(--text-main);
+      font-weight: 600;
+    }
+
+    .separator {
+      width: 100%;
+      height: 1px;
+      background: var(--border);
+      margin: 4rem 0;
+      position: relative;
+    }
+
+    .separator::before {
+      content: '+';
+      position: absolute;
+      left: 0;
+      top: -8px;
+      color: var(--accent);
+      font-family: var(--font-mono);
+      font-size: 10px;
+    }
+
+    /* Table Data Grid */
+    .data-grid {
+      display: flex;
+      flex-direction: column;
+      border: 1px solid var(--border);
+      background: var(--surface);
+      margin: 2rem 0;
+      font-size: 0.9rem;
+    }
+
+    .dg-header {
+      display: grid;
+      grid-template-columns: 1fr 1.5fr 1.5fr 1.5fr;
+      background: rgba(31, 41, 55, 0.4);
+      font-family: var(--font-mono);
+      text-transform: uppercase;
+      font-size: 0.7rem;
+      letter-spacing: 0.1em;
+      color: var(--text-main);
+      border-bottom: 1px solid var(--border);
+    }
+
+    .dg-row {
+      display: grid;
+      grid-template-columns: 1fr 1.5fr 1.5fr 1.5fr;
+      border-bottom: 1px solid var(--border);
+      transition: background 0.3s;
+    }
+
+    .dg-row:last-child {
+      border-bottom: none;
+    }
+
+    .dg-row:hover {
+      background: rgba(0, 240, 255, 0.03);
+    }
+
+    .dg-cell {
+      padding: 1rem;
+      color: var(--text-muted);
+    }
+
+    .dg-cell.highlight {
+      color: var(--text-main);
+      font-weight: 600;
+    }
+
+    /* Lists */
+    ul {
+      list-style: none;
+      margin-bottom: 1.5rem;
+    }
+
+    li {
+      position: relative;
+      padding-left: 1.5rem;
+      margin-bottom: 1rem;
+      color: var(--text-muted);
+      font-size: 1.05rem;
+    }
+
+    li::before {
+      content: '>';
+      position: absolute;
+      left: 0;
+      color: var(--accent);
+      font-family: var(--font-mono);
+    }
+
+    /* Quotes */
+    blockquote {
+      border-left: 4px solid var(--accent);
+      padding: 1.5rem 2rem;
+      background: rgba(0, 240, 255, 0.02);
+      font-family: var(--font-display);
+      font-size: 1.25rem;
+      color: #fff;
+      margin: 2rem 0;
+      font-style: italic;
+    }
+
+    /* Animations */
+    .reveal {
+      opacity: 0;
+      transform: translateY(30px);
+      transition: opacity 0.8s var(--ease), transform 0.8s var(--ease);
+    }
+
+    .reveal.is-visible {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    /* Mobile Responsive */
+    @media (max-width: 900px) {
+      .container {
+        flex-direction: column;
+      }
+
+      .visual-pane {
+        width: 100vw;
+        height: 40vh;
+        position: fixed;
+        top: 0;
+        z-index: 0;
+        border-right: none;
+        border-bottom: 1px solid var(--border);
+      }
+
+      .content-pane {
+        width: 100vw;
+        margin-top: 40vh;
+        background: var(--bg);
+        position: relative;
+        z-index: 1;
+        padding: 2rem 1.5rem;
+      }
+
+      .step {
+        min-height: auto;
+        padding: 4rem 0;
+      }
+
+      .dg-header {
+        display: none;
+      }
+
+      .dg-row {
+        display: flex;
+        flex-direction: column;
+        padding: 1rem 0;
+      }
+
+      .dg-cell {
+        padding: 0.5rem 1rem;
+      }
+
+      .dg-cell::before {
+        content: attr(data-label);
+        display: block;
+        font-family: var(--font-mono);
+        font-size: 0.7rem;
+        color: var(--accent);
+        margin-bottom: 0.25rem;
+        text-transform: uppercase;
+      }
+    }
+  </style>
+</head>
+
+<body>
+
+  <!-- SVG Filters for noise and glitch -->
+  <svg width="0" height="0" style="position:absolute;z-index:-1;">
+    <filter id="film-noise">
+      <feTurbulence type="fractalNoise" baseFrequency="0.8" numOctaves="3" result="noise">
+        <animate attributeName="baseFrequency" values="0.8;0.9;0.8" dur="0.15s" repeatCount="indefinite" />
+      </feTurbulence>
+      <feColorMatrix type="matrix" values="1 0 0 0 0  0 1 0 0 0  0 0 1 0 0  0 0 0 0.15 0" />
+    </filter>
+  </svg>
+
+  <div class="noise-layer" style="filter: url(#film-noise);"></div>
+
+  <!-- Custom Cursor -->
+  <div class="cursor-dot"></div>
+  <div class="cursor-outline"></div>
+
+  <div class="container">
+    <!-- Left Pane: sticky visual context -->
+    <div class="visual-pane">
+      <div class="bg-img active" data-target="0" style="background-image: url('./images/agentic-mood.png');"></div>
+      <div class="bg-img" data-target="1" style="background-image: url('./images/agent-5.jpg');"></div>
+      <div class="bg-img" data-target="2" style="background-image: url('./images/agent-2.jpg');"></div>
+      <div class="bg-img" data-target="3" style="background-image: url('./images/agent-3.jpg');"></div>
+      <div class="bg-img" data-target="4" style="background-image: url('./images/agent-4.jpg');"></div>
+
+      <div class="sys-overlay">
+        <span>Status: Active</span>
+        <span>Protocol: Agentic_v25</span>
+        <span id="coord-display">LOC: 0.00.00</span>
+      </div>
+    </div>
+
+    <!-- Right Pane: Scrolling Content -->
+    <div class="content-pane">
+
+      <!-- Intro Section -->
+      <section class="step" data-index="0">
+        <div class="reveal">
+          <span class="label">00 // Executive Summary</span>
+          <h1>Codebase Architectures and Agentic Engineering in the Age of AI</h1>
+          <p>The emergence of AI coding agents necessitates a fundamental shift in software engineering: moving from
+            human-centric design to AI-centric architecture. The core of this transition is the mastery of the "Big
+            Three"—Context, Model, and Prompt—with a primary focus on context management. Research and practice suggest
+            that "Vertical Slice" and "Atomic" architectures are superior to traditional "Layered" structures for AI
+            tools because they optimize token efficiency and context priming.</p>
+          <p>Beyond basic coding assistance, the industry is entering the era of Agentic Engineering, where the value
+            resides in the Agent Harness—the system that orchestrates teams of specialized agents. By utilizing
+            multi-tier architectures (Orchestrator, Leads, and Workers) and infinite agentic loops, engineers can scale
+            their compute to solve entire problem classes rather than isolated tasks. The ultimate goal is "AI
+            Readability," ensuring codebases are structured for agents to navigate, understand, and operate with maximum
+            autonomy and minimal token waste.</p>
+        </div>
+      </section>
+
+      <!-- Section I -->
+      <section class="step" data-index="1">
+        <div class="separator reveal"></div>
+        <div class="reveal">
+          <span class="label">01 // Architectures</span>
+          <h2>I. Optimal Codebase Architectures for AI Agents</h2>
+          <p>Designing a codebase for AI agents requires balancing reuse, separation of concerns, and context
+            efficiency. The following table synthesizes the primary architectural patterns identified for the AI era:
+          </p>
+
+          <div class="data-grid">
+            <div class="dg-header">
+              <div class="dg-cell">Architecture</div>
+              <div class="dg-cell">Structure</div>
+              <div class="dg-cell">Pros for AI</div>
+              <div class="dg-cell">Cons for AI</div>
+            </div>
+            <div class="dg-row">
+              <div class="dg-cell highlight" data-label="Architecture">Vertical Slice</div>
+              <div class="dg-cell" data-label="Structure">Features/slices containing API, Model, and Service in one
+                directory.</div>
+              <div class="dg-cell" data-label="Pros">Optimal for AI. Single-prompt context priming. Minimizes
+                cross-cutting concerns.</div>
+              <div class="dg-cell" data-label="Cons">High code duplication; requires discipline to avoid shared utility
+                bloat.</div>
+            </div>
+            <div class="dg-row">
+              <div class="dg-cell highlight" data-label="Architecture">Atomic / Composable</div>
+              <div class="dg-cell" data-label="Structure">Atoms composed into Molecules, then Organisms and Membranes.
+              </div>
+              <div class="dg-cell" data-label="Pros">Highly reusable and easily testable. Clear levels of abstraction.
+              </div>
+              <div class="dg-cell" data-label="Cons">"New feature modification chain" problem; updating low-level atoms
+                requires updating all compositions.</div>
+            </div>
+            <div class="dg-row">
+              <div class="dg-cell highlight" data-label="Architecture">Layered</div>
+              <div class="dg-cell" data-label="Structure">Arbitrary technical layers (e.g., /api, /models, /utils).
+              </div>
+              <div class="dg-cell" data-label="Pros">Familiar and established; scales well for human teams.</div>
+              <div class="dg-cell" data-label="Cons">Suboptimal for AI. Forces agents to search across many directories,
+                consuming excessive tokens.</div>
+            </div>
+            <div class="dg-row">
+              <div class="dg-cell highlight" data-label="Architecture">Pipeline</div>
+              <div class="dg-cell" data-label="Structure">Sequential processing steps and shared utilities.</div>
+              <div class="dg-cell" data-label="Pros">Ideal for data/ML engineering. LLMs love the clear types and
+                sequential paths.</div>
+              <div class="dg-cell" data-label="Cons">Nonsensical for general application structures; challenging state
+                management.</div>
+            </div>
+            <div class="dg-row">
+              <div class="dg-cell highlight" data-label="Architecture">Single File Agent</div>
+              <div class="dg-cell" data-label="Structure">Self-contained files (e.g., 700+ lines) containing all logic.
+              </div>
+              <div class="dg-cell" data-label="Pros">Provides complete context in a single file; extremely fast for
+                agents to update.</div>
+              <div class="dg-cell" data-label="Cons">Viewed as an anti-pattern in traditional human-led development.
+              </div>
+            </div>
+          </div>
+
+          <h3>Key Insight: The Vertical Slice Advantage</h3>
+          <p>Vertical Slice architecture is increasingly viewed as the gold standard for agentic coding. Because all
+            logic for a feature exists in one place, an engineer can "prime" an agent with a single command (e.g., /add
+            features/users/). This minimizes the need for the agent to "chew up tokens" searching for disconnected files
+            in a layered directory.</p>
+        </div>
+      </section>
+
+      <!-- Section II -->
+      <section class="step" data-index="2">
+        <div class="separator reveal"></div>
+        <div class="reveal">
+          <span class="label">02 // Orchestration</span>
+          <h2>II. The Agent Harness and Multi-Agent Orchestration</h2>
+          <p>The "Claude Code leak" and subsequent market developments highlight a critical shift: the agent harness is
+            the product. While models are becoming commoditized, the harness—which provides deterministic code, token
+            caching, orchestration, and model control—is where engineering leverage resides.</p>
+
+          <h3>The Three-Tier Orchestration Model</h3>
+          <p>To solve complex problem classes, engineers must move beyond a single agent to a structured team:</p>
+          <ul>
+            <li><strong>Orchestrator:</strong> The single point of entry. It thinks, plans, and prompt-engineers the
+              other agents. It does no "work" (coding) but manages the "till done" list.</li>
+            <li><strong>Team Leads:</strong> Managers that delegate tasks to specific workers. They supervise and can
+              step in if a worker fails, but their primary role is oversight.</li>
+            <li><strong>Workers:</strong> Hyper-specialized agents (e.g., "Animation Specialist," "View Generator,"
+              "Security Validator") that execute specific, isolated tasks.</li>
+          </ul>
+
+          <h3>Agentic Security and Domain Specialization</h3>
+          <p>Owning the harness allows for specialized security implementations. As black-hat hackers begin using agent
+            teams to exploit applications, "Agentic Security Command Centers" are becoming essential. These systems use
+            agents to monitor logs in real-time, detecting anomalies and threats that traditional static tools might
+            miss.</p>
+        </div>
+      </section>
+
+      <!-- Section III -->
+      <section class="step" data-index="3">
+        <div class="separator reveal"></div>
+        <div class="reveal">
+          <span class="label">03 // Techniques</span>
+          <h2>III. Advanced Techniques for Agentic Engineering</h2>
+
+          <h3>1. Context Priming</h3>
+          <p>Agents begin as "blank pages." Effective engineers now include "context priming" prompts in their README
+            files. These prompts direct the agent to read essential files and run commands like ls -R or tree
+            immediately upon startup.</p>
+
+          <blockquote>"If you manage your context, you manage your results. In the generative AI age, this is the name
+            of the game."</blockquote>
+
+          <h3>2. Collector vs. Executor Tools</h3>
+          <p>Tools (integrated via Model Context Protocol or MCP) fall into two categories:</p>
+          <ul>
+            <li><strong>Collectors:</strong> Tools like fetch or firecrawl that scrape documentation and data to feed
+              into the context window.</li>
+            <li><strong>Executors:</strong> Tools like the Sonnet 3.7 text_editor that precisely edit files, update
+              databases, or run CRUD operations.</li>
+          </ul>
+
+          <h3>3. Infinite Agentic Loops</h3>
+          <p>This pattern uses two prompts—an "infinite prompt" and a "spec/PRD"—to generate an unlimited set of
+            variations for a solution.</p>
+          <ul>
+            <li><strong>Pattern:</strong> An orchestrator fires off waves of parallel sub-agents (e.g., five at a time)
+              to explore different architectural or UI designs.</li>
+            <li><strong>Use Case:</strong> Ideal for hard problems where the optimal solution is unknown and exploring
+              variations is required to find the best path.</li>
+          </ul>
+
+          <h3>4. Generative UI and Custom Output Styles</h3>
+          <p>Modern agentic tools like Claude Code allow for custom output formats that increase the "information rate"
+            between the agent and the engineer:</p>
+          <ul>
+            <li><strong>Table/YAML:</strong> Structured data for quick analysis.</li>
+            <li><strong>HTML:</strong> The agent generates on-the-fly UI (Generative UI) to present research or
+              technical guides in a rich, readable format.</li>
+            <li><strong>Status Lines:</strong> Custom terminal lines that track the most recent prompt or current model
+              state to manage multiple simultaneous agent instances.</li>
+          </ul>
+        </div>
+      </section>
+
+      <!-- Section IV & V -->
+      <section class="step" data-index="4">
+        <div class="separator reveal"></div>
+        <div class="reveal">
+          <span class="label">04 // Analysis</span>
+          <h2>IV. Tracing and Fundamental Analysis</h2>
+          <p>To master agentic engineering, one must move from "vibe coding" (blindly firing prompts) to understanding
+            the fundamental operations of the tool.</p>
+          <ul>
+            <li><strong>Claude Trace:</strong> Tools that generate local HTML files to inspect all traffic between the
+              agent and the model. This reveals how the orchestrator "talks" to sub-agents and provides the raw tool
+              definitions and system prompts.</li>
+            <li><strong>Cost vs. ROI:</strong> Agentic engineering is a question of Return on Investment, not just cost.
+            </li>
+          </ul>
+
+          <div class="separator"></div>
+
+          <span class="label">05 // Outlook</span>
+          <h2>V. Core Principles and the Future Outlook</h2>
+          <p>The transition to agentic engineering is underpinned by several non-negotiable principles:</p>
+          <ul>
+            <li><strong>AI Readability > Human Readability:</strong> Codebases must be designed so that AI can navigate
+              them efficiently, even if it contradicts legacy "clean code" standards for humans.</li>
+            <li><strong>Scale Compute to Scale Impact:</strong> One agent is rarely enough. Success in 2025 and beyond
+              requires spinning up parallel agents and teams that "remember" and "learn" through mental models stored in
+              expertise files.</li>
+            <li><strong>The "Big Three" as the Foundation:</strong> Every agentic system is defined by its Context,
+              Model, and Prompt. Mastering these allows an engineer to move between different tools (Cursor, Windsurf,
+              Claude Code) with ease.</li>
+            <li><strong>System Building vs. Task Solving:</strong> Solving one-off problems is a waste of time. The goal
+              is to build the "system that builds the system," creating reusable agentic workflows that operate a domain
+              on the engineer's behalf.</li>
+          </ul>
+
+          <h3>Final Takeaway</h3>
+          <p>The industry is moving from AI-assisted coding to Agentic Coding. 2025 is the critical window for engineers
+            to adapt. Those who fail to master agent harnesses and context-efficient architectures risk their skills
+            becoming "deprecated" as AI takes over the majority of manual code generation.</p>
+        </div>
+      </section>
+
+    </div>
+  </div>
+
+  <script>
+    // Custom Cursor Logic
+    const cursorDot = document.querySelector('.cursor-dot');
+    const cursorOutline = document.querySelector('.cursor-outline');
+    const isTouchDevice = 'ontouchstart' in window || navigator.maxTouchPoints > 0;
+
+    if (!isTouchDevice) {
+      window.addEventListener('mousemove', (e) => {
+        cursorDot.style.left = `${e.clientX}px`;
+        cursorDot.style.top = `${e.clientY}px`;
+
+        // Slight delay for outline for elastic feel
+        setTimeout(() => {
+          cursorOutline.style.left = `${e.clientX}px`;
+          cursorOutline.style.top = `${e.clientY}px`;
+        }, 50);
+      });
+    } else {
+      cursorDot.style.display = 'none';
+      cursorOutline.style.display = 'none';
+      document.body.style.cursor = 'auto';
+    }
+
+    // Scrollytelling Intersection Observer
+    const steps = document.querySelectorAll('.step');
+    const reveals = document.querySelectorAll('.reveal');
+    const bgImages = document.querySelectorAll('.bg-img');
+    const coordDisplay = document.getElementById('coord-display');
+
+    // Reveal text blocks
+    const textObserver = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          entry.target.classList.add('is-visible');
+        }
+      });
+    }, { threshold: 0.15, rootMargin: "0px 0px -10% 0px" });
+
+    reveals.forEach(reveal => textObserver.observe(reveal));
+
+    // Trigger Image Changes based on section
+    const sectionObserver = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          const index = entry.target.getAttribute('data-index');
+
+          bgImages.forEach(img => {
+            if (img.getAttribute('data-target') === index) {
+              img.classList.add('active');
+            } else {
+              img.classList.remove('active');
+            }
+          });
+        }
+      });
+    }, { threshold: 0.4 }); // Trigger when section is 40% in view
+
+    steps.forEach(step => sectionObserver.observe(step));
+
+    // Fake terminal coordinate update on scroll
+    window.addEventListener('scroll', () => {
+      const scrollVal = (window.scrollY / 100).toFixed(2);
+      if (coordDisplay) coordDisplay.innerText = `LOC: 0.${scrollVal.split('.')[0].padStart(2, '0')}.${scrollVal.split('.')[1]}`;
+    });
+  </script>
+</body>
+
+</html>

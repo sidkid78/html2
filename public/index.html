@@ -1,0 +1,312 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Strategic Intelligence Hub | Cultivation Architecture</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@100..800&family=Space+Grotesk:wght@300..700&display=swap');
+
+    :root {
+      --bg: #05080A;
+      --surface: #0B1116;
+      --border: rgba(0, 255, 204, 0.2);
+      --accent: #00FFCC;
+      --accent-dim: rgba(0, 255, 204, 0.1);
+      --text-main: #E2E8F0;
+      --text-dim: #94A3B8;
+      --font-head: 'Space Grotesk', sans-serif;
+      --font-mono: 'JetBrains Mono', monospace;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      background-color: var(--bg);
+      color: var(--text-main);
+      font-family: var(--font-head);
+      overflow-x: hidden;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+    }
+
+    /* Ambient Background */
+    .grid-bg {
+      position: fixed;
+      inset: 0;
+      background-size: 50px 50px;
+      background-image:
+        linear-gradient(to right, var(--border) 1px, transparent 1px),
+        linear-gradient(to bottom, var(--border) 1px, transparent 1px);
+      z-index: -1;
+      pointer-events: none;
+      mask-image: radial-gradient(circle at center, black, transparent 80%);
+    }
+
+    .vignette {
+      position: fixed;
+      inset: 0;
+      background: radial-gradient(circle at center, transparent 20%, rgba(5, 8, 10, 0.8) 100%);
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    /* Header Styling */
+    header {
+      text-align: center;
+      margin-bottom: 4rem;
+      position: relative;
+      z-index: 10;
+    }
+
+    .system-status {
+      font-family: var(--font-mono);
+      font-size: 0.8rem;
+      color: var(--accent);
+      text-transform: uppercase;
+      letter-spacing: 0.2em;
+      margin-bottom: 1rem;
+      display: block;
+    }
+
+    h1 {
+      font-size: clamp(2.5rem, 5vw, 4rem);
+      text-transform: uppercase;
+      font-weight: 800;
+      letter-spacing: -0.02em;
+      line-height: 1;
+      margin-bottom: 1rem;
+    }
+
+    .subtitle {
+      color: var(--text-dim);
+      font-size: 1.1rem;
+      max-width: 600px;
+      margin: 0 auto;
+    }
+
+    /* Dashboard Grid */
+    .dashboard {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 2rem;
+      width: 90vw;
+      max-width: 1200px;
+      position: relative;
+      z-index: 10;
+    }
+
+    .card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      padding: 2.5rem;
+      text-decoration: none;
+      color: inherit;
+      position: relative;
+      overflow: hidden;
+      transition: all 0.4s cubic-bezier(0.2, 0.8, 0.2, 1);
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+    }
+
+    .card::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 2px;
+      background: var(--accent);
+      transform: scaleX(0);
+      transform-origin: left;
+      transition: transform 0.4s ease;
+    }
+
+    .card:hover {
+      border-color: var(--accent);
+      background: var(--accent-dim);
+      transform: translateY(-5px);
+      box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4), 0 0 20px rgba(0, 255, 204, 0.1);
+    }
+
+    .card:hover::before {
+      transform: scaleX(1);
+    }
+
+    .card-meta {
+      font-family: var(--font-mono);
+      font-size: 0.75rem;
+      color: var(--accent);
+      margin-bottom: 1.5rem;
+      display: flex;
+      justify-content: space-between;
+      opacity: 0.7;
+    }
+
+    .card-title {
+      font-size: 1.8rem;
+      font-weight: 700;
+      margin-bottom: 1rem;
+      line-height: 1.2;
+    }
+
+    .card-description {
+      color: var(--text-dim);
+      font-size: 1rem;
+      line-height: 1.5;
+    }
+
+    .card-footer {
+      margin-top: 2rem;
+      font-family: var(--font-mono);
+      font-size: 0.8rem;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      color: var(--accent);
+    }
+
+    .card-footer::after {
+      content: '→';
+      transition: transform 0.3s ease;
+    }
+
+    .card:hover .card-footer::after {
+      transform: translateX(5px);
+    }
+
+    /* Executive Highlight */
+    .card.executive {
+      grid-column: span 2;
+      background: linear-gradient(135deg, var(--surface) 0%, #0D1C1B 100%);
+      border-color: rgba(0, 255, 204, 0.4);
+    }
+
+    /* HUD Elements */
+    .hud-corner {
+      position: fixed;
+      width: 30px;
+      height: 30px;
+      border: 2px solid var(--accent);
+      opacity: 0.3;
+      pointer-events: none;
+      z-index: 100;
+    }
+
+    .tl { top: 20px; left: 20px; border-right: none; border-bottom: none; }
+    .tr { top: 20px; right: 20px; border-left: none; border-bottom: none; }
+    .bl { bottom: 20px; left: 20px; border-right: none; border-top: none; }
+    .br { bottom: 20px; right: 20px; border-left: none; border-top: none; }
+
+    /* Scanline Animation */
+    .scanline {
+      position: fixed;
+      inset: 0;
+      background: linear-gradient(to bottom, transparent 50%, rgba(0, 255, 204, 0.02) 50%);
+      background-size: 100% 4px;
+      z-index: 20;
+      pointer-events: none;
+    }
+
+    /* Mobile Adaptivity */
+    @media (max-width: 800px) {
+      .dashboard {
+        grid-template-columns: 1fr;
+        width: 95vw;
+        gap: 1rem;
+      }
+      .card.executive {
+        grid-column: span 1;
+      }
+      header {
+        margin-top: 4rem;
+        margin-bottom: 2rem;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <div class="grid-bg"></div>
+  <div class="vignette"></div>
+  <div class="scanline"></div>
+
+  <div class="hud-corner tl"></div>
+  <div class="hud-corner tr"></div>
+  <div class="hud-corner bl"></div>
+  <div class="hud-corner br"></div>
+
+  <header>
+    <span class="system-status">System Matrix // Active</span>
+    <h1>Strategic Intelligence</h1>
+    <p class="subtitle">High-Precision Commercial Cultivation Architecture: Domain Status & Executive Synthesis</p>
+  </header>
+
+  <main class="dashboard">
+    <!-- Domain 1 -->
+    <a href="mush-report-1.html" class="card">
+      <div class="card-meta">
+        <span>DOMAIN_01</span>
+        <span>STATUS: VERIFIED</span>
+      </div>
+      <div>
+        <h2 class="card-title">Biology & Optimization</h2>
+        <p class="card-description">Deep-dive into mycology, genetic selection, and biological trigger mechanisms for maximum yield.</p>
+      </div>
+      <div class="card-footer">ACCESS_REPORT</div>
+    </a>
+
+    <!-- Domain 2 -->
+    <a href="mush-report-2.html" class="card">
+      <div class="card-meta">
+        <span>DOMAIN_02</span>
+        <span>STATUS: VERIFIED</span>
+      </div>
+      <div>
+        <h2 class="card-title">Automation & Hardware</h2>
+        <p class="card-description">Industrial automation, sensor abstraction layers, and climate control engineering for commercial scale.</p>
+      </div>
+      <div class="card-footer">ACCESS_REPORT</div>
+    </a>
+
+    <!-- Domain 3 -->
+    <a href="mush-report-3.html" class="card">
+      <div class="card-meta">
+        <span>DOMAIN_03</span>
+        <span>STATUS: VERIFIED</span>
+      </div>
+      <div>
+        <h2 class="card-title">Infrastructure & Scaling</h2>
+        <p class="card-description">Central trunk topology, biosecurity zoning, and modular facility expansion strategies.</p>
+      </div>
+      <div class="card-footer">ACCESS_REPORT</div>
+    </a>
+
+    <!-- Executive Brief -->
+    <a href="executive-mush-report.html" class="card executive">
+      <div class="card-meta">
+        <span>SYNTHESIS_MASTER</span>
+        <span>STATUS: CRITICAL</span>
+      </div>
+      <div>
+        <h2 class="card-title">Executive Strategy Brief</h2>
+        <p class="card-description">Strategic synthesis of Biological, Physical, and Software domains. The primary roadmap for commercial deployment and risk mitigation.</p>
+      </div>
+      <div class="card-footer">EXECUTE_BRIEFING</div>
+    </a>
+  </main>
+
+  <footer style="margin-top: 4rem; padding: 2rem; font-family: var(--font-mono); font-size: 0.7rem; color: var(--text-dim); opacity: 0.5;">
+    © 2026 CYBERDYNAMIC SYSTEMS // ALL RIGHTS RESERVED // FRAGMENT_ID: MUSH_ID_004
+  </footer>
+
+</body>
+</html>

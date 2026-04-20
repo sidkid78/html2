@@ -1,493 +1,989 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>The End of the Blind Gig</title>
-<style>
-@import url('https://fonts.googleapis.com/css2?family=Anton&family=Inter:wght@300;400;600&family=Space+Mono:wght@400;700&display=swap');
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>The End of the Blind Gig</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Anton&family=Inter:wght@300;400;600&family=Space+Mono:wght@400;700&display=swap');
 
-:root {
-  --c-bg: #050505;
-  --c-text: #F0F0F0;
-  --c-accent: #E5FF00;
-  --c-mute: #666666;
-  --f-hero: 'Anton', sans-serif;
-  --f-body: 'Inter', sans-serif;
-  --f-mono: 'Space Mono', monospace;
-}
+    :root {
+      --c-bg: #050505;
+      --c-text: #F0F0F0;
+      --c-accent: #E5FF00;
+      --c-mute: #666666;
+      --f-hero: 'Anton', sans-serif;
+      --f-body: 'Inter', sans-serif;
+      --f-mono: 'Space Mono', monospace;
+      --glass: rgba(255, 255, 255, 0.03);
+      --glass-border: rgba(255, 255, 255, 0.1);
+    }
 
-* { box-sizing: border-box; margin: 0; padding: 0; }
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
 
-body {
-  background-color: var(--c-bg);
-  color: var(--c-text);
-  font-family: var(--f-body);
-  overflow: hidden;
-  overscroll-behavior-x: none;
-  cursor: none;
-}
+    body {
+      background-color: var(--c-bg);
+      color: var(--c-text);
+      font-family: var(--f-body);
+      overflow: hidden;
+      overscroll-behavior-x: none;
+      cursor: none;
+    }
 
-/* Hide Scrollbar */
-::-webkit-scrollbar { display: none; }
-html { -ms-overflow-style: none; scrollbar-width: none; }
+    /* Hide Scrollbar */
+    ::-webkit-scrollbar {
+      display: none;
+    }
 
-/* Custom Cursor */
-#cursor {
-  position: fixed;
-  top: 0; left: 0;
-  width: 20px; height: 20px;
-  border: 2px solid var(--c-accent);
-  border-radius: 50%;
-  transform: translate(-50%, -50%);
-  pointer-events: none;
-  z-index: 9999;
-  mix-blend-mode: difference;
-  transition: width 0.2s, height 0.2s, background-color 0.2s;
-}
-#cursor::after {
-  content: '';
-  position: absolute;
-  top: 50%; left: 50%;
-  width: 4px; height: 4px;
-  background: var(--c-accent);
-  border-radius: 50%;
-  transform: translate(-50%, -50%);
-}
-body:active #cursor { width: 30px; height: 30px; background-color: rgba(229, 255, 0, 0.2); }
+    html {
+      -ms-overflow-style: none;
+      scrollbar-width: none;
+    }
 
-/* Global Noise Overlay */
-.noise-layer {
-  position: fixed;
-  top: 0; left: 0;
-  width: 100vw; height: 100vh;
-  pointer-events: none;
-  z-index: 50;
-  opacity: 0.08;
-}
+    /* Custom Cursor */
+    #cursor {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 20px;
+      height: 20px;
+      border: 2px solid var(--c-accent);
+      border-radius: 50%;
+      transform: translate(-50%, -50%);
+      pointer-events: none;
+      z-index: 9999;
+      mix-blend-mode: difference;
+      transition: width 0.2s, height 0.2s, background-color 0.2s;
+    }
 
-/* UI Chrome Layer */
-.ui-layer {
-  position: fixed;
-  top: 0; left: 0;
-  width: 100%; height: 100%;
-  pointer-events: none;
-  z-index: 100;
-  padding: 2rem;
-  display: flex;
-  flex-direction: column;
-  justify-content: space-between;
-}
-.ui-header, .ui-footer {
-  display: flex;
-  justify-content: space-between;
-  font-family: var(--f-mono);
-  font-size: 0.75rem;
-  text-transform: uppercase;
-  letter-spacing: 0.2em;
-  color: var(--c-mute);
-}
-.ui-progress {
-  font-size: 1rem;
-  color: var(--c-accent);
-  font-weight: 700;
-}
-.progress-bar-container {
-  position: absolute;
-  bottom: 0; left: 0;
-  width: 100%; height: 4px;
-  background: rgba(255,255,255,0.1);
-}
-#progress-bar {
-  height: 100%; width: 0%;
-  background: var(--c-accent);
-  transition: width 0.3s cubic-bezier(0.16, 1, 0.3, 1);
-}
+    #cursor::after {
+      content: '';
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      width: 4px;
+      height: 4px;
+      background: var(--c-accent);
+      border-radius: 50%;
+      transform: translate(-50%, -50%);
+    }
 
-/* Carousel Container */
-.carousel {
-  display: flex;
-  width: 100vw;
-  height: 100vh;
-  overflow-x: scroll;
-  overflow-y: hidden;
-  scroll-snap-type: x mandatory;
-  scroll-behavior: smooth;
-}
+    body:active #cursor {
+      width: 30px;
+      height: 30px;
+      background-color: rgba(229, 255, 0, 0.2);
+    }
 
-/* Panel Archetype: Editorial Grid / Bleed */
-.panel {
-  flex: 0 0 100vw;
-  width: 100vw;
-  height: 100vh;
-  scroll-snap-align: start;
-  position: relative;
-  display: flex;
-  align-items: center;
-  padding: 4rem;
-}
+    /* Global Noise Overlay */
+    .noise-layer {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
+      pointer-events: none;
+      z-index: 50;
+      opacity: 0.08;
+    }
 
-.panel-bg {
-  position: absolute;
-  top: 0; left: 0;
-  width: 100%; height: 100%;
-  object-fit: cover;
-  z-index: 0;
-  filter: grayscale(100%) contrast(1.2) brightness(0.4);
-  transition: filter 1s ease;
-}
-.panel.is-visible .panel-bg {
-  filter: grayscale(80%) contrast(1.1) brightness(0.6);
-}
-.panel::after {
-  content: '';
-  position: absolute;
-  top: 0; left: 0;
-  width: 100%; height: 100%;
-  background: linear-gradient(90deg, var(--c-bg) 0%, rgba(5,5,5,0.8) 50%, transparent 100%);
-  z-index: 1;
-}
-.panel-alt::after {
-  background: linear-gradient(270deg, var(--c-bg) 0%, rgba(5,5,5,0.9) 60%, rgba(5,5,5,0.4) 100%);
-}
+    /* UI Chrome Layer */
+    .ui-layer {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+      z-index: 100;
+      padding: 2rem;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+    }
 
-/* Content Formatting */
-.content-wrap {
-  position: relative;
-  z-index: 10;
-  max-width: 600px;
-  display: flex;
-  flex-direction: column;
-  gap: 1.5rem;
-}
-.panel-alt .content-wrap {
-  margin-left: auto;
-  text-align: right;
-}
+    .ui-header,
+    .ui-footer {
+      display: flex;
+      justify-content: space-between;
+      font-family: var(--f-mono);
+      font-size: 0.75rem;
+      text-transform: uppercase;
+      letter-spacing: 0.2em;
+      color: var(--c-mute);
+    }
 
-.hero-title {
-  font-family: var(--f-hero);
-  font-size: clamp(3.5rem, 8vw, 7rem);
-  line-height: 0.85;
-  text-transform: uppercase;
-  color: var(--c-text);
-  letter-spacing: -0.02em;
-  margin-bottom: 1rem;
-}
-.hero-title span {
-  display: block;
-  color: var(--c-accent);
-}
+    .ui-progress {
+      font-size: 1rem;
+      color: var(--c-accent);
+      font-weight: 700;
+    }
 
-.meta-label {
-  font-family: var(--f-mono);
-  font-size: 0.85rem;
-  letter-spacing: 0.1em;
-  color: var(--c-accent);
-  text-transform: uppercase;
-}
+    .progress-bar-container {
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      width: 100%;
+      height: 4px;
+      background: rgba(255, 255, 255, 0.1);
+    }
 
-.body-text {
-  font-size: clamp(1rem, 1.2vw, 1.25rem);
-  line-height: 1.6;
-  font-weight: 300;
-  color: #D0D0D0;
-}
-.body-text strong {
-  font-weight: 600;
-  color: var(--c-text);
-  background: linear-gradient(to right, rgba(229,255,0,0.2) 0%, transparent 100%);
-  padding: 0 4px;
-}
-.panel-alt .body-text strong {
-  background: linear-gradient(to left, rgba(229,255,0,0.2) 0%, transparent 100%);
-}
+    #progress-bar {
+      height: 100%;
+      width: 0%;
+      background: var(--c-accent);
+      transition: width 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+    }
 
-.list-item {
-  display: flex;
-  align-items: flex-start;
-  gap: 1rem;
-  margin-top: 1rem;
-  font-family: var(--f-body);
-  font-size: 1rem;
-  line-height: 1.5;
-}
-.list-item::before {
-  content: '>';
-  font-family: var(--f-mono);
-  color: var(--c-accent);
-  font-weight: bold;
-}
+    /* ─── Global Nav Tabs ─── */
+    .nav-tabs {
+      display: flex;
+      gap: 20px;
+      pointer-events: auto;
+    }
 
-/* Animations */
-.anim-el {
-  opacity: 0;
-  transform: translateY(40px);
-  transition: opacity 0.8s cubic-bezier(0.2, 1, 0.3, 1), transform 0.8s cubic-bezier(0.2, 1, 0.3, 1);
-}
-.panel.is-visible .anim-el {
-  opacity: 1;
-  transform: translateY(0);
-}
-.delay-1 { transition-delay: 100ms; }
-.delay-2 { transition-delay: 200ms; }
-.delay-3 { transition-delay: 300ms; }
-.delay-4 { transition-delay: 400ms; }
+    .nav-tab {
+      text-decoration: none;
+      font-family: var(--f-mono);
+      font-size: 0.7rem;
+      color: var(--c-mute);
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      padding: 5px 10px;
+      border: 1px solid transparent;
+      transition: all 0.3s;
+    }
 
-/* Specific Panel Overrides */
-#panel-1 .hero-title { filter: url(#chromatic); }
-#panel-6 { justify-content: center; text-align: center; }
-#panel-6 .content-wrap { margin: 0 auto; text-align: center; max-width: 800px; }
-#panel-6::after { background: rgba(5,5,5,0.85); }
+    .nav-tab:hover {
+      color: var(--c-accent);
+      border-color: rgba(229, 255, 0, 0.2);
+      background: rgba(229, 255, 0, 0.05);
+    }
 
-@media (max-width: 768px) {
-  .panel { padding: 2rem; align-items: flex-end; padding-bottom: 6rem; }
-  .panel::after { background: linear-gradient(0deg, var(--c-bg) 0%, rgba(5,5,5,0.9) 70%, transparent 100%); }
-  .panel-alt::after { background: linear-gradient(0deg, var(--c-bg) 0%, rgba(5,5,5,0.9) 70%, transparent 100%); }
-  .content-wrap { text-align: left; margin: 0; max-width: 100%; }
-  .panel-alt .content-wrap { text-align: left; }
-  .ui-header, .ui-footer { flex-direction: column; gap: 0.5rem; }
-  .panel-alt .body-text strong { background: linear-gradient(to right, rgba(229,255,0,0.2) 0%, transparent 100%); }
-}
-</style>
+    .nav-tab.active {
+      color: var(--c-accent);
+      border-color: var(--c-accent);
+      background: rgba(229, 255, 0, 0.1);
+    }
+
+    /* Carousel Container */
+    .carousel {
+      display: flex;
+      width: 100vw;
+      height: 100vh;
+      overflow-x: scroll;
+      overflow-y: hidden;
+      scroll-snap-type: x mandatory;
+      scroll-behavior: smooth;
+    }
+
+    /* Panel Archetype: Editorial Grid / Bleed */
+    .panel {
+      flex: 0 0 100vw;
+      width: 100vw;
+      height: 100vh;
+      scroll-snap-align: start;
+      position: relative;
+      display: flex;
+      align-items: center;
+      padding: 4rem;
+    }
+
+    .panel-bg {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      z-index: 0;
+      filter: grayscale(100%) contrast(1.2) brightness(0.4);
+      transition: filter 1s ease;
+    }
+
+    .panel.is-visible .panel-bg {
+      filter: grayscale(80%) contrast(1.1) brightness(0.6);
+    }
+
+    .panel::after {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(90deg, var(--c-bg) 0%, rgba(5, 5, 5, 0.8) 50%, transparent 100%);
+      z-index: 1;
+    }
+
+    .panel-alt::after {
+      background: linear-gradient(270deg, var(--c-bg) 0%, rgba(5, 5, 5, 0.9) 60%, rgba(5, 5, 5, 0.4) 100%);
+    }
+
+    /* Content Formatting */
+    .content-wrap {
+      position: relative;
+      z-index: 10;
+      max-width: 600px;
+      display: flex;
+      flex-direction: column;
+      gap: 1.5rem;
+    }
+
+    .panel-alt .content-wrap {
+      margin-left: auto;
+      text-align: right;
+    }
+
+    .hero-title {
+      font-family: var(--f-hero);
+      font-size: clamp(3.5rem, 8vw, 7rem);
+      line-height: 0.85;
+      text-transform: uppercase;
+      color: var(--c-text);
+      letter-spacing: -0.02em;
+      margin-bottom: 1rem;
+    }
+
+    .hero-title span {
+      display: block;
+      color: var(--c-accent);
+    }
+
+    .meta-label {
+      font-family: var(--f-mono);
+      font-size: 0.85rem;
+      letter-spacing: 0.1em;
+      color: var(--c-accent);
+      text-transform: uppercase;
+    }
+
+    .body-text {
+      font-size: clamp(1rem, 1.2vw, 1.25rem);
+      line-height: 1.6;
+      font-weight: 300;
+      color: #D0D0D0;
+    }
+
+    .body-text strong {
+      font-weight: 600;
+      color: var(--c-text);
+      background: linear-gradient(to right, rgba(229, 255, 0, 0.2) 0%, transparent 100%);
+      padding: 0 4px;
+    }
+
+    .panel-alt .body-text strong {
+      background: linear-gradient(to left, rgba(229, 255, 0, 0.2) 0%, transparent 100%);
+    }
+
+    .list-item {
+      display: flex;
+      align-items: flex-start;
+      gap: 1rem;
+      margin-top: 1rem;
+      font-family: var(--f-body);
+      font-size: 1rem;
+      line-height: 1.5;
+    }
+
+    .list-item::before {
+      content: '>';
+      font-family: var(--f-mono);
+      color: var(--c-accent);
+      font-weight: bold;
+    }
+
+    /* Animations */
+    .anim-el {
+      opacity: 0;
+      transform: translateY(40px);
+      transition: opacity 0.8s cubic-bezier(0.2, 1, 0.3, 1), transform 0.8s cubic-bezier(0.2, 1, 0.3, 1);
+    }
+
+    .panel.is-visible .anim-el {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    .delay-1 {
+      transition-delay: 100ms;
+    }
+
+    .delay-2 {
+      transition-delay: 200ms;
+    }
+
+    .delay-3 {
+      transition-delay: 300ms;
+    }
+
+    .delay-4 {
+      transition-delay: 400ms;
+    }
+
+    /* Specific Panel Overrides */
+    #panel-1 .hero-title {
+      filter: url(#chromatic);
+    }
+
+    #panel-6 {
+      justify-content: center;
+      text-align: center;
+    }
+
+    #panel-6 .content-wrap {
+      margin: 0 auto;
+      text-align: center;
+      max-width: 800px;
+    }
+
+    #panel-6::after {
+      background: rgba(5, 5, 5, 0.85);
+    }
+
+    @media (max-width: 768px) {
+      .panel {
+        padding: 2rem;
+        align-items: flex-end;
+        padding-bottom: 6rem;
+      }
+
+      .panel::after {
+        background: linear-gradient(0deg, var(--c-bg) 0%, rgba(5, 5, 5, 0.9) 70%, transparent 100%);
+      }
+
+      .panel-alt::after {
+        background: linear-gradient(0deg, var(--c-bg) 0%, rgba(5, 5, 5, 0.9) 70%, transparent 100%);
+      }
+
+      .content-wrap {
+        text-align: left;
+        margin: 0;
+        max-width: 100%;
+      }
+
+      .panel-alt .content-wrap {
+        text-align: left;
+      }
+
+      .ui-header,
+      .ui-footer {
+        flex-direction: column;
+        gap: 0.5rem;
+      }
+
+      .panel-alt .body-text strong {
+        background: linear-gradient(to right, rgba(229, 255, 0, 0.2) 0%, transparent 100%);
+      }
+    }
+
+    /* Audio Hub Styles */
+    .audio-hub {
+      position: fixed;
+      bottom: 2rem;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 90%;
+      max-width: 800px;
+      background: rgba(5, 5, 5, 0.8);
+      -webkit-backdrop-filter: blur(20px);
+      backdrop-filter: blur(20px);
+      border: 1px solid var(--glass-border);
+      padding: 1rem 1.5rem;
+      border-radius: 4px;
+      z-index: 1000;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 2rem;
+      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5);
+      transition: all 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+      opacity: 0;
+      pointer-events: none;
+    }
+
+    .audio-hub.active {
+      opacity: 1;
+      pointer-events: auto;
+    }
+
+    .hub-controls {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+    }
+
+    .hub-btn {
+      background: var(--glass);
+      border: 1px solid var(--glass-border);
+      color: var(--c-text);
+      font-family: var(--f-mono);
+      font-size: 0.7rem;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      padding: 0.6rem 1rem;
+      cursor: pointer;
+      border-radius: 2px;
+      transition: all 0.2s;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .hub-btn:hover {
+      background: rgba(255, 255, 255, 0.1);
+      border-color: var(--c-accent);
+    }
+
+    .hub-btn.active {
+      background: var(--c-accent);
+      color: var(--c-bg);
+      border-color: var(--c-accent);
+    }
+
+    .vol-mix {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      flex: 1;
+      max-width: 200px;
+    }
+
+    .vol-mix input {
+      flex: 1;
+      height: 2px;
+      -webkit-appearance: none;
+      -moz-appearance: none;
+      appearance: none;
+      background: rgba(255, 255, 255, 0.1);
+    }
+
+    .vol-mix input::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      -moz-appearance: none;
+      appearance: none;
+      width: 10px;
+      height: 10px;
+      background: var(--c-accent);
+      cursor: pointer;
+    }
+
+    .seg-info {
+      font-family: var(--f-mono);
+      font-size: 0.65rem;
+      color: var(--c-mute);
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+    }
+
+    .pulse-glow {
+      animation: pulse-border 2s infinite;
+    }
+
+    @keyframes pulse-border {
+      0% {
+        border-color: var(--glass-border);
+      }
+
+      50% {
+        border-color: var(--c-accent);
+      }
+
+      100% {
+        border-color: var(--glass-border);
+      }
+    }
+  </style>
 </head>
+
 <body>
 
-<!-- SVG Filters -->
-<svg style="display:none;">
-  <defs>
-    <filter id="noise">
-      <feTurbulence type="fractalNoise" baseFrequency="0.8" numOctaves="3" stitchTiles="stitch">
-        <animate attributeName="seed" values="1;2;3;4;5;6;7;8;9;10" dur="1s" repeatCount="indefinite" />
-      </feTurbulence>
-      <feColorMatrix type="matrix" values="1 0 0 0 0, 0 1 0 0 0, 0 0 1 0 0, 0 0 0 0.2 0" />
-    </filter>
-    <filter id="chromatic">
-      <feColorMatrix type="matrix" result="red" values="1 0 0 0 0  0 0 0 0 0  0 0 0 0 0  0 0 0 1 0"/>
-      <feOffset in="red" dx="3" dy="0" result="red_offset"/>
-      <feColorMatrix in="SourceGraphic" type="matrix" result="blue" values="0 0 0 0 0  0 1 0 0 0  0 0 1 0 0  0 0 0 1 0"/>
-      <feOffset in="blue" dx="-3" dy="0" result="blue_offset"/>
-      <feBlend mode="screen" in="red_offset" in2="blue_offset"/>
-    </filter>
-  </defs>
-</svg>
+  <!-- SVG Filters -->
+  <svg style="display:none;">
+    <defs>
+      <filter id="noise">
+        <feTurbulence type="fractalNoise" baseFrequency="0.8" numOctaves="3" stitchTiles="stitch">
+          <animate attributeName="seed" values="1;2;3;4;5;6;7;8;9;10" dur="1s" repeatCount="indefinite" />
+        </feTurbulence>
+        <feColorMatrix type="matrix" values="1 0 0 0 0, 0 1 0 0 0, 0 0 1 0 0, 0 0 0 0.2 0" />
+      </filter>
+      <filter id="chromatic">
+        <feColorMatrix type="matrix" result="red" values="1 0 0 0 0  0 0 0 0 0  0 0 0 0 0  0 0 0 1 0" />
+        <feOffset in="red" dx="3" dy="0" result="red_offset" />
+        <feColorMatrix in="SourceGraphic" type="matrix" result="blue"
+          values="0 0 0 0 0  0 1 0 0 0  0 0 1 0 0  0 0 0 1 0" />
+        <feOffset in="blue" dx="-3" dy="0" result="blue_offset" />
+        <feBlend mode="screen" in="red_offset" in2="blue_offset" />
+      </filter>
+    </defs>
+  </svg>
 
-<div id="cursor"></div>
-<div class="noise-layer" style="filter: url(#noise);"></div>
+  <div id="cursor"></div>
+  <div class="noise-layer" style="filter: url(#noise);"></div>
 
-<!-- Static UI Chrome -->
-<div class="ui-layer">
-  <div class="ui-header">
-    <div>System: FairGig Manifesto</div>
-    <div>Status: <span style="color:var(--c-accent)">Weaponized</span></div>
+  <!-- Static UI Chrome -->
+  <div class="ui-layer">
+    <nav class="ui-header">
+      <div>System: FairGig Manifesto</div>
+
+      <div class="nav-tabs">
+        <a href="fairgig.html" class="nav-tab">Objective</a>
+        <a href="fairgig101.html" class="nav-tab active">Manifesto</a>
+        <a href="fairgig-2.html" class="nav-tab">Arsenal</a>
+      </div>
+
+      <div>Status: <span style="color:var(--c-accent)">Weaponized</span></div>
+    </nav>
+    <div class="ui-footer">
+      <div>Scroll to Advance [→]</div>
+      <div class="ui-progress" id="progress-text">01 / 06</div>
+    </div>
+    <div class="progress-bar-container">
+      <div id="progress-bar"></div>
+    </div>
   </div>
-  <div class="ui-footer">
-    <div>Scroll to Advance [→]</div>
-    <div class="ui-progress" id="progress-text">01 / 06</div>
+
+  <!-- Audio Assets -->
+  <audio id="bg-music-1" src="./audio/secbackground.mp3" loop></audio>
+  <audio id="bg-music-2" src="./audio/fairgigbackground.mp3" loop></audio>
+  <audio id="narration-player"></audio>
+
+  <!-- Audio Insight Hub -->
+  <div class="audio-hub" id="audio-hub">
+    <div class="hub-controls">
+      <button class="hub-btn" id="btn-master" onclick="toggleMasterSequence()">
+        <span id="master-icon">▶</span>
+        <span>Master Sequence</span>
+      </button>
+      <div class="seg-info" id="hub-seg-info">Segment: 01</div>
+    </div>
+
+    <div class="hub-controls">
+      <button class="hub-btn active" id="btn-ambient-1" onclick="switchAmbient(1)">Hum</button>
+      <button class="hub-btn" id="btn-ambient-2" onclick="switchAmbient(2)">Silence</button>
+    </div>
+
+    <div class="vol-mix">
+      <span class="seg-info">Mix</span>
+      <input type="range" id="hub-vol" min="0" max="1" step="0.01" value="0.4">
+    </div>
   </div>
-  <div class="progress-bar-container">
-    <div id="progress-bar"></div>
+
+  <!-- Audio Interaction Trigger -->
+  <div id="audio-init"
+    style="position:fixed; inset:0; z-index:9999; display:flex; align-items:center; justify-content:center; background:rgba(5,5,5,0.9); cursor:pointer;">
+    <div style="text-align:center;">
+      <div class="meta-label" style="margin-bottom:1rem;">Audio Required</div>
+      <div class="hero-title" style="font-size:2rem;">Click to Enter <br><span>Experience</span></div>
+    </div>
   </div>
-</div>
 
-<!-- Audio Assets -->
-<audio id="bg-music" src="./audio/secbackground.mp3" loop></audio>
-<audio id="narration-player"></audio>
+  <!-- Scroll Container -->
+  <main class="carousel" id="carousel">
 
-<!-- Audio Interaction Trigger -->
-<div id="audio-init" style="position:fixed; inset:0; z-index:9999; display:flex; align-items:center; justify-content:center; background:rgba(5,5,5,0.9); cursor:pointer;">
-  <div style="text-align:center;">
-    <div class="meta-label" style="margin-bottom:1rem;">Audio Required</div>
-    <div class="hero-title" style="font-size:2rem;">Click to Enter <br><span>Experience</span></div>
-  </div>
-</div>
-
-<!-- Scroll Container -->
-<main class="carousel" id="carousel">
-
-  <!-- Panel 1 -->
-  <section class="panel" id="panel-1">
-    <img src="./images/sene-1.jpg" alt="Dark alley" class="panel-bg">
-    <div class="content-wrap">
-      <div class="meta-label anim-el">01. The 2:00 AM Envelope</div>
-      <h1 class="hero-title anim-el delay-1">The End of the <br><span>Blind Gig</span></h1>
-      <div class="body-text anim-el delay-2">
-        <p>It’s 2:00 AM. You’re hauling a 60-pound Twin Reverb down a narrow flight of stairs. Your ears are ringing, your fingers are raw, and your shirt smells like stale beer and floor cleaner. As you load the last cymbal stand into a cramped van, the promoter hands you a crumpled white envelope.</p>
-        <br>
-        <p>You open it under the streetlamp. <strong>Forty bucks.</strong></p>
-        <br>
-        <p>Did you even make enough to cover the gas? What happened to the door money? Where did the ticket presales go? The promoter mumbles something about "sound guy fees" and "marketing overhead" before disappearing back inside. For the independent artist, this isn't a business. It’s an abusive relationship. Deals are struck on vague text threads, and the math remains a black box until the night is over. You aren't treated like talent; you are treated like an unsecured, zero-interest lender to struggling venues.</p>
+    <!-- Panel 1 -->
+    <section class="panel" id="panel-1">
+      <video id="video-scene-1" src="./video/101-1.mp4" class="panel-bg" muted playsinline preload="auto" loop></video>
+      <div class="content-wrap">
+        <div class="meta-label anim-el">01. The 2:00 AM Envelope</div>
+        <h1 class="hero-title anim-el delay-1">The End of the <br><span>Blind Gig</span></h1>
+        <div class="body-text anim-el delay-2">
+          <p>It’s 2:00 AM. You’re hauling a 60-pound Twin Reverb down a narrow flight of stairs. Your ears are ringing,
+            your fingers are raw, and your shirt smells like stale beer and floor cleaner. As you load the last cymbal
+            stand into a cramped van, the promoter hands you a crumpled white envelope.</p>
+          <br>
+          <p>You open it under the streetlamp. <strong>Forty bucks.</strong></p>
+          <br>
+          <p>Did you even make enough to cover the gas? What happened to the door money? Where did the ticket presales
+            go? The promoter mumbles something about "sound guy fees" and "marketing overhead" before disappearing back
+            inside. For the independent artist, this isn't a business. It’s an abusive relationship. Deals are struck on
+            vague text threads, and the math remains a black box until the night is over. You aren't treated like
+            talent; you are treated like an unsecured, zero-interest lender to struggling venues.</p>
+        </div>
       </div>
-    </div>
-  </section>
+    </section>
 
-  <!-- Panel 2 -->
-  <section class="panel panel-alt" id="panel-2">
-    <img src="./images/sene-2 (1).jpg" alt="Stage with financial graphs" class="panel-bg" style="object-position: right center;">
-    <div class="content-wrap">
-      <div class="meta-label anim-el">02. The Big Lie</div>
-      <h2 class="hero-title anim-el delay-1">Discovery <br>is a <span>Trap</span></h2>
-      <div class="body-text anim-el delay-2">
-        <p>The music tech world loves to sell us on "discovery." They tell you that if you just get on the right app and find the right stage, your career will explode. This is the industry’s Big Lie.</p>
-        <br>
-        <p>Finding a stage isn't the problem. <strong>Getting paid without getting played is the problem.</strong></p>
-        <br>
-        <p>The industry has quietly shifted all the financial risk onto the backs of the artists. "Pay-to-play," hidden production fees, and opaque door splits are bleeding the working musician dry. Venues don't need another generic booking app. Artists need a weapon to force the truth into the light.</p>
+    <!-- Panel 2 -->
+    <section class="panel panel-alt" id="panel-2">
+      <video src="./video/101-2.mp4" class="panel-bg" autoplay loop muted playsinline
+        style="object-position: right center;"></video>
+      <div class="content-wrap">
+        <div class="meta-label anim-el">02. The Big Lie</div>
+        <h2 class="hero-title anim-el delay-1">Discovery <br>is a <span>Trap</span></h2>
+        <div class="body-text anim-el delay-2">
+          <p>The music tech world loves to sell us on "discovery." They tell you that if you just get on the right app
+            and find the right stage, your career will explode. This is the industry’s Big Lie.</p>
+          <br>
+          <p>Finding a stage isn't the problem. <strong>Getting paid without getting played is the problem.</strong></p>
+          <br>
+          <p>The industry has quietly shifted all the financial risk onto the backs of the artists. "Pay-to-play,"
+            hidden production fees, and opaque door splits are bleeding the working musician dry. Venues don't need
+            another generic booking app. Artists need a weapon to force the truth into the light.</p>
+        </div>
       </div>
-    </div>
-  </section>
+    </section>
 
-  <!-- Panel 3 -->
-  <section class="panel" id="panel-3">
-    <img src="./images/sene-3(1).jpg" alt="Band vs Suit" class="panel-bg">
-    <div class="content-wrap">
-      <div class="meta-label anim-el">03. Genesis</div>
-      <h2 class="hero-title anim-el delay-1">From Sanctuary to <br><span>War Room</span></h2>
-      <div class="body-text anim-el delay-2">
-        <p>FairGig wasn’t built in a Silicon Valley boardroom. It was built by someone who lived the grind. Our founder, Cliff Franco, has been inseparable from the guitar since a visit to Jimi Hendrix’s grave in 1999.</p>
-        <br>
-        <p>Over 15 years fronting bands, music transitioned from a hobby to his personal sanctuary—a sacred space to keep his mind aligned. But every time he stepped off the stage and tried to settle up with a venue, the predatory reality of the business violated that sanctuary.</p>
-        <br>
-        <p>He didn't build software to start a tech company. <strong>He built FairGig to build a wall around the music, keeping the parasites out.</strong></p>
+    <section class="panel" id="panel-3">
+      <video id="video-scene-3-1" src="./video/s3-1.mp4" class="panel-bg" muted playsinline preload="auto" style="opacity: 1; transition: opacity 1s;"></video>
+      <video id="video-scene-3-2" src="./video/s3-2.mp4" class="panel-bg" muted playsinline preload="auto" style="opacity: 0; transition: opacity 1s;"></video>
+      <div class="content-wrap">
+        <div class="meta-label anim-el">03. Genesis</div>
+        <h2 class="hero-title anim-el delay-1">From Sanctuary to <br><span>War Room</span></h2>
+        <div class="body-text anim-el delay-2">
+          <p>FairGig wasn’t built in a Silicon Valley boardroom. It was built by someone who lived the grind. Our
+            founder, Cliff Franco, has been inseparable from the guitar since a visit to Jimi Hendrix’s grave in 1999.
+          </p>
+          <br>
+          <p>Over 15 years fronting bands, music transitioned from a hobby to his personal sanctuary—a sacred space to
+            keep his mind aligned. But every time he stepped off the stage and tried to settle up with a venue, the
+            predatory reality of the business violated that sanctuary.</p>
+          <br>
+          <p>He didn't build software to start a tech company. <strong>He built FairGig to build a wall around the
+              music, keeping the parasites out.</strong></p>
+        </div>
       </div>
-    </div>
-  </section>
+    </section>
 
-  <!-- Panel 4 -->
-  <section class="panel panel-alt" id="panel-4">
-    <img src="[User Image 4]" alt="App Interface" class="panel-bg" style="object-position: left center;">
-    <div class="content-wrap">
-      <div class="meta-label anim-el">04. The Math</div>
-      <h2 class="hero-title anim-el delay-1">Weaponize <br>Your <span>Draw</span></h2>
-      <div class="body-text anim-el delay-2">
-        <p>To fix a rigged game, you have to change the rules. FairGig replaces industry guesswork with cold, hard math. We built the <strong>Show Engine</strong>, but you can think of it as an X-Ray machine for your gigs.</p>
-        <br>
-        <p>Instead of nodding along to a promoter's verbal promises, you use simple sliders on your phone to input the deal. Instantly, the app calculates the break-even point. It shows you exactly what the band takes home versus what the venue pockets if the room is empty, half-full, or sold out.</p>
-        <br>
-        <p>Suddenly, you aren't just a band hoping for a gig. You are a business presenting mathematical proof of the revenue you generate. You can finally weaponize your draw. "Take it or leave it" offers evaporate when you hold the math in your hand.</p>
+    <!-- Panel 4 -->
+    <section class="panel panel-alt" id="panel-4">
+      <video id="video-scene-4" src="./video/101-4.mp4" class="panel-bg" muted playsinline preload="auto"
+        style="object-position: left center;"></video>
+      <div class="content-wrap">
+        <div class="meta-label anim-el">04. The Math</div>
+        <h2 class="hero-title anim-el delay-1">Weaponize <br>Your <span>Draw</span></h2>
+        <div class="body-text anim-el delay-2">
+          <p>To fix a rigged game, you have to change the rules. FairGig replaces industry guesswork with cold, hard
+            math. We built the <strong>Show Engine</strong>, but you can think of it as an X-Ray machine for your gigs.
+          </p>
+          <br>
+          <p>Instead of nodding along to a promoter's verbal promises, you use simple sliders on your phone to input the
+            deal. Instantly, the app calculates the break-even point. It shows you exactly what the band takes home
+            versus what the venue pockets if the room is empty, half-full, or sold out.</p>
+          <br>
+          <p>Suddenly, you aren't just a band hoping for a gig. You are a business presenting mathematical proof of the
+            revenue you generate. You can finally weaponize your draw. "Take it or leave it" offers evaporate when you
+            hold the math in your hand.</p>
+        </div>
       </div>
-    </div>
-  </section>
+    </section>
 
-  <!-- Panel 5 -->
-  <section class="panel" id="panel-5">
-    <img src="[User Image 5]" alt="Triumphant Stage" class="panel-bg">
-    <div class="content-wrap">
-      <div class="meta-label anim-el">05. The Truth Tax</div>
-      <h2 class="hero-title anim-el delay-1">Exposing the <br><span>Ghosts</span></h2>
-      <div class="body-text anim-el delay-2">
-        <p>FairGig is completely free for artists, and that is by design. We are building an army of independent bands, touring acts, and local legends who simply refuse to play in the dark anymore. When an entire community of musicians demands transparency, venues have nowhere to hide.</p>
-        <br>
-        <p>FairGig tracks venue behavior through a <strong>Reputation Layer</strong>:</p>
-        <div class="list-item delay-3"><strong>Fairness Score:</strong> Do they hide fees?</div>
-        <div class="list-item delay-3"><strong>Payout Reliability:</strong> Do they actually pay what they promised?</div>
-        <div class="list-item delay-3"><strong>Artist Ratings:</strong> Real talk from the bands who stood on their stage.</div>
-        <br>
-        <p class="delay-4">When transparency becomes the standard, a venue’s refusal to use FairGig becomes a massive red flag. Good venues and honest promoters—the ones who gladly show bands exactly where the money goes—will attract the best talent. The shady promoters will find themselves playing to empty rooms.</p>
+    <!-- Panel 5 -->
+    <section class="panel" id="panel-5">
+      <video id="video-scene-5" src="./video/101-5.mp4" class="panel-bg" muted playsinline preload="auto"></video>
+      <div class="content-wrap">
+        <div class="meta-label anim-el">05. The Truth Tax</div>
+        <h2 class="hero-title anim-el delay-1">Exposing the <br><span>Ghosts</span></h2>
+        <div class="body-text anim-el delay-2">
+          <p>FairGig is completely free for artists, and that is by design. We are building an army of independent
+            bands, touring acts, and local legends who simply refuse to play in the dark anymore. When an entire
+            community of musicians demands transparency, venues have nowhere to hide.</p>
+          <br>
+          <p>FairGig tracks venue behavior through a <strong>Reputation Layer</strong>:</p>
+          <div class="list-item delay-3"><strong>Fairness Score:</strong> Do they hide fees?</div>
+          <div class="list-item delay-3"><strong>Payout Reliability:</strong> Do they actually pay what they promised?
+          </div>
+          <div class="list-item delay-3"><strong>Artist Ratings:</strong> Real talk from the bands who stood on their
+            stage.</div>
+          <br>
+          <p class="delay-4">When transparency becomes the standard, a venue’s refusal to use FairGig becomes a massive
+            red flag. Good venues and honest promoters—the ones who gladly show bands exactly where the money goes—will
+            attract the best talent. The shady promoters will find themselves playing to empty rooms.</p>
+        </div>
       </div>
-    </div>
-  </section>
+    </section>
 
-  <!-- Panel 6 -->
-  <section class="panel" id="panel-6">
-    <div class="content-wrap">
-      <div class="meta-label anim-el">06. Conclusion</div>
-      <h2 class="hero-title anim-el delay-1">The <span>Bottom</span> Line</h2>
-      <div class="body-text anim-el delay-2" style="font-size: clamp(1.2rem, 2vw, 2rem); line-height: 1.4;">
-        <p>The era of the "blind gig" is over. We are dragging the live music economy out of the shadows.</p>
-        <br>
-        <p>We are done acting like gamblers whose stakes are our own livelihoods. The question for venues is no longer whether they want to be transparent, but whether they can afford to be left behind by the artists who draw the crowds.</p>
-        <br>
-        <p style="color: var(--c-accent); font-weight: 600;">Before FairGig, you guessed. Now, you know. Let’s take our stages back.</p>
+    <!-- Panel 6 -->
+    <section class="panel" id="panel-6">
+      <div class="content-wrap">
+        <div class="meta-label anim-el">06. Conclusion</div>
+        <h2 class="hero-title anim-el delay-1">The <span>Bottom</span> Line</h2>
+        <div class="body-text anim-el delay-2" style="font-size: clamp(1.2rem, 2vw, 2rem); line-height: 1.4;">
+          <p>The era of the "blind gig" is over. We are dragging the live music economy out of the shadows.</p>
+          <br>
+          <p>We are done acting like gamblers whose stakes are our own livelihoods. The question for venues is no longer
+            whether they want to be transparent, but whether they can afford to be left behind by the artists who draw
+            the crowds.</p>
+          <br>
+          <p style="color: var(--c-accent); font-weight: 600;">Before FairGig, you guessed. Now, you know. Let’s take
+            our stages back.</p>
+        </div>
       </div>
-    </div>
-  </section>
+    </section>
 
-</main>
+  </main>
 
-<script>
-  // Custom Cursor Logic
-  const cursor = document.getElementById('cursor');
-  document.addEventListener('mousemove', (e) => {
-    cursor.style.left = e.clientX + 'px';
-    cursor.style.top = e.clientY + 'px';
-  });
+  <script>
+    // Custom Cursor Logic
+    const cursor = document.getElementById('cursor');
+    document.addEventListener('mousemove', (e) => {
+      cursor.style.left = e.clientX + 'px';
+      cursor.style.top = e.clientY + 'px';
+    });
 
-  // Intersection Observer for Animations and Progress
-  const panels = document.querySelectorAll('.panel');
-  const progressText = document.getElementById('progress-text');
-  const progressBar = document.getElementById('progress-bar');
-  const bgMusic = document.getElementById('bg-music');
-  const narrationPlayer = document.getElementById('narration-player');
-  const totalPanels = panels.length;
-  let lastIndex = -1;
+    // Global State & Elements
+    const panels = document.querySelectorAll('.panel');
+    const progressText = document.getElementById('progress-text');
+    const progressBar = document.getElementById('progress-bar');
+    const ambient1 = document.getElementById('bg-music-1');
+    const ambient2 = document.getElementById('bg-music-2');
+    const narrationPlayer = document.getElementById('narration-player');
+    const hub = document.getElementById('audio-hub');
+    const hubVol = document.getElementById('hub-vol');
+    const totalPanels = panels.length;
 
-  // Audio Policy Handle
-  document.getElementById('audio-init').addEventListener('click', function() {
-    this.style.opacity = '0';
-    setTimeout(() => this.style.display = 'none', 500);
-    bgMusic.volume = 0.4;
-    bgMusic.play();
-  });
+    let lastIndex = -1;
+    let activeAmbient = ambient1;
+    let isMasterSequence = false;
 
-  const observerOptions = {
-    root: document.getElementById('carousel'),
-    threshold: 0.5
-  };
+    // Helper for volume fading (replaces non-functional .animate logic)
+    function fadeVolume(audio, targetVol, duration = 1000) {
+      if (!audio) return;
+      const startVol = audio.volume;
+      const startTime = performance.now();
+      function update(now) {
+        const elapsed = now - startTime;
+        const progress = Math.min(elapsed / duration, 1);
+        audio.volume = startVol + (targetVol - startVol) * progress;
+        if (progress < 1) requestAnimationFrame(update);
+      }
+      requestAnimationFrame(update);
+    }
 
-  const observer = new IntersectionObserver((entries) => {
-    entries.forEach(entry => {
-      if (entry.isIntersecting) {
-        entry.target.classList.add('is-visible');
-        
-        const index = Array.from(panels).indexOf(entry.target) + 1;
-        progressText.innerText = `0${index} / 0${totalPanels}`;
-        progressBar.style.width = `${(index / totalPanels) * 100}%`;
+    // Audio Policy Handle
+    document.getElementById('audio-init').addEventListener('click', function () {
+      this.style.opacity = '0';
+      setTimeout(() => this.style.display = 'none', 500);
+      hub.classList.add('active');
 
-        // Narration Logic
-        if (index !== lastIndex && index <= 5) {
-          narrate(index);
-          lastIndex = index;
+      // Check if we are on the first panel to start synced audio
+      const index = Array.from(panels).findIndex(p => p.classList.contains('is-visible')) + 1;
+      if (index === 1) {
+        // Sync Master Sequence state
+        isMasterSequence = true;
+        const btn = document.getElementById('btn-master');
+        const icon = document.getElementById('master-icon');
+        btn.classList.add('active');
+        hub.classList.add('pulse-glow');
+        icon.innerText = '■';
+
+        narrate(1); // narrate(1) will now start the background music
+      } else {
+        activeAmbient.volume = hubVol.value;
+        activeAmbient.play();
+      }
+    });
+
+    hubVol.addEventListener('input', (e) => {
+      const vol = e.target.value;
+      if (activeAmbient) activeAmbient.volume = isSpeaking() ? vol * 0.25 : vol;
+    });
+
+    function isSpeaking() {
+      return !narrationPlayer.paused && narrationPlayer.currentTime > 0;
+    }
+
+    const observerOptions = {
+      root: document.getElementById('carousel'),
+      threshold: 0.5
+    };
+
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          entry.target.classList.add('is-visible');
+
+          const index = Array.from(panels).indexOf(entry.target) + 1;
+          progressText.innerText = `0${index} / 0${totalPanels}`;
+          progressBar.style.width = `${(index / totalPanels) * 100}%`;
+          document.getElementById('hub-seg-info').innerText = `Segment: 0${index}`;
+
+          // Narration Logic (Manual Scroll)
+          if (!isMasterSequence && index !== lastIndex && index <= 5) {
+            narrate(index);
+            lastIndex = index;
+          }
+        }
+      });
+    }, observerOptions);
+
+    const scene1Video = document.getElementById('video-scene-1');
+    const scene2Video = document.getElementById('video-scene-2');
+    const scene3Video1 = document.getElementById('video-scene-3-1');
+    const scene3Video2 = document.getElementById('video-scene-3-2');
+    const scene4Video = document.getElementById('video-scene-4');
+    const scene5Video = document.getElementById('video-scene-5');
+    
+    // Logic to trigger Scene 1 video in its final 8 seconds
+    narrationPlayer.addEventListener('timeupdate', () => {
+      // Check if we are playing the first narration segment
+      if (narrationPlayer.src.includes('sec-1.wav') && narrationPlayer.duration) {
+        const remaining = narrationPlayer.duration - narrationPlayer.currentTime;
+        // Trigger if within last 8 seconds and not already playing
+        if (remaining <= 8.1 && remaining > 0 && scene1Video.paused) {
+          scene1Video.play();
         }
       }
     });
-  }, observerOptions);
 
-  function narrate(index) {
-    narrationPlayer.src = `./audio/sec-${index}.wav`;
-    narrationPlayer.volume = 0.9;
-    
-    // Duck background music
-    bgMusic.animate([
-      { volume: bgMusic.volume },
-      { volume: 0.15 }
-    ], { duration: 500, fill: 'forwards' });
+    function narrate(index) {
+      if (index > 5) return;
+      narrationPlayer.src = `./audio/sec-${index}.wav`;
+      narrationPlayer.volume = 0.9;
 
-    narrationPlayer.play();
+      // Reset/Sync Videos
+      if (index === 1 && scene1Video) {
+        // Scene 1 stays paused until the timeupdate listener triggers it (final 8s)
+        scene1Video.pause();
+        scene1Video.currentTime = 0;
+        scene1Video.playbackRate = 1.0; 
 
-    narrationPlayer.onended = () => {
-      bgMusic.animate([
-        { volume: bgMusic.volume },
-        { volume: 0.4 }
-      ], { duration: 500, fill: 'forwards' });
-    };
-  }
+        if (activeAmbient.paused) {
+          activeAmbient.currentTime = 0;
+          activeAmbient.play();
+        }
+      } else if (index === 3 && scene3Video1 && scene3Video2) {
+        // Sequential "Splice": Video 1 then Video 2 to fill 28s
+        const halfDuration = 14000; // 14s each
+        
+        scene3Video1.currentTime = 0;
+        scene3Video1.playbackRate = 8 / 14; 
+        scene3Video1.style.opacity = '1';
+        scene3Video1.play();
 
-  panels.forEach(panel => {
-    observer.observe(panel);
-  });
+        scene3Video2.currentTime = 0;
+        scene3Video2.playbackRate = 8 / 14;
+        scene3Video2.style.opacity = '0';
+        scene3Video2.pause();
 
-  // Handle horizontal scrolling with mouse wheel (optional, but good UX for desktop)
-  const carousel = document.getElementById('carousel');
-  carousel.addEventListener('wheel', (evt) => {
-    if (Math.abs(evt.deltaY) > Math.abs(evt.deltaX)) {
-      evt.preventDefault();
-      carousel.scrollBy({
-        left: evt.deltaY > 0 ? window.innerWidth : -window.innerWidth,
-        behavior: 'smooth'
-      });
+        // Cross-fade to video 2 at halfway mark
+        this.scene3Timeout = setTimeout(() => {
+          scene3Video1.style.opacity = '0';
+          scene3Video2.style.opacity = '1';
+          scene3Video2.play();
+          setTimeout(() => scene3Video1.pause(), 1000);
+        }, halfDuration);
+      } else if (index === 4 && scene4Video) {
+        // Slow down 8s video to match 20s narration
+        scene4Video.currentTime = 0;
+        scene4Video.playbackRate = 8 / 20;
+        scene4Video.play();
+      } else if (index === 5 && scene5Video) {
+        // Slow down 8s video to match 23s narration
+        scene5Video.currentTime = 0;
+        scene5Video.playbackRate = 8 / 23;
+        scene5Video.play();
+      }
+
+      // Cleanup videos for other scenes
+      if (index !== 1) {
+        scene1Video.pause();
+        scene1Video.currentTime = 0;
+      }
+      if (index !== 3) {
+        if (this.scene3Timeout) clearTimeout(this.scene3Timeout);
+        if (scene3Video1) {
+          scene3Video1.pause();
+          scene3Video1.style.opacity = '1';
+        }
+        if (scene3Video2) {
+          scene3Video2.pause();
+          scene3Video2.style.opacity = '0';
+        }
+      }
+      if (index !== 4 && scene4Video) {
+        scene4Video.pause();
+      }
+      if (index !== 5 && scene5Video) {
+        scene5Video.pause();
+      }
+
+      // Duck background music
+      const currentVol = hubVol.value;
+      fadeVolume(activeAmbient, currentVol * 0.25, 500);
+
+      narrationPlayer.play();
+
+      narrationPlayer.onended = () => {
+        if (isMasterSequence) {
+          if (index < 5) {
+            // Advance scroll to next panel
+            const nextPanel = panels[index];
+            nextPanel.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'start' });
+            setTimeout(() => narrate(index + 1), 1000);
+          } else {
+            toggleMasterSequence(); // End sequence
+          }
+        } else {
+          fadeVolume(activeAmbient, currentVol, 500);
+        }
+      };
     }
-  }, { passive: false });
-</script>
+
+    function toggleMasterSequence() {
+      isMasterSequence = !isMasterSequence;
+      const btn = document.getElementById('btn-master');
+      const icon = document.getElementById('master-icon');
+
+      if (isMasterSequence) {
+        btn.classList.add('active');
+        hub.classList.add('pulse-glow');
+        icon.innerText = '■';
+        lastIndex = 1;
+        // Start from Panel 1
+        panels[0].scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'start' });
+        setTimeout(() => narrate(1), 1000);
+      } else {
+        btn.classList.remove('active');
+        hub.classList.remove('pulse-glow');
+        icon.innerText = '▶';
+        narrationPlayer.pause();
+        // Restore volume
+        fadeVolume(activeAmbient, hubVol.value, 500);
+      }
+    }
+
+    function switchAmbient(num) {
+      const nextAmbient = num === 1 ? ambient1 : ambient2;
+      if (nextAmbient === activeAmbient) return;
+
+      document.getElementById('btn-ambient-1').classList.toggle('active', num === 1);
+      document.getElementById('btn-ambient-2').classList.toggle('active', num === 2);
+
+      const oldAmbient = activeAmbient;
+      nextAmbient.volume = 0;
+      nextAmbient.play();
+
+      const targetVol = hubVol.value * (isSpeaking() ? 0.25 : 1);
+
+      fadeVolume(nextAmbient, targetVol, 1000);
+      fadeVolume(oldAmbient, 0, 1000);
+
+      setTimeout(() => {
+        oldAmbient.pause();
+        activeAmbient = nextAmbient;
+      }, 1000);
+    }
+
+    panels.forEach(panel => {
+      observer.observe(panel);
+    });
+
+    // Handle horizontal scrolling with mouse wheel (optional, but good UX for desktop)
+    const carousel = document.getElementById('carousel');
+    carousel.addEventListener('wheel', (evt) => {
+      if (Math.abs(evt.deltaY) > Math.abs(evt.deltaX)) {
+        evt.preventDefault();
+        carousel.scrollBy({
+          left: evt.deltaY * 5,
+          behavior: 'auto'
+        });
+      }
+    }, { passive: false });
+  </script>
 </body>
+
 </html>

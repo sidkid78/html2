@@ -1,0 +1,616 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>High-Precision Commercial Cultivation Architecture</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@100..800&family=Space+Grotesk:wght@300..700&display=swap');
+
+    :root {
+      --bg: #05080A;
+      --surface: #0B1116;
+      --border: rgba(0, 255, 204, 0.15);
+      --text-main: #E2E8F0;
+      --text-dim: #94A3B8;
+      --accent: #00FFCC;
+      --accent-dim: rgba(0, 255, 204, 0.2);
+      --alert: #FF3366;
+      --font-head: 'Space Grotesk', sans-serif;
+      --font-mono: 'JetBrains Mono', monospace;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      background-color: var(--bg);
+      color: var(--text-main);
+      font-family: var(--font-head);
+      line-height: 1.6;
+      overflow-x: hidden;
+      cursor: none;
+    }
+
+    /* Custom Cursor */
+    #cursor {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 20px;
+      height: 20px;
+      border: 1px solid var(--accent);
+      border-radius: 50%;
+      transform: translate(-50%, -50%);
+      pointer-events: none;
+      z-index: 9999;
+      transition: width 0.2s, height 0.2s, background-color 0.2s;
+    }
+
+    #cursor::after {
+      content: '';
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      width: 4px;
+      height: 4px;
+      background: var(--accent);
+      transform: translate(-50%, -50%);
+    }
+
+    /* Ambient Grid Background */
+    .grid-bg {
+      position: fixed;
+      inset: 0;
+      background-size: 40px 40px;
+      background-image:
+        linear-gradient(to right, var(--border) 1px, transparent 1px),
+        linear-gradient(to bottom, var(--border) 1px, transparent 1px);
+      z-index: 0;
+      pointer-events: none;
+    }
+
+    /* SVG Noise Filter Container */
+    .noise-layer {
+      position: fixed;
+      inset: 0;
+      z-index: 1;
+      pointer-events: none;
+      mix-blend-mode: overlay;
+      opacity: 0.4;
+    }
+
+    /* Main Layout */
+    .layout {
+      display: flex;
+      position: relative;
+      z-index: 10;
+      width: 100%;
+    }
+
+    /* Left Column: Scrolling Text */
+    .scroller {
+      width: 50%;
+      padding: 0 4vw;
+      padding-bottom: 30vh;
+    }
+
+    /* Right Column: Sticky Visuals */
+    .visuals {
+      width: 50%;
+      height: 100vh;
+      position: sticky;
+      top: 0;
+      border-left: 1px solid var(--border);
+      overflow: hidden;
+      background: var(--surface);
+    }
+
+    .img-layer {
+      position: absolute;
+      inset: 0;
+      background-size: cover;
+      background-position: center;
+      opacity: 0;
+      transition: opacity 0.8s cubic-bezier(0.65, 0, 0.35, 1), transform 1.5s ease-out;
+      transform: scale(1.05);
+      /* Technical Monochromatic Treatment */
+      filter: grayscale(100%) contrast(1.2);
+      mix-blend-mode: screen;
+    }
+
+    .visuals::after {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: var(--accent);
+      mix-blend-mode: multiply;
+      opacity: 0.3;
+      pointer-events: none;
+    }
+
+    .img-layer.active {
+      opacity: 1;
+      transform: scale(1);
+    }
+
+    /* Typography & Components */
+    header {
+      height: 100vh;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+    }
+
+    .meta-label {
+      font-family: var(--font-mono);
+      font-size: 0.75rem;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      color: var(--accent);
+      margin-bottom: 1rem;
+      display: block;
+    }
+
+    h1 {
+      font-size: clamp(2.5rem, 4vw, 5rem);
+      line-height: 1.1;
+      text-transform: uppercase;
+      font-weight: 700;
+      margin-bottom: 2rem;
+      letter-spacing: -0.02em;
+    }
+
+    h2 {
+      font-family: var(--font-mono);
+      font-size: clamp(1.2rem, 2vw, 1.8rem);
+      color: var(--accent);
+      margin: 15vh 0 3rem 0;
+      padding-bottom: 1rem;
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: baseline;
+      gap: 1rem;
+    }
+
+    h2 span {
+      font-size: 0.8rem;
+      opacity: 0.5;
+    }
+
+    .block-text {
+      font-size: 1.1rem;
+      color: var(--text-dim);
+      margin-bottom: 2rem;
+    }
+
+    /* Bullet Modules */
+    .module {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      padding: 1.5rem;
+      margin-bottom: 1rem;
+      position: relative;
+    }
+
+    .module::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 4px;
+      height: 100%;
+      background: var(--accent);
+      transform: scaleY(0);
+      transform-origin: top;
+      transition: transform 0.4s ease;
+    }
+
+    .module:hover::before {
+      transform: scaleY(1);
+    }
+
+    .module-title {
+      font-family: var(--font-mono);
+      color: var(--text-main);
+      margin-bottom: 0.5rem;
+      font-weight: 600;
+    }
+
+    /* Tensions specific styling */
+    .tension-box {
+      border: 1px solid var(--alert);
+      padding: 1.5rem;
+      margin-bottom: 2rem;
+      background: rgba(255, 51, 102, 0.05);
+    }
+
+    .tension-head {
+      color: var(--alert);
+      font-family: var(--font-mono);
+      margin-bottom: 1rem;
+      font-size: 0.9rem;
+      text-transform: uppercase;
+    }
+
+    .resolution-head {
+      color: var(--accent);
+      font-family: var(--font-mono);
+      margin-top: 1rem;
+      margin-bottom: 0.5rem;
+      font-size: 0.9rem;
+    }
+
+    /* Steps specific styling */
+    .step-row {
+      display: flex;
+      gap: 1.5rem;
+      margin-bottom: 2rem;
+      border-top: 1px solid var(--border);
+      padding-top: 1.5rem;
+    }
+
+    .step-num {
+      font-family: var(--font-mono);
+      font-size: 2rem;
+      color: var(--accent);
+      line-height: 1;
+    }
+
+    .step-content ul {
+      list-style: none;
+      margin-top: 0.5rem;
+    }
+
+    .step-content li {
+      color: var(--text-dim);
+      position: relative;
+      padding-left: 1.5rem;
+      margin-bottom: 0.5rem;
+    }
+
+    .step-content li::before {
+      content: '>';
+      position: absolute;
+      left: 0;
+      color: var(--accent);
+      font-family: var(--font-mono);
+    }
+
+    /* Animation Classes */
+    .rev {
+      opacity: 0;
+      transform: translateY(20px);
+      transition: opacity 0.8s ease, transform 0.8s cubic-bezier(0.2, 0.8, 0.2, 1);
+    }
+
+    .rev.in-view {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    /* HUD Overlay Elements */
+    .hud-corners {
+      position: fixed;
+      inset: 20px;
+      pointer-events: none;
+      z-index: 100;
+    }
+
+    .hud-corner {
+      position: absolute;
+      width: 20px;
+      height: 20px;
+      border: 2px solid var(--accent);
+    }
+
+    .hud-tl {
+      top: 0;
+      left: 0;
+      border-right: none;
+      border-bottom: none;
+    }
+
+    .hud-tr {
+      top: 0;
+      right: 0;
+      border-left: none;
+      border-bottom: none;
+    }
+
+    .hud-bl {
+      bottom: 0;
+      left: 0;
+      border-right: none;
+      border-top: none;
+    }
+
+    .hud-br {
+      bottom: 0;
+      right: 0;
+      border-left: none;
+      border-top: none;
+    }
+
+    /* Mobile Adaptation */
+    @media (max-width: 900px) {
+      .layout {
+        flex-direction: column;
+      }
+
+      .scroller {
+        width: 100%;
+        padding: 0 5vw;
+      }
+
+      .visuals {
+        position: fixed;
+        width: 100%;
+        z-index: -1;
+        opacity: 0.2;
+      }
+
+      h1 {
+        font-size: 2.5rem;
+      }
+    }
+  </style>
+</head>
+
+<body>
+
+  <div id="cursor"></div>
+
+  <div class="grid-bg"></div>
+
+  <svg class="noise-layer">
+    <filter id="static">
+      <feTurbulence type="fractalNoise" baseFrequency="0.8" numOctaves="3" stitchTiles="stitch">
+        <animate attributeName="seed" values="1;100" dur="1s" repeatCount="indefinite" />
+      </feTurbulence>
+      <feColorMatrix type="matrix" values="1 0 0 0 0, 0 1 0 0 0, 0 0 1 0 0, 0 0 0 0.2 0" />
+    </filter>
+    <rect width="100%" height="100%" filter="url(#static)" />
+  </svg>
+
+  <div class="hud-corners">
+    <div class="hud-corner hud-tl"></div>
+    <div class="hud-corner hud-tr"></div>
+    <div class="hud-corner hud-bl"></div>
+    <div class="hud-corner hud-br"></div>
+  </div>
+
+  <main class="layout">
+    <article class="scroller">
+
+      <!-- HERO / OBJECTIVE -->
+      <section class="section-block" data-img="0">
+        <header>
+          <span class="meta-label rev">System // Initialization</span>
+          <h1 class="rev">Executive Strategy Brief</h1>
+          <div class="meta-label rev" style="margin-top: -1rem; margin-bottom: 2rem;">High-Precision Commercial
+            Cultivation Architecture</div>
+          <p class="block-text rev"><strong style="color:var(--text-main)">Objective:</strong> Strategic synthesis of
+            Biological, Physical, and Software domains to deploy a highly scalable, commercial-grade magic mushroom (and
+            high-value therapeutic fungi) cultivation system.</p>
+        </header>
+      </section>
+
+      <!-- SECTION 1 -->
+      <section class="section-block" data-img="1">
+        <h2 class="rev"><span>01</span> Strategic Insights & Highest-Impact Findings</h2>
+
+        <div class="module rev">
+          <div class="module-title">Precision Triggers Yield</div>
+          <p class="block-text">The biological transition from vegetative colonization to reproductive fruiting requires
+            rapid, simultaneous "environmental shocks" (sudden temperature drops, CO2 flushing, and light introduction).
+            Executing these shocks without destabilizing the system requires fully modulating, inverter-driven HVAC
+            hardware governed by deterministic edge-computing.</p>
+        </div>
+
+        <div class="module rev">
+          <div class="module-title">Biosecurity is the Primary Economic Driver</div>
+          <p class="block-text">Fungal contamination (<em>Trichoderma</em>, <em>Bacillus</em>) is the highest risk to
+            economic viability. Mitigation requires a multi-tiered approach: physical facility zoning (HEPA, Vacuum
+            Insulated Panels), extreme sterilization (15 PSI for >2.5 hours), and automated software safety interlocks
+            that minimize human vectoring.</p>
+        </div>
+
+        <div class="module rev">
+          <div class="module-title">Infinite Scalability via Centralized Topology</div>
+          <p class="block-text">Commercial expansion will utilize a Central Trunk utility backbone (plug-and-play power,
+            fluids, and data). This allows horizontal and vertical module expansion with zero system downtime, managed
+            seamlessly by a Sensor Abstraction Layer (SAL) in the control software.</p>
+        </div>
+      </section>
+
+      <!-- SECTION 2 -->
+      <section class="section-block" data-img="2">
+        <h2 class="rev"><span>02</span> Cross-Domain System Integration</h2>
+        <p class="block-text rev">Our system's resilience comes from tightly coupling biological requirements with
+          hardware constraints and software logic:</p>
+
+        <div class="module rev">
+          <div class="module-title">Latent Heat and Humidity Management</div>
+          <p class="block-text">The pinning phase requires extreme humidity (95–100% RH). Traditional steam humidifiers
+            inject sensible heat, which would ruin the critical temperature-drop shock required for fruiting. <strong
+              style="color:var(--accent)">Integration:</strong> We will utilize ultrasonic humidifiers (Hardware)
+            governed by PI Control loops with Kd=0 (Software) to maintain ±2% RH without altering the sensible
+            temperature, ensuring perfect morphological cueing (Biology).</p>
+        </div>
+
+        <div class="module rev">
+          <div class="module-title">Data-Driven Lifecycle Progression</div>
+          <p class="block-text">Fungal colonization thrives in high CO2 (up to 20,000 PPM), while fruiting demands low
+            CO2 (<800 PPM). <strong style="color:var(--accent)">Integration:</strong> High-fidelity Sensirion SCD30
+              sensors (Hardware) feed edge-validated data via MQTT (Software) to trigger automated fresh-air exhaust
+              sequences precisely when the mycelium reaches maturity, simulating natural emergence (Biology).</p>
+        </div>
+      </section>
+
+      <!-- SECTION 3 -->
+      <section class="section-block" data-img="3">
+        <h2 class="rev"><span>03</span> Critical Tensions & Contradictions</h2>
+
+        <div class="tension-box rev">
+          <div class="tension-head">Tension 1: High Humidity vs. Sensor Fidelity</div>
+          <p class="block-text">Mycology requires near 100% RH during critical growth phases, an environment that
+            inherently causes electronic sensor drift and failure.</p>
+          <div class="resolution-head">Resolution</div>
+          <p class="block-text" style="margin-bottom:0;">Hardware must utilize aspirated radiation shields to protect
+            probes, while Software will implement Triple Modular Redundancy (TMR) voting logic to computationally
+            identify and ignore drifting/fouled sensors.</p>
+        </div>
+
+        <div class="tension-box rev">
+          <div class="tension-head">Tension 2: Environmental Shocks vs. Microclimate Stability</div>
+          <p class="block-text">The biological mandate to rapidly flush CO2 from 20,000 PPM to 800 PPM requires massive
+            fresh air exchange. This directly contradicts the hardware mandate to maintain strict ±0.5°C and ±2% RH
+            tolerances, as untreated outside air will wildly destabilize the chamber.</p>
+          <div class="resolution-head">Resolution</div>
+          <p class="block-text" style="margin-bottom:0;">Intake air must be aggressively pre-conditioned using desiccant
+            dehumidifiers and inverter-driven mini-splits before entering the central trunk. Software must use
+            Split-Range PID tuning to anticipate this sudden load.</p>
+        </div>
+
+        <div class="tension-box rev">
+          <div class="tension-head">Tension 3: Biological Lag vs. Automation Speed</div>
+          <p class="block-text">High-frequency edge computing (operating in milliseconds) will naturally overcorrect for
+            slow-moving biological variables (like the thermal inertia of dense, hydrated substrate blocks).</p>
+          <div class="resolution-head">Resolution</div>
+          <p class="block-text" style="margin-bottom:0;">The control logic must implement a Smith Predictor and Integral
+            Anti-Windup. This prevents actuator "chattering" and resource overdosing by acknowledging the dead-time
+            between an HVAC action and the substrate's actual biological response.</p>
+        </div>
+      </section>
+
+      <!-- SECTION 4 -->
+      <section class="section-block" data-img="4">
+        <h2 class="rev"><span>04</span> Prioritized Next Steps</h2>
+
+        <div class="step-row rev">
+          <div class="step-num">01</div>
+          <div class="step-content">
+            <div class="module-title">Phase 1: Prototype the Modular Node (Hardware & Software)</div>
+            <ul>
+              <li>Construct a single Alpha-module using 45 Series aluminum and Vacuum Insulated Panels (VIP).</li>
+              <li>Deploy the FreeRTOS gateway with the Carel c.pCO DDC to validate the unloaded baseline climate
+                tolerances (±0.5°C / ±2% RH).</li>
+            </ul>
+          </div>
+        </div>
+
+        <div class="step-row rev">
+          <div class="step-num">02</div>
+          <div class="step-content">
+            <div class="module-title">Phase 2: Biological Baselines & Control Tuning (Biology & Software)</div>
+            <ul>
+              <li>Execute a test crop using a rapid-cycle proxy species (e.g., Oyster mushrooms, 15–25 days) on
+                supplemented Master's Mix (sterilized at 15 PSI).</li>
+              <li>Use this rapid growth cycle to calibrate the PID loops for Vapor Pressure Deficit (VPD) and CO2
+                extraction rates.</li>
+            </ul>
+          </div>
+        </div>
+
+        <div class="step-row rev">
+          <div class="step-num">03</div>
+          <div class="step-content">
+            <div class="module-title">Phase 3: Central Trunk Engineering (Physical Infrastructure)</div>
+            <ul>
+              <li>Finalize the design of the centralized utility backbone.</li>
+              <li>Secure sourcing for dry-break fluid quick-disconnects, IP67 overhead power busbars, and dual-stack
+                (MQTT/LoRa) network architecture.</li>
+            </ul>
+          </div>
+        </div>
+
+        <div class="step-row rev">
+          <div class="step-num">04</div>
+          <div class="step-content">
+            <div class="module-title">Phase 4: Cloud Pipeline Deployment (Data & Operations)</div>
+            <ul>
+              <li>Establish the AWS IoT / TimescaleDB cloud architecture.</li>
+              <li>Build the executive dashboard prioritizing semantic UI (Green/Yellow/Red) and intelligent alert
+                deduplication to prevent operator fatigue during commercial scale-up.</li>
+            </ul>
+          </div>
+        </div>
+      </section>
+
+    </article>
+
+    <!-- VISUAL CONTEXT WINDOW -->
+    <aside class="visuals">
+      <div class="img-layer active" id="img-idx-0" style="background-image: url('./images/executive-mood.png');"></div>
+      <div class="img-layer" id="img-idx-1" style="background-image: url('./images/mush-1(3).jpg');"></div>
+      <div class="img-layer" id="img-idx-2" style="background-image: url('./images/mush-3(3).jpg');"></div>
+      <div class="img-layer" id="img-idx-3" style="background-image: url('./images/mush-4(3).jpg');"></div>
+      <div class="img-layer" id="img-idx-4" style="background-image: url('./images/mush-5(2).jpg');"></div>
+    </aside>
+  </main>
+
+  <script>
+    // Custom Cursor Logic
+    const cursor = document.getElementById('cursor');
+    document.addEventListener('mousemove', (e) => {
+      cursor.style.left = e.clientX + 'px';
+      cursor.style.top = e.clientY + 'px';
+    });
+
+    document.querySelectorAll('h2, .module, .tension-box, .step-row').forEach(el => {
+      el.addEventListener('mouseenter', () => {
+        cursor.style.width = '40px';
+        cursor.style.height = '40px';
+        cursor.style.backgroundColor = 'rgba(0, 255, 204, 0.1)';
+      });
+      el.addEventListener('mouseleave', () => {
+        cursor.style.width = '20px';
+        cursor.style.height = '20px';
+        cursor.style.backgroundColor = 'transparent';
+      });
+    });
+
+    // Scroll Reveal and Image Swapping Logic
+    const revElements = document.querySelectorAll('.rev');
+    const sections = document.querySelectorAll('.section-block');
+    const images = document.querySelectorAll('.img-layer');
+
+    const observerOptions = {
+      root: null,
+      rootMargin: '0px',
+      threshold: 0.15
+    };
+
+    const revObserver = new IntersectionObserver((entries, observer) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          entry.target.classList.add('in-view');
+        }
+      });
+    }, observerOptions);
+
+    revElements.forEach(el => revObserver.observe(el));
+
+    // Section observer to change background images
+    const sectionObserver = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting && entry.intersectionRatio > 0.2) {
+          const imgIndex = entry.target.getAttribute('data-img');
+          images.forEach(img => img.classList.remove('active'));
+          const targetImg = document.getElementById(`img-idx-${imgIndex}`);
+          if (targetImg) targetImg.classList.add('active');
+        }
+      });
+    }, { threshold: 0.3 });
+
+    sections.forEach(sec => sectionObserver.observe(sec));
+  </script>
+
+</body>
+
+</html>

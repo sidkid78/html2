@@ -1,0 +1,682 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Agentic Engineering</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@100;400;700;800&family=Inter:wght@300;400;600&display=swap');
+
+    :root {
+      --bg: #040507;
+      --surface: #0a0d14;
+      --surface-alt: #121620;
+      --border: #1d2435;
+      --accent: #00f0ff;
+      --text-main: #e2e8f0;
+      --text-muted: #8b9bb4;
+      --font-mono: 'JetBrains Mono', monospace;
+      --font-sans: 'Inter', sans-serif;
+      --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
+      --ease-in-out: cubic-bezier(0.65, 0, 0.35, 1);
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      background-color: var(--bg);
+      color: var(--text-main);
+      font-family: var(--font-sans);
+      overflow: hidden;
+      cursor: none;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    /* SVG Filters */
+    .filter-noise {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
+      pointer-events: none;
+      z-index: 50;
+      opacity: 0.4;
+      mix-blend-mode: overlay;
+    }
+
+    /* Custom Cursor */
+    #cursor {
+      width: 24px;
+      height: 24px;
+      border: 1px solid rgba(0, 240, 255, 0.5);
+      position: fixed;
+      top: -12px;
+      left: -12px;
+      pointer-events: none;
+      z-index: 9999;
+      transition: transform 0.1s ease-out, scale 0.2s var(--ease-out);
+      mix-blend-mode: difference;
+    }
+
+    #cursor::after {
+      content: '';
+      position: absolute;
+      top: 50%;
+      left: -6px;
+      right: -6px;
+      height: 1px;
+      background: var(--accent);
+    }
+
+    #cursor::before {
+      content: '';
+      position: absolute;
+      left: 50%;
+      top: -6px;
+      bottom: -6px;
+      width: 1px;
+      background: var(--accent);
+    }
+
+    .hovering-interactive #cursor {
+      transform: scale(1.5);
+      border-radius: 50%;
+    }
+
+    /* UI Chrome */
+    .progress-container {
+      position: fixed;
+      bottom: 2rem;
+      left: 2rem;
+      z-index: 100;
+      font-family: var(--font-mono);
+      font-size: 0.75rem;
+      color: var(--accent);
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      letter-spacing: 0.1em;
+    }
+
+    .progress-bar {
+      width: 100px;
+      height: 1px;
+      background: var(--border);
+      position: relative;
+    }
+
+    .progress-fill {
+      position: absolute;
+      top: 0;
+      left: 0;
+      height: 100%;
+      background: var(--accent);
+      width: 12.5%;
+      transition: width 0.6s var(--ease-out);
+    }
+
+    /* Carousel Container */
+    .carousel {
+      display: flex;
+      overflow-x: auto;
+      overflow-y: hidden;
+      scroll-snap-type: x mandatory;
+      height: 100vh;
+      width: 100vw;
+      scroll-behavior: smooth;
+    }
+
+    .carousel::-webkit-scrollbar {
+      display: none;
+    }
+
+    /* Panel Core */
+    .panel {
+      flex: 0 0 100vw;
+      width: 100vw;
+      height: 100vh;
+      scroll-snap-align: start;
+      position: relative;
+      padding: 6rem 4rem;
+      display: grid;
+      grid-template-columns: repeat(12, 1fr);
+      gap: 2rem;
+      align-items: center;
+    }
+
+    /* Typography */
+    .hero-title {
+      font-family: var(--font-mono);
+      font-size: clamp(2rem, 5vw, 6rem);
+      font-weight: 800;
+      line-height: 1;
+      text-transform: uppercase;
+      letter-spacing: -0.02em;
+      grid-column: 1 / 11;
+      margin-bottom: 2rem;
+      filter: url(#chromatic-hover);
+      transition: filter 0.3s;
+    }
+
+    .hero-title:hover {
+      filter: url(#chromatic);
+    }
+
+    .section-title {
+      font-family: var(--font-mono);
+      font-size: clamp(1rem, 2vw, 2rem);
+      color: var(--accent);
+      font-weight: 400;
+      margin-bottom: 1.5rem;
+      text-transform: uppercase;
+      grid-column: 1 / -1;
+    }
+
+    p,
+    li {
+      font-size: 1.125rem;
+      line-height: 1.6;
+      color: var(--text-muted);
+      margin-bottom: 1.25rem;
+    }
+
+    strong {
+      color: var(--text-main);
+      font-weight: 600;
+    }
+
+    /* Structural Archetypes */
+    .text-block {
+      grid-column: 1 / 6;
+      z-index: 2;
+    }
+
+    .image-block {
+      grid-column: 7 / 13;
+      position: relative;
+      height: 60vh;
+      z-index: 1;
+    }
+
+    .image-block img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      filter: grayscale(100%) contrast(1.2) brightness(0.7);
+      border: 1px solid var(--border);
+      transition: filter 0.8s var(--ease-out);
+    }
+
+    .panel.is-active .image-block img {
+      filter: grayscale(50%) contrast(1.1) brightness(0.9);
+    }
+
+    .image-overlay {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: var(--accent);
+      mix-blend-mode: multiply;
+      opacity: 0.2;
+    }
+
+    /* Tables & Lists */
+    .tech-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-family: var(--font-mono);
+      font-size: 0.875rem;
+      grid-column: 1 / -1;
+    }
+
+    .tech-table th,
+    .tech-table td {
+      border: 1px solid var(--border);
+      padding: 1rem;
+      text-align: left;
+    }
+
+    .tech-table th {
+      color: var(--accent);
+      font-weight: 400;
+      text-transform: uppercase;
+    }
+
+    ul {
+      list-style: none;
+    }
+
+    li {
+      position: relative;
+      padding-left: 1.5rem;
+    }
+
+    li::before {
+      content: '>';
+      position: absolute;
+      left: 0;
+      top: 0;
+      color: var(--accent);
+      font-family: var(--font-mono);
+    }
+
+    /* Specialized Layouts */
+    .grid-3-col {
+      grid-column: 1 / -1;
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 2rem;
+    }
+
+    .card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      padding: 2rem;
+      transition: transform 0.4s var(--ease-out), border-color 0.4s;
+    }
+
+    .card:hover {
+      transform: translateY(-10px);
+      border-color: var(--accent);
+    }
+
+    .huge-number {
+      font-family: var(--font-mono);
+      font-size: 8rem;
+      color: var(--surface-alt);
+      position: absolute;
+      top: -2rem;
+      right: 1rem;
+      line-height: 1;
+      z-index: 0;
+      pointer-events: none;
+    }
+
+    .roadmap-item {
+      position: relative;
+      z-index: 1;
+      padding: 2rem;
+      border-top: 1px solid var(--border);
+    }
+
+    /* Animations */
+    .reveal {
+      opacity: 0;
+      transform: translateY(30px);
+      transition: opacity 0.8s var(--ease-out), transform 0.8s var(--ease-out);
+    }
+
+    .panel.is-active .reveal {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    .d-1 {
+      transition-delay: 0.1s;
+    }
+
+    .d-2 {
+      transition-delay: 0.2s;
+    }
+
+    .d-3 {
+      transition-delay: 0.3s;
+    }
+
+    .d-4 {
+      transition-delay: 0.4s;
+    }
+
+    .grid-lines {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+      z-index: 0;
+      background-size: 4rem 4rem;
+      background-image: linear-gradient(to right, rgba(255, 255, 255, 0.02) 1px, transparent 1px),
+        linear-gradient(to bottom, rgba(255, 255, 255, 0.02) 1px, transparent 1px);
+    }
+  </style>
+</head>
+
+<body>
+
+  <svg style="display:none;">
+    <filter id="noise">
+      <feTurbulence type="fractalNoise" baseFrequency="0.7" numOctaves="3" stitchTiles="stitch">
+        <animate attributeName="seed" from="0" to="10" dur="1s" repeatCount="indefinite" />
+      </feTurbulence>
+      <feColorMatrix type="matrix" values="1 0 0 0 0, 0 1 0 0 0, 0 0 1 0 0, 0 0 0 0.08 0" />
+    </filter>
+    <filter id="chromatic">
+      <feColorMatrix type="matrix" result="red" values="1 0 0 0 0  0 0 0 0 0  0 0 0 0 0  0 0 0 1 0" />
+      <feOffset in="red" dx="4" dy="0" result="red_shifted" />
+      <feColorMatrix in="SourceGraphic" type="matrix" result="blue"
+        values="0 0 0 0 0  0 1 0 0 0  0 0 1 0 0  0 0 0 1 0" />
+      <feOffset in="blue" dx="-4" dy="0" result="blue_shifted" />
+      <feBlend mode="screen" in="red_shifted" in2="blue_shifted" />
+    </filter>
+  </svg>
+
+  <div class="filter-noise" style="backdrop-filter: url(#noise);"></div>
+  <div id="cursor"></div>
+
+  <div class="progress-container">
+    <span>SYS.LOC</span>
+    <span id="panel-counter">[01/08]</span>
+    <div class="progress-bar">
+      <div class="progress-fill" id="progress-fill"></div>
+    </div>
+    <span>AGENTIC_ENG</span>
+  </div>
+
+  <main class="carousel" id="carousel">
+
+    <!-- Panel 1: Executive Summary -->
+    <section class="panel" data-index="1">
+      <div class="grid-lines"></div>
+      <div class="text-block">
+        <div class="section-title reveal">Executive Summary</div>
+        <h1 class="hero-title reveal d-1">Agentic<br>Engineering</h1>
+        <p class="reveal d-2">Architecting the Future of Software Development</p>
+        <p class="reveal d-3">The software engineering landscape is undergoing a fundamental shift from "vibe
+          coding"—the practice of prompting without a deep understanding of the underlying system—to "agentic
+          engineering." This transition is characterized by the use of specialized agent harnesses, custom developer
+          workflows, and codebase architectures optimized specifically for AI consumption.</p>
+        <p class="reveal d-4">Leading engineering teams, such as Stripe, are already merging over 1,300 pull requests
+          weekly with zero human-written code by leveraging "outloop" agentic systems. To achieve this level of scale,
+          organizations must move beyond off-the-shelf chat interfaces and invest in custom agentic layers.</p>
+      </div>
+      <div class="image-block reveal d-3">
+        <img src="./images/sne-1(1).jpg" alt="Executive Context">
+        <div class="image-overlay"></div>
+      </div>
+    </section>
+
+    <!-- Panel 2: Paradigm Shift -->
+    <section class="panel" data-index="2">
+      <div class="grid-lines"></div>
+      <div class="section-title reveal" style="grid-column: 1 / -1;">I. Defining the Paradigm Shift</div>
+      <h2 class="hero-title reveal d-1" style="font-size: clamp(1.5rem, 3vw, 3rem);">Vibe Coding vs. Agentic Engineering
+      </h2>
+      <div class="text-block" style="grid-column: 1 / 10;">
+        <p class="reveal d-2">The distinction between basic AI-assisted coding and true agentic engineering is defined
+          by the level of control and system knowledge.</p>
+        <ul class="reveal d-3" style="margin-top: 2rem; display: grid; gap: 1.5rem;">
+          <li><strong>Vibe Coding:</strong> Not knowing what will happen in the system and not looking; the
+            lowest-hanging fruit of AI coding.</li>
+          <li><strong>Agentic Engineering:</strong> Knowing what will happen in the system so well that constant human
+            supervision is unnecessary.</li>
+          <li><strong>Specialization as Advantage:</strong> The greatest edge for an engineer is moving away from
+            "out-of-the-box" experiences and toward specialized solutions (custom prompts, custom skills, and
+            specialized agent harnesses).</li>
+        </ul>
+      </div>
+    </section>
+
+    <!-- Panel 3: The Stripe Model -->
+    <section class="panel" data-index="3">
+      <div class="grid-lines"></div>
+      <div class="text-block" style="grid-column: 1 / 5;">
+        <div class="section-title reveal">II. The Stripe Model</div>
+        <h2 class="hero-title reveal d-1" style="font-size: 2.5rem;">High-Scale Agentic Infrastructure</h2>
+        <p class="reveal d-2">Stripe’s "Minions" project demonstrates the potential of fully unattended coding agents
+          operating on a codebase with hundreds of millions of lines of code.</p>
+        <h3 class="reveal d-3" style="color: var(--text-main); font-family: var(--font-mono); margin: 2rem 0 1rem;">The
+          "Outloop" Strategy</h3>
+        <p class="reveal d-4">Stripe distinguishes between Inloop (human babysitting an agent in real-time) and Outloop
+          (parallelization of tasks where the human only plans and reviews). By moving agents out of the loop into
+          dedicated sandboxes, a single engineer can manage multiple agents solving problems in parallel.</p>
+      </div>
+      <div class="text-block reveal d-3" style="grid-column: 6 / 13;">
+        <table class="tech-table">
+          <thead>
+            <tr>
+              <th>Component</th>
+              <th>Description</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>Warm Devbox Pool</td>
+              <td>Isolated AWS EC2 instances that mirror human developer environments. Pre-warmed to boot in 10 seconds.
+              </td>
+            </tr>
+            <tr>
+              <td>Agent Harness</td>
+              <td>A custom fork of the "Goose" coding agent, optimized for Stripe’s specific LLM infrastructure.</td>
+            </tr>
+            <tr>
+              <td>Blueprint Engine</td>
+              <td>A system that interleaves agentic loops with deterministic code (e.g., linters, tests).</td>
+            </tr>
+            <tr>
+              <td>Tool Shed</td>
+              <td>A centralized internal MCP (Model Context Protocol) server housing nearly 500 tools.</td>
+            </tr>
+            <tr>
+              <td>Rules Files</td>
+              <td>MDC/Markdown files with front-matter that conditionally apply context based on subdirectories.</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+      <div
+        style="position: absolute; right: 4rem; top: 4rem; width: 300px; height: 150px; z-index: -1; opacity: 0.3; filter: grayscale(100%);">
+        <img src="./images/scn-2(3).jpg" style="width:100%; height:100%; object-fit:cover;">
+      </div>
+    </section>
+
+    <!-- Panel 4: Architectures -->
+    <section class="panel" data-index="4">
+      <div class="grid-lines"></div>
+      <div class="section-title reveal">III. Optimal Codebase Architectures for AI Agents</div>
+      <p class="reveal d-1" style="grid-column: 1 / 8; font-size: 1.25rem;">To maximize the efficiency of AI coding
+        tools (Claude Code, Cursor, Windsurf, etc.), architectures must prioritize "AI Readability" and context
+        management.</p>
+
+      <div class="grid-3-col reveal d-2">
+        <div class="card">
+          <h3 style="color: var(--accent); margin-bottom: 1rem;">Vertical Slice Architecture</h3>
+          <p style="font-family: var(--font-mono); font-size: 0.75rem; color: var(--text-main); margin-bottom: 0.5rem;">
+            [OPTIMAL FOR AI]</p>
+          <p><strong>Structure:</strong> Everything (API, model, service) is isolated in a single feature directory.</p>
+          <p><strong>Pros:</strong> Allows "one-prompt context priming"; minimizes cross-cutting concerns; highly
+            token-efficient.</p>
+          <p><strong>Cons:</strong> High code duplication; avoids shared "utils" folders to prevent context bloat.</p>
+        </div>
+        <div class="card">
+          <h3 style="color: var(--accent); margin-bottom: 1rem;">Atomic Composable Architecture</h3>
+          <p><strong>Structure:</strong> Atoms → Molecules → Organisms → Membranes.</p>
+          <p><strong>Pros:</strong> Highly reusable and easy to test at the "atom" level.</p>
+          <p><strong>Cons:</strong> The "new feature modification chain problem"—changing an atom requires updating
+            every higher-level composition.</p>
+        </div>
+        <div class="card">
+          <h3 style="color: var(--accent); margin-bottom: 1rem;">Layered Architecture</h3>
+          <p><strong>Structure:</strong> Logic separated by technical layers (API, Models, Services).</p>
+          <p><strong>Cons:</strong> Forces AI tools to search across numerous directories, chewing up tokens.</p>
+        </div>
+      </div>
+      <div
+        style="position: absolute; bottom: 0; left: 0; width: 100%; height: 30vh; z-index: -1; opacity: 0.15; filter: grayscale(100%);">
+        <img src="./images/scn-3(3).jpg" style="width:100%; height:100%; object-fit:cover;">
+      </div>
+    </section>
+
+    <!-- Panel 5: Harness Engineering -->
+    <section class="panel" data-index="5">
+      <div class="grid-lines"></div>
+      <div class="text-block" style="grid-column: 1 / 7;">
+        <div class="section-title reveal">IV. Harness Engineering and Multi-Agent Orchestration</div>
+        <p class="reveal d-1">The "agent harness" is the core product of agentic engineering. It provides deterministic
+          code, token caching, orchestration, and model control.</p>
+        <h3 class="reveal d-2" style="margin-top: 2rem; color: var(--text-main);">Three-Tier Agent Architecture</h3>
+        <ul class="reveal d-3" style="margin-top: 1rem;">
+          <li><strong>1. Orchestrators:</strong> High-level thinkers that plan and delegate; they do not perform raw
+            building.</li>
+          <li><strong>2. Team Leads:</strong> Managers that coordinate sub-tasks and step in if a worker fails (e.g., if
+            a model returns no response).</li>
+          <li><strong>3. Workers:</strong> Hyper-specialized agents (e.g., View Generators, Animation Specialists, Soft
+            Validators) that execute specific tasks within their domain.</li>
+        </ul>
+      </div>
+      <div class="text-block reveal d-4"
+        style="grid-column: 8 / 13; border-left: 1px solid var(--accent); padding-left: 2rem;">
+        <h3 style="color: var(--text-main); margin-bottom: 1rem;">Agent Expertise and Mental Models</h3>
+        <p>Effective harnesses allow agents to maintain "Mental Models" or expertise files. These files (e.g., 7K-8K
+          tokens) allow agents to track their own work, ideas, and system patterns across sessions, creating "agents
+          that learn."</p>
+      </div>
+      <div
+        style="position: absolute; top: 0; right: 0; width: 50vw; height: 100vh; z-index: -2; opacity: 0.1; filter: sepia(100%) hue-rotate(180deg);">
+        <img src="./images/scn-4(3).jpg" style="width:100%; height:100%; object-fit:cover;">
+      </div>
+    </section>
+
+    <!-- Panel 6: Tactical Tools -->
+    <section class="panel" data-index="6">
+      <div class="grid-lines"></div>
+      <div class="section-title reveal">V. Tactical Tools for Agentic Productivity</div>
+      <p class="reveal d-1" style="grid-column: 1 / -1; font-size: 1.5rem;">Maximizing the ROI of agentic coding
+        requires deep visibility into tool performance and costs.</p>
+      <div class="grid-3-col reveal d-2" style="margin-top: 2rem;">
+        <div class="card">
+          <h3 style="color: var(--accent); margin-bottom: 0.5rem;">Claude Trace</h3>
+          <p>A tool that generates local HTML files to inspect Claude Code traffic. It reveals how Claude acts as a
+            "user" to fire off sub-agents and provides full access to hidden system prompts and tool descriptions.</p>
+        </div>
+        <div class="card">
+          <h3 style="color: var(--accent); margin-bottom: 0.5rem;">Usage Tracking</h3>
+          <p>Commands like <code>npx cc usage</code> help engineers view ROI as a return on investment rather than a
+            cost. If an average engineer is 50-70% more productive, the cost of high-tier plans is negligible compared
+            to the saved engineering hours.</p>
+        </div>
+        <div class="card">
+          <h3 style="color: var(--accent); margin-bottom: 0.5rem;">Multi-Modal Tools</h3>
+          <p>Using screenshot MCP servers (like Snaphappy) allows agents to "see" the UI they are building, bridging the
+            gap between terminal-based code and visual results.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- Panel 7: Roadmap -->
+    <section class="panel" data-index="7">
+      <div class="grid-lines"></div>
+      <div class="section-title reveal">VI. Strategic Roadmap</div>
+      <h2 class="hero-title reveal d-1" style="font-size: 3rem; margin-bottom: 3rem;">Five Bets for 2026</h2>
+      <p class="reveal d-1" style="grid-column: 1 / -1; margin-top: -2rem; margin-bottom: 2rem;">The future of
+        engineering is "agent-first." Success in 2026 requires making specific strategic bets today.</p>
+      <div class="reveal d-2" style="grid-column: 1 / 13; display: grid; grid-template-columns: 1fr 1fr; gap: 2rem;">
+        <div class="roadmap-item">
+          <div class="huge-number">01</div>
+          <p><strong>Custom Agents:</strong> Moving into the top 1% of engineering by deploying domain-specific agents
+            in production systems to solve "nasty" complexity.</p>
+        </div>
+        <div class="roadmap-item">
+          <div class="huge-number">02</div>
+          <p><strong>Deprecating Old Skills:</strong> Letting go of manual, line-by-line coding to make space for
+            teaching agents. "It's not about what you can do; it's about what you can teach your agents to do."</p>
+        </div>
+        <div class="roadmap-item">
+          <div class="huge-number">03</div>
+          <p><strong>Limit Breaking Constraints:</strong> Blasting through the time-intensive bottlenecks of planning
+            and reviewing by using AI Developer Workflows (ADWs).</p>
+        </div>
+        <div class="roadmap-item">
+          <div class="huge-number">04</div>
+          <p><strong>Multi-Agent UIs:</strong> Moving beyond lazy chat interfaces toward high-information-rate
+            interfaces, including voice and multi-agent visualization.</p>
+        </div>
+        <div class="roadmap-item" style="grid-column: 1 / -1;">
+          <div class="huge-number">05</div>
+          <p><strong>Compute Maxing:</strong> Transitioning to "always-on" 24/7 custom agents. If an agent is not
+            constantly solving problems on your behalf, you are not using enough compute.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- Panel 8: Definitions -->
+    <section class="panel" data-index="8">
+      <div class="grid-lines"></div>
+      <div class="text-block" style="grid-column: 1 / 7;">
+        <div class="section-title reveal">VII. Key Definitions and Critical Insights</div>
+        <h2 class="hero-title reveal d-1" style="font-size: 2.5rem; text-transform: none; color: var(--accent);">"Manage
+          your context, manage your results."</h2>
+        <ul class="reveal d-2" style="margin-top: 2rem; display: grid; gap: 1.5rem;">
+          <li><strong>ZTE (Zero Touch Engineering):</strong> The North Star goal of shipping from prompt to production
+            with no human oversight.</li>
+          <li><strong>AI Developer Workflow (ADW):</strong> A pipeline of agents that combines the "old world" of
+            deterministic engineering with the "new world" of agentic reasoning.</li>
+          <li><strong>Specialization is the Edge:</strong> Off-the-shelf tools babysit the agent; custom systems allow
+            the agent to operate autonomously.</li>
+          <li><strong>The ROI Question:</strong> "Your time is your most valuable resource." High-scale agentic
+            engineering is an investment in time recovery.</li>
+        </ul>
+      </div>
+      <div class="image-block reveal d-3" style="grid-column: 8 / 13;">
+        <img src="./images/scn-5(3).jpg" alt="Future State">
+        <div class="image-overlay"></div>
+      </div>
+    </section>
+
+  </main>
+
+  <script>
+    // Custom Cursor Logic
+    const cursor = document.getElementById('cursor');
+    document.addEventListener('mousemove', (e) => {
+      cursor.style.transform = `translate(${e.clientX}px, ${e.clientY}px)`;
+    });
+
+    // Add hover state for links/interactive elements if added later
+    document.querySelectorAll('a, .card').forEach(el => {
+      el.addEventListener('mouseenter', () => document.body.classList.add('hovering-interactive'));
+      el.addEventListener('mouseleave', () => document.body.classList.remove('hovering-interactive'));
+    });
+
+    // Intersection Observer for Animations & Progress Tracking
+    const panels = document.querySelectorAll('.panel');
+    const counter = document.getElementById('panel-counter');
+    const progressFill = document.getElementById('progress-fill');
+    const totalPanels = panels.length;
+
+    const observerOptions = {
+      root: document.getElementById('carousel'),
+      threshold: 0.5
+    };
+
+    const panelObserver = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          entry.target.classList.add('is-active');
+          const index = entry.target.getAttribute('data-index');
+
+          // Update UI Chrome
+          const formattedIndex = index.padStart(2, '0');
+          const formattedTotal = totalPanels.toString().padStart(2, '0');
+          counter.innerText = `[${formattedIndex}/${formattedTotal}]`;
+
+          // Update Progress Bar
+          const percentage = (index / totalPanels) * 100;
+          progressFill.style.width = `${percentage}%`;
+        }
+      });
+    }, observerOptions);
+
+    panels.forEach(panel => panelObserver.observe(panel));
+  </script>
+</body>
+
+</html>
