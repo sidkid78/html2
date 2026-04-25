@@ -121,6 +121,15 @@ const hubs = [
     shadow: "hover:shadow-[0_0_40px_-10px_rgba(6,182,212,0.3)]"
   },
   {
+    title: "The Lewis Huggins Leopards",
+    description: "A monument to a quiet hero. The story of Dr. L. James Lewis, Salk vaccine pioneer, told through a rare Verre Églomisé masterpiece.",
+    href: "/leopards",
+    icon: "🐆",
+    color: "from-amber-700 to-yellow-800",
+    border: "hover:border-amber-500/50",
+    shadow: "hover:shadow-[0_0_40px_-10px_rgba(207,160,82,0.2)]"
+  },
+  {
     title: "Strategic Mycology & Cultivation",
     description: "High-precision commercial cultivation architecture. Biological, hardware, and infrastructure domain reports.",
     href: "/index.html",

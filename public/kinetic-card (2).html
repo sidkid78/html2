@@ -1,0 +1,512 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Final Protocol</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Rajdhani:wght@500;700&family=Space+Mono:ital,wght@0,400;0,700;1,400&display=swap');
+
+        :root {
+            --bg: #020603;
+            --fg: #8ab496;
+            --accent: #00ff41;
+            --alert: #ff3333;
+            --border: rgba(0, 255, 65, 0.2);
+            --scan: rgba(0, 255, 65, 0.05);
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            cursor: none;
+        }
+
+        body {
+            background-color: var(--bg);
+            color: var(--fg);
+            font-family: 'Space Mono', monospace;
+            overflow-x: hidden;
+            line-height: 1.5;
+            font-size: 14px;
+        }
+
+        ::selection {
+            background: var(--accent);
+            color: var(--bg);
+        }
+
+        h1,
+        h2,
+        h3,
+        h4,
+        .accent-text {
+            font-family: 'Rajdhani', sans-serif;
+            text-transform: uppercase;
+            color: var(--accent);
+            letter-spacing: 0.05em;
+        }
+
+        .cursor {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 14px;
+            height: 24px;
+            background-color: var(--accent);
+            pointer-events: none;
+            z-index: 9999;
+            mix-blend-mode: difference;
+            transition: transform 0.1s ease-out;
+            transform: translate(-50%, -50%);
+        }
+
+        .scanline {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 10px;
+            background: var(--scan);
+            z-index: 9998;
+            pointer-events: none;
+            animation: scan 6s linear infinite;
+            box-shadow: 0 0 20px 5px var(--scan);
+        }
+
+        @keyframes scan {
+            0% {
+                top: -10vh;
+            }
+
+            100% {
+                top: 110vh;
+            }
+        }
+
+        .crt-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            background: radial-gradient(circle, rgba(0, 0, 0, 0) 60%, rgba(0, 0, 0, 0.8) 100%);
+            pointer-events: none;
+            z-index: 9000;
+            mix-blend-mode: multiply;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 2rem;
+            position: relative;
+            z-index: 10;
+        }
+
+        header {
+            display: flex;
+            justify-content: space-between;
+            padding: 1rem 0;
+            border-bottom: 1px solid var(--border);
+            margin-bottom: 4rem;
+            font-size: 0.8rem;
+            text-transform: uppercase;
+        }
+
+        .nav-links span {
+            margin-left: 2rem;
+            border: 1px solid var(--accent);
+            padding: 0.25rem 0.5rem;
+            transition: all 0.3s;
+        }
+
+        .nav-links span:hover {
+            background: var(--accent);
+            color: var(--bg);
+        }
+
+        .hero {
+            min-height: 80vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            position: relative;
+        }
+
+        .bg-image {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            opacity: 0.15;
+            filter: grayscale(100%) sepia(100%) hue-rotate(80deg) saturate(300%) contrast(150%);
+            z-index: -1;
+        }
+
+        .title-block {
+            border-left: 4px solid var(--accent);
+            padding-left: 2rem;
+            margin-bottom: 4rem;
+        }
+
+        h1 {
+            font-size: clamp(3rem, 8vw, 6rem);
+            line-height: 0.9;
+            margin-bottom: 0.5rem;
+            text-shadow: 0 0 10px rgba(0, 255, 65, 0.3);
+        }
+
+        .subtitle {
+            font-size: clamp(1rem, 2vw, 1.5rem);
+            color: var(--fg);
+            font-family: 'Space Mono', monospace;
+        }
+
+        .metrics-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 2rem;
+            margin-bottom: 6rem;
+        }
+
+        .metric-card {
+            border: 1px solid var(--border);
+            padding: 2rem;
+            background: rgba(0, 20, 0, 0.4);
+            -webkit-backdrop-filter: blur(5px);
+            backdrop-filter: blur(5px);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .metric-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 20px;
+            height: 20px;
+            border-top: 2px solid var(--accent);
+            border-left: 2px solid var(--accent);
+        }
+
+        .metric-label {
+            font-size: 0.8rem;
+            text-transform: uppercase;
+            margin-bottom: 1rem;
+            opacity: 0.8;
+        }
+
+        .metric-value {
+            font-size: 2.5rem;
+            font-family: 'Rajdhani', sans-serif;
+            color: var(--accent);
+            font-weight: bold;
+        }
+
+        .section {
+            margin: 8rem 0;
+            position: relative;
+        }
+
+        .section-title {
+            font-size: 2rem;
+            border-bottom: 1px solid var(--border);
+            padding-bottom: 1rem;
+            margin-bottom: 3rem;
+            display: flex;
+            align-items: baseline;
+            justify-content: space-between;
+        }
+
+        .section-title span {
+            font-family: 'Space Mono', monospace;
+            font-size: 0.9rem;
+            color: var(--fg);
+            opacity: 0.5;
+        }
+
+        .exec-summary {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 4rem;
+            align-items: center;
+        }
+
+        .exec-text {
+            font-size: 1.1rem;
+            line-height: 1.8;
+            border-left: 2px dashed var(--border);
+            padding-left: 2rem;
+            position: relative;
+        }
+
+        .exec-text::before {
+            content: '>';
+            position: absolute;
+            left: -1rem;
+            top: 0;
+            color: var(--accent);
+        }
+
+        .image-frame {
+            border: 1px solid var(--border);
+            padding: 0.5rem;
+            background: repeating-linear-gradient(45deg, transparent, transparent 10px, var(--border) 10px, var(--border) 11px);
+        }
+
+        .image-frame img {
+            width: 100%;
+            height: auto;
+            display: block;
+            filter: grayscale(100%) contrast(120%);
+            transition: filter 0.5s;
+        }
+
+        .image-frame:hover img {
+            filter: grayscale(0%) contrast(100%);
+        }
+
+        .matrix-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            grid-template-rows: auto auto;
+            gap: 1rem;
+        }
+
+        .matrix-cell {
+            border: 1px solid var(--border);
+            padding: 2rem;
+            background: rgba(0, 0, 0, 0.6);
+        }
+
+        .matrix-cell.high-high {
+            border-color: var(--accent);
+            box-shadow: inset 0 0 20px rgba(0, 255, 65, 0.1);
+        }
+
+        .matrix-cell.low-high {
+            border-color: var(--alert);
+        }
+
+        .matrix-cell.low-high h3 {
+            color: var(--alert);
+        }
+
+        .cell-label {
+            font-size: 0.7rem;
+            opacity: 0.6;
+            margin-bottom: 1rem;
+            display: block;
+        }
+
+        .roadmap-list {
+            list-style: none;
+            border-left: 1px solid var(--border);
+            padding-left: 2rem;
+            margin-left: 1rem;
+        }
+
+        .roadmap-item {
+            margin-bottom: 3rem;
+            position: relative;
+        }
+
+        .roadmap-item::before {
+            content: '';
+            position: absolute;
+            left: -2.35rem;
+            top: 0.25rem;
+            width: 10px;
+            height: 10px;
+            background: var(--bg);
+            border: 2px solid var(--accent);
+            border-radius: 50%;
+        }
+
+        .day-label {
+            font-family: 'Rajdhani', sans-serif;
+            font-size: 1.5rem;
+            color: var(--accent);
+            font-weight: bold;
+            margin-bottom: 0.5rem;
+        }
+
+        .vectors-container {
+            display: flex;
+            flex-direction: column;
+            gap: 2rem;
+        }
+
+        .vector-item {
+            background: rgba(0, 255, 65, 0.03);
+            border: 1px solid rgba(0, 255, 65, 0.1);
+            padding: 2rem;
+        }
+
+        .vector-title {
+            color: var(--alert);
+            margin-bottom: 1rem;
+            font-size: 1.5rem;
+        }
+
+        .reveal {
+            opacity: 0;
+            transform: translateY(30px);
+            transition: opacity 0.8s cubic-bezier(0.2, 0.8, 0.2, 1), transform 0.8s cubic-bezier(0.2, 0.8, 0.2, 1);
+        }
+
+        .reveal.visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        @media (max-width: 768px) {
+
+            .exec-summary,
+            .matrix-grid {
+                grid-template-columns: 1fr;
+            }
+
+            h1 {
+                font-size: 3rem;
+            }
+
+            .title-block {
+                padding-left: 1rem;
+            }
+        }
+
+        .glitch-filter {
+            position: absolute;
+            width: 0;
+            height: 0;
+        }
+    </style>
+</head>
+
+<body><svg class="glitch-filter">
+        <filter id="glitch">
+            <feTurbulence type="fractalNoise" baseFrequency="0.15" numOctaves="1" result="warp"></feTurbulence>
+            <feDisplacementMap xChannelSelector="R" yChannelSelector="G" scale="5" in="SourceGraphic" in2="warp">
+            </feDisplacementMap>
+        </filter>
+    </svg>
+    <div class="cursor" id="custom-cursor"></div>
+    <div class="scanline"></div>
+    <div class="crt-overlay"></div>
+    <div class="container">
+        <header class="reveal">
+            <div>METACORTEX // SYS.AUTH.OK</div>
+            <div class="nav-links"><span>Export PDF</span><span>Share Link</span></div>
+        </header>
+        <section class="hero"><img src="./images/system_core_bg.png" alt="System Core" class="bg-image">
+            <div class="title-block reveal">
+                <h1>Final Protocol</h1>
+                <div class="subtitle">Strategic Asset for Thomas Anderson</div>
+            </div>
+            <div class="metrics-grid">
+                <div class="metric-card reveal" style="transition-delay: 100ms;">
+                    <div class="metric-label">Monthly Net ROI</div>
+                    <div class="metric-value">$4,249</div>
+                </div>
+                <div class="metric-card reveal" style="transition-delay: 200ms;">
+                    <div class="metric-label">Time Reclaimed</div>
+                    <div class="metric-value">11h / week</div>
+                </div>
+                <div class="metric-card reveal" style="transition-delay: 300ms;">
+                    <div class="metric-label">Infrastructure</div>
+                    <div class="metric-value">$151 / mo</div>
+                </div>
+            </div>
+        </section>
+        <section class="section">
+            <h2 class="section-title reveal">Executive Summary <span>// 01</span></h2>
+            <div class="exec-summary">
+                <div class="image-frame reveal"><img src="./images/foresight-1.jpg" alt="Manual Bottleneck"></div>
+                <div class="exec-text reveal" style="transition-delay: 200ms;">“This AI Assessment Blueprint for Thomas
+                    Anderson at Metacortex outlines a strategic roadmap to modernize the Innovation Hub's research and
+                    data workflows. By addressing the 'brutal' manual data preprocessing and fragmented gathering
+                    processes identified in our discovery call, we will reclaim high-value engineering hours. This plan
+                    transitions Metacortex from manual labor to automated predictive modeling readiness, justifying the
+                    initial discovery investment through immediate operational efficiency.”</div>
+            </div>
+        </section>
+        <section class="section">
+            <h2 class="section-title reveal">Strategic Impact Matrix <span>// 02</span></h2>
+            <div class="matrix-grid">
+                <div class="matrix-cell reveal"><span class="cell-label">High Impact, Low Effort</span>
+                    <h3>Quick Wins</h3>
+                    <p>DashThis<br>Fathom</p>
+                </div>
+                <div class="matrix-cell high-high reveal" style="transition-delay: 100ms;"><span class="cell-label">High
+                        Impact, High Effort</span>
+                    <h3>Major Projects</h3>
+                    <p>Automated Predictive Modeling Pipeline</p>
+                </div>
+                <div class="matrix-cell reveal" style="transition-delay: 200ms;"><span class="cell-label">Low Impact,
+                        Low Effort</span>
+                    <h3>Fill-ins</h3>
+                    <p>No vectors identified</p>
+                </div>
+                <div class="matrix-cell low-high reveal" style="transition-delay: 300ms;"><span class="cell-label">Low
+                        Impact, High Effort</span>
+                    <h3>Ignore / Repair</h3>
+                    <p>Broken Process</p>
+                </div>
+            </div>
+        </section>
+        <section class="section relative" style="position: relative;"><img src="./images/foresight-2.jpg" alt="Automated Pipeline"
+                class="bg-image" style="opacity: 0.05;">
+            <h2 class="section-title reveal">04 Implementation Roadmap: First 4 Days <span>// 03</span></h2>
+            <ul class="roadmap-list">
+                <li class="roadmap-item reveal">
+                    <div class="day-label">DAY 1</div>
+                    <p>Audit all current Metacortex data silos and API access points for the Innovation Hub.</p>
+                </li>
+                <li class="roadmap-item reveal">
+                    <div class="day-label">DAY 2</div>
+                    <p>Configure DashThis connectors to automate real-time data aggregation for active research
+                        projects.</p>
+                </li>
+                <li class="roadmap-item reveal">
+                    <div class="day-label">DAY 3</div>
+                    <p>Deploy Fathom across the research team to automate meeting documentation and requirement
+                        gathering.</p>
+                </li>
+                <li class="roadmap-item reveal">
+                    <div class="day-label">DAY 4</div>
+                    <p>Initialize GoHighLevel to track project intake and automate stakeholder reporting on data
+                        readiness.</p>
+                </li>
+            </ul>
+        </section>
+        <section class="section">
+            <h2 class="section-title reveal">Priority Vectors <span>// 04</span></h2>
+            <div class="exec-summary" style="margin-bottom: 2rem;">
+                <div class="vectors-container">
+                    <div class="vector-item reveal">
+                        <h3 class="vector-title">Manual Data Aggregation</h3>
+                        <p>Team members are losing significant time gathering data from disparate sources before any
+                            actual research or analysis can begin.</p>
+                    </div>
+                    <div class="vector-item reveal" style="transition-delay: 150ms;">
+                        <h3 class="vector-title">Inefficient Data Preprocessing</h3>
+                        <p>The 'brutal' manual cleaning and preparation phase creates a massive bottleneck, delaying
+                            project kickoffs and reducing the team's ability to focus on generative AI trends.</p>
+                    </div>
+                </div>
+                <div class="image-frame reveal" style="transition-delay: 300ms;"><img src="./images/foresight-3.jpg"
+                        alt="ROI Impact"></div>
+            </div>
+        </section>
+    </div>
+    <script>document.addEventListener('DOMContentLoaded', () => { const cursor = document.getElementById('custom-cursor'); document.addEventListener('mousemove', (e) => { cursor.style.transform = `translate(calc(${e.clientX}px - 50%), calc(${e.clientY}px - 50%))`; }); document.addEventListener('mousedown', () => cursor.style.transform = `translate(calc(${e.clientX}px - 50%), calc(${e.clientY}px - 50%)) scale(0.5)`); document.addEventListener('mouseup', () => cursor.style.transform = `translate(calc(${e.clientX}px - 50%), calc(${e.clientY}px - 50%)) scale(1)`); const observerOptions = { root: null, rootMargin: '0px', threshold: 0.15 }; const observer = new IntersectionObserver((entries, obs) => { entries.forEach(entry => { if (entry.isIntersecting) { entry.target.classList.add('visible'); obs.unobserve(entry.target); } }); }, observerOptions); document.querySelectorAll('.reveal').forEach(el => observer.observe(el)); });</script>
+</body>
+
+</html>

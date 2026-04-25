@@ -1,0 +1,423 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Your Legs Are Exhausted</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500&family=Playfair+Display:ital,wght@0,400;0,600;0,900;1,400&display=swap');
+
+    :root {
+      --c-dark: #0a0a0c;
+      --c-light: #f3f4f6;
+      --c-accent: #f59e0b;
+      --c-muted: #9ca3af;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      cursor: none;
+    }
+
+    body {
+      background-color: var(--c-dark);
+      color: var(--c-light);
+      font-family: 'Inter', sans-serif;
+      overflow-x: hidden;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    /* Custom Cursor */
+    .cursor {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 20px;
+      height: 20px;
+      background: rgba(245, 158, 11, 0.4);
+      border-radius: 50%;
+      transform: translate(-50%, -50%);
+      pointer-events: none;
+      z-index: 9999;
+      transition: width 0.3s, height 0.3s, background 0.3s;
+      mix-blend-mode: screen;
+    }
+
+    /* Fixed Backgrounds */
+    .bg-container {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
+      z-index: 0;
+    }
+
+    .bg-layer {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-size: cover;
+      background-position: center;
+      opacity: 0;
+      transition: opacity 1.5s ease-in-out, transform 10s linear;
+      transform: scale(1.05);
+    }
+
+    .bg-layer.active {
+      opacity: 0.35;
+      transform: scale(1);
+    }
+
+    .bg-overlay {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(to bottom, rgba(10, 10, 12, 0.8) 0%, rgba(10, 10, 12, 0.2) 50%, rgba(10, 10, 12, 0.95) 100%);
+      z-index: 1;
+    }
+
+    .mood-layer {
+      opacity: 0.15;
+      mix-blend-mode: color-dodge;
+      z-index: 2;
+      filter: url(#heat-warp);
+    }
+
+    /* Scrollytelling Content */
+    .content-wrapper {
+      position: relative;
+      z-index: 10;
+      display: flex;
+      flex-direction: column;
+    }
+
+    section {
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      padding: 4rem 10vw;
+      max-width: 1400px;
+      margin: 0 auto;
+    }
+
+    /* Typography */
+    h1,
+    h2,
+    .hero-text {
+      font-family: 'Playfair Display', serif;
+      font-weight: 900;
+      line-height: 1.1;
+    }
+
+    p {
+      font-weight: 300;
+      line-height: 1.6;
+      font-size: clamp(1.1rem, 2vw, 1.5rem);
+      max-width: 800px;
+    }
+
+    .text-accent {
+      color: var(--c-accent);
+    }
+
+    .text-massive {
+      font-size: clamp(3rem, 8vw, 7rem);
+      letter-spacing: -0.02em;
+    }
+
+    .text-large {
+      font-size: clamp(2rem, 5vw, 4rem);
+    }
+
+    .tracking-wide {
+      letter-spacing: 0.05em;
+    }
+
+    .italic {
+      font-style: italic;
+    }
+
+    .list-item {
+      margin-top: 2rem;
+      padding-left: 2rem;
+      border-left: 2px solid rgba(245, 158, 11, 0.3);
+    }
+
+    .list-item strong {
+      font-family: 'Playfair Display', serif;
+      font-size: 1.5em;
+      display: block;
+      margin-bottom: 0.5rem;
+      color: var(--c-light);
+    }
+
+    .price-tag {
+      font-family: 'Playfair Display', serif;
+      font-size: clamp(4rem, 10vw, 8rem);
+      color: var(--c-accent);
+      line-height: 1;
+      display: block;
+      margin-bottom: 1rem;
+    }
+
+    .meta-label {
+      font-family: 'Inter', sans-serif;
+      text-transform: uppercase;
+      font-size: 0.75rem;
+      letter-spacing: 0.2em;
+      color: var(--c-muted);
+      margin-bottom: 2rem;
+      display: block;
+    }
+
+    /* Animation Classes */
+    .reveal {
+      opacity: 0;
+      transform: translateY(60px);
+      filter: blur(12px);
+      transition: opacity 1.2s cubic-bezier(0.16, 1, 0.3, 1),
+        transform 1.2s cubic-bezier(0.16, 1, 0.3, 1),
+        filter 1.2s cubic-bezier(0.16, 1, 0.3, 1);
+      will-change: transform, opacity, filter;
+    }
+
+    .reveal.is-visible {
+      opacity: 1;
+      transform: translateY(0);
+      filter: blur(0);
+    }
+
+    .delay-1 {
+      transition-delay: 150ms;
+    }
+
+    .delay-2 {
+      transition-delay: 300ms;
+    }
+
+    .delay-3 {
+      transition-delay: 450ms;
+    }
+
+    /* Alignment utils */
+    .text-center {
+      text-align: center;
+      align-items: center;
+    }
+
+    .text-right {
+      text-align: right;
+      align-items: flex-end;
+    }
+
+    .ml-auto {
+      margin-left: auto;
+    }
+
+    .mx-auto {
+      margin-left: auto;
+      margin-right: auto;
+    }
+  </style>
+</head>
+
+<body>
+
+  <!-- SVG Filters -->
+  <svg style="position: absolute; width: 0; height: 0;" aria-hidden="true">
+    <defs>
+      <filter id="heat-warp">
+        <feTurbulence type="fractalNoise" baseFrequency="0.01 0.02" numOctaves="2" result="noise">
+          <animate attributeName="baseFrequency" values="0.01 0.02; 0.015 0.04; 0.01 0.02" dur="8s"
+            repeatCount="indefinite" />
+        </feTurbulence>
+        <feDisplacementMap in="SourceGraphic" in2="noise" scale="15" xChannelSelector="R" yChannelSelector="G" />
+      </filter>
+    </defs>
+  </svg>
+
+  <!-- Custom Cursor -->
+  <div class="cursor" id="cursor"></div>
+
+  <!-- Fixed Background System -->
+  <div class="bg-container">
+    <!-- bg1: exhaustion -->
+    <div class="bg-layer active" id="bg1" style="background-image: url('./images/q-1.jpg');"></div>
+    <!-- bg2: throbbing -->
+    <div class="bg-layer" id="bg2" style="background-image: url('./images/q-2.jpg');"></div>
+    <!-- bg3: heat -->
+    <div class="bg-layer" id="bg3" style="background-image: url('./images/q-3.jpg'); filter: url(#heat-warp);"></div>
+    <!-- bg4: sleep -->
+    <div class="bg-layer" id="bg4" style="background-image: url('./images/q-4.jpg');"></div>
+    <!-- bg5: product -->
+    <div class="bg-layer" id="bg5" style="background-image: url('./images/q-5.jpg');"></div>
+
+    <!-- Ambient mood layer always present but subtle -->
+    <div class="bg-layer active mood-layer" style="background-image: url('./images/quinear-mood.png');"></div>
+    <div class="bg-overlay"></div>
+  </div>
+
+  <!-- Scrolling Content -->
+  <main class="content-wrapper">
+
+    <section data-bg="bg1">
+      <div class="reveal">
+        <span class="meta-label"></span>
+        <h1 class="text-massive">Your legs are <span class="text-accent">exhausted.</span></h1>
+      </div>
+      <div class="reveal delay-1 mt-4">
+        <h2 class="text-large">It’s time to give them their life back.</h2>
+        <p class="mt-4 tracking-wide text-muted">(QUINEAR Leg Recovery Massager)</p>
+      </div>
+    </section>
+
+    <section data-bg="bg1" class="text-right">
+      <div class="reveal ml-auto">
+        <p>If you spend all day on your feet—whether you’re a nurse working brutal 12-hour shifts, an athlete pushing
+          your limits, or you just suffer from legs that feel heavy, swollen, and restless at the end of the day—you
+          already know the feeling.</p>
+      </div>
+    </section>
+
+    <section data-bg="bg2" class="text-center">
+      <div class="reveal mx-auto">
+        <p class="text-large hero-text">You sit down on the couch, and your calves are just <br><span
+            class="text-massive text-accent italic">throbbing.</span></p>
+      </div>
+    </section>
+
+    <section data-bg="bg2">
+      <div class="reveal">
+        <p>I’m selling this QUINEAR Air Compression Leg Massager because I know exactly what that pain feels like, and
+          this device was my nightly rescue.</p>
+      </div>
+      <div class="reveal delay-1" style="margin-top: 2rem;">
+        <p>I am passing it on in perfectly sanitized, like-new condition so it can rescue someone else’s legs.</p>
+      </div>
+    </section>
+
+    <section data-bg="bg3">
+      <div class="reveal">
+        <h2 class="text-massive hero-text">This isn’t just a massager.</h2>
+        <h2 class="text-large hero-text text-accent mt-2">It’s a reset button for your body.</h2>
+      </div>
+      <div class="reveal delay-1" style="margin-top: 3rem;">
+        <p>Instead of just vibrating, this wraps around your feet and calves and mimics the deep-kneading hands of a
+          sports massage therapist. It literally squeezes the fatigue and heavy fluid out of your legs.</p>
+      </div>
+    </section>
+
+    <section data-bg="bg3">
+      <div class="reveal">
+        <h2 class="text-large hero-text mb-4">Why you’ll look forward to this every single night:</h2>
+      </div>
+      <div class="reveal delay-1 list-item">
+        <p><strong>The "Melt-Into-The-Couch" Heat:</strong><br>It doesn't just squeeze; it heats up. The warmth
+          penetrates deep into sore muscles, increasing blood flow and melting away the ache of a hard day.</p>
+      </div>
+      <div class="reveal delay-2 list-item">
+        <p><strong>Exactly the Relief You Need:</strong><br>Some days you need a gentle, comforting squeeze. Other days,
+          your muscles scream for a deep, intense release. With 3 modes and intensities, you get exactly what your body
+          is asking for.</p>
+      </div>
+    </section>
+
+    <section data-bg="bg4">
+      <div class="reveal list-item" style="border-color: rgba(243, 244, 246, 0.3);">
+        <p><strong>Fall Asleep Worry-Free:</strong><br>The deep compression is so relaxing that you will probably fall
+          asleep. The 20-minute auto-shutoff ensures you can drift off safely.</p>
+      </div>
+    </section>
+
+    <section data-bg="bg5">
+      <div class="reveal">
+        <p>It comes from a meticulously clean, smoke-free, pet-free home, complete with all the original accessories
+          (wraps, extensions, controller, and travel bag).</p>
+      </div>
+      <div class="reveal delay-1 mt-4">
+        <p class="italic text-muted" style="font-size: 1rem; opacity: 0.8;">*Bonus: Because this is recognized as a
+          legitimate wellness device, you can usually use your FSA/HSA to cover it.*</p>
+      </div>
+    </section>
+
+    <section data-bg="bg5" class="text-center" style="padding-bottom: 10vh;">
+      <div class="reveal mx-auto">
+        <p class="text-large hero-text mb-8">Don't spend another evening rubbing your own aching calves. Let this
+          machine do the heavy lifting so you can wake up tomorrow feeling light, rested, and ready to go.</p>
+      </div>
+      <div class="reveal delay-1 mx-auto mt-8">
+        <span class="price-tag">$55</span>
+        <p class="meta-label mb-8">(A fraction of the cost of a single professional massage).</p>
+        <p class="hero-text text-large">Reach out and let's get your legs feeling good again.</p>
+      </div>
+    </section>
+
+  </main>
+
+  <script>
+    // Custom Cursor Logic
+    const cursor = document.getElementById('cursor');
+
+    document.addEventListener('mousemove', (e) => {
+      cursor.style.left = e.clientX + 'px';
+      cursor.style.top = e.clientY + 'px';
+    });
+
+    document.addEventListener('mousedown', () => {
+      cursor.style.transform = 'translate(-50%, -50%) scale(1.5)';
+      cursor.style.background = 'rgba(245, 158, 11, 0.8)';
+    });
+
+    document.addEventListener('mouseup', () => {
+      cursor.style.transform = 'translate(-50%, -50%) scale(1)';
+      cursor.style.background = 'rgba(245, 158, 11, 0.4)';
+    });
+
+    // Intersection Observer for scroll triggers and background changes
+    const revealElements = document.querySelectorAll('.reveal');
+    const sections = document.querySelectorAll('section[data-bg]');
+    const bgLayers = document.querySelectorAll('.bg-layer:not(.mood-layer)');
+
+    const observerOptions = {
+      root: null,
+      rootMargin: '0px 0px -15% 0px',
+      threshold: 0.1
+    };
+
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        // Text Reveal
+        if (entry.isIntersecting && entry.target.classList.contains('reveal')) {
+          entry.target.classList.add('is-visible');
+        }
+
+        // Background Switcher
+        if (entry.isIntersecting && entry.target.tagName.toLowerCase() === 'section') {
+          const targetBgId = entry.target.getAttribute('data-bg');
+
+          bgLayers.forEach(layer => {
+            if (layer.id === targetBgId) {
+              layer.classList.add('active');
+            } else {
+              layer.classList.remove('active');
+            }
+          });
+        }
+      });
+    }, observerOptions);
+
+    revealElements.forEach(el => observer.observe(el));
+    sections.forEach(sec => observer.observe(sec));
+  </script>
+</body>
+
+</html>

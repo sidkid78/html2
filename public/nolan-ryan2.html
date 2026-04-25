@@ -1,0 +1,619 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>The Birth of the Ryan Express</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;0,900;1,400&family=Space+Mono:ital,wght@0,400;0,700;1,400&family=Inter:wght@300;400;500&display=swap');
+
+    :root {
+      --bg-color: #050505;
+      --text-main: #F4F1EB;
+      --text-muted: #8E8D8A;
+      --accent-red: #BA122B;
+      --font-hero: 'Playfair Display', serif;
+      --font-body: 'Inter', sans-serif;
+      --font-mono: 'Space Mono', monospace;
+      --ease-out: cubic-bezier(0.215, 0.610, 0.355, 1.000);
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      cursor: none;
+    }
+
+    body {
+      background-color: var(--bg-color);
+      color: var(--text-main);
+      font-family: var(--font-body);
+      overflow: hidden;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    /* Custom Cursor */
+    #cursor {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 12px;
+      height: 12px;
+      background-color: var(--accent-red);
+      border-radius: 50%;
+      pointer-events: none;
+      z-index: 9999;
+      transform: translate(-50%, -50%);
+      transition: width 0.3s var(--ease-out), height 0.3s var(--ease-out), background-color 0.3s;
+      mix-blend-mode: exclusion;
+    }
+
+    #cursor.hover {
+      width: 60px;
+      height: 60px;
+      background-color: var(--text-main);
+      mix-blend-mode: difference;
+    }
+
+    /* SVG Grain Overlay */
+    .grain-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
+      pointer-events: none;
+      z-index: 9000;
+      opacity: 0.35;
+      mix-blend-mode: overlay;
+    }
+
+    /* UI Chrome */
+    .progress-indicator {
+      position: fixed;
+      bottom: 2rem;
+      left: 3rem;
+      font-family: var(--font-mono);
+      font-size: 0.75rem;
+      letter-spacing: 0.2em;
+      color: var(--text-muted);
+      z-index: 100;
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+    }
+
+    .progress-bar {
+      width: 60px;
+      height: 1px;
+      background: rgba(255, 255, 255, 0.2);
+      position: relative;
+    }
+
+    .progress-fill {
+      position: absolute;
+      top: 0;
+      left: 0;
+      height: 100%;
+      background: var(--accent-red);
+      width: 25%;
+      transition: width 0.6s var(--ease-out);
+    }
+
+    .global-title {
+      position: fixed;
+      top: 2rem;
+      left: 3rem;
+      font-family: var(--font-mono);
+      font-size: 0.7rem;
+      text-transform: uppercase;
+      letter-spacing: 0.15em;
+      color: var(--text-muted);
+      z-index: 100;
+    }
+
+    .global-title span {
+      color: var(--accent-red);
+    }
+
+    /* Carousel Container */
+    .carousel {
+      display: flex;
+      width: 100vw;
+      height: 100vh;
+      overflow-x: auto;
+      overflow-y: hidden;
+      scroll-snap-type: x mandatory;
+      scroll-behavior: smooth;
+      scrollbar-width: none;
+      /* Firefox */
+    }
+
+    .carousel::-webkit-scrollbar {
+      display: none;
+      /* Chrome/Safari */
+    }
+
+    /* Panels */
+    .panel {
+      flex: 0 0 100vw;
+      width: 100vw;
+      height: 100vh;
+      scroll-snap-align: start;
+      position: relative;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 4rem;
+      overflow: hidden;
+    }
+
+    /* Typographic & Animation Utilities */
+    .reveal-text {
+      opacity: 0;
+      transform: translateY(40px);
+      filter: blur(10px);
+      transition: opacity 1.2s var(--ease-out), transform 1.2s var(--ease-out), filter 1.2s var(--ease-out);
+    }
+
+    .panel.is-active .reveal-text {
+      opacity: 1;
+      transform: translateY(0);
+      filter: blur(0);
+    }
+
+    .delay-1 {
+      transition-delay: 0.1s;
+    }
+
+    .delay-2 {
+      transition-delay: 0.3s;
+    }
+
+    .delay-3 {
+      transition-delay: 0.5s;
+    }
+
+    .delay-4 {
+      transition-delay: 0.7s;
+    }
+
+    .hero-heading {
+      font-family: var(--font-hero);
+      font-size: clamp(3rem, 7vw, 8rem);
+      line-height: 0.9;
+      font-weight: 900;
+      text-transform: uppercase;
+      margin-bottom: 2rem;
+    }
+
+    .hero-heading em {
+      color: var(--accent-red);
+      font-style: italic;
+      font-weight: 400;
+    }
+
+    .body-text {
+      font-family: var(--font-body);
+      font-size: clamp(1rem, 1.5vw, 1.25rem);
+      line-height: 1.6;
+      max-width: 600px;
+      color: var(--text-muted);
+    }
+
+    .body-text strong {
+      color: var(--text-main);
+      font-weight: 500;
+    }
+
+    .label {
+      font-family: var(--font-mono);
+      font-size: 0.75rem;
+      text-transform: uppercase;
+      letter-spacing: 0.2em;
+      color: var(--accent-red);
+      margin-bottom: 1rem;
+      display: block;
+    }
+
+    /* --- Specific Panel Layouts --- */
+
+    /* Panel 1: The Legend */
+    #panel-1 .bg-image {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-image: url('./images/nolan-1.jpg');
+      background-size: cover;
+      background-position: center;
+      filter: grayscale(100%) contrast(120%) brightness(0.4);
+      z-index: -1;
+      transform: scale(1.05);
+      transition: transform 10s linear;
+    }
+
+    #panel-1.is-active .bg-image {
+      transform: scale(1);
+    }
+
+    #panel-1 .content {
+      width: 100%;
+      max-width: 1400px;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 4rem;
+      align-items: end;
+    }
+
+    #panel-1 .col-left {
+      padding-bottom: 4rem;
+    }
+
+    /* Panel 2: The Time Machine */
+    #panel-2 {
+      background-color: #0A0A0A;
+    }
+
+    #panel-2 .content {
+      display: grid;
+      grid-template-columns: 5fr 7fr;
+      gap: 6rem;
+      width: 100%;
+      max-width: 1400px;
+      align-items: center;
+    }
+
+    #panel-2 .card-wrapper {
+      position: relative;
+      perspective: 1000px;
+    }
+
+    #panel-2 .card-img {
+      width: 100%;
+      height: auto;
+      transform: rotateY(-15deg) rotateX(5deg);
+      box-shadow: 20px 30px 50px rgba(0, 0, 0, 0.8), -1px -1px 2px rgba(255, 255, 255, 0.1);
+      transition: transform 0.8s var(--ease-out);
+    }
+
+    #panel-2.is-active .card-img:hover {
+      transform: rotateY(0deg) rotateX(0deg) scale(1.02);
+    }
+
+    #panel-2 .hero-heading {
+      font-size: clamp(2.5rem, 5vw, 5rem);
+      text-transform: none;
+    }
+
+    /* Panel 3: The Soul */
+    #panel-3 {
+      background-color: var(--bg-color);
+      text-align: center;
+      justify-content: center;
+    }
+
+    #panel-3 .content {
+      max-width: 900px;
+    }
+
+    #panel-3 .hero-heading {
+      font-size: clamp(2rem, 4vw, 4rem);
+      text-transform: none;
+      line-height: 1.2;
+      margin-bottom: 3rem;
+    }
+
+    .cta-btn {
+      display: inline-block;
+      margin-top: 3rem;
+      padding: 1.5rem 3rem;
+      border: 1px solid var(--text-muted);
+      color: var(--text-main);
+      text-decoration: none;
+      font-family: var(--font-mono);
+      font-size: 0.85rem;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      position: relative;
+      overflow: hidden;
+      transition: color 0.4s;
+    }
+
+    .cta-btn::before {
+      content: '';
+      position: absolute;
+      top: 100%;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: var(--text-main);
+      transition: top 0.4s var(--ease-out);
+      z-index: -1;
+    }
+
+    .cta-btn:hover {
+      color: var(--bg-color);
+    }
+
+    .cta-btn:hover::before {
+      top: 0;
+    }
+
+    /* Panel 4: The Artifact (Specs) */
+    #panel-4 .bg-image {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-image: url('./images/nolan-3.jpg');
+      background-size: cover;
+      background-position: center;
+      filter: grayscale(80%) brightness(0.15);
+      z-index: -1;
+    }
+
+    #panel-4 .content {
+      width: 100%;
+      max-width: 1200px;
+      background: rgba(10, 10, 10, 0.6);
+      -webkit-backdrop-filter: blur(20px);
+      backdrop-filter: blur(20px);
+      border: 1px solid rgba(255, 255, 255, 0.05);
+      padding: 4rem;
+    }
+
+    .specs-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      gap: 2rem;
+      margin-bottom: 3rem;
+      border-top: 1px solid rgba(255, 255, 255, 0.1);
+      padding-top: 3rem;
+    }
+
+    .spec-item {
+      font-family: var(--font-mono);
+    }
+
+    .spec-key {
+      color: var(--text-muted);
+      font-size: 0.75rem;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      display: block;
+      margin-bottom: 0.5rem;
+    }
+
+    .spec-val {
+      color: var(--text-main);
+      font-size: 1rem;
+    }
+
+    .spec-val span {
+      color: var(--text-muted);
+      font-size: 0.85rem;
+      display: block;
+      margin-top: 0.25rem;
+    }
+
+    .tags {
+      font-family: var(--font-mono);
+      font-size: 0.75rem;
+      color: var(--accent-red);
+      letter-spacing: 0.05em;
+      line-height: 1.8;
+    }
+
+    @media (max-width: 768px) {
+
+      .progress-indicator,
+      .global-title {
+        display: none;
+      }
+
+      .panel {
+        padding: 2rem;
+      }
+
+      #panel-1 .content,
+      #panel-2 .content {
+        grid-template-columns: 1fr;
+        gap: 2rem;
+      }
+
+      #panel-1 .col-left {
+        padding-bottom: 0;
+      }
+
+      .hero-heading {
+        font-size: clamp(2.5rem, 10vw, 4rem);
+      }
+
+      #panel-4 .content {
+        padding: 2rem;
+      }
+    }
+  </style>
+</head>
+
+<body>
+
+  <div id="cursor"></div>
+
+  <svg class="grain-overlay">
+    <filter id="noise">
+      <feTurbulence type="fractalNoise" baseFrequency="0.75" numOctaves="3" stitchTiles="stitch" />
+      <feColorMatrix type="matrix" values="1 0 0 0 0, 0 1 0 0 0, 0 0 1 0 0, 0 0 0 0.15 0" />
+    </filter>
+    <rect width="100%" height="100%" filter="url(#noise)"></rect>
+  </svg>
+
+  <div class="global-title">
+    1972 Topps #595 <span>//</span> The Vault
+  </div>
+
+  <div class="progress-indicator">
+    <span id="current-panel">01</span>
+    <div class="progress-bar">
+      <div class="progress-fill" id="progress-fill"></div>
+    </div>
+    <span>04</span>
+  </div>
+
+  <main class="carousel" id="carousel">
+
+    <!-- PANEL 1 -->
+    <section class="panel" id="panel-1">
+      <div class="bg-image"></div>
+      <div class="content">
+        <div class="col-left">
+          <h1 class="hero-heading reveal-text">
+            The Birth<br>of the<br><em>Ryan<br>Express</em>
+          </h1>
+        </div>
+        <div class="col-right">
+          <span class="label reveal-text delay-1">The Story</span>
+          <p class="body-text reveal-text delay-2">
+            Before the unbreakable records. Before the legendary 5,714 strikeouts. Before the <strong>100-mph
+              heat</strong> that terrified batters for four decades... there was 1972.
+            <br><br>
+            For years, Nolan Ryan was an erratic, wild-throwing kid for the Mets. But in 1972, he put on the California
+            Angels uniform for the first time, and everything changed. He didn't just find his control; he became a god
+            of the mound.
+          </p>
+        </div>
+      </div>
+    </section>
+
+    <!-- PANEL 2 -->
+    <section class="panel" id="panel-2">
+      <div class="content">
+        <div class="card-wrapper reveal-text interactive">
+          <img src="./images/nolan-21.jpg" alt="1972 Topps Nolan Ryan Card" class="card-img">
+        </div>
+        <div class="text-content">
+          <h2 class="hero-heading reveal-text delay-1">
+            A Time<br>Machine.
+          </h2>
+          <p class="body-text reveal-text delay-2">
+            This 1972 Topps #595 isn't just a piece of cardboard. Encased in that iconic, psychedelic '72 Topps design
+            is the exact historical pivot point where a young pitcher transformed into "The Ryan Express."
+            <br><br>
+            When you hold this card, you are holding the dawn of the greatest strikeout era in baseball history.
+          </p>
+        </div>
+      </div>
+    </section>
+
+    <!-- PANEL 3 -->
+    <section class="panel" id="panel-3">
+      <div class="content">
+        <h2 class="hero-heading reveal-text">
+          Modern cards have manufactured rarity.<br>
+          <em>This card has a soul.</em>
+        </h2>
+        <p class="body-text reveal-text delay-1" style="margin: 0 auto;">
+          It survived half a century in Excellent condition just so it could anchor your collection. Don't just chase
+          the stats. Own the exact moment the legend began.
+        </p>
+        <div class="reveal-text delay-2">
+          <a href="#" class="cta-btn interactive">[ Inquire or Purchase ]</a>
+        </div>
+      </div>
+    </section>
+
+    <!-- PANEL 4 -->
+    <section class="panel" id="panel-4">
+      <div class="bg-image"></div>
+      <div class="content reveal-text">
+        <span class="label">The Artifact (Specifications)</span>
+
+        <div class="specs-grid">
+          <div class="spec-item reveal-text delay-1">
+            <span class="spec-key">Player</span>
+            <div class="spec-val">Nolan Ryan <span>(The Strikeout King)</span></div>
+          </div>
+          <div class="spec-item reveal-text delay-1">
+            <span class="spec-key">Era</span>
+            <div class="spec-val">1972 <span>(First year as a California Angel)</span></div>
+          </div>
+          <div class="spec-item reveal-text delay-2">
+            <span class="spec-key">Manufacturer</span>
+            <div class="spec-val">Topps Baseball <span>(#595)</span></div>
+          </div>
+          <div class="spec-item reveal-text delay-2">
+            <span class="spec-key">Condition</span>
+            <div class="spec-val">Excellent <span>(A brilliantly preserved piece of vintage wax-pack history)</span>
+            </div>
+          </div>
+          <div class="spec-item reveal-text delay-3">
+            <span class="spec-key">Investment</span>
+            <div class="spec-val">Contact for pricing <span>(Market avg: $120)</span></div>
+          </div>
+        </div>
+
+        <div class="tags reveal-text delay-4">
+          #NolanRyan #TheRyanExpress #VintageTopps #1972Baseball #CardboardHistory #AngelsBaseball #TheVault
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <script>
+    // Custom Cursor Logic
+    const cursor = document.getElementById('cursor');
+    const interactives = document.querySelectorAll('.interactive');
+
+    document.addEventListener('mousemove', (e) => {
+      cursor.style.left = e.clientX + 'px';
+      cursor.style.top = e.clientY + 'px';
+    });
+
+    interactives.forEach(el => {
+      el.addEventListener('mouseenter', () => cursor.classList.add('hover'));
+      el.addEventListener('mouseleave', () => cursor.classList.remove('hover'));
+    });
+
+    // Scroll logic & Intersection Observer for animations
+    const carousel = document.getElementById('carousel');
+    const panels = document.querySelectorAll('.panel');
+    const currentPanelEl = document.getElementById('current-panel');
+    const progressFill = document.getElementById('progress-fill');
+
+    const observerOptions = {
+      root: carousel,
+      threshold: 0.5
+    };
+
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          entry.target.classList.add('is-active');
+
+          // Update Counter
+          const index = Array.from(panels).indexOf(entry.target);
+          currentPanelEl.innerText = '0' + (index + 1);
+          progressFill.style.width = ((index + 1) / panels.length) * 100 + '%';
+        }
+      });
+    }, observerOptions);
+
+    panels.forEach(panel => {
+      observer.observe(panel);
+    });
+
+    // Force first panel active on load
+    setTimeout(() => {
+      panels[0].classList.add('is-active');
+    }, 100);
+
+  </script>
+</body>
+
+</html>

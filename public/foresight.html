@@ -1,0 +1,479 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ForeSight OS: The Architect's Weapon</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=Playfair+Display:ital,wght@0,400;0,600;0,800;1,400;1,600&display=swap');
+
+  :root {
+    --bg: #F5F2EB;
+    --ink: #111111;
+    --ink-light: #333333;
+    --accent: #5A6B7C;
+    --font-serif: 'Playfair Display', serif;
+    --font-sans: 'Inter', sans-serif;
+    --spacing-sm: 1rem;
+    --spacing-md: 2rem;
+    --spacing-lg: 5rem;
+    --spacing-xl: 10vw;
+  }
+
+  * {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    border-radius: 0 !important; /* Strict zero-radius corners */
+    cursor: none; /* Custom cursor */
+  }
+
+  body {
+    background-color: var(--bg);
+    color: var(--ink);
+    font-family: var(--font-sans);
+    line-height: 1.6;
+    overflow-x: hidden;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  /* Custom Cursor */
+  #cursor {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 12px;
+    height: 12px;
+    background-color: var(--ink);
+    transform: translate(-50%, -50%);
+    pointer-events: none;
+    z-index: 9999;
+    mix-blend-mode: difference;
+    transition: width 0.2s, height 0.2s, background-color 0.2s;
+  }
+  #cursor.hover {
+    width: 40px;
+    height: 40px;
+    background-color: transparent;
+    border: 1px solid var(--bg);
+  }
+
+  /* SVG Grain Overlay */
+  #grain {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    pointer-events: none;
+    z-index: 9998;
+    opacity: 0.4;
+    mix-blend-mode: multiply;
+  }
+
+  /* Typography Hierarchy */
+  h1, h2, h3, h4, .serif {
+    font-family: var(--font-serif);
+    font-weight: 800;
+    line-height: 1.1;
+  }
+
+  .hero-title {
+    font-size: clamp(4rem, 12vw, 15rem);
+    letter-spacing: -0.02em;
+    text-transform: uppercase;
+    border-bottom: 2px solid var(--ink);
+    padding-bottom: 2rem;
+    margin-bottom: 2rem;
+  }
+
+  .subtitle {
+    font-family: var(--font-sans);
+    font-size: clamp(1rem, 2vw, 1.5rem);
+    font-weight: 400;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+  }
+
+  .body-text {
+    font-size: clamp(1rem, 1.5vw, 1.5rem);
+    max-width: 65ch;
+    margin-bottom: var(--spacing-md);
+  }
+
+  .body-text strong {
+    font-family: var(--font-serif);
+    font-weight: 600;
+    font-size: 1.1em;
+  }
+
+  .meta-label {
+    font-family: var(--font-sans);
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: var(--ink-light);
+    border-bottom: 1px solid var(--ink-light);
+    padding-bottom: 0.25rem;
+    display: inline-block;
+    margin-bottom: 1rem;
+  }
+
+  /* Layout Archetype: Editorial Grid */
+  .grid-container {
+    display: grid;
+    grid-template-columns: repeat(12, 1fr);
+    gap: var(--spacing-md);
+    padding: var(--spacing-xl) 5vw;
+  }
+
+  .col-full { grid-column: 1 / -1; }
+  .col-half-left { grid-column: 1 / 7; }
+  .col-half-right { grid-column: 7 / 13; }
+  .col-center { grid-column: 3 / 11; }
+  
+  @media (max-width: 768px) {
+    .col-half-left, .col-half-right, .col-center {
+      grid-column: 1 / -1;
+    }
+  }
+
+  /* Section Styling */
+  section {
+    border-bottom: 1px solid var(--ink);
+    position: relative;
+  }
+
+  .hero-section {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    padding-top: 10vh;
+  }
+
+  .philosophy-block {
+    background-color: var(--ink);
+    color: var(--bg);
+    padding: var(--spacing-xl) 5vw;
+  }
+  .philosophy-block h2 {
+    color: var(--bg);
+  }
+  .philosophy-block .meta-label {
+    border-color: var(--bg);
+    color: var(--bg);
+  }
+
+  /* Pipeline Phases */
+  .phase-row {
+    display: grid;
+    grid-template-columns: repeat(12, 1fr);
+    gap: var(--spacing-md);
+    padding: var(--spacing-lg) 0;
+    border-top: 1px solid var(--ink);
+  }
+  .phase-row:first-child { border-top: none; }
+  
+  .phase-number {
+    grid-column: 1 / 3;
+    font-family: var(--font-serif);
+    font-size: clamp(3rem, 8vw, 8rem);
+    font-weight: 400;
+    font-style: italic;
+    line-height: 0.8;
+    color: var(--ink-light);
+  }
+  
+  .phase-content {
+    grid-column: 3 / 8;
+  }
+  
+  .phase-image-wrapper {
+    grid-column: 8 / 13;
+    position: relative;
+    overflow: hidden;
+    aspect-ratio: 4/3;
+    border: 1px solid var(--ink);
+  }
+
+  @media (max-width: 1024px) {
+    .phase-number { grid-column: 1 / 3; }
+    .phase-content { grid-column: 3 / -1; }
+    .phase-image-wrapper { grid-column: 1 / -1; margin-top: 2rem; }
+  }
+
+  /* Image Treatment */
+  .img-cover {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    filter: grayscale(100%) contrast(1.2);
+    transition: transform 1.2s cubic-bezier(0.19, 1, 0.22, 1), filter 0.8s ease;
+  }
+  
+  .phase-image-wrapper:hover .img-cover,
+  .interactive-img:hover {
+    transform: scale(1.05);
+    filter: grayscale(0%) contrast(1);
+  }
+
+  .hero-bg-img {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    opacity: 0.15;
+    z-index: -1;
+    filter: grayscale(100%);
+  }
+
+  /* Animation Classes */
+  .reveal {
+    opacity: 0;
+    transform: translateY(40px);
+    transition: opacity 1s cubic-bezier(0.215, 0.610, 0.355, 1), 
+                transform 1s cubic-bezier(0.215, 0.610, 0.355, 1);
+  }
+  .reveal.active {
+    opacity: 1;
+    transform: translateY(0);
+  }
+  
+  .reveal-delay-1 { transition-delay: 0.1s; }
+  .reveal-delay-2 { transition-delay: 0.2s; }
+  .reveal-delay-3 { transition-delay: 0.3s; }
+
+  .line-mask {
+    overflow: hidden;
+    display: block;
+  }
+  .line-mask span {
+    display: block;
+    transform: translateY(100%);
+    transition: transform 1s cubic-bezier(0.215, 0.610, 0.355, 1);
+  }
+  .reveal.active .line-mask span {
+    transform: translateY(0);
+  }
+
+  /* Specific element styling */
+  .blockquote {
+    font-family: var(--font-serif);
+    font-size: clamp(1.5rem, 3vw, 2.5rem);
+    font-style: italic;
+    border-left: 4px solid var(--ink);
+    padding-left: 2rem;
+    margin: var(--spacing-lg) 0;
+  }
+
+</style>
+</head>
+<body>
+
+  <!-- SVG Filters -->
+  <svg style="display: none;">
+    <filter id="paper-texture">
+      <feTurbulence type="fractalNoise" baseFrequency="0.8" numOctaves="4" result="noise" />
+      <feColorMatrix type="matrix" values="1 0 0 0 0  0 0.98 0 0 0  0 0.94 0 0 0  0 0 0 0.5 0" in="noise" result="coloredNoise" />
+      <feBlend in="SourceGraphic" in2="coloredNoise" mode="multiply" />
+    </filter>
+  </svg>
+
+  <div id="grain"></div>
+  <div id="cursor"></div>
+
+  <main>
+    <!-- HERO SECTION -->
+    <section class="hero-section grid-container">
+      <img src="./images/foresight-hero.png" alt="Atmosphere" class="hero-bg-img parallax" data-speed="0.2">
+      <div class="col-full">
+        <span class="meta-label reveal">Issue 01 // Initialization</span>
+        <h1 class="hero-title reveal reveal-delay-1">
+          <span class="line-mask"><span>ForeSight OS</span></span>
+        </h1>
+        <p class="subtitle reveal reveal-delay-2">The Architect’s Weapon.</p>
+      </div>
+    </section>
+
+    <!-- INTRO / PROBLEM -->
+    <section class="grid-container">
+      <div class="col-half-left reveal">
+        <span class="meta-label">The Current State</span>
+        <p class="body-text">You didn’t get into AI consulting to be a glorified transcriber.</p>
+        <p class="body-text">Yet, that’s exactly where most consultants find themselves: drowning in raw discovery calls, manually piecing together pain points, and slapping data into cheap, neon SaaS dashboards that scream "amateur."</p>
+        <p class="body-text">It is agonizingly difficult to ask a client for a $10,000+ retainer when your deliverables look like they were made in a free trial. You are selling the future of technology, but your operational presence lacks gravity. You feel like a freelancer when you know you should be seen as an authority.</p>
+      </div>
+      <div class="col-half-right reveal reveal-delay-2">
+        <div class="phase-image-wrapper">
+          <img src="./images/fore-1.jpg" alt="Consultant struggling" class="img-cover interactive-img parallax" data-speed="0.1">
+        </div>
+      </div>
+    </section>
+
+    <!-- SOLUTION -->
+    <section class="grid-container">
+      <div class="col-center text-center reveal">
+        <h2 class="serif" style="font-size: clamp(2rem, 5vw, 4rem); margin-bottom: 2rem;">Enter ForeSight OS.</h2>
+        <p class="body-text" style="margin-left: auto; margin-right: auto;">
+          ForeSight OS is not just another project management tool. It is an editorial-grade, AI-driven operating system designed to violently separate you from the commodity consultants. We built ForeSight OS with one obsessive goal: to automate your administrative heavy lifting so you can reclaim your rightful place as the architect of high-level solutions.
+        </p>
+      </div>
+    </section>
+
+    <!-- PHILOSOPHY BLOCK -->
+    <section class="philosophy-block grid-container">
+      <div class="col-half-left reveal">
+        <span class="meta-label">The Philosophy</span>
+        <h2 class="serif" style="font-size: clamp(2rem, 4vw, 3rem); margin-bottom: 2rem;">Editorial Minimalism</h2>
+        <p class="body-text" style="color: #ccc;">
+          We reject the childish, rounded-corner aesthetic of modern SaaS. To command high-ticket fees, the medium must match the message. ForeSight OS is built on an "Editorial Minimalism" philosophy—a digital homage to high-end business journals. 
+        </p>
+        <p class="body-text" style="color: #ccc;">
+          With deep charcoal ink on off-white parchment, sharp zero-radius corners, and authoritative serif typography, your OS doesn't look like software. It looks like a Fortune 500 boardroom. It projects absolute authority before you even speak.
+        </p>
+      </div>
+      <div class="col-half-right reveal reveal-delay-2">
+        <div class="phase-image-wrapper" style="border-color: var(--bg);">
+           <img src="./images/fore-2.jpg" alt="Tablet with elegant UI" class="img-cover interactive-img">
+        </div>
+      </div>
+    </section>
+
+    <!-- THE PIPELINE -->
+    <section class="grid-container">
+      <div class="col-full reveal">
+        <span class="meta-label">Operational Framework</span>
+        <h2 class="serif" style="font-size: clamp(2.5rem, 6vw, 5rem); margin-bottom: 4rem; border-bottom: 1px solid var(--ink); padding-bottom: 1rem;">The Five-Phase Ascension Pipeline</h2>
+        <p class="body-text">ForeSight OS arms you with the infrastructure of an elite agency, condensed into five seamless motions:</p>
+      </div>
+
+      <div class="col-full">
+        <!-- Phase 1 -->
+        <div class="phase-row reveal">
+          <div class="phase-number">1</div>
+          <div class="phase-content">
+            <h3 class="serif" style="font-size: 2rem; margin-bottom: 1rem;">The Command of Attention <br><span class="meta-label" style="border:none; margin-top:0.5rem;">(Lead Gen)</span></h3>
+            <p class="body-text">Stop guessing where your next retainer is coming from. ForeSight tracks your physical and digital footprint in real-time, pulling leads from Luma, Meetups, and physical outreach into a high-contrast ledger. You know exactly who to strike and when.</p>
+          </div>
+        </div>
+
+        <!-- Phase 2 -->
+        <div class="phase-row reveal">
+          <div class="phase-number">2</div>
+          <div class="phase-content">
+            <h3 class="serif" style="font-size: 2rem; margin-bottom: 1rem;">The End of the Interrogation <br><span class="meta-label" style="border:none; margin-top:0.5rem;">(Automated Intake)</span></h3>
+            <p class="body-text">Stop wasting hours on manual discovery calls. Deploy "Annie"—your autonomous voice agent. She conducts the interviews, navigating complex logic trees to extract operational bottlenecks from your prospects. You get to step out of the interrogation room and simply listen to the active transcripts, monitoring tone and nuance like a maestro.</p>
+          </div>
+          <div class="phase-image-wrapper interactive">
+            <img src="./images/fore-3.jpg" alt="Consultant using Annie" class="img-cover interactive-img">
+          </div>
+        </div>
+
+        <!-- Phase 3 -->
+        <div class="phase-row reveal">
+          <div class="phase-number">3</div>
+          <div class="phase-content">
+            <h3 class="serif" style="font-size: 2rem; margin-bottom: 1rem;">The Alchemist’s Workbench <br><span class="meta-label" style="border:none; margin-top:0.5rem;">(Technical Analysis)</span></h3>
+            <p class="body-text">Let advanced AI (Claude) do the brutal analytical labor. ForeSight digests Annie’s transcripts and instantly isolates the revenue leakage. It spots the dispatcher losing 3 hours a day to manual entry, scores the pain points, and automatically recommends the exact AI stack (Zapier, Bland AI, etc.) required to fix it.</p>
+          </div>
+        </div>
+
+        <!-- Phase 4 -->
+        <div class="phase-row reveal">
+          <div class="phase-number">4</div>
+          <div class="phase-content">
+            <h3 class="serif" style="font-size: 2rem; margin-bottom: 1rem;">The High-Ticket Justification <br><span class="meta-label" style="border:none; margin-top:0.5rem;">(Audit Blueprints)</span></h3>
+            <p class="body-text">This is where data becomes dollars. ForeSight takes raw analysis and packages it into high-fidelity, client-facing blueprints. We categorize everything into four color-coded quadrants of value, explicitly highlighting the <em>Financial Impact</em>—like "$2,450 Monthly Net ROI." With one click, this data exports to Gamma, generating breathtaking pitch decks that make your high-ticket fees an absolute no-brainer.</p>
+          </div>
+          <div class="phase-image-wrapper">
+            <img src="./images/fore-4.jpg" alt="Audit Blueprints" class="img-cover interactive-img">
+          </div>
+        </div>
+
+        <!-- Phase 5 -->
+        <div class="phase-row reveal">
+          <div class="phase-number">5</div>
+          <div class="phase-content">
+            <h3 class="serif" style="font-size: 2rem; margin-bottom: 1rem;">The Empire Builder <br><span class="meta-label" style="border:none; margin-top:0.5rem;">(Implementation & Upsells)</span></h3>
+            <p class="body-text">Once the blueprint is sold, ForeSight transitions you into a scaling CEO. Track your monthly closed pipeline value, monitor active builds, and deploy our standardized Upsell Catalog—pitching flagship $3,500+ speed-to-lead agents and $5k custom knowledge systems with zero friction.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- OUTRO -->
+    <section class="grid-container" style="min-height: 80vh; align-items: center; text-align: center; border-bottom: none;">
+      <div class="col-center reveal">
+        <p class="body-text" style="margin-left: auto; margin-right: auto; font-size: 1.2rem;">
+          ForeSight OS is entirely white-labeled to <em>your</em> brand. With silent background processing, toast notifications, and seamless GoHighLevel syncing, the tech simply disappears, leaving only your expertise.
+        </p>
+        <blockquote class="blockquote">
+          Stop doing the work of an assistant. <br>Step into ForeSight OS. <br><strong>Become the Architect.</strong>
+        </blockquote>
+        <div style="margin-top: 4rem; overflow: hidden; border: 1px solid var(--ink); aspect-ratio: 21/9;">
+            <img src="./images/fore-5.jpg" alt="The Architect" class="img-cover interactive-img parallax" data-speed="0.1">
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      // Custom Cursor Logic
+      const cursor = document.getElementById('cursor');
+      const interactiveElements = document.querySelectorAll('a, button, .interactive-img');
+
+      document.addEventListener('mousemove', (e) => {
+        cursor.style.left = e.clientX + 'px';
+        cursor.style.top = e.clientY + 'px';
+      });
+
+      interactiveElements.forEach(el => {
+        el.addEventListener('mouseenter', () => cursor.classList.add('hover'));
+        el.addEventListener('mouseleave', () => cursor.classList.remove('hover'));
+      });
+
+      // Intersection Observer for Scroll Reveals
+      const observerOptions = {
+        root: null,
+        rootMargin: '0px',
+        threshold: 0.15
+      };
+
+      const observer = new IntersectionObserver((entries, observer) => {
+        entries.forEach(entry => {
+          if (entry.isIntersecting) {
+            entry.target.classList.add('active');
+            observer.unobserve(entry.target);
+          }
+        });
+      }, observerOptions);
+
+      document.querySelectorAll('.reveal').forEach(el => {
+        observer.observe(el);
+      });
+
+      // Simple Parallax Effect
+      const parallaxElements = document.querySelectorAll('.parallax');
+      
+      window.addEventListener('scroll', () => {
+        const scrolled = window.scrollY;
+        parallaxElements.forEach(el => {
+          const speed = el.getAttribute('data-speed');
+          const yPos = -(scrolled * speed);
+          el.style.transform = `translateY(${yPos}px) scale(1.05)`; // Maintain scale from object-fit container
+        });
+      });
+
+      // Apply filter as background texture via canvas for performance if needed, 
+      // but inline CSS filter over body is requested. We use a fixed div #grain.
+      document.getElementById('grain').style.filter = "url('#paper-texture')";
+    });
+  </script>
+</body>
+</html>
