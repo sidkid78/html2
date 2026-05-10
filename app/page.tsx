@@ -137,6 +137,15 @@ const hubs = [
     color: "from-emerald-500 to-teal-600",
     border: "hover:border-emerald-400/50",
     shadow: "hover:shadow-[0_0_40px_-10px_rgba(16,185,129,0.3)]"
+  },
+  {
+    title: "Dante: The Inferno",
+    description: "Abandon all hope, ye who enter here. Experience the nine circles of Hell through a groundbreaking synthesis of generative video and spatial audio.",
+    href: "/dante.html",
+    icon: "🔥",
+    color: "from-red-900 to-orange-900",
+    border: "hover:border-red-600/50",
+    shadow: "hover:shadow-[0_0_40px_-10px_rgba(220,38,38,0.4)]"
   }
 ];
 
