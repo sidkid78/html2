@@ -1,0 +1,432 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Circle 6: Heresy</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@400;700;900&family=Inter:wght@300;400;700&display=swap');
+
+:root {
+  --bg-color: #050505;
+  --text-main: #e0e0e0;
+  --accent: #ff4500;
+  --accent-dim: rgba(255, 69, 0, 0.3);
+  --font-hero: 'Cinzel', serif;
+  --font-body: 'Inter', sans-serif;
+  --cursor-size: 20px;
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body, html {
+  width: 100%;
+  height: 100%;
+  background-color: var(--bg-color);
+  color: var(--text-main);
+  overflow: hidden;
+  cursor: none;
+  font-family: var(--font-body);
+  -webkit-font-smoothing: antialiased;
+}
+
+/* Custom Cursor */
+.cursor {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: var(--cursor-size);
+  height: var(--cursor-size);
+  background: var(--accent);
+  border-radius: 50%;
+  pointer-events: none;
+  z-index: 9999;
+  mix-blend-mode: screen;
+  transform: translate(-50%, -50%);
+  transition: width 0.2s, height 0.2s;
+  filter: blur(4px);
+}
+
+/* Carousel Container */
+.carousel {
+  display: flex;
+  width: 100vw;
+  height: 100vh;
+  overflow-x: scroll;
+  overflow-y: hidden;
+  scroll-snap-type: x mandatory;
+  scrollbar-width: none; /* Firefox */
+}
+.carousel::-webkit-scrollbar {
+  display: none; /* Chrome/Safari */
+}
+
+/* Progress Indicator */
+.progress-container {
+  position: fixed;
+  bottom: 40px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 60vw;
+  height: 2px;
+  background: rgba(255,255,255,0.1);
+  z-index: 100;
+  display: flex;
+}
+.progress-bar {
+  height: 100%;
+  width: 0%;
+  background: var(--accent);
+  transition: width 0.2s ease-out;
+  box-shadow: 0 0 10px var(--accent);
+}
+
+/* Panel Styles */
+.panel {
+  flex: 0 0 100vw;
+  width: 100vw;
+  height: 100vh;
+  scroll-snap-align: start;
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+}
+
+/* Background Images & Effects */
+.panel-bg {
+  position: absolute;
+  top: -5%;
+  left: -5%;
+  width: 110%;
+  height: 110%;
+  background-size: cover;
+  background-position: center;
+  z-index: 1;
+  filter: url(#heat-warp) brightness(0.6) contrast(1.2);
+  animation: kenBurns 30s infinite alternate linear;
+}
+
+.overlay {
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(circle at center, rgba(5,5,5,0.2) 0%, rgba(5,5,5,0.95) 100%);
+  z-index: 2;
+}
+
+.panel-content {
+  position: relative;
+  z-index: 10;
+  max-width: 1200px;
+  width: 90%;
+  padding: 4rem;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 4rem;
+  align-items: center;
+}
+
+/* Center alignment for intro */
+.panel.intro .panel-content {
+  grid-template-columns: 1fr;
+  text-align: center;
+}
+
+/* Typography */
+.kicker {
+  font-family: var(--font-body);
+  font-size: 0.85rem;
+  text-transform: uppercase;
+  letter-spacing: 0.4em;
+  color: var(--accent);
+  margin-bottom: 1rem;
+  display: block;
+}
+
+h1 {
+  font-family: var(--font-hero);
+  font-size: clamp(4rem, 8vw, 10rem);
+  line-height: 0.9;
+  font-weight: 900;
+  text-transform: uppercase;
+  color: #fff;
+  margin-bottom: 0.5rem;
+  text-shadow: 0 10px 30px rgba(0,0,0,0.8);
+}
+
+h2 {
+  font-family: var(--font-hero);
+  font-size: clamp(2rem, 4vw, 4rem);
+  line-height: 1.1;
+  font-weight: 700;
+  color: #fff;
+  margin-bottom: 2rem;
+  border-left: 4px solid var(--accent);
+  padding-left: 1.5rem;
+}
+
+.text-column {
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
+}
+
+p {
+  font-size: clamp(1rem, 1.2vw, 1.25rem);
+  line-height: 1.7;
+  font-weight: 300;
+  color: #ccc;
+}
+
+.meta-block {
+  background: rgba(10, 10, 10, 0.6);
+  border: 1px solid rgba(255, 69, 0, 0.2);
+  padding: 1.5rem;
+  border-left: 2px solid var(--accent);
+  backdrop-filter: blur(10px);
+}
+
+.meta-label {
+  font-family: var(--font-hero);
+  font-weight: 700;
+  color: var(--accent);
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  font-size: 0.9rem;
+  margin-bottom: 0.5rem;
+  display: block;
+}
+
+/* Animations */
+@keyframes kenBurns {
+  0% { transform: scale(1) translate(0, 0); }
+  100% { transform: scale(1.1) translate(-1%, -1%); }
+}
+
+.reveal {
+  opacity: 0;
+  transform: translateY(40px);
+  transition: opacity 1.2s cubic-bezier(0.2, 0.8, 0.2, 1), 
+              transform 1.2s cubic-bezier(0.2, 0.8, 0.2, 1);
+  filter: blur(10px);
+}
+
+.panel.is-active .reveal {
+  opacity: 1;
+  transform: translateY(0);
+  filter: blur(0px);
+}
+
+.d-1 { transition-delay: 0.2s; }
+.d-2 { transition-delay: 0.4s; }
+.d-3 { transition-delay: 0.6s; }
+.d-4 { transition-delay: 0.8s; }
+
+/* SVG Filters setup */
+.svg-filters {
+  position: absolute;
+  width: 0;
+  height: 0;
+  pointer-events: none;
+}
+
+/* Responsive */
+@media (max-width: 900px) {
+  .panel-content {
+    grid-template-columns: 1fr;
+    gap: 2rem;
+    padding: 2rem;
+  }
+  h2 {
+    border-left: none;
+    border-top: 4px solid var(--accent);
+    padding-left: 0;
+    padding-top: 1rem;
+  }
+}
+</style>
+</head>
+<body>
+
+<svg class="svg-filters">
+  <filter id="heat-warp">
+    <feTurbulence type="fractalNoise" baseFrequency="0.01 0.05" numOctaves="2" result="noise">
+      <animate attributeName="baseFrequency" values="0.01 0.05; 0.015 0.08; 0.01 0.05" dur="15s" repeatCount="indefinite"/>
+    </feTurbulence>
+    <feDisplacementMap in="SourceGraphic" in2="noise" scale="15" xChannelSelector="R" yChannelSelector="G"/>
+  </filter>
+</svg>
+
+<div class="cursor" id="cursor"></div>
+
+<div class="progress-container">
+  <div class="progress-bar" id="progressBar"></div>
+</div>
+
+<div class="carousel" id="carousel">
+
+  <!-- INTRO -->
+  <section class="panel intro is-active">
+    <div class="panel-bg" style="background-image: url('./images/cantos6-intro.png');"></div>
+    <div class="overlay"></div>
+    <div class="panel-content">
+      <div>
+        <span class="kicker reveal d-1">The Inferno</span>
+        <h1 class="reveal d-2">Circle 6</h1>
+        <h2 class="reveal d-3" style="border:none; padding:0; color: var(--accent);">Heresy</h2>
+      </div>
+    </div>
+  </section>
+
+  <!-- PANEL 1 -->
+  <section class="panel">
+    <div class="panel-bg" style="background-image: url('./images/cantos6-1.jpg');"></div>
+    <div class="overlay"></div>
+    <div class="panel-content">
+      <div>
+        <span class="kicker reveal d-1">Chapter One</span>
+        <h2 class="reveal d-2">The Standoff at the Gates</h2>
+      </div>
+      <div class="text-column">
+        <p class="reveal d-3">Before Dante and Virgil can even get to the burning coffins, they are locked out of the City of Dis by fallen angels.</p>
+        <div class="meta-block reveal d-4">
+          <span class="meta-label">The Visual</span>
+          <p>Three blood-stained Furies (Megaera, Alecto, and Tisiphone) appear on the flaming high tower, shrieking and tearing at their own chests. They have horned vipers and green hydras for hair.</p>
+        </div>
+        <div class="meta-block reveal d-4" style="transition-delay: 1s;">
+          <span class="meta-label">The Threat</span>
+          <p>They call for Medusa to come and turn Dante to stone. Virgil literally has to cover Dante’s eyes with his own hands to protect him. This is a massive, high-tension cinematic moment!</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- PANEL 2 -->
+  <section class="panel">
+    <div class="panel-bg" style="background-image: url('./images/cantos6-2.jpg');"></div>
+    <div class="overlay"></div>
+    <div class="panel-content">
+      <div>
+        <span class="kicker reveal d-1">Chapter Two</span>
+        <h2 class="reveal d-2">The Heavenly Messenger</h2>
+      </div>
+      <div class="text-column">
+        <p class="reveal d-3">Hell’s forces refuse to open the gates, so Heaven intervenes.</p>
+        <div class="meta-block reveal d-4">
+          <span class="meta-label">The Visual</span>
+          <p>A terrifying, powerful angel descends from Heaven, walking across the River Styx without his feet ever touching the muck. He scatters the damned souls like frogs, waves a small wand, and blasts the massive gates of Dis open in an explosive shockwave.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- PANEL 3 -->
+  <section class="panel">
+    <div class="panel-bg" style="background-image: url('./images/cantos6-3.jpg');"></div>
+    <div class="overlay"></div>
+    <div class="panel-content">
+      <div>
+        <span class="kicker reveal d-1">Chapter Three</span>
+        <h2 class="reveal d-2">The Sprawling Necropolis</h2>
+      </div>
+      <div class="text-column">
+        <p class="reveal d-3">Once inside the walls, it isn't just a few coffins.</p>
+        <div class="meta-block reveal d-4">
+          <span class="meta-label">The Visual</span>
+          <p>It is an endless, uneven graveyard. The ground is terrifyingly hot, and the open stone tombs are glowing red like an iron foundry. The flames don't just burn in the coffins; they surround them entirely.</p>
+        </div>
+        <div class="meta-block reveal d-4" style="transition-delay: 1s;">
+          <span class="meta-label">The Audio</span>
+          <p>The air is filled with the agonizing, overlapping groans and shrieks of the souls trapped inside.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- PANEL 4 -->
+  <section class="panel">
+    <div class="panel-bg" style="background-image: url('./images/cantos6-4.jpg');"></div>
+    <div class="overlay"></div>
+    <div class="panel-content">
+      <div>
+        <span class="kicker reveal d-1">Chapter Four</span>
+        <h2 class="reveal d-2">Farinata the Arrogant</h2>
+      </div>
+      <div class="text-column">
+        <p class="reveal d-3">Dante actually speaks to one of the heretics, a political rival named Farinata degli Uberti.</p>
+        <div class="meta-block reveal d-4">
+          <span class="meta-label">The Visual</span>
+          <p>Farinata rises from his flaming tomb, visible only from the waist up. His chest and brow are thrust out in sheer defiance, looking around as if he holds all of Hell in absolute contempt. He is so arrogant he doesn't even care that he's burning. It’s a brilliant, imposing character shot.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- PANEL 5 -->
+  <section class="panel">
+    <div class="panel-bg" style="background-image: url('./images/cantos6-5.jpg');"></div>
+    <div class="overlay"></div>
+    <div class="panel-content">
+      <div>
+        <span class="kicker reveal d-1">Chapter Five</span>
+        <h2 class="reveal d-2">The Ultimate Dread</h2>
+      </div>
+      <div class="text-column">
+        <p class="reveal d-3">The tragic, theological twist of this circle: the massive, heavy stone lids of these tombs are currently propped open or suspended above the coffins.</p>
+        <div class="meta-block reveal d-4">
+          <span class="meta-label">The Narrative Punch</span>
+          <p>Dante is told that after the Final Judgment at the end of time, the heavy stone lids will be slammed shut and sealed forever, plunging the heretics into eternal, burning darkness.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+</div>
+
+<script>
+  document.addEventListener('DOMContentLoaded', () => {
+    const carousel = document.getElementById('carousel');
+    const progressBar = document.getElementById('progressBar');
+    const panels = document.querySelectorAll('.panel');
+    const cursor = document.getElementById('cursor');
+
+    // Custom Cursor Logic
+    document.addEventListener('mousemove', (e) => {
+      cursor.style.transform = `translate(${e.clientX}px, ${e.clientY}px)`;
+    });
+
+    // Progress Bar Logic
+    carousel.addEventListener('scroll', () => {
+      const scrollLeft = carousel.scrollLeft;
+      const maxScroll = carousel.scrollWidth - carousel.clientWidth;
+      const scrolled = (scrollLeft / maxScroll) * 100;
+      progressBar.style.width = scrolled + '%';
+    });
+
+    // Intersection Observer for Animations
+    const observerOptions = {
+      root: carousel,
+      threshold: 0.5
+    };
+
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          entry.target.classList.add('is-active');
+        } else {
+          // Optional: remove class when out of view to re-trigger on return
+          // entry.target.classList.remove('is-active'); 
+        }
+      });
+    }, observerOptions);
+
+    panels.forEach(panel => observer.observe(panel));
+  });
+</script>
+</body>
+</html>

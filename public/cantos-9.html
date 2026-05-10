@@ -1,0 +1,454 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Circle 9: Treachery</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;700;900&family=Inter:wght@300;400;600&display=swap"
+        rel="stylesheet">
+    <style>
+        :root {
+            --bg-deep: #020407;
+            --ice-white: #e3effa;
+            --ice-blue: #5b96ba;
+            --void-black: #000000;
+            --font-hero: 'Cinzel', serif;
+            --font-body: 'Inter', sans-serif;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            cursor: none;
+            /* Custom cursor */
+        }
+
+        body {
+            background-color: var(--bg-deep);
+            color: var(--ice-white);
+            font-family: var(--font-body);
+            overflow: hidden;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        /* SVG Filter Container */
+        .svg-filters {
+            position: absolute;
+            width: 0;
+            height: 0;
+            pointer-events: none;
+        }
+
+        /* Carousel Container */
+        .cocytus-carousel {
+            display: flex;
+            width: 100vw;
+            height: 100vh;
+            overflow-x: auto;
+            overflow-y: hidden;
+            scroll-snap-type: x mandatory;
+            scrollbar-width: none;
+            /* Firefox */
+            -ms-overflow-style: none;
+            /* IE and Edge */
+        }
+
+        .cocytus-carousel::-webkit-scrollbar {
+            display: none;
+        }
+
+        /* Individual Panels */
+        .panel {
+            flex: 0 0 100vw;
+            width: 100vw;
+            height: 100vh;
+            scroll-snap-align: start;
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            padding: 8vw 12vw;
+            overflow: hidden;
+        }
+
+        /* Background Imagery with Ice Filter */
+        .panel-bg {
+            position: absolute;
+            top: -5%;
+            left: -5%;
+            width: 110%;
+            height: 110%;
+            background-size: cover;
+            background-position: center;
+            z-index: 1;
+            opacity: 0.35;
+            filter: url(#ice-distortion) grayscale(60%) contrast(150%);
+            transition: transform 10s cubic-bezier(0.25, 1, 0.5, 1);
+        }
+
+        .panel.is-visible .panel-bg {
+            transform: scale(1);
+        }
+
+        .panel:not(.is-visible) .panel-bg {
+            transform: scale(1.05);
+        }
+
+        /* Vignette overlay */
+        .vignette {
+            position: absolute;
+            inset: 0;
+            background: radial-gradient(circle at center, transparent 0%, var(--void-black) 90%);
+            z-index: 2;
+            pointer-events: none;
+        }
+
+        /* Content Layer */
+        .content {
+            position: relative;
+            z-index: 10;
+            display: flex;
+            flex-direction: column;
+            gap: 2rem;
+            max-width: 1200px;
+        }
+
+        /* Typography */
+        h1.hero {
+            font-family: var(--font-hero);
+            font-size: clamp(3rem, 8vw, 10rem);
+            font-weight: 900;
+            line-height: 0.9;
+            text-transform: uppercase;
+            letter-spacing: -0.02em;
+            color: var(--ice-white);
+            text-shadow: 0 10px 30px rgba(0, 0, 0, 0.8);
+            margin-bottom: 0.5rem;
+        }
+
+        h2.subhero {
+            font-family: var(--font-hero);
+            font-size: clamp(1.5rem, 4vw, 4rem);
+            font-weight: 400;
+            letter-spacing: 0.2em;
+            color: var(--ice-blue);
+            opacity: 0.8;
+        }
+
+        p.body-text {
+            font-size: clamp(1rem, 1.5vw, 1.5rem);
+            line-height: 1.6;
+            max-width: 600px;
+            font-weight: 300;
+            letter-spacing: 0.03em;
+            text-shadow: 0 2px 10px rgba(0, 0, 0, 0.9);
+        }
+
+        .zone-block {
+            border-left: 1px solid var(--ice-blue);
+            padding-left: 2rem;
+            margin-bottom: 3rem;
+        }
+
+        .zone-block.offset {
+            margin-left: 15vw;
+        }
+
+        h3.zone-name {
+            font-family: var(--font-hero);
+            font-size: clamp(2rem, 3vw, 4rem);
+            color: var(--ice-blue);
+            letter-spacing: 0.1em;
+            margin-bottom: 0.5rem;
+            text-transform: uppercase;
+        }
+
+        .center-align {
+            align-items: center;
+            text-align: center;
+            margin: 0 auto;
+        }
+
+        .center-align p.body-text {
+            text-align: center;
+            max-width: 800px;
+        }
+
+        /* Animations */
+        .reveal-elem {
+            opacity: 0;
+            transform: translateY(40px);
+            filter: blur(10px);
+            transition: opacity 1.8s cubic-bezier(0.19, 1, 0.22, 1),
+                transform 1.8s cubic-bezier(0.19, 1, 0.22, 1),
+                filter 1.8s cubic-bezier(0.19, 1, 0.22, 1);
+        }
+
+        .panel.is-visible .reveal-elem {
+            opacity: 1;
+            transform: translateY(0);
+            filter: blur(0);
+        }
+
+        .delay-1 {
+            transition-delay: 0.2s;
+        }
+
+        .delay-2 {
+            transition-delay: 0.4s;
+        }
+
+        .delay-3 {
+            transition-delay: 0.6s;
+        }
+
+        /* Progress Indicator */
+        .tracker {
+            position: fixed;
+            bottom: 3rem;
+            right: 3rem;
+            z-index: 100;
+            font-family: var(--font-body);
+            font-size: 0.75rem;
+            letter-spacing: 0.3em;
+            color: var(--ice-blue);
+            text-transform: uppercase;
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            opacity: 0;
+            transition: opacity 1s ease;
+        }
+
+        .tracker.active {
+            opacity: 0.7;
+        }
+
+        .tracker-line {
+            width: 40px;
+            height: 1px;
+            background: var(--ice-blue);
+            transform-origin: left;
+            transition: transform 0.5s ease;
+        }
+
+        /* Custom Cursor */
+        .cursor-ring {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 40px;
+            height: 40px;
+            border: 1px solid rgba(91, 150, 186, 0.5);
+            border-radius: 50%;
+            transform: translate(-50%, -50%);
+            pointer-events: none;
+            z-index: 9999;
+            transition: width 0.3s, height 0.3s, border-color 0.3s;
+            mix-blend-mode: difference;
+        }
+
+        .cursor-dot {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 4px;
+            height: 4px;
+            background: var(--ice-white);
+            border-radius: 50%;
+            transform: translate(-50%, -50%);
+            pointer-events: none;
+            z-index: 9999;
+        }
+
+        /* Interactive Hover States */
+        .zone-block:hover .zone-name {
+            color: var(--ice-white);
+            transition: color 0.4s ease;
+        }
+    </style>
+</head>
+
+<body>
+
+    <!-- SVG Filters -->
+    <svg class="svg-filters">
+        <defs>
+            <filter id="ice-distortion">
+                <feTurbulence type="fractalNoise" baseFrequency="0.005 0.02" numOctaves="3" result="noise">
+                    <animate attributeName="baseFrequency" values="0.005 0.02; 0.008 0.04; 0.005 0.02" dur="20s"
+                        repeatCount="indefinite" />
+                </feTurbulence>
+                <feDisplacementMap in="SourceGraphic" in2="noise" scale="30" xChannelSelector="R"
+                    yChannelSelector="G" />
+            </filter>
+        </defs>
+    </svg>
+
+    <!-- Custom Cursor -->
+    <div class="cursor-ring" id="cursor-ring"></div>
+    <div class="cursor-dot" id="cursor-dot"></div>
+
+    <!-- Global Progress Indicator -->
+    <div class="tracker" id="tracker">
+        <span>DESCENT</span>
+        <div class="tracker-line" id="tracker-line"></div>
+        <span id="tracker-num">I / IV</span>
+    </div>
+
+    <!-- Main Carousel -->
+    <main class="cocytus-carousel" id="carousel">
+
+        <!-- Panel 1: Intro -->
+        <section class="panel">
+            <div class="panel-bg" style="background-image: url('./images/cantos9-1.jpg');"></div>
+            <div class="vignette"></div>
+            <div class="content">
+                <h1 class="hero reveal-elem delay-1">Circle 9:</h1>
+                <h2 class="subhero reveal-elem delay-2">Treachery</h2>
+                <p class="body-text reveal-elem delay-3">
+                    The deepest, coldest part of Hell. Treachery is seen as the ultimate sin because it violates a bond
+                    of trust. Unlike the fire of the upper circles, this is a frozen lake (Cocytus).
+                </p>
+            </div>
+        </section>
+
+        <!-- Panel 2: Kin & Country -->
+        <section class="panel">
+            <div class="panel-bg" style="background-image: url('./images/cantos9-2.jpg');"></div>
+            <div class="vignette"></div>
+            <div class="content">
+                <div class="zone-block reveal-elem delay-1">
+                    <h3 class="zone-name">Caina</h3>
+                    <p class="body-text">Traitors to kin (frozen up to their necks).</p>
+                </div>
+                <div class="zone-block offset reveal-elem delay-2">
+                    <h3 class="zone-name">Antenora</h3>
+                    <p class="body-text">Traitors to country.</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Panel 3: Guests & Lords -->
+        <section class="panel">
+            <div class="panel-bg" style="background-image: url('./images/cantos9-mood.png');"></div>
+            <div class="vignette"></div>
+            <div class="content">
+                <div class="zone-block reveal-elem delay-1">
+                    <h3 class="zone-name">Ptolomea</h3>
+                    <p class="body-text">Traitors to guests (their tears freeze in their eye sockets).</p>
+                </div>
+                <div class="zone-block offset reveal-elem delay-2">
+                    <h3 class="zone-name">Judecca</h3>
+                    <p class="body-text">Traitors to lords/benefactors (completely submerged in ice).</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Panel 4: Lucifer -->
+        <section class="panel">
+            <div class="panel-bg" style="background-image: url('./images/cantos9-3.jpg');"></div>
+            <div class="vignette"></div>
+            <div class="content center-align">
+                <h1 class="hero reveal-elem delay-1">LUCIFER</h1>
+                <p class="body-text reveal-elem delay-2">
+                    At the very center of the Earth stands Lucifer. He has three faces and eternally chews on the three
+                    greatest traitors of history: Judas Iscariot, Brutus, and Cassius.
+                </p>
+            </div>
+        </section>
+
+    </main>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const panels = document.querySelectorAll('.panel');
+            const tracker = document.getElementById('tracker');
+            const trackerNum = document.getElementById('tracker-num');
+            const trackerLine = document.getElementById('tracker-line');
+
+            // Intersection Observer for Panel Animations and Tracking
+            const observerOptions = {
+                root: document.getElementById('carousel'),
+                threshold: 0.5
+            };
+
+            const romanNumerals = ['I', 'II', 'III', 'IV'];
+
+            const observer = new IntersectionObserver((entries) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        // Add visible class to trigger CSS animations
+                        entry.target.classList.add('is-visible');
+                        tracker.classList.add('active');
+
+                        // Update Tracker
+                        const index = Array.from(panels).indexOf(entry.target);
+                        trackerNum.textContent = `${romanNumerals[index]} / IV`;
+                        trackerLine.style.transform = `scaleX(${(index + 1) / panels.length})`;
+                    }
+                });
+            }, observerOptions);
+
+            panels.forEach(panel => {
+                observer.observe(panel);
+            });
+
+            // Custom Cursor Logic
+            const cursorRing = document.getElementById('cursor-ring');
+            const cursorDot = document.getElementById('cursor-dot');
+            let mouseX = window.innerWidth / 2;
+            let mouseY = window.innerHeight / 2;
+            let ringX = mouseX;
+            let ringY = mouseY;
+
+            document.addEventListener('mousemove', (e) => {
+                mouseX = e.clientX;
+                mouseY = e.clientY;
+
+                // Instant dot movement
+                cursorDot.style.left = `${mouseX}px`;
+                cursorDot.style.top = `${mouseY}px`;
+            });
+
+            // Smooth interpolation for the ring
+            function animateCursor() {
+                const dx = mouseX - ringX;
+                const dy = mouseY - ringY;
+
+                ringX += dx * 0.15;
+                ringY += dy * 0.15;
+
+                cursorRing.style.left = `${ringX}px`;
+                cursorRing.style.top = `${ringY}px`;
+
+                requestAnimationFrame(animateCursor);
+            }
+            animateCursor();
+
+            // Hover effect on interactive elements
+            const hoverTargets = document.querySelectorAll('.zone-block');
+            hoverTargets.forEach(target => {
+                target.addEventListener('mouseenter', () => {
+                    cursorRing.style.width = '60px';
+                    cursorRing.style.height = '60px';
+                    cursorRing.style.borderColor = 'rgba(227, 239, 250, 0.8)';
+                });
+                target.addEventListener('mouseleave', () => {
+                    cursorRing.style.width = '40px';
+                    cursorRing.style.height = '40px';
+                    cursorRing.style.borderColor = 'rgba(91, 150, 186, 0.5)';
+                });
+            });
+        });
+    </script>
+</body>
+
+</html>"
+}
+```

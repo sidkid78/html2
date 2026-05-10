@@ -1,0 +1,428 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Circle 1: Limbo</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@400;500&family=Inter:wght@300;400&family=Playfair+Display:ital,wght@0,400;0,500;1,400&display=swap');
+
+:root {
+  --c-bg: #0a0d0c;
+  --c-text: #dbe2e0;
+  --c-accent: #7a8c87;
+  --c-dark: #121816;
+  
+  --f-hero: 'Playfair Display', serif;
+  --f-body: 'Inter', sans-serif;
+  --f-label: 'Cinzel', serif;
+  
+  --ease-out: cubic-bezier(0.215, 0.61, 0.355, 1);
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body, html {
+  width: 100%;
+  height: 100%;
+  background-color: var(--c-bg);
+  color: var(--c-text);
+  font-family: var(--f-body);
+  overflow: hidden;
+  cursor: none;
+}
+
+/* Custom Cursor */
+#cursor {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background: rgba(219, 226, 224, 0.3);
+  pointer-events: none;
+  z-index: 9999;
+  transform: translate(-50%, -50%);
+  transition: width 0.3s, height 0.3s, background 0.3s;
+  mix-blend-mode: difference;
+}
+
+/* Global Fog Overlay */
+.fog-overlay {
+  position: fixed;
+  top: -10%;
+  left: -10%;
+  width: 120%;
+  height: 120%;
+  background-image: url('./images/cantos1-mood.png');
+  background-size: cover;
+  background-position: center;
+  opacity: 0.35;
+  mix-blend-mode: screen;
+  pointer-events: none;
+  z-index: 10;
+  filter: url(#slow-warp) grayscale(50%);
+}
+
+.grain-overlay {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 100;
+  opacity: 0.05;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E");
+}
+
+/* UI Elements */
+.ui-layer {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  z-index: 50;
+  padding: 3vw;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+}
+
+.header, .footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-family: var(--f-label);
+  font-size: 0.75rem;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--c-accent);
+}
+
+.progress-container {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.progress-line {
+  width: 50px;
+  height: 1px;
+  background: rgba(122, 140, 135, 0.3);
+  position: relative;
+  overflow: hidden;
+}
+
+.progress-fill {
+  position: absolute;
+  top: 0;
+  left: 0;
+  height: 100%;
+  width: 33.33%;
+  background: var(--c-text);
+  transition: transform 0.6s var(--ease-out);
+}
+
+/* Carousel Container */
+.carousel {
+  width: 100vw;
+  height: 100vh;
+  display: flex;
+  overflow-x: scroll;
+  overflow-y: hidden;
+  scroll-snap-type: x mandatory;
+  scrollbar-width: none; /* Firefox */
+  -ms-overflow-style: none;  /* IE 10+ */
+}
+.carousel::-webkit-scrollbar { display: none; }
+
+/* Panels */
+.panel {
+  flex: 0 0 100vw;
+  height: 100vh;
+  scroll-snap-align: start;
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+}
+
+.bg-image {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-size: cover;
+  background-position: center;
+  opacity: 0.5;
+  transition: transform 1.5s var(--ease-out), filter 1.5s var(--ease-out);
+  transform: scale(1.05);
+}
+
+.panel.is-active .bg-image {
+  transform: scale(1);
+  filter: brightness(0.7) contrast(1.1);
+}
+
+/* Panel 1 specific */
+#p1 .bg-image { background-image: url('./images/cantos-1.jpg'); }
+#p2 .bg-image { background-image: url('./images/cantos-2.jpg'); filter: brightness(0.5); }
+#p3 .bg-image { background-image: url('./images/cantos-3.jpg'); }
+
+/* Typography & Layout */
+.content-wrap {
+  position: relative;
+  z-index: 20;
+  width: 85%;
+  max-width: 1200px;
+  display: grid;
+  grid-template-columns: repeat(12, 1fr);
+  gap: 2rem;
+}
+
+.reveal {
+  opacity: 0;
+  transform: translateY(30px);
+  transition: opacity 1.2s var(--ease-out), transform 1.2s var(--ease-out);
+}
+
+.is-active .reveal {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/* Typographic Hierarchy */
+.t-label {
+  font-family: var(--f-label);
+  font-size: 0.85rem;
+  letter-spacing: 0.3em;
+  color: var(--c-accent);
+  text-transform: uppercase;
+  margin-bottom: 2rem;
+}
+
+.t-hero {
+  font-family: var(--f-hero);
+  font-size: clamp(3rem, 8vw, 8rem);
+  line-height: 1.1;
+  font-weight: 400;
+  letter-spacing: -0.02em;
+  margin-bottom: 1rem;
+}
+
+.t-subhero {
+  font-family: var(--f-hero);
+  font-size: clamp(1.5rem, 3vw, 3rem);
+  font-style: italic;
+  color: var(--c-accent);
+  margin-bottom: 3rem;
+}
+
+.t-body {
+  font-size: clamp(1rem, 1.2vw, 1.25rem);
+  line-height: 1.6;
+  font-weight: 300;
+  max-width: 400px;
+}
+
+/* Panel Specific Layouts */
+#p1 .content-wrap {
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+#p1 .t-body { max-width: 600px; margin-top: 2rem; }
+
+#p2 .content-wrap {
+  align-items: end;
+}
+#p2 .text-block {
+  grid-column: 2 / 7;
+  background: rgba(10, 13, 12, 0.6);
+  padding: 3rem;
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(122, 140, 135, 0.2);
+}
+
+#p3 .content-wrap {
+  align-items: center;
+}
+#p3 .text-block {
+  grid-column: 8 / 13;
+}
+
+/* Delays */
+.is-active .d-1 { transition-delay: 0.1s; }
+.is-active .d-2 { transition-delay: 0.3s; }
+.is-active .d-3 { transition-delay: 0.5s; }
+.is-active .d-4 { transition-delay: 0.7s; }
+
+/* Keyword highlights */
+.hlt {
+  font-family: var(--f-hero);
+  font-style: italic;
+  color: #fff;
+  font-size: 1.1em;
+}
+
+@media (max-width: 768px) {
+  .content-wrap { display: flex; flex-direction: column; }
+  #p2 .text-block, #p3 .text-block { padding: 1.5rem; }
+}
+</style>
+</head>
+<body>
+
+<!-- SVG Filters -->
+<svg style="display:none;">
+  <defs>
+    <filter id="slow-warp">
+      <feTurbulence type="fractalNoise" baseFrequency="0.005 0.01" numOctaves="3" result="noise">
+        <animate attributeName="baseFrequency" values="0.005 0.01; 0.008 0.015; 0.005 0.01" dur="20s" repeatCount="indefinite"/>
+      </feTurbulence>
+      <feDisplacementMap in="SourceGraphic" in2="noise" scale="30" xChannelSelector="R" yChannelSelector="G"/>
+    </filter>
+  </defs>
+</svg>
+
+<div id="cursor"></div>
+<div class="fog-overlay"></div>
+<div class="grain-overlay"></div>
+
+<!-- UI Layer -->
+<div class="ui-layer">
+  <div class="header">
+    <span>Dante's Inferno</span>
+    <span>Canto IV</span>
+  </div>
+  <div class="footer">
+    <span>Scroll</span>
+    <div class="progress-container">
+      <span id="counter">01</span>
+      <div class="progress-line">
+        <div class="progress-fill" id="progress-fill"></div>
+      </div>
+      <span>03</span>
+    </div>
+  </div>
+</div>
+
+<!-- Interactive Carousel -->
+<div class="carousel" id="carousel">
+  
+  <!-- Panel 1: Location -->
+  <section class="panel" id="p1" data-index="0">
+    <div class="bg-image"></div>
+    <div class="content-wrap">
+      <div class="t-label reveal d-1">Circle 1</div>
+      <h1 class="t-hero reveal d-2">Limbo</h1>
+      <h2 class="t-subhero reveal d-3">(The Unbaptized & Virtuous Pagans)</h2>
+      <p class="t-body reveal d-4">
+        Limbo is a place of <span class="hlt">"sorrow without torment."</span> It’s a green, peaceful meadow with a great citadel, but it is shrouded in an eternal fog of sadness.
+      </p>
+    </div>
+  </section>
+
+  <!-- Panel 2: The Sin -->
+  <section class="panel" id="p2" data-index="1">
+    <div class="bg-image"></div>
+    <div class="content-wrap">
+      <div class="text-block">
+        <h2 class="t-hero reveal d-1" style="font-size: clamp(2rem, 5vw, 4rem);">The Sin</h2>
+        <p class="t-body reveal d-2">
+          These souls didn't "sin" in the traditional sense, but they either lived before the time of Christ (like Homer, Socrates, and Aristotle) or were never baptized.
+        </p>
+      </div>
+    </div>
+  </section>
+
+  <!-- Panel 3: The Punishment -->
+  <section class="panel" id="p3" data-index="2">
+    <div class="bg-image"></div>
+    <div class="content-wrap">
+      <div class="text-block">
+        <h2 class="t-hero reveal d-1" style="font-size: clamp(2rem, 5vw, 4rem);">The Punishment</h2>
+        <p class="t-body reveal d-2">
+          There is no physical pain. Instead, they suffer from spiritual sighing. They live in a state of eternal <span class="hlt">"longing without hope,"</span> knowing that a higher paradise exists but that they are forever barred from it.
+        </p>
+      </div>
+    </div>
+  </section>
+
+</div>
+
+<script>
+  // Custom Cursor Logic
+  const cursor = document.getElementById('cursor');
+  let mouseX = 0, mouseY = 0;
+  let cursorX = 0, cursorY = 0;
+
+  document.addEventListener('mousemove', (e) => {
+    mouseX = e.clientX;
+    mouseY = e.clientY;
+  });
+
+  function animateCursor() {
+    let dx = mouseX - cursorX;
+    let dy = mouseY - cursorY;
+    cursorX += dx * 0.15;
+    cursorY += dy * 0.15;
+    cursor.style.transform = `translate(${cursorX}px, ${cursorY}px) translate(-50%, -50%)`;
+    requestAnimationFrame(animateCursor);
+  }
+  animateCursor();
+
+  // Interactive elements expand cursor
+  document.querySelectorAll('.panel').forEach(el => {
+    el.addEventListener('mousedown', () => {
+      cursor.style.transform = `translate(${cursorX}px, ${cursorY}px) translate(-50%, -50%) scale(0.5)`;
+    });
+    el.addEventListener('mouseup', () => {
+      cursor.style.transform = `translate(${cursorX}px, ${cursorY}px) translate(-50%, -50%) scale(1)`;
+    });
+  });
+
+  // Intersection Observer for scroll-triggered animations
+  const panels = document.querySelectorAll('.panel');
+  const counter = document.getElementById('counter');
+  const progressFill = document.getElementById('progress-fill');
+
+  const observerOptions = {
+    root: document.getElementById('carousel'),
+    threshold: 0.5
+  };
+
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        entry.target.classList.add('is-active');
+        
+        // Update UI logic
+        const index = parseInt(entry.target.getAttribute('data-index'));
+        counter.innerText = '0' + (index + 1);
+        progressFill.style.transform = `translateX(${index * 100}%)`;
+        
+      } else {
+        // Optional: remove class to replay animation on scroll back
+        // entry.target.classList.remove('is-active');
+      }
+    });
+  }, observerOptions);
+
+  panels.forEach(panel => {
+    observer.observe(panel);
+  });
+  
+  // Trigger first panel immediately
+  setTimeout(() => { document.getElementById('p1').classList.add('is-active'); }, 100);
+</script>
+</body>
+</html>

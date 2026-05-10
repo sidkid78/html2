@@ -1,0 +1,307 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Circle 3: Gluttony</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@700;900&family=Inter:wght@300;400;600&display=swap');
+
+        :root {
+            --bg-color: #050505;
+            --text-main: #e3dfd5;
+            --text-muted: #8a8880;
+            --accent: #a3a896; /* Sickly pale green/grey */
+            --ease-out-expo: cubic-bezier(0.19, 1, 0.22, 1);
+            --ease-in-out-sine: cubic-bezier(0.445, 0.05, 0.55, 0.95);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            font-family: 'Inter', sans-serif;
+            overflow-x: hidden;
+            overscroll-behavior: none;
+            cursor: crosshair;
+        }
+
+        /* SVG Filter Definitions hidden */
+        .svg-defs {
+            position: absolute;
+            width: 0;
+            height: 0;
+        }
+
+        /* Global Overlays */
+        .noise-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            pointer-events: none;
+            z-index: 100;
+            opacity: 0.15;
+            background: url('data:image/svg+xml;utf8,%3Csvg viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg"%3E%3Cfilter id="noiseFilter"%3E%3CfeTurbulence type="fractalNoise" baseFrequency="0.85" numOctaves="3" stitchTiles="stitch"/%3E%3C/filter%3E%3Crect width="100%25" height="100%25" filter="url(%23noiseFilter)"/%3E%3C/svg%3E');
+        }
+
+        .texture-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            pointer-events: none;
+            z-index: 1;
+            background-image: url('./images/cantos3-texture.png');
+            background-size: cover;
+            background-position: center;
+            opacity: 0.3;
+            mix-blend-mode: multiply;
+        }
+
+        .vignette {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            pointer-events: none;
+            z-index: 50;
+            background: radial-gradient(circle at center, transparent 20%, #000000 100%);
+        }
+
+        /* Scrollytelling Sections */
+        .scene {
+            position: relative;
+            min-height: 120vh;
+            width: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+            padding: 5vw;
+            z-index: 10;
+        }
+
+        /* Background Parallax Layers */
+        .bg-layer {
+            position: absolute;
+            top: -10%;
+            left: -5%;
+            width: 110%;
+            height: 120%;
+            background-size: cover;
+            background-position: center;
+            z-index: -1;
+            filter: url(#ooze) brightness(0.4) contrast(1.2);
+            transform-origin: center;
+            will-change: transform;
+        }
+
+        /* Typography System */
+        .content-container {
+            position: relative;
+            max-width: 1200px;
+            width: 100%;
+            z-index: 20;
+        }
+
+        h1.hero {
+            font-family: 'Cinzel', serif;
+            font-size: clamp(4rem, 12vw, 15rem);
+            font-weight: 900;
+            line-height: 0.85;
+            text-transform: uppercase;
+            letter-spacing: -0.02em;
+            color: #fff;
+            margin-bottom: 2rem;
+            text-shadow: 0 10px 30px rgba(0,0,0,0.8);
+        }
+
+        .label {
+            font-family: 'Inter', sans-serif;
+            font-size: clamp(0.75rem, 1.5vw, 1rem);
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.3em;
+            color: var(--accent);
+            margin-bottom: 1.5rem;
+            border-bottom: 1px solid rgba(163, 168, 150, 0.3);
+            padding-bottom: 0.5rem;
+            display: inline-block;
+        }
+
+        p.body-text {
+            font-size: clamp(1.2rem, 3.5vw, 2.8rem);
+            line-height: 1.3;
+            font-weight: 300;
+            max-width: 900px;
+            margin-bottom: 2rem;
+            text-shadow: 0 4px 20px rgba(0,0,0,1);
+        }
+
+        /* Alignment Variations */
+        .align-right { text-align: right; margin-left: auto; }
+        .align-center { text-align: center; margin: 0 auto; }
+        .align-left { text-align: left; }
+
+        /* Animation Classes */
+        .anim-element {
+            opacity: 0;
+            transform: translateY(60px) scale(0.98);
+            transition: opacity 1.2s var(--ease-out-expo), transform 1.2s var(--ease-out-expo);
+            will-change: opacity, transform;
+        }
+
+        .anim-element.revealed {
+            opacity: 1;
+            transform: translateY(0) scale(1);
+        }
+
+        .delay-1 { transition-delay: 0.1s; }
+        .delay-2 { transition-delay: 0.2s; }
+        .delay-3 { transition-delay: 0.3s; }
+
+    </style>
+</head>
+<body>
+
+    <!-- SVG Filters for visual effects -->
+    <svg class="svg-defs">
+        <defs>
+            <!-- Slow, heavy liquid distortion for the muck -->
+            <filter id="ooze" x="-20%" y="-20%" width="140%" height="140%">
+                <feTurbulence type="fractalNoise" baseFrequency="0.01 0.015" numOctaves="3" result="noise">
+                    <animate attributeName="baseFrequency" values="0.01 0.015; 0.015 0.02; 0.01 0.015" dur="15s" repeatCount="indefinite" />
+                </feTurbulence>
+                <feDisplacementMap in="SourceGraphic" in2="noise" scale="25" xChannelSelector="R" yChannelSelector="G" />
+            </filter>
+        </defs>
+    </svg>
+
+    <div class="noise-overlay"></div>
+    <div class="texture-overlay"></div>
+    <div class="vignette"></div>
+
+    <main>
+        <!-- Scene 1: Introduction -->
+        <section class="scene">
+            <div class="bg-layer parallax-bg" style="background-image: url('./images/cantos13-1.jpg');" data-speed="0.4"></div>
+            <div class="content-container align-left">
+                <h1 class="hero anim-element">Circle 3:<br>Gluttony</h1>
+                <p class="body-text anim-element delay-1">
+                    Dante finds this circle particularly repulsive—a cold, stinking slush created by "dirty" rain and black snow.
+                </p>
+            </div>
+        </section>
+
+        <!-- Scene 2: The Sin -->
+        <section class="scene">
+            <div class="bg-layer parallax-bg" style="background-image: url('./images/cantos3-2.jpg');" data-speed="0.3"></div>
+            <div class="content-container align-right">
+                <div class="anim-element">
+                    <h2 class="label">The Sin:</h2>
+                </div>
+                <p class="body-text anim-element delay-1" style="max-width: 700px; margin-left: auto;">
+                    Those who lived for the pleasure of food and drink, ignoring the spiritual for the sake of the belly.
+                </p>
+            </div>
+        </section>
+
+        <!-- Scene 3: The Punishment (Part 1) -->
+        <section class="scene">
+            <div class="bg-layer parallax-bg" style="background-image: url('./images/cantos2-3.jpg');" data-speed="0.5"></div>
+            <div class="content-container align-center">
+                <div class="anim-element">
+                    <h2 class="label">The Punishment:</h2>
+                </div>
+                <p class="body-text anim-element delay-1">
+                    They lie face down in freezing, putrid muck and filth.
+                </p>
+                <p class="body-text anim-element delay-2">
+                    To add to the misery, the three-headed dog Cerberus stands over them, flaying and scratching them with his claws and bark-howling in their ears.
+                </p>
+            </div>
+        </section>
+
+        <!-- Scene 4: Conclusion -->
+        <section class="scene" style="min-height: 80vh;">
+            <div class="bg-layer parallax-bg" style="background-image: url('[AI Mood Image]'); filter: url(#ooze) brightness(0.2) contrast(1.5);" data-speed="0.2"></div>
+            <div class="content-container align-center">
+                <p class="body-text anim-element" style="font-family: 'Cinzel', serif; font-size: clamp(2rem, 5vw, 4rem); color: var(--accent);">
+                    It is a sensory overload of "grossness" to match their overindulgent lives.
+                </p>
+            </div>
+        </section>
+    </main>
+
+    <script>
+        document.addEventListener("DOMContentLoaded", () => {
+            // 1. Intersection Observer for Scroll Reveals
+            const observerOptions = {
+                root: null,
+                rootMargin: '0px 0px -15% 0px',
+                threshold: 0.1
+            };
+
+            const revealObserver = new IntersectionObserver((entries, observer) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        entry.target.classList.add('revealed');
+                        // Optional: unobserve after reveal for one-time animation
+                        // observer.unobserve(entry.target);
+                    } else {
+                        // Re-hide when scrolling up for dramatic re-entry
+                        entry.target.classList.remove('revealed');
+                    }
+                });
+            }, observerOptions);
+
+            const animatedElements = document.querySelectorAll('.anim-element');
+            animatedElements.forEach(el => revealObserver.observe(el));
+
+            // 2. Parallax Background Logic using requestAnimationFrame for smoothness
+            const parallaxBgs = document.querySelectorAll('.parallax-bg');
+            let lastScrollY = window.scrollY;
+            let ticking = false;
+
+            function updateParallax() {
+                const scrollY = window.scrollY;
+                const windowHeight = window.innerHeight;
+
+                parallaxBgs.forEach(bg => {
+                    const parent = bg.closest('.scene');
+                    const rect = parent.getBoundingClientRect();
+                    
+                    // Only animate if section is in or near viewport
+                    if (rect.top <= windowHeight && rect.bottom >= 0) {
+                        const speed = parseFloat(bg.getAttribute('data-speed')) || 0.3;
+                        // Calculate offset based on element's distance from center of screen
+                        const yPos = (rect.top - (windowHeight / 2)) * speed;
+                        bg.style.transform = `translate3d(0, ${yPos}px, 0) scale(1.15)`;
+                    }
+                });
+                ticking = false;
+            }
+
+            window.addEventListener('scroll', () => {
+                lastScrollY = window.scrollY;
+                if (!ticking) {
+                    window.requestAnimationFrame(updateParallax);
+                    ticking = true;
+                }
+            }, { passive: true });
+
+            // Initial trigger
+            updateParallax();
+        });
+    </script>
+</body>
+</html>

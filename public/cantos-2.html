@@ -1,0 +1,311 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Circle 2: Lust</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@400;700&family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,400&family=Inter:wght@300;400&display=swap');
+
+        *,
+        *::before,
+        *::after {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            background-color: #050505;
+            color: #e0dcd8;
+            font-family: 'Cormorant Garamond', serif;
+            overflow: hidden;
+            cursor: crosshair;
+        }
+
+        ::selection {
+            background: #8a0303;
+            color: #fff;
+        }
+
+        .noise-overlay {
+            position: fixed;
+            inset: 0;
+            pointer-events: none;
+            z-index: 9999;
+            opacity: 0.3;
+            mix-blend-mode: overlay;
+            background: url('data:image/svg+xml;utf8,<svg viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg"><filter id="noiseFilter"><feTurbulence type="fractalNoise" baseFrequency="0.8" numOctaves="3" stitchTiles="stitch"/></filter><rect width="100%" height="100%" filter="url(#noiseFilter)"/></svg>');
+        }
+
+        .scroll-container {
+            height: 100vh;
+            width: 100vw;
+            overflow-y: scroll;
+            scroll-snap-type: y mandatory;
+            scrollbar-width: none;
+            -ms-overflow-style: none;
+        }
+
+        .scroll-container::-webkit-scrollbar {
+            display: none;
+        }
+
+        .progress-bar {
+            position: fixed;
+            left: 2rem;
+            top: 0;
+            width: 1px;
+            height: 0vh;
+            background: #8a0303;
+            z-index: 100;
+            transition: height 0.1s linear;
+            box-shadow: 0 0 10px #8a0303;
+        }
+
+        .progress-track {
+            position: fixed;
+            left: 2rem;
+            top: 0;
+            width: 1px;
+            height: 100vh;
+            background: rgba(255, 255, 255, 0.1);
+            z-index: 99;
+        }
+
+        .panel {
+            position: relative;
+            height: 100vh;
+            width: 100vw;
+            scroll-snap-align: start;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+        }
+
+        .bg {
+            position: absolute;
+            inset: 0;
+            background-size: cover;
+            background-position: center;
+            opacity: 0.25;
+            transition: transform 10s ease-out, opacity 2s ease;
+            filter: grayscale(60%) contrast(120%);
+        }
+
+        .panel:hover .bg {
+            transform: scale(1.05);
+            opacity: 0.4;
+        }
+
+        .gradient-overlay {
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(to top, #050505 10%, transparent 50%, #050505 90%);
+        }
+
+        .content-grid {
+            position: relative;
+            z-index: 10;
+            width: 90%;
+            max-width: 1200px;
+            display: grid;
+            grid-template-columns: repeat(12, 1fr);
+            gap: 2rem;
+            padding: 4rem;
+        }
+
+        .hero-text {
+            grid-column: 1 / -1;
+            font-family: 'Cinzel', serif;
+            text-transform: uppercase;
+        }
+
+        .label {
+            font-family: 'Inter', sans-serif;
+            font-size: 0.75rem;
+            letter-spacing: 0.3em;
+            color: #8a0303;
+            margin-bottom: 1rem;
+            display: block;
+        }
+
+        .title-large {
+            font-size: clamp(4rem, 10vw, 10rem);
+            line-height: 0.85;
+            font-weight: 700;
+            letter-spacing: -0.02em;
+            margin-bottom: 2rem;
+            position: relative;
+            color: #fff;
+            text-shadow: 0 10px 30px rgba(0, 0, 0, 0.8);
+        }
+
+        .body-text {
+            font-size: clamp(1.2rem, 2vw, 1.8rem);
+            line-height: 1.6;
+            font-weight: 300;
+            max-width: 600px;
+            text-shadow: 0 2px 10px rgba(0, 0, 0, 0.9);
+        }
+
+        .panel-1 .content-grid {
+            grid-template-rows: auto auto;
+        }
+
+        .panel-1 .title-large {
+            grid-column: 1 / -1;
+        }
+
+        .panel-1 .body-text {
+            grid-column: 5 / 13;
+            margin-top: 2rem;
+        }
+
+        .panel-2 .bg {
+            mix-blend-mode: screen;
+            opacity: 0.15;
+        }
+
+        .panel-2 .content-grid {
+            align-items: center;
+        }
+
+        .panel-2 .text-block {
+            grid-column: 3 / 11;
+            text-align: center;
+        }
+
+        .panel-2 .title-large {
+            font-size: clamp(3rem, 6vw, 6rem);
+            color: #8a0303;
+        }
+
+        .panel-2 .body-text {
+            margin: 0 auto;
+            font-style: italic;
+            font-size: clamp(1.5rem, 3vw, 2.5rem);
+        }
+
+        .panel-3 .bg {
+            filter: url(#wind-warp) grayscale(80%) contrast(150%);
+            opacity: 0.3;
+        }
+
+        .panel-3 .content-grid {
+            align-items: end;
+            height: 100%;
+            padding-bottom: 10vh;
+        }
+
+        .panel-3 .text-block {
+            grid-column: 1 / 9;
+        }
+
+        .panel-3 .title-large {
+            font-size: clamp(3rem, 7vw, 7rem);
+            margin-bottom: 1rem;
+            color: #666;
+        }
+
+        .panel-3 .body-text {
+            color: #e0dcd8;
+        }
+
+        .reveal {
+            opacity: 0;
+            transform: translateY(40px);
+            transition: all 1.2s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        .reveal.is-visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        .delay-1 {
+            transition-delay: 150ms;
+        }
+
+        .delay-2 {
+            transition-delay: 300ms;
+        }
+
+        @media(max-width:768px) {
+            .content-grid {
+                display: flex;
+                flex-direction: column;
+                padding: 2rem;
+            }
+
+            .progress-bar,
+            .progress-track {
+                left: 1rem;
+            }
+
+            .panel-1 .body-text {
+                margin-top: 1rem;
+            }
+
+            .panel-2 .text-block {
+                text-align: left;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="noise-overlay"></div>
+    <div class="progress-track"></div>
+    <div class="progress-bar" id="progress"></div><svg style="width:0;height:0;position:absolute;" aria-hidden="true">
+        <filter id="wind-warp">
+            <feTurbulence type="fractalNoise" baseFrequency="0.01 0.05" numOctaves="3" result="noise">
+                <animate attributeName="baseFrequency" values="0.01 0.05; 0.015 0.08; 0.01 0.05" dur="8s"
+                    repeatCount="indefinite" />
+            </feTurbulence>
+            <feDisplacementMap in="SourceGraphic" in2="noise" scale="25" xChannelSelector="R" yChannelSelector="G" />
+        </filter>
+    </svg>
+    <div class="scroll-container" id="scroll-container">
+        <section class="panel panel-1">
+            <div class="bg" style="background-image: url('./images/cantos3-1.jpg')"></div>
+            <div class="gradient-overlay"></div>
+            <div class="content-grid">
+                <div class="hero-text reveal"><span class="label">Descent</span>
+                    <h1 class="title-large">Circle 2:<br>Lust</h1>
+                </div>
+                <p class="body-text reveal delay-1">As Dante moves deeper, the true "shrieks" of Hell begin. Here, the
+                    judge Minos sits at the entrance, wrapping his tail around himself to signal which circle a soul
+                    must go to.</p>
+            </div>
+        </section>
+        <section class="panel panel-2">
+            <div class="bg" style="background-image: url('./images/cantos2-2.jpg')"></div>
+            <div class="gradient-overlay"></div>
+            <div class="content-grid">
+                <div class="text-block"><span class="label reveal">The Sin</span>
+                    <h2 class="title-large reveal delay-1">Those who placed their sexual appetites above their reason.
+                    </h2>
+                </div>
+            </div>
+        </section>
+        <section class="panel panel-3">
+            <div class="bg" style="background-image: url('./images/cantos2-3.png')"></div>
+            <div class="gradient-overlay"></div>
+            <div class="content-grid">
+                <div class="text-block"><span class="label reveal">The Punishment</span>
+                    <h2 class="title-large reveal delay-1">Howling Gale</h2>
+                    <p class="body-text reveal delay-2">The souls are swept up in a terrible, howling gale that never
+                        stops. Just as they let their passions blow them about aimlessly on Earth, they are now tossed
+                        and smashed against jagged rocks by an eternal wind, never able to touch the ground or find
+                        rest.</p>
+                </div>
+            </div>
+        </section>
+    </div>
+    <script>document.addEventListener('DOMContentLoaded', () => { const scrollEl = document.getElementById('scroll-container'); const progress = document.getElementById('progress'); scrollEl.addEventListener('scroll', () => { const scrolled = scrollEl.scrollTop; const max = scrollEl.scrollHeight - scrollEl.clientHeight; const percentage = (scrolled / max) * 100; progress.style.height = percentage + 'vh'; }); const observer = new IntersectionObserver((entries) => { entries.forEach(entry => { if (entry.isIntersecting) { entry.target.classList.add('is-visible'); } }); }, { threshold: 0.25, rootMargin: '0px 0px -10% 0px' }); document.querySelectorAll('.reveal').forEach(el => observer.observe(el)); });</script>
+</body>
+
+</html>
