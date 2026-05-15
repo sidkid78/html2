@@ -1,0 +1,557 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AI Assessment Blueprint - Bagwell Construction</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Syncopate:wght@400;700&display=swap');
+
+    :root {
+      --cyan: #00f0ff;
+      --amber: #ff4500;
+      --dark: #020617;
+      --panel: rgba(15, 23, 42, 0.7);
+    }
+
+    body {
+      font-family: 'Share Tech Mono', monospace;
+      background-color: var(--dark);
+      color: #94a3b8;
+      margin: 0;
+      overflow-x: hidden;
+    }
+
+    h1,
+    h2,
+    h3,
+    .syncopate {
+      font-family: 'Syncopate', sans-serif;
+      text-transform: uppercase;
+    }
+
+    /* Generative Blueprint Grid */
+    .blueprint-bg {
+      background-image:
+        linear-gradient(rgba(0, 240, 255, 0.05) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(0, 240, 255, 0.05) 1px, transparent 1px);
+      background-size: 40px 40px;
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      z-index: -2;
+    }
+
+    /* Animated Scanline */
+    @keyframes scan {
+      0% {
+        transform: translateY(-100vh);
+      }
+
+      100% {
+        transform: translateY(200vh);
+      }
+    }
+
+    .scanline {
+      width: 100%;
+      height: 3px;
+      background: rgba(0, 240, 255, 0.3);
+      position: fixed;
+      top: 0;
+      left: 0;
+      animation: scan 6s linear infinite;
+      pointer-events: none;
+      z-index: 50;
+      box-shadow: 0 0 20px var(--cyan);
+    }
+
+    /* SVG Filter Overlay */
+    .noise-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      pointer-events: none;
+      z-index: -1;
+      opacity: 0.15;
+      filter: url(#noise);
+    }
+
+    /* UI Elements */
+    .hud-panel {
+      background: var(--panel);
+      border: 1px solid rgba(0, 240, 255, 0.2);
+      backdrop-filter: blur(10px);
+      position: relative;
+      transition: border-color 0.3s ease, box-shadow 0.3s ease;
+    }
+
+    .hud-panel:hover {
+      border-color: var(--cyan);
+      box-shadow: 0 0 15px rgba(0, 240, 255, 0.1);
+    }
+
+    .hud-panel::before,
+    .hud-panel::after {
+      content: '';
+      position: absolute;
+      width: 10px;
+      height: 10px;
+      border: 1px solid var(--cyan);
+    }
+
+    .hud-panel::before {
+      top: -1px;
+      left: -1px;
+      border-right: none;
+      border-bottom: none;
+    }
+
+    .hud-panel::after {
+      bottom: -1px;
+      right: -1px;
+      border-left: none;
+      border-top: none;
+    }
+
+    .hud-panel-alert {
+      border-color: rgba(255, 69, 0, 0.3);
+    }
+
+    .hud-panel-alert:hover {
+      border-color: var(--amber);
+      box-shadow: 0 0 15px rgba(255, 69, 0, 0.2);
+    }
+
+    .hud-panel-alert::before,
+    .hud-panel-alert::after {
+      border-color: var(--amber);
+    }
+
+    /* Image Blending */
+    .img-blend-cyan {
+      mix-blend-mode: luminosity;
+      filter: sepia(100%) hue-rotate(150deg) saturate(300%) contrast(150%) opacity(0.4);
+    }
+
+    .img-blend-alert {
+      mix-blend-mode: luminosity;
+      filter: sepia(100%) hue-rotate(330deg) saturate(300%) contrast(120%) opacity(0.3);
+    }
+
+    /* Typography FX */
+    .glitch-text {
+      position: relative;
+    }
+
+    .glitch-text::before,
+    .glitch-text::after {
+      content: attr(data-text);
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      opacity: 0.8;
+    }
+
+    .glitch-text::before {
+      left: 2px;
+      text-shadow: -1px 0 red;
+      clip: rect(24px, 550px, 90px, 0);
+      animation: glitch-anim 2.5s infinite linear alternate-reverse;
+    }
+
+    .glitch-text::after {
+      left: -2px;
+      text-shadow: -1px 0 blue;
+      clip: rect(85px, 550px, 140px, 0);
+      animation: glitch-anim 3s infinite linear alternate-reverse;
+    }
+
+    @keyframes glitch-anim {
+      0% {
+        clip: rect(10px, 9999px, 86px, 0);
+      }
+
+      20% {
+        clip: rect(61px, 9999px, 16px, 0);
+      }
+
+      40% {
+        clip: rect(33px, 9999px, 7px, 0);
+      }
+
+      60% {
+        clip: rect(98px, 9999px, 71px, 0);
+      }
+
+      80% {
+        clip: rect(2px, 9999px, 44px, 0);
+      }
+
+      100% {
+        clip: rect(54px, 9999px, 93px, 0);
+      }
+    }
+
+    /* Stepper */
+    .timeline-node {
+      width: 12px;
+      height: 12px;
+      background: var(--dark);
+      border: 2px solid var(--cyan);
+      border-radius: 50%;
+      position: absolute;
+      left: -6px;
+      top: 0;
+      z-index: 10;
+    }
+  </style>
+</head>
+
+<body class="antialiased selection:bg-cyan-500 selection:text-black">
+
+  <!-- SVG Filters -->
+  <svg class="hidden">
+    <filter id="noise">
+      <feTurbulence type="fractalNoise" baseFrequency="0.7" numOctaves="3" stitchTiles="stitch" />
+      <feColorMatrix type="matrix" values="1 0 0 0 0, 0 1 0 0 0, 0 0 1 0 0, 0 0 0 0.1 0" />
+    </filter>
+  </svg>
+
+  <!-- Global FX -->
+  <div class="blueprint-bg"></div>
+  <div class="noise-overlay"></div>
+  <div class="scanline"></div>
+
+  <!-- MAIN CONTAINER -->
+  <main class="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 space-y-24">
+
+    <!-- HEADER AREA -->
+    <header class="relative hud-panel p-8 md:p-12 overflow-hidden group">
+      <img src="./images/bagwell-hero.jpg" alt="AI Core"
+        class="absolute inset-0 w-full h-full object-cover img-blend-cyan transition-all duration-700 group-hover:scale-105 group-hover:opacity-60">
+      <div class="absolute inset-0 bg-gradient-to-r from-[#020617] via-[#020617]/80 to-transparent"></div>
+      <div class="relative z-10">
+        <div class="flex items-center space-x-4 mb-4">
+          <div class="h-px w-12 bg-cyan-400"></div>
+          <p class="text-cyan-400 text-sm tracking-widest uppercase scramble"
+            data-value="Generated by Edge Craft Technology on 5/15/2026">Generated by Edge Craft Technology on 5/15/2026
+          </p>
+        </div>
+        <h1 class="text-4xl md:text-6xl font-bold text-white mb-2 glitch-text tracking-tighter"
+          data-text="AI Assessment Blueprint">AI Assessment Blueprint</h1>
+        <h2 class="text-2xl md:text-3xl text-cyan-500 syncopate">Bagwell Construction</h2>
+      </div>
+    </header>
+
+    <!-- EXECUTIVE SUMMARY -->
+    <section class="grid grid-cols-1 md:grid-cols-12 gap-8 items-start">
+      <div class="md:col-span-3 text-right hidden md:block">
+        <h3 class="text-xl text-white tracking-widest border-r-2 border-cyan-500 pr-4">Executive<br>Summary</h3>
+        <p class="text-xs text-cyan-600 mt-2">SYS_REQ::OVERRIDE</p>
+      </div>
+      <div class="md:col-span-9 hud-panel p-6 md:p-8 text-lg leading-relaxed text-gray-300">
+        <h3 class="text-xl text-white tracking-widest border-l-2 border-cyan-500 pl-4 mb-4 md:hidden">Executive Summary
+        </h3>
+        <p class="mb-4">This AI Assessment Blueprint for <strong class="text-white">Jeff Bagwell</strong> at <strong
+            class="text-white">Bagwell Construction</strong> outlines a strategic transition from manual, reactive
+          administration to a high-velocity, data-driven operation.</p>
+        <p class="mb-4">Currently, Bagwell Construction is <span class="text-[#ff4500] font-bold">hemorrhaging 15+ hours
+            weekly</span> on manual estimates and change order processing—labor that represents a significant drain on
+          executive bandwidth and a direct threat to project profitability.</p>
+        <p>By deploying an integrated AI ecosystem featuring <strong class="text-cyan-400">GoHighLevel</strong> for
+          workflow automation and <strong class="text-cyan-400">DashThis</strong> for real-time financial intelligence,
+          we will eliminate the 'constant drag' of paperwork and replace outdated spreadsheet reconciliation with live
+          margin visibility. This roadmap is designed to <strong class="text-[#00f0ff]">reclaim $6,000+ in monthly labor
+            value</strong>, ensuring that every project is managed with surgical precision and that no revenue leaks
+          through the cracks of delayed cost tracking.</p>
+      </div>
+    </section>
+
+    <!-- PAIN POINTS (DIAGNOSTIC) -->
+    <section class="space-y-8">
+      <div class="flex items-center justify-between border-b border-gray-800 pb-2">
+        <h2 class="text-3xl text-white">System Friction <span class="text-sm text-gray-500">[Pain Points]</span></h2>
+        <span class="text-[#ff4500] text-xs blink">! CRITICAL BOTTLENECKS DETECTED</span>
+      </div>
+
+      <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <!-- Card 1 -->
+        <div class="hud-panel hud-panel-alert p-6 flex flex-col justify-between overflow-hidden relative group">
+          <img src="./images/bagwell-1.jpg" alt="Manual Labor"
+            class="absolute inset-0 w-full h-full object-cover img-blend-alert transition-transform duration-1000 group-hover:scale-110">
+          <div class="absolute inset-0 bg-[#020617]/80"></div>
+          <div class="relative z-10">
+            <div class="text-[#ff4500] text-sm mb-2 font-bold">01 // ERR</div>
+            <h3 class="text-white text-lg font-bold mb-3 syncopate">Inefficient Estimating & Cost Visibility</h3>
+            <p class="text-sm text-gray-400 mb-6">Delayed estimate delivery creates a critical bottleneck in the sales
+              pipeline, potentially losing high-value contracts to faster competitors. Furthermore, the absence of
+              real-time cost visibility forces the leadership team to manage by 'rearview mirror,' where margin erosion
+              is only discovered after it is too late to course-correct.</p>
+          </div>
+          <blockquote
+            class="relative z-10 border-l-2 border-[#ff4500] pl-4 text-sm text-gray-300 italic bg-black/50 p-3">
+            "Our main problems are consistently slow estimates and not having real-time visibility on project costs."
+            <br><span class="text-xs text-[#ff4500] mt-1 block">- (Business Owner)</span>
+          </blockquote>
+        </div>
+
+        <!-- Card 2 -->
+        <div class="hud-panel hud-panel-alert p-6 flex flex-col justify-between overflow-hidden relative group">
+          <div class="absolute inset-0 bg-[#020617]"></div>
+          <div class="absolute top-0 right-0 p-2 opacity-20">
+            <svg width="60" height="60" viewBox="0 0 24 24" fill="none" stroke="#ff4500" stroke-width="1">
+              <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+              <polyline points="14 2 14 8 20 8"></polyline>
+              <line x1="16" y1="13" x2="8" y2="13"></line>
+              <line x1="16" y1="17" x2="8" y2="17"></line>
+              <polyline points="10 9 9 9 8 9"></polyline>
+            </svg>
+          </div>
+          <div class="relative z-10">
+            <div class="text-[#ff4500] text-sm mb-2 font-bold">02 // WARN</div>
+            <h3 class="text-white text-lg font-bold mb-3 syncopate">Administrative Paperwork Friction</h3>
+            <p class="text-sm text-gray-400 mb-6">The manual processing of change orders acts as a systemic friction
+              point, stalling project momentum and consuming 60 hours of monthly labor. This 'constant drag' not only
+              inflates overhead but also increases the risk of unbilled work due to lost or delayed approval
+              documentation.</p>
+          </div>
+          <div class="relative z-10 space-y-3">
+            <blockquote class="border-l-2 border-[#ff4500] pl-4 text-sm text-gray-300 italic bg-black/50 p-3">
+              "Paperwork for change orders and approvals is also a constant drag." <br><span
+                class="text-xs text-[#ff4500] mt-1 block">- (Business Owner)</span>
+            </blockquote>
+            <blockquote class="border-l-2 border-[#ff4500] pl-4 text-sm text-gray-300 italic bg-black/50 p-3">
+              "We probably burn about 15 hours a week on those tasks, at least." <br><span
+                class="text-xs text-[#ff4500] mt-1 block">- (Business Owner)</span>
+            </blockquote>
+          </div>
+        </div>
+
+        <!-- Card 3 -->
+        <div class="hud-panel hud-panel-alert p-6 flex flex-col justify-between overflow-hidden relative group">
+          <img src="./images/bagwell-3.jpg" alt="Spreadsheet Data"
+            class="absolute inset-0 w-full h-full object-cover img-blend-alert transition-transform duration-1000 group-hover:scale-110">
+          <div class="absolute inset-0 bg-[#020617]/85"></div>
+          <div class="relative z-10">
+            <div class="text-[#ff4500] text-sm mb-2 font-bold">03 // FAIL</div>
+            <h3 class="text-white text-lg font-bold mb-3 syncopate">Manual Data Reconciliation Lag</h3>
+            <p class="text-sm text-gray-400 mb-6">A 24-hour data lag in invoice reconciliation creates a dangerous blind
+              spot in cash flow management. Relying on manual spreadsheet updates introduces human error and ensures
+              that financial decisions are consistently based on stale information, preventing the firm from responding
+              dynamically to fluctuating project costs.</p>
+          </div>
+          <blockquote
+            class="relative z-10 border-l-2 border-[#ff4500] pl-4 text-sm text-gray-300 italic bg-black/50 p-3">
+            "Right now, we're mostly using spreadsheets and trying to reconcile invoices. But by the time we get it all,
+            it's usually day." <br><span class="text-xs text-[#ff4500] mt-1 block">- (Business Owner)</span>
+          </blockquote>
+        </div>
+      </div>
+    </section>
+
+    <!-- EFFORT VS IMPACT MATRIX (PROTOCOL) -->
+    <section class="space-y-8 relative">
+      <div class="flex items-center justify-between border-b border-cyan-900 pb-2">
+        <h2 class="text-3xl text-white">Resolution Protocol <span class="text-sm text-gray-500">[Effort vs. Impact
+            Matrix]</span></h2>
+        <span class="text-cyan-400 text-xs uppercase scramble" data-value="Deploying Solutions">Deploying
+          Solutions</span>
+      </div>
+
+      <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+
+        <!-- Quick Wins & Major Projects -->
+        <div class="space-y-8">
+          <div class="hud-panel p-6 relative overflow-hidden">
+            <img src="./images/bagwell-2.jpg" alt="Workflow App"
+              class="absolute top-0 right-0 w-1/2 h-full object-cover img-blend-cyan mask-image-gradient">
+            <div class="absolute inset-0 bg-gradient-to-r from-[#020617] via-[#020617]/90 to-transparent"></div>
+            <div class="relative z-10">
+              <h3 class="text-xl text-white mb-4 flex items-center gap-2"><span class="text-2xl">⚡</span> Quick Wins
+              </h3>
+              <ul class="space-y-4">
+                <li class="border-l border-cyan-500 pl-4">
+                  <strong class="text-cyan-400 block text-lg mb-1">GoHighLevel</strong>
+                  <span class="text-sm text-gray-300">Automates change order approvals and estimate tracking via digital
+                    workflows. <br><em class="text-cyan-600">(8h/week saved, setup: 10 hours)</em></span>
+                </li>
+                <li class="border-l border-cyan-500 pl-4">
+                  <strong class="text-cyan-400 block text-lg mb-1">DashThis</strong>
+                  <span class="text-sm text-gray-300">Provides real-time visibility on project costs by aggregating
+                    spreadsheet data into a live dashboard. <br><em class="text-cyan-600">(4h/week saved, setup: 5
+                      hours)</em></span>
+                </li>
+              </ul>
+            </div>
+          </div>
+
+          <div class="hud-panel p-6">
+            <h3 class="text-xl text-white mb-4 flex items-center gap-2"><span class="text-2xl">🏗️</span> Major Projects
+            </h3>
+            <div class="border-l border-cyan-500 pl-4">
+              <strong class="text-white block text-lg mb-1">Automated Construction Estimator</strong>
+              <span class="text-sm text-gray-300">Development of a custom AI-driven estimating engine within GoHighLevel
+                to reduce turnaround time from days to minutes. <br><em class="text-cyan-600">(Est. $4,500)</em></span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Fill-ins & Ignore -->
+        <div class="space-y-8">
+          <div class="hud-panel p-6 relative overflow-hidden">
+            <img src="./images/bagwell-2.jpg" alt="Site Recording"
+              class="absolute inset-0 w-full h-full object-cover img-blend-cyan">
+            <div class="absolute inset-0 bg-[#020617]/85"></div>
+            <div class="relative z-10">
+              <h3 class="text-xl text-white mb-4 flex items-center gap-2"><span class="text-2xl">📌</span> Fill-ins</h3>
+              <div class="border-l border-cyan-500 pl-4">
+                <p class="text-sm text-gray-300">Use <strong class="text-cyan-400">Fathom</strong> to record site
+                  walkthroughs and automatically transcribe change order requirements for the office team.</p>
+              </div>
+            </div>
+          </div>
+
+          <div
+            class="hud-panel hud-panel-alert p-6 bg-[repeating-linear-gradient(45deg,transparent,transparent_10px,rgba(255,69,0,0.05)_10px,rgba(255,69,0,0.05)_20px)]">
+            <h3 class="text-xl text-white mb-4 flex items-center gap-2"><span class="text-2xl">🚫</span> Ignore (for
+              now)</h3>
+            <div class="border-l border-[#ff4500] pl-4">
+              <p class="text-sm text-gray-300">Manual invoice reconciliation should not be automated until the
+                underlying spreadsheet logic is standardized to prevent 'garbage in, garbage out' scenarios.</p>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </section>
+
+    <!-- FINANCIAL IMPACT & TIMELINE -->
+    <section class="grid grid-cols-1 lg:grid-cols-12 gap-8">
+
+      <!-- Financial Impact -->
+      <div class="lg:col-span-5 space-y-6">
+        <div class="flex items-center justify-between border-b border-cyan-900 pb-2">
+          <h2 class="text-2xl text-white">Telemetry <span class="text-sm text-gray-500">[Financial Impact]</span></h2>
+        </div>
+        <div class="grid grid-cols-1 gap-4">
+          <div class="hud-panel p-6 flex justify-between items-center">
+            <span class="text-gray-400 uppercase tracking-widest text-sm">Weekly Hours Returned</span>
+            <span class="text-3xl text-cyan-400 font-bold syncopate">15h</span>
+          </div>
+          <div class="hud-panel p-6 flex justify-between items-center bg-cyan-900/20">
+            <span class="text-gray-400 uppercase tracking-widest text-sm">Monthly Net ROI</span>
+            <span class="text-4xl text-white font-bold syncopate">$5,664</span>
+          </div>
+          <div class="hud-panel p-6 flex justify-between items-center">
+            <span class="text-gray-400 uppercase tracking-widest text-sm">Total Tool Costs</span>
+            <span class="text-xl text-[#ff4500] font-bold syncopate">$336<span class="text-sm">/mo</span></span>
+          </div>
+        </div>
+      </div>
+
+      <!-- 4-Day Plan -->
+      <div class="lg:col-span-7 space-y-6">
+        <div class="flex items-center justify-between border-b border-cyan-900 pb-2">
+          <h2 class="text-2xl text-white">Execution <span class="text-sm text-gray-500">[4-Day Implementation
+              Plan]</span></h2>
+        </div>
+        <div class="hud-panel p-8">
+          <div class="relative border-l border-cyan-800 ml-3 space-y-8">
+
+            <div class="relative pl-8">
+              <div class="timeline-node"></div>
+              <h4 class="text-cyan-400 font-bold mb-1 syncopate text-lg">Day 1</h4>
+              <p class="text-sm text-gray-300">Audit existing spreadsheet logic and map the current manual change order
+                approval path.</p>
+            </div>
+
+            <div class="relative pl-8">
+              <div class="timeline-node"></div>
+              <h4 class="text-cyan-400 font-bold mb-1 syncopate text-lg">Day 2</h4>
+              <p class="text-sm text-gray-300">Configure GoHighLevel CRM to handle digital signatures for change orders
+                and automate estimate notifications.</p>
+            </div>
+
+            <div class="relative pl-8">
+              <div class="timeline-node"></div>
+              <h4 class="text-cyan-400 font-bold mb-1 syncopate text-lg">Day 3</h4>
+              <p class="text-sm text-gray-300">Connect project cost spreadsheets to DashThis to create the first
+                real-time margin visibility dashboard.</p>
+            </div>
+
+            <div class="relative pl-8">
+              <div class="timeline-node shadow-[0_0_10px_#00f0ff] bg-cyan-400"></div>
+              <h4 class="text-cyan-400 font-bold mb-1 syncopate text-lg">Day 4</h4>
+              <p class="text-sm text-gray-300">Train the Bagwell Construction team on using Fathom for site meetings to
+                capture verbal project updates.</p>
+            </div>
+
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- FOOTER -->
+    <footer class="border-t border-gray-800 pt-8 mt-16 text-center">
+      <p class="text-xs text-gray-600 tracking-widest scramble"
+        data-value="© Edge Craft Technology — Confidential AI Assessment Blueprint">
+        © Edge Craft Technology — Confidential AI Assessment Blueprint
+      </p>
+    </footer>
+
+  </main>
+
+  <script>
+    // Terminal Scramble Effect
+    const chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789@#$%&*";
+
+    document.querySelectorAll('.scramble').forEach(el => {
+      const originalText = el.getAttribute('data-value');
+
+      el.addEventListener('mouseover', () => {
+        let iterations = 0;
+        const interval = setInterval(() => {
+          el.innerText = originalText.split("")
+            .map((letter, index) => {
+              if (index < iterations) return originalText[index];
+              return chars[Math.floor(Math.random() * chars.length)];
+            })
+            .join("");
+
+          if (iterations >= originalText.length) clearInterval(interval);
+          iterations += 1 / 2;
+        }, 30);
+      });
+    });
+
+    // Initial entrance animation scramble
+    window.addEventListener('DOMContentLoaded', () => {
+      document.querySelectorAll('.scramble').forEach(el => {
+        const originalText = el.getAttribute('data-value');
+        let iterations = 0;
+        const interval = setInterval(() => {
+          el.innerText = originalText.split("")
+            .map((letter, index) => {
+              if (index < iterations) return originalText[index];
+              return chars[Math.floor(Math.random() * chars.length)];
+            })
+            .join("");
+
+          if (iterations >= originalText.length) clearInterval(interval);
+          iterations += 1 / 3;
+        }, 40);
+      });
+    });
+  </script>
+</body>
+
+</html>
