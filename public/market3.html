@@ -1,0 +1,945 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Domain Report: Trading Strategies</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+      @import url("https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@100..800&family=Share+Tech+Mono&display=swap");
+      body {
+        background-color: #050505;
+        color: #00ff41;
+        font-family: "JetBrains Mono", monospace;
+        overflow-x: hidden;
+      }
+      ::-webkit-scrollbar {
+        width: 8px;
+      }
+      ::-webkit-scrollbar-track {
+        background: #000;
+      }
+      ::-webkit-scrollbar-thumb {
+        background: #00ff41;
+      }
+      .font-display {
+        font-family: "Share Tech Mono", monospace;
+      }
+      .noise-overlay {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100vw;
+        height: 100vh;
+        pointer-events: none;
+        z-index: 9999;
+        opacity: 0.12;
+        filter: url(#noise-filter);
+      }
+      .scanline {
+        width: 100%;
+        height: 100px;
+        z-index: 9998;
+        position: fixed;
+        pointer-events: none;
+        background: linear-gradient(
+          0deg,
+          transparent,
+          rgba(0, 255, 65, 0.15),
+          transparent
+        );
+        animation: scan 6s linear infinite;
+      }
+      @keyframes scan {
+        0% {
+          top: -100px;
+        }
+        100% {
+          top: 100vh;
+        }
+      }
+      .glass-panel {
+        background: rgba(5, 15, 5, 0.85);
+        backdrop-filter: blur(12px);
+        border: 1px solid rgba(0, 255, 65, 0.2);
+        box-shadow: 0 0 20px rgba(0, 255, 65, 0.05);
+      }
+      .glass-panel-red {
+        background: rgba(20, 5, 5, 0.9);
+        backdrop-filter: blur(12px);
+        border: 1px solid rgba(255, 0, 65, 0.4);
+        box-shadow: 0 0 30px rgba(255, 0, 65, 0.1);
+        color: #ff3333;
+      }
+      .text-glow {
+        text-shadow: 0 0 8px currentColor;
+      }
+      .text-glow-red {
+        text-shadow: 0 0 15px #ff003c;
+      }
+      .parallax-bg {
+        background-attachment: fixed;
+        background-position: center;
+        background-repeat: no-repeat;
+        background-size: cover;
+        background-blend-mode: luminosity;
+      }
+      .math-text {
+        color: #00ccff;
+        letter-spacing: 0.05em;
+      }
+      .glitch {
+        position: relative;
+      }
+      .glitch::before,
+      .glitch::after {
+        content: attr(data-text);
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+      }
+      .glitch::before {
+        left: 2px;
+        text-shadow: -1px 0 red;
+        clip: rect(24px, 550px, 90px, 0);
+        animation: glitch-anim 2s infinite linear alternate-reverse;
+      }
+      .glitch::after {
+        left: -2px;
+        text-shadow: -1px 0 blue;
+        clip: rect(85px, 550px, 140px, 0);
+        animation: glitch-anim 2s infinite linear alternate-reverse;
+      }
+      @keyframes glitch-anim {
+        0% {
+          clip: rect(12px, 9999px, 11px, 0);
+        }
+        5% {
+          clip: rect(64px, 9999px, 11px, 0);
+        }
+        10% {
+          clip: rect(142px, 9999px, 46px, 0);
+        }
+        15% {
+          clip: rect(120px, 9999px, 32px, 0);
+        }
+        20% {
+          clip: rect(33px, 9999px, 115px, 0);
+        }
+        25% {
+          clip: rect(2px, 9999px, 56px, 0);
+        }
+        30% {
+          clip: rect(99px, 9999px, 23px, 0);
+        }
+        35% {
+          clip: rect(55px, 9999px, 120px, 0);
+        }
+        40% {
+          clip: rect(130px, 9999px, 66px, 0);
+        }
+        45% {
+          clip: rect(12px, 9999px, 101px, 0);
+        }
+        50% {
+          clip: rect(89px, 9999px, 11px, 0);
+        }
+        55% {
+          clip: rect(45px, 9999px, 90px, 0);
+        }
+        60% {
+          clip: rect(10px, 9999px, 14px, 0);
+        }
+        65% {
+          clip: rect(111px, 9999px, 121px, 0);
+        }
+        70% {
+          clip: rect(5px, 9999px, 45px, 0);
+        }
+        75% {
+          clip: rect(123px, 9999px, 8px, 0);
+        }
+        80% {
+          clip: rect(66px, 9999px, 98px, 0);
+        }
+        85% {
+          clip: rect(22px, 9999px, 34px, 0);
+        }
+        90% {
+          clip: rect(100px, 9999px, 110px, 0);
+        }
+        95% {
+          clip: rect(14px, 9999px, 22px, 0);
+        }
+        100% {
+          clip: rect(76px, 9999px, 55px, 0);
+        }
+      }
+      .ticker-wrap {
+        width: 100%;
+        overflow: hidden;
+        background: rgba(0, 255, 65, 0.1);
+        border-top: 1px solid #00ff41;
+        border-bottom: 1px solid #00ff41;
+      }
+      .ticker {
+        display: inline-block;
+        white-space: nowrap;
+        padding-right: 100%;
+        box-sizing: content-box;
+        animation: ticker 20s linear infinite;
+      }
+      @keyframes ticker {
+        0% {
+          transform: translate3d(0, 0, 0);
+        }
+        100% {
+          transform: translate3d(-100%, 0, 0);
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <svg class="hidden">
+      <filter id="noise-filter">
+        <feTurbulence
+          type="fractalNoise"
+          baseFrequency="0.8"
+          numOctaves="3"
+          stitchTiles="stitch"
+        />
+        <feColorMatrix
+          type="matrix"
+          values="1 0 0 0 0, 0 1 0 0 0, 0 0 1 0 0, 0 0 0 0.15 0"
+        />
+      </filter>
+    </svg>
+    <div class="noise-overlay"></div>
+    <div class="scanline"></div>
+    <div
+      id="boot-screen"
+      class="fixed inset-0 bg-black z-[10000] flex flex-col items-start justify-center p-10 transition-opacity duration-1000"
+    >
+      <div class="text-[#00ff41] text-xl mb-4">
+        > INITIATING QUANTITATIVE SYNTHESIS...
+      </div>
+      <div class="text-[#00ff41] text-xl mb-4">
+        > LOADING ASSET CORRELATION MATRICES...
+      </div>
+      <div class="text-[#00ff41] text-xl mb-4">
+        > ESTABLISHING SECURE CONNECTION...
+      </div>
+      <div
+        id="progress-bar"
+        class="h-1 bg-[#00ff41] w-0 transition-all duration-1000 mt-4"
+      ></div>
+    </div>
+    <main class="relative w-full">
+      <section
+        class="parallax-bg min-h-screen flex items-center justify-center p-8 relative"
+        style="
+          background-image: url('./images/mark-111.jpg');
+          background-color: #021002;
+        "
+      >
+        <div
+          class="absolute inset-0 bg-gradient-to-b from-black/80 via-black/60 to-[#050505]"
+        ></div>
+        <div class="glass-panel relative z-10 max-w-5xl w-full p-12 lg:p-20">
+          <h1
+            class="font-display text-4xl lg:text-6xl text-glow mb-6 tracking-tighter uppercase"
+          >
+            Domain Report: Trading Strategies
+          </h1>
+          <p class="text-lg lg:text-xl text-gray-300 mb-8 leading-relaxed">
+            <span class="text-[#00ff41] font-bold">Goal:</span> Develop and
+            evaluate quantitative and algorithmic trading strategies for
+            crypto-exposed equities, focusing on correlation arbitrage between
+            spot crypto and stock prices, volatility harvesting, and momentum
+            indicators.
+          </p>
+          <div class="border-t border-[#00ff41]/30 pt-8">
+            <h2 class="text-2xl lg:text-3xl font-bold mb-4">
+              Domain Synthesis Report: Quantitative Trading Strategies for
+              Crypto-Exposed Equities
+            </h2>
+            <p class="text-gray-400 leading-relaxed mb-4">
+              This report synthesizes the research and backtesting results of
+              quantitative trading strategies targeting crypto-exposed equities
+              (specifically MicroStrategy - MSTR, Marathon Digital - MARA, Riot
+              Platforms - RIOT, and Coinbase - COIN) relative to spot
+              cryptocurrencies (BTC and ETH).
+            </p>
+            <p class="text-gray-400 leading-relaxed">
+              The synthesis covers three primary alpha-generating strategies:
+              Correlation Arbitrage/Cointegration, Volatility
+              Harvesting/Dispersion, and Cross-Asset Lead-Lag Momentum.
+              Additionally, it addresses a critical gap in the portfolio risk
+              management framework due to a non-reporting worker node.
+            </p>
+          </div>
+        </div>
+      </section>
+      <section class="py-20 px-8 max-w-6xl mx-auto">
+        <div class="mb-16">
+          <h2
+            class="font-display text-3xl text-glow border-b border-[#00ff41] inline-block pb-2 mb-8 uppercase"
+          >
+            Executive Summary
+          </h2>
+          <p class="text-gray-300 leading-relaxed mb-6">
+            Crypto-exposed equities offer unique structural inefficiencies, high
+            volatility, and leverage characteristics that can be systematically
+            exploited using quantitative frameworks. By analyzing the
+            relationship between spot digital assets and their equity proxies,
+            we have validated three distinct sources of alpha:
+          </p>
+          <ul
+            class="space-y-6 text-gray-400 ml-4 border-l border-[#00ff41]/30 pl-6"
+          >
+            <li class="relative">
+              <span class="absolute -left-8 top-1 text-[#00ff41]">■</span
+              ><strong class="text-white"
+                >Statistical Arbitrage (Cointegration):</strong
+              >
+              Exploiting the long-term equilibrium between BTC and MSTR. This
+              strategy achieved the highest risk-adjusted performance with a
+              Sharpe Ratio of 2.35 and a exceptionally low Maximum Drawdown of
+              -4.22%.
+            </li>
+            <li class="relative">
+              <span class="absolute -left-8 top-1 text-[#00ff41]">■</span
+              ><strong class="text-white">Volatility Dispersion:</strong>
+              Harvesting the variance premium differential between MSTR and BTC.
+              By trading a simulated delta-neutral variance swap, the strategy
+              captured an annualized return of 16.48% with a Sharpe Ratio of
+              1.81.
+            </li>
+            <li class="relative">
+              <span class="absolute -left-8 top-1 text-[#00ff41]">■</span
+              ><strong class="text-white"
+                >High-Frequency Lead-Lag Momentum:</strong
+              >
+              Capitalizing on the 1-to-5-minute informational latency between
+              spot BTC/ETH and equities (MARA, RIOT, COIN). This strategy
+              demonstrated statistically significant predictive power with an
+              Information Coefficient (IC) of 0.082 (t t-stat of 2.74).
+            </li>
+          </ul>
+        </div>
+        <div class="glass-panel p-8 overflow-x-auto">
+          <h3 class="text-xl mb-6 text-glow uppercase tracking-widest">
+            Performance & Characteristics Summary Table
+          </h3>
+          <table class="w-full text-left border-collapse min-w-[800px]">
+            <thead>
+              <tr
+                class="text-[#00ff41] border-b border-[#00ff41]/50 bg-[#00ff41]/5"
+              >
+                <th class="p-4 uppercase text-sm">Strategy</th>
+                <th class="p-4 uppercase text-sm">Primary Assets</th>
+                <th class="p-4 uppercase text-sm">Core Methodology</th>
+                <th class="p-4 uppercase text-sm">Sharpe Ratio</th>
+                <th class="p-4 uppercase text-sm">Max Drawdown</th>
+                <th class="p-4 uppercase text-sm">
+                  Primary Metric / Alpha Source
+                </th>
+              </tr>
+            </thead>
+            <tbody class="text-gray-300 text-sm">
+              <tr
+                class="border-b border-gray-800 hover:bg-white/5 transition-colors"
+              >
+                <td class="p-4 font-bold text-white">Correlation Arbitrage</td>
+                <td class="p-4">BTC-USD / MSTR</td>
+                <td class="p-4">
+                  Engle-Granger Cointegration & Rolling Z-Score
+                </td>
+                <td class="p-4 text-[#00ff41]">2.35</td>
+                <td class="p-4 text-red-400">-4.22%</td>
+                <td class="p-4">Win Rate: 65.42%, Total Return: 101.1%</td>
+              </tr>
+              <tr
+                class="border-b border-gray-800 hover:bg-white/5 transition-colors"
+              >
+                <td class="p-4 font-bold text-white">Volatility Dispersion</td>
+                <td class="p-4">BTC-USD / MSTR</td>
+                <td class="p-4">Realized Variance Spread & Variance Swaps</td>
+                <td class="p-4 text-[#00ff41]">1.81</td>
+                <td class="p-4 text-red-400">-7.45%</td>
+                <td class="p-4">Annualized Return: 16.48%</td>
+              </tr>
+              <tr class="hover:bg-white/5 transition-colors">
+                <td class="p-4 font-bold text-white">Lead-Lag Momentum</td>
+                <td class="p-4">BTC/ETH → → MARA/RIOT/COIN</td>
+                <td class="p-4">5-Min Lead RSI & Cross-Asset Momentum</td>
+                <td class="p-4">N/A (RSI)</td>
+                <td class="p-4">Reduced vs. B&H</td>
+                <td class="p-4">
+                  Information Coefficient: 0.082 (p &lt; 0.01 p&lt;0.01)
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+      <section
+        class="parallax-bg min-h-screen relative py-20"
+        style="
+          background-image: url('./images/mark-1112.jpg');
+          background-color: #001122;
+        "
+      >
+        <div class="absolute inset-0 bg-blue-900/40 mix-blend-multiply"></div>
+        <div
+          class="absolute inset-0 bg-gradient-to-b from-[#050505] via-transparent to-[#050505]"
+        ></div>
+        <div
+          class="relative z-10 max-w-6xl mx-auto px-8 grid grid-cols-1 lg:grid-cols-2 gap-12 items-center"
+        >
+          <div
+            class="glass-panel p-10 border-[#00ccff]/30 shadow-[0_0_30px_rgba(0,204,255,0.1)]"
+          >
+            <h2 class="font-display text-2xl lg:text-3xl text-[#00ccff] mb-6">
+              1. Correlation Arbitrage & Cointegration Strategy (BTC-USD vs.
+              MSTR)
+            </h2>
+            <h3 class="text-xl text-white mb-4 uppercase tracking-widest">
+              Mathematical Formulation
+            </h3>
+            <p class="text-gray-400 mb-6">
+              The strategy relies on the Engle-Granger two-step cointegration
+              technique to model the long-term equilibrium between the log
+              prices of MicroStrategy (MSTR) and Bitcoin (BTC-USD). The
+              relationship is defined as:
+            </p>
+            <div
+              class="bg-black/80 p-6 rounded text-center math-text text-lg mb-6 border border-[#00ccff]/20"
+            >
+              log(MSTR_t) = β ⋅ log(BTC_t) + Spread_t + α<br /><br /><span
+                class="text-sm opacity-70"
+                >log(MSTR t ​ )=β⋅log(BTC t ​ )+Spread t ​ +α</span
+              >
+            </div>
+            <p class="text-gray-400 mb-4">Where:</p>
+            <ul class="list-disc list-inside text-gray-400 space-y-2 mb-8">
+              <li class="math-text inline">β β</li>
+              <span class="inline">
+                is the dynamic hedge ratio calculated via a rolling
+                regression.</span
+              ><br />
+              <li class="math-text inline">α α</li>
+              <span class="inline"> is the constant intercept.</span
+              ><br />
+              <li class="math-text inline">Spread_t Spread t ​</li>
+              <span class="inline">
+                is the residuals series, which is proven to be stationary (I(0)
+                I(0)) via the Augmented Dickey-Fuller (ADF) test.</span
+              >
+            </ul>
+          </div>
+          <div class="space-y-8">
+            <div class="glass-panel p-8 border-[#00ccff]/30">
+              <h3 class="text-xl text-white mb-4 uppercase tracking-widest">
+                Execution Methodology
+              </h3>
+              <p class="text-gray-400 mb-4">
+                To trade the mean-reverting properties of the spread, a 30-day
+                rolling Z-score of the spread is calculated:
+              </p>
+              <div
+                class="bg-black/80 p-4 text-center math-text mb-6 border border-[#00ccff]/20 text-sm overflow-x-auto"
+              >
+                Z_t = (Spread_t − μ_Spread,30) / σ_Spread,30<br />Z t ​ = σ
+                Spread,30 ​ Spread t ​ −μ Spread,30 ​ ​
+              </div>
+              <ul class="space-y-3 text-sm text-gray-300">
+                <li class="flex items-start">
+                  <span class="text-[#00ff41] mr-2">[LONG]</span
+                  ><span
+                    >Long Spread Entry (Buy MSTR, Short BTC): Triggered when Z_t
+                    &lt; −2.0 Z t ​ &lt;−2.0.</span
+                  >
+                </li>
+                <li class="flex items-start">
+                  <span class="text-red-400 mr-2">[SHORT]</span
+                  ><span
+                    >Short Spread Entry (Short MSTR, Long BTC): Triggered when
+                    Z_t &gt; 2.0 Z t ​ &gt;2.0.</span
+                  >
+                </li>
+                <li class="flex items-start">
+                  <span class="text-white mr-2">[EXIT]</span
+                  ><span
+                    >Exit Signal: Position is closed at complete mean reversion
+                    (Z_t = 0.0 Z t ​ =0.0).</span
+                  >
+                </li>
+              </ul>
+            </div>
+            <div class="glass-panel p-8 border-[#00ccff]/30">
+              <h3 class="text-xl text-white mb-4 uppercase tracking-widest">
+                Performance & Key Insights
+              </h3>
+              <ul class="grid grid-cols-2 gap-4 text-sm mb-6">
+                <li>
+                  <span class="text-gray-500">Total Return:</span>
+                  <span class="text-[#00ff41] text-lg">101.1%</span>
+                </li>
+                <li>
+                  <span class="text-gray-500">Sharpe Ratio:</span>
+                  <span class="text-[#00ff41] text-lg">2.3493</span>
+                </li>
+                <li>
+                  <span class="text-gray-500">Max Drawdown:</span>
+                  <span class="text-red-400 text-lg">-4.22%</span>
+                </li>
+                <li>
+                  <span class="text-gray-500">Win Rate:</span>
+                  <span class="text-[#00ff41] text-lg">65.42%</span>
+                </li>
+              </ul>
+              <p class="text-gray-400 text-sm leading-relaxed">
+                <strong class="text-white">Insight:</strong> Cointegration holds
+                remarkably well because MSTR acts as a treasury-backed proxy for
+                Bitcoin. The tight drawdown profile indicates that divergence
+                from the historical beta relationship is temporary, providing
+                reliable statistical limits for risk allocation. The full model
+                code and structural parameters are documented in
+                <span class="text-[#00ccff]"
+                  >workers/correlation_arbitrage_analysis.json</span
+                >.
+              </p>
+            </div>
+          </div>
+        </div>
+      </section>
+      <div class="ticker-wrap py-2">
+        <div class="ticker font-display text-xs text-[#00ff41]/60">
+          VAR_SPREAD = RV_MSTR,20^2 - RV_BTC,20^2 /// Z > 1.5 SHORT MSTR VOL ///
+          Z < -1.5 LONG MSTR VOL /// SUPER-BETA EXTRACTED /// ANNUALIZED RETURN
+          16.48% /// SHARPE 1.81 /// VAR_SPREAD = RV_MSTR,20^2 - RV_BTC,20^2 ///
+          Z > 1.5 SHORT MSTR VOL /// Z < -1.5 LONG MSTR VOL /// SUPER-BETA
+          EXTRACTED /// ANNUALIZED RETURN 16.48% /// SHARPE 1.81
+        </div>
+      </div>
+      <section class="py-20 px-8 max-w-6xl mx-auto relative">
+        <div
+          class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[800px] rounded-full border border-[#00ff41]/10 flex items-center justify-center animate-[spin_60s_linear_infinite] pointer-events-none"
+        >
+          <div
+            class="w-[600px] h-[600px] rounded-full border border-[#00ff41]/20 border-dashed animate-[spin_40s_linear_infinite_reverse]"
+          ></div>
+        </div>
+        <div class="relative z-10 glass-panel p-12 lg:p-16">
+          <h2
+            class="font-display text-3xl lg:text-4xl text-glow mb-6 uppercase"
+          >
+            2. Volatility Harvesting & Dispersion Strategy
+          </h2>
+          <div class="grid grid-cols-1 lg:grid-cols-2 gap-12">
+            <div class="space-y-6">
+              <h3
+                class="text-xl text-white uppercase tracking-widest border-b border-gray-700 pb-2"
+              >
+                The "Super-Beta" Volatility Premium
+              </h3>
+              <p class="text-gray-300 leading-relaxed">
+                MicroStrategy (MSTR) trades as a levered "super-beta" vehicle
+                for Bitcoin due to its debt-funded BTC acquisitions and
+                speculative equity options demand. This dynamics creates a
+                persistent, structural premium in both realized volatility (RV)
+                and implied volatility (IV) over spot BTC.
+              </p>
+              <h3
+                class="text-xl text-white uppercase tracking-widest border-b border-gray-700 pb-2 mt-8"
+              >
+                Strategy Mechanics
+              </h3>
+              <p class="text-gray-400">
+                The strategy captures this volatility spread using a
+                delta-neutral variance swap framework.
+              </p>
+              <ul class="space-y-4 text-sm text-gray-300">
+                <li
+                  class="bg-black/40 p-4 rounded border-l-2 border-purple-500"
+                >
+                  <strong>Spread Definition:</strong> Measures the 20-day
+                  annualized realized variance spread:<br /><span
+                    class="math-text block mt-2"
+                    >Var_Spread = RV_MSTR,20^2 − RV_BTC,20^2<br />Var_Spread=RV
+                    MSTR,20 2 ​ −RV BTC,20 2 ​</span
+                  >
+                </li>
+                <li
+                  class="bg-black/40 p-4 rounded border-l-2 border-purple-500"
+                >
+                  <strong>Signal Generation:</strong> A 60-day rolling Z-score
+                  is applied to the variance spread.<br />Short Vol Dispersion:
+                  When Z &gt; 1.5 Z&gt;1.5, short MSTR variance and long BTC
+                  variance.<br />Long Vol Dispersion: When Z &lt; −1.5
+                  Z&lt;−1.5, long MSTR variance and short BTC variance.
+                </li>
+                <li
+                  class="bg-black/40 p-4 rounded border-l-2 border-purple-500"
+                >
+                  <strong>Exit:</strong> Reversion of the Z-score to 0 0.
+                </li>
+              </ul>
+            </div>
+            <div class="space-y-6">
+              <div class="bg-black/60 p-6 rounded border border-gray-800">
+                <h3 class="text-lg text-white mb-4 uppercase tracking-widest">
+                  Mathematical Representation of Daily PnL
+                </h3>
+                <p class="text-sm text-gray-400 mb-4">
+                  Lacking direct options data, the daily variance swap cash
+                  flows are mathematically modeled as:
+                </p>
+                <div class="math-text text-center text-sm mb-4">
+                  Daily PnL = (Daily Return)^2 − (Implied Volatility^2 / 365)<br /><br />Daily
+                  PnL=(Daily Return) 2 − 365 Implied Volatility 2 ​
+                </div>
+              </div>
+              <div
+                class="bg-[#00ff41]/5 p-6 rounded border border-[#00ff41]/30"
+              >
+                <h3
+                  class="text-lg text-[#00ff41] mb-4 uppercase tracking-widest"
+                >
+                  Performance Metrics
+                </h3>
+                <div class="grid grid-cols-2 gap-4 text-sm mb-4">
+                  <div>
+                    <span class="block text-gray-500">Annualized Return:</span>
+                    <span class="text-white font-bold">16.48%</span>
+                  </div>
+                  <div>
+                    <span class="block text-gray-500"
+                      >Annualized Volatility:</span
+                    >
+                    <span class="text-white font-bold">9.12%</span>
+                  </div>
+                  <div>
+                    <span class="block text-gray-500">Sharpe Ratio:</span>
+                    <span class="text-[#00ff41] font-bold">1.81</span>
+                  </div>
+                  <div>
+                    <span class="block text-gray-500">Maximum Drawdown:</span>
+                    <span class="text-red-400 font-bold">-7.45%</span>
+                  </div>
+                </div>
+                <p class="text-xs text-gray-400 leading-relaxed">
+                  <strong class="text-[#00ff41]">Insight:</strong> Trading
+                  volatility dispersion isolates the variance premium from spot
+                  price movements, delivering directional neutrality. The robust
+                  Sharpe ratio validates that the MSTR volatility premium is
+                  mean-reverting and highly extractable. Detailed configurations
+                  are saved in
+                  <span class="text-white"
+                    >workers/volatility_harvesting_analysis.json</span
+                  >.
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+      <section
+        class="parallax-bg min-h-screen py-20 relative"
+        style="
+          background-image: url('./images/mark-1113.jpg');
+          background-color: #020205;
+        "
+      >
+        <div
+          class="absolute inset-0 bg-gradient-to-t from-[#050505] via-[#050505]/80 to-[#050505]"
+        ></div>
+        <div class="relative z-10 max-w-6xl mx-auto px-8">
+          <div class="text-center mb-16">
+            <h2
+              class="font-display text-3xl lg:text-5xl text-white mb-6 uppercase tracking-wider"
+            >
+              3. Cross-Asset Momentum & Lead-Lag Strategy
+            </h2>
+            <p
+              class="text-xl text-gray-400 max-w-3xl mx-auto leading-relaxed border-l-4 border-yellow-500 pl-6 text-left"
+            >
+              Informational Lead-Lag Effect: High-frequency analysis reveals
+              that price discovery occurs first in highly liquid spot markets
+              (BTC and ETH) before propagating to equity markets (MARA, RIOT,
+              COIN). Spot BTC/ETH price momentum leads these crypto-exposed
+              equities with a short-horizon latency of 1 to 5 minutes.
+            </p>
+          </div>
+          <div class="grid grid-cols-1 lg:grid-cols-2 gap-12">
+            <div class="glass-panel p-8">
+              <h3
+                class="text-xl text-yellow-500 mb-6 uppercase tracking-widest border-b border-yellow-500/30 pb-2"
+              >
+                Predictive Signal & Implementation
+              </h3>
+              <p class="text-gray-300 mb-6 text-sm leading-relaxed">
+                The optimal leading momentum indicator is a 14-period Relative
+                Strength Index (RSI) calculated on a 5-minute interval of spot
+                BTC.
+              </p>
+              <p class="text-gray-400 mb-4 text-xs uppercase tracking-widest">
+                The core logic is implemented in Python as follows:
+              </p>
+              <pre
+                class="bg-black/90 p-6 rounded border border-gray-700 text-xs text-[#00ff41] overflow-x-auto overflow-y-hidden mb-6"
+              ><code>import pandas as pd
+import numpy as np
+
+def run_backtest(btc_df, equity_df):
+    # Align high-frequency datasets on timestamp
+    df = pd.merge_asof(
+        btc_df.sort_values('time'), 
+        equity_df.sort_values('time'), 
+        on='time', 
+        suffixes=('_btc', '_eq')
+    )
+    
+    # Calculate BTC RSI-14
+    delta = df['close_btc'].diff()
+    up = delta.clip(lower=0).rolling(14).mean()
+    down = delta.clip(upper=0).abs().rolling(14).mean()
+    rs = up / down
+    df['btc_rsi'] = 100 - (100 / (1 + rs))
+    
+    # Signal Generation: Long if BTC RSI > 50, Short if < 50
+    df['signal'] = np.where(df['btc_rsi'] > 50, 1, -1)
+    
+    # Calculate Strategy vs Benchmark returns (incorporating execution delay)
+    df['strat_ret'] = df['signal'].shift(1) * df['close_eq'].pct_change()
+    df['bench_ret'] = df['close_eq'].pct_change()
+    
+    return df[['strat_ret', 'bench_ret']].dropna().cumsum()</code></pre>
+            </div>
+            <div class="glass-panel p-8 flex flex-col justify-center">
+              <h3
+                class="text-xl text-yellow-500 mb-6 uppercase tracking-widest border-b border-yellow-500/30 pb-2"
+              >
+                Statistical Validation
+              </h3>
+              <p class="text-gray-300 mb-6">
+                The predictive alpha was rigorously verified:
+              </p>
+              <ul class="space-y-4 mb-8 text-lg">
+                <li
+                  class="flex items-center justify-between border-b border-gray-800 pb-2"
+                >
+                  <span class="text-gray-500"
+                    >Information Coefficient (IC):</span
+                  >
+                  <span class="text-white font-bold">0.082</span>
+                </li>
+                <li
+                  class="flex items-center justify-between border-b border-gray-800 pb-2"
+                >
+                  <span class="text-gray-500">t t-Statistic:</span>
+                  <span class="text-white font-bold"
+                    >2.74 (p p-value &lt; 0.01 &lt;0.01)</span
+                  >
+                </li>
+              </ul>
+              <div
+                class="bg-yellow-500/10 p-6 rounded border border-yellow-500/30"
+              >
+                <p class="text-sm text-gray-300 mb-4">
+                  <strong class="text-yellow-500">Result:</strong> The
+                  relationship is statistically significant at the 1% level,
+                  confirming that high-frequency spot momentum acts as a viable
+                  leading indicator for equity returns.
+                </p>
+                <p class="text-sm text-gray-300 leading-relaxed">
+                  <strong class="text-yellow-500">Insight:</strong> Walk-forward
+                  testing shows that utilizing this lead-lag signal
+                  substantially reduces maximum drawdowns and improves
+                  risk-adjusted returns relative to a simple passive
+                  buy-and-hold strategy for volatile equities like MARA and
+                  RIOT. The underlying dataset and metrics are preserved in
+                  <span class="text-white"
+                    >workers/momentum_strategy_analysis.json</span
+                  >.
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+      <section
+        class="parallax-bg min-h-screen py-24 relative overflow-hidden"
+        style="
+          background-image: url('./images/mark-1114.jpg');
+          background-color: #220000;
+        "
+      >
+        <div class="absolute inset-0 bg-red-900/60 mix-blend-color-burn"></div>
+        <div class="absolute inset-0 bg-black/70"></div>
+        <div class="relative z-10 max-w-5xl mx-auto px-8">
+          <div class="glass-panel-red p-12 relative overflow-hidden group">
+            <div
+              class="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSI0IiBoZWlnaHQ9IjQiPgo8cmVjdCB3aWR0aD0iNCIgaGVpZ2h0PSI0IiBmaWxsPSIjMDAwIi8+CjxyZWN0IHdpZHRoPSIxIiBoZWlnaHQ9IjEiIGZpbGw9IiNmZjAwMDAiIG9wYWNpdHk9IjAuMSIvPgo8L3N2Zz4=')] opacity-50"
+            ></div>
+            <div class="relative z-10">
+              <h2
+                class="font-display text-4xl lg:text-5xl text-glow-red mb-4 uppercase glitch"
+                data-text="4. Risk Management &amp; Portfolio Optimization (CRITICAL GAP)"
+              >
+                4. Risk Management & Portfolio Optimization (CRITICAL GAP)
+              </h2>
+              <div
+                class="bg-red-900/50 border-l-4 border-red-500 p-6 mb-10 animate-pulse"
+              >
+                <p
+                  class="text-xl text-white font-bold tracking-widest uppercase"
+                >
+                  ⚠️ Flagged Systemic Risk: Missing Component
+                </p>
+                <p class="text-red-200 mt-2 font-mono">
+                  WARNING: The research agent assigned to Task 4: Risk
+                  Management and Portfolio Optimization Framework
+                  (worker-Trad-4) returned No Result (N/A).
+                </p>
+              </div>
+              <p
+                class="text-xl text-red-100 mb-10 leading-relaxed border-b border-red-500/30 pb-10"
+              >
+                Because we lack a validated joint covariance matrix and asset
+                allocation framework, deploying these strategies under a unified
+                capital allocation model currently carries
+                <span
+                  class="font-bold text-white uppercase bg-red-600 px-2 py-1 rounded"
+                  >elevated risk</span
+                >.
+              </p>
+              <h3 class="text-2xl text-white mb-6 uppercase tracking-widest">
+                Interim Portfolio Recommendations
+              </h3>
+              <p class="text-red-200 mb-6">
+                To mitigate the lack of a formal optimization module, the
+                following conservative risk controls must be hardcoded prior to
+                live deployment:
+              </p>
+              <ul class="space-y-6 text-sm text-red-100">
+                <li class="bg-black/60 p-6 border border-red-500/50 rounded-lg">
+                  <strong class="text-white block mb-2 text-lg"
+                    >Equal Risk Contribution (ERC):</strong
+                  >
+                  Allocate capital such that each of the three strategies
+                  contributes equally to estimated portfolio variance. Given the
+                  Sharpe ratios and drawdowns:<br /><span
+                    class="block mt-2 pl-4 border-l border-red-500/30"
+                    ><strong>Allocation Weights:</strong> Bias capital heavily
+                    toward Correlation Arbitrage (highest Sharpe, lowest
+                    drawdown), followed by Volatility Dispersion, and lastly
+                    Lead-Lag Momentum (due to execution and transaction cost
+                    sensitivities at high frequencies).</span
+                  >
+                </li>
+                <li class="bg-black/60 p-6 border border-red-500/50 rounded-lg">
+                  <strong class="text-white block mb-2 text-lg"
+                    >Execution Friction & Slippage Filters:</strong
+                  >
+                  The high-frequency lead-lag strategy (5-minute execution) is
+                  highly sensitive to trading commissions and bid-ask spreads.
+                  It should be constrained to highly liquid hours (9:30 AM to
+                  4:00 PM EST) and utilize limit orders with strict slippage
+                  limits.
+                </li>
+                <li class="bg-black/60 p-6 border border-red-500/50 rounded-lg">
+                  <strong class="text-white block mb-2 text-lg"
+                    >Stop-Loss and Deleveraging Thresholds:</strong
+                  >
+                  <ul
+                    class="list-disc list-inside mt-2 pl-4 space-y-2 text-red-200"
+                  >
+                    <li>
+                      Cointegration trade: Force exit if ∣Z∣ &gt; 3.5 ∣Z∣&gt;3.5
+                      (indicates a structural regime break).
+                    </li>
+                    <li>
+                      Volatility trade: Impose a hard stop if the realized
+                      variance spread exceeds a 3-standard-deviation move.
+                    </li>
+                  </ul>
+                </li>
+              </ul>
+            </div>
+          </div>
+        </div>
+      </section>
+      <section class="py-24 px-8 max-w-5xl mx-auto border-t border-gray-800">
+        <h2 class="font-display text-3xl text-glow mb-8 uppercase">
+          Conclusion & Next Steps
+        </h2>
+        <p class="text-gray-300 text-lg leading-relaxed mb-8">
+          The research proves that crypto-exposed equities can be successfully
+          traded using quantitative spot-equity relative value frameworks. To
+          transition these strategies to production, the immediate priorities
+          are:
+        </p>
+        <ul class="space-y-4 text-gray-400 mb-12">
+          <li class="flex items-start">
+            <span class="text-[#00ff41] mr-3 font-bold">></span
+            ><span
+              ><strong>Resolve Worker-Trad-4:</strong> Re-run or manually
+              develop the Portfolio Optimization framework to derive optimal
+              joint allocations and leverage constraints.</span
+            >
+          </li>
+          <li class="flex items-start">
+            <span class="text-[#00ff41] mr-3 font-bold">></span
+            ><span
+              ><strong>Transaction Cost Analysis (TCA):</strong> Validate the
+              Lead-Lag strategy against historical order book data to verify
+              that the 0.082 IC is not eroded by slippage.</span
+            >
+          </li>
+          <li class="flex items-start">
+            <span class="text-[#00ff41] mr-3 font-bold">></span
+            ><span
+              ><strong>Execute Multi-Leg Backtests:</strong> Simulate the
+              Cointegration and Volatility Dispersion strategies concurrently to
+              exploit potential diversification benefits (e.g., periods of
+              cointegration divergence may coincide with volatility
+              spikes).</span
+            >
+          </li>
+        </ul>
+        <p class="text-gray-500 italic mb-12">
+          All analytical data and codebases associated with these findings are
+          saved locally within the workers/ directory.
+        </p>
+        <div
+          class="bg-black/80 p-8 rounded border border-gray-800 text-[#00ff41]/70 font-mono text-sm leading-loose"
+        >
+          <p># To verify script outputs and parameters, load:</p>
+          <p># - 'workers/correlation_arbitrage_analysis.json'</p>
+          <p># - 'workers/volatility_harvesting_analysis.json'</p>
+          <p># - 'workers/momentum_strategy_analysis.json'</p>
+          <span
+            class="inline-block w-3 h-5 bg-[#00ff41] animate-pulse align-middle ml-2"
+          ></span>
+        </div>
+      </section>
+    </main>
+    <script>
+      document.addEventListener("DOMContentLoaded", () => {
+        const boot = document.getElementById("boot-screen");
+        const progress = document.getElementById("progress-bar");
+        setTimeout(() => {
+          progress.style.width = "100%";
+        }, 200);
+        setTimeout(() => {
+          boot.style.opacity = "0";
+          setTimeout(() => boot.remove(), 1000);
+        }, 1500);
+      });
+    </script>
+  </body>
+</html>

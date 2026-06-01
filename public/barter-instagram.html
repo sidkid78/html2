@@ -1,0 +1,226 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Skill-Barter Local Carousel</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Anton&family=Inter:wght@300;400;500;700;900&family=Playfair+Display:ital,wght@0,600;0,800;1,600;1,800&display=swap');
+  
+  body {
+    font-family: 'Inter', sans-serif;
+    background-color: #0a0a0a;
+    margin: 0;
+    padding: 0;
+  }
+
+  .hide-scrollbar::-webkit-scrollbar {
+    display: none;
+  }
+  .hide-scrollbar {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+
+  .anton-font {
+    font-family: 'Anton', sans-serif;
+  }
+
+  .playfair-font {
+    font-family: 'Playfair Display', serif;
+  }
+
+  .clip-diagonal {
+    clip-path: polygon(0 0, 100% 0, 100% 85%, 0 100%);
+  }
+
+  .carousel-scroll {
+    display: flex;
+    overflow-x: auto;
+    scroll-behavior: smooth;
+    scroll-snap-type: x mandatory;
+  }
+
+  .carousel-scroll section {
+    scroll-snap-align: start;
+    flex-shrink: 0;
+  }
+</style>
+</head>
+<body class="flex items-center justify-center min-h-screen relative overflow-hidden">
+
+  <!-- Global Ambient Background -->
+  <div class="absolute inset-0 z-0">
+    <img src="./images/barter-21.jpg" class="w-full h-full object-cover blur-[100px] opacity-40 scale-125" />
+    <div class="absolute inset-0 bg-black/60"></div>
+  </div>
+
+  <!-- Main Carousel Wrapper -->
+  <div class="relative z-10 w-full max-w-[420px] aspect-[4/5] bg-stone-100 shadow-[0_0_80px_rgba(0,0,0,0.8)] rounded-2xl overflow-hidden flex flex-col border border-white/10">
+    
+    <!-- Mock Instagram Header -->
+    <div class="w-full h-14 bg-white border-b border-stone-200 z-50 flex items-center justify-between px-4 shrink-0 shadow-sm">
+      <div class="flex items-center gap-3">
+        <div class="w-8 h-8 rounded-full bg-gradient-to-tr from-yellow-400 via-red-500 to-purple-500 p-[2px]">
+          <img src="./images/barter-21.jpg" class="w-full h-full object-cover rounded-full border-2 border-white" />
+        </div>
+        <div class="flex flex-col">
+          <span class="font-bold text-[13px] text-stone-900 leading-tight tracking-tight">skillbarter.local</span>
+          <span class="text-[10px] text-stone-500 font-medium">Sponsored</span>
+        </div>
+      </div>
+      <svg class="w-5 h-5 text-stone-900" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 12h.01M12 12h.01M19 12h.01M6 12a1 1 0 11-2 0 1 1 0 012 0zm7 0a1 1 0 11-2 0 1 1 0 012 0zm7 0a1 1 0 11-2 0 1 1 0 012 0z"></path></svg>
+    </div>
+
+    <!-- Swipeable Container -->
+    <div class="carousel-scroll flex flex-1 w-full overflow-x-auto snap-x snap-mandatory scroll-smooth hide-scrollbar relative bg-stone-900" id="carousel">
+      
+      <!-- SLIDE 1: The Hook -->
+      <section class="snap-center shrink-0 w-full h-full relative flex flex-col justify-end p-8 group">
+        <img src="./images/barter-21.jpg" class="absolute inset-0 w-full h-full object-cover z-0 transition-transform duration-[2000ms] ease-out group-hover:scale-110" />
+        <div class="absolute inset-0 bg-gradient-to-t from-[#0a0a0a] via-black/40 to-black/10 z-10"></div>
+        
+        <!-- Animated Badge -->
+        <div class="absolute top-6 right-6 w-16 h-16 animate-[spin_15s_linear_infinite] z-20 opacity-90 drop-shadow-2xl">
+          <svg viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M50 0L53.5 35L85.3 14.6L68.5 45L100 50L68.5 55L85.3 85.4L53.5 65L50 100L46.5 65L14.6 85.4L31.5 55L0 50L31.5 45L14.6 14.6L46.5 35L50 0Z" fill="#FBBF24"/>
+          </svg>
+        </div>
+
+        <div class="relative z-20 text-white mb-8 transform translate-y-4 group-hover:translate-y-0 transition-transform duration-700 ease-out">
+          <div class="inline-flex items-center gap-2 mb-4">
+             <div class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></div>
+             <span class="text-emerald-400 font-bold uppercase tracking-[0.2em] text-[10px] border border-emerald-400/30 px-3 py-1 rounded-full backdrop-blur-sm bg-black/20">Connect Account</span>
+          </div>
+          
+          <h1 class="text-[3.5rem] leading-[0.9] tracking-tighter mb-5 uppercase drop-shadow-2xl anton-font text-stone-100">
+            Skip the Cash.<br>
+            <span class="text-transparent bg-clip-text bg-gradient-to-r from-amber-400 via-orange-500 to-red-500 inline-block transform -skew-x-6 mt-1">Swap the Skill.</span> 🤝
+          </h1>
+          <p class="text-stone-300 text-[13px] font-medium leading-relaxed max-w-[260px] opacity-90">Enter the #NoMoneyEconomy. Brand awareness starts with community building.</p>
+        </div>
+      </section>
+
+      <!-- SLIDE 2: The App Demo -->
+      <section class="snap-center shrink-0 w-full h-full relative flex flex-col items-center justify-center p-6 overflow-hidden">
+        <!-- Complex Dual Background -->
+        <img src="./images/barter-41.jpg" class="absolute inset-0 w-full h-full object-cover z-0 filter blur-md scale-110 opacity-40 sepia-[.4]" />
+        <div class="absolute inset-0 bg-gradient-to-br from-[#003B24]/90 to-[#0A0A0A]/90 z-0 mix-blend-multiply"></div>
+        
+        <div class="relative z-10 w-full flex flex-col items-center mt-[-20px]">
+          <h2 class="text-[2rem] text-white mb-6 text-center tracking-tight leading-[1.1] drop-shadow-lg anton-font">
+            GEMINI AI<br><span class="text-amber-400">VALUE MATCHER</span>
+          </h2>
+          
+          <!-- Glassmorphic Phone Mockup -->
+          <div class="relative w-[60%] aspect-[1/2.15] bg-white/10 backdrop-blur-xl p-2 rounded-[2.5rem] shadow-[0_30px_60px_rgba(0,0,0,0.6)] transform -rotate-3 hover:rotate-0 hover:scale-105 transition-all duration-700 ease-out border border-white/20">
+             <img src="./images/barter-22.jpg" class="w-full h-full object-cover rounded-[2rem] shadow-inner" />
+             <!-- Dynamic Island / Notch -->
+             <div class="absolute top-2 left-1/2 -translate-x-1/2 w-[35%] h-5 bg-black/90 backdrop-blur-md rounded-full z-20 border border-white/10"></div>
+             <!-- Play button overlay indicating screen recording -->
+             <div class="absolute inset-0 flex items-center justify-center z-30">
+                <div class="w-14 h-14 bg-white/20 backdrop-blur-lg rounded-full flex items-center justify-center border border-white/40 shadow-xl cursor-pointer group">
+                  <svg class="w-6 h-6 text-white ml-1 drop-shadow-md group-hover:scale-110 transition-transform" fill="currentColor" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
+                </div>
+             </div>
+          </div>
+
+          <!-- Floating Information Card -->
+          <div class="relative z-10 mt-6 bg-white/10 backdrop-blur-md border border-white/20 text-white p-4 rounded-2xl shadow-2xl w-[85%] transform translate-y-4">
+            <p class="text-center text-[13px] font-medium leading-relaxed">
+              Trading <span class="playfair-font italic text-amber-300 text-[16px] font-bold">'Custom Portrait Illustration'</span><br>
+              <span class="text-[9px] text-stone-400 uppercase tracking-[0.3em] block my-1.5">for</span>
+              <span class="playfair-font italic text-emerald-300 text-[16px] font-bold">'French Tutoring'</span>
+            </p>
+          </div>
+        </div>
+      </section>
+
+      <!-- SLIDE 3: The Mission & Call to Action -->
+      <section class="snap-center shrink-0 w-full h-full relative bg-[#F4F1EA] flex flex-col justify-between py-10 px-6 overflow-hidden">
+        
+        <!-- Subtle Grid Texture -->
+        <div class="absolute inset-0 z-0 opacity-[0.15]" style="background-image: radial-gradient(#8c8170 1px, transparent 1px); background-size: 24px 24px;"></div>
+        
+        <div class="relative z-10 text-center mt-2">
+           <h2 class="text-[1.8rem] playfair-font italic font-extrabold text-stone-900 leading-[1.1] mb-4 drop-shadow-sm">"Your skills are<br>your currency! 🌟"</h2>
+           <p class="text-stone-700 text-[13px] leading-relaxed font-medium mx-auto max-w-[90%]">Inflation is tough, but your talents are valuable. With Skill-Barter Local, you can swap what you do best for what you need most—without spending a single dollar.</p>
+        </div>
+        
+        <!-- Artistic Integration of Texas Graphics -->
+        <div class="relative z-10 w-full flex-1 flex items-center justify-center my-2">
+           <div class="relative w-full h-full group">
+             <img src="./images/barter-31.jpg" class="absolute inset-0 w-full h-full object-contain filter drop-shadow-2xl scale-110 transition-transform duration-1000 group-hover:scale-[1.15]" style="mix-blend-mode: multiply; filter: contrast(1.1) saturate(1.1);" />
+           </div>
+        </div>
+
+        <div class="relative z-10 w-full text-center">
+           <p class="text-stone-800 text-[10px] font-bold uppercase tracking-widest mb-4 border-t border-stone-300 pt-4">
+             Our advanced AI evaluates effort, market demand, and rarity so both neighbors win.<br><br>
+             <span class="text-amber-600 text-[13px] font-black anton-font tracking-wide">WHAT SKILL ARE YOU TRADING FIRST, KILLEEN?</span>
+           </p>
+           
+           <!-- Hashtags -->
+           <div class="flex flex-wrap justify-center gap-1.5 mb-5">
+             <span class="text-[9px] font-bold bg-stone-900 text-white px-2.5 py-1 rounded-sm uppercase tracking-wider">#SkillSharing</span>
+             <span class="text-[9px] font-bold bg-stone-900 text-white px-2.5 py-1 rounded-sm uppercase tracking-wider">#KilleenTx</span>
+             <span class="text-[9px] font-bold bg-amber-500 text-stone-900 px-2.5 py-1 rounded-sm uppercase tracking-wider">#NoMoneyEconomy</span>
+             <span class="text-[9px] font-bold bg-[#004225] text-white px-2.5 py-1 rounded-sm uppercase tracking-wider">#AISolutions</span>
+             <span class="text-[9px] font-bold bg-stone-200 text-stone-800 px-2.5 py-1 rounded-sm uppercase tracking-wider">#BuildCommunity</span>
+           </div>
+           
+           <button class="w-full bg-stone-900 text-white font-black py-4 rounded-xl uppercase tracking-[0.2em] text-[13px] hover:shadow-[0_10px_30px_rgba(245,158,11,0.3)] transition-all active:scale-95 transform duration-150 relative overflow-hidden group">
+             <span class="relative z-10 group-hover:text-amber-400 transition-colors duration-300">Follow for Updates</span>
+             <div class="absolute inset-0 bg-stone-800 transform scale-y-0 origin-bottom group-hover:scale-y-100 transition-transform duration-300 ease-out z-0"></div>
+           </button>
+        </div>
+      </section>
+
+    </div>
+
+    <!-- Interactive Pagination Dots overlaying the content -->
+    <div class="absolute bottom-[110px] left-1/2 -translate-x-1/2 flex gap-2 z-50 bg-black/20 backdrop-blur-md px-3 py-2 rounded-full border border-white/10 pointer-events-none">
+       <div class="dot w-1.5 h-1.5 rounded-full transition-all duration-300 bg-white scale-125 shadow-[0_0_5px_rgba(255,255,255,0.8)]" id="dot-0"></div>
+       <div class="dot w-1.5 h-1.5 rounded-full transition-all duration-300 bg-white/40 scale-100" id="dot-1"></div>
+       <div class="dot w-1.5 h-1.5 rounded-full transition-all duration-300 bg-white/40 scale-100" id="dot-2"></div>
+    </div>
+
+  </div>
+
+  <!-- Global Film Grain Overlay for Cinematic Texture -->
+  <div class="pointer-events-none fixed inset-0 z-[100] opacity-[0.35] mix-blend-overlay" style="background-image: url('data:image/svg+xml,%3Csvg viewBox=%220 0 200 200%22 xmlns=%22http://www.w3.org/2000/svg%22%3E%3Cfilter id=%22noise%22%3E%3CfeTurbulence type=%22fractalNoise%22 baseFrequency=%220.85%22 numOctaves=%223%22 stitchTiles=%22stitch%22/%3E%3C/filter%3E%3Crect width=%22100%25%22 height=%22100%25%22 filter=%22url(%23noise)%22 opacity=%220.6%22/%3E%3C/svg%3E');"></div>
+
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      const carousel = document.getElementById('carousel');
+      const dots = [
+        document.getElementById('dot-0'),
+        document.getElementById('dot-1'),
+        document.getElementById('dot-2')
+      ];
+
+      const updateDots = () => {
+        // Calculate active index based on scroll position
+        const scrollLeft = carousel.scrollLeft;
+        const width = carousel.offsetWidth;
+        const index = Math.round(scrollLeft / width);
+        
+        dots.forEach((dot, i) => {
+          if (i === index) {
+            dot.className = 'dot w-1.5 h-1.5 rounded-full transition-all duration-300 bg-white scale-125 shadow-[0_0_5px_rgba(255,255,255,0.8)]';
+          } else {
+            dot.className = 'dot w-1.5 h-1.5 rounded-full transition-all duration-300 bg-white/40 scale-100';
+          }
+        });
+      };
+
+      carousel.addEventListener('scroll', updateDots, { passive: true });
+      window.addEventListener('resize', updateDots);
+      
+      // Force layout calculation initially
+      setTimeout(updateDots, 100);
+    });
+  </script>
+</body>
+</html>

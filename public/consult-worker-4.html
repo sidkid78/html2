@@ -1,0 +1,671 @@
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AI Consulting Architecture</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@100;400;700;800&family=Space+Grotesk:wght@300;500;700&display=swap" rel="stylesheet">
+<script>
+tailwind.config = {
+  theme: {
+    extend: {
+      fontFamily: {
+        sans: ['Space Grotesk', 'sans-serif'],
+        mono: ['JetBrains Mono', 'monospace'],
+      },
+      colors: {
+        cyber: {
+          bg: '#030305',
+          grid: '#1a1a24',
+          neon: '#00f3ff',
+          magenta: '#ff003c',
+          purple: '#9d4edd',
+          emerald: '#00ff66',
+          alert: '#ffaa00'
+        }
+      },
+      backgroundImage: {
+        'gradient-radial': 'radial-gradient(var(--tw-gradient-stops))',
+      }
+    }
+  }
+}
+</script>
+<style>
+  :root {
+    --x: 50%;
+    --y: 50%;
+  }
+  body {
+    background-color: #030305;
+    color: #e2e8f0;
+    overflow-x: hidden;
+  }
+  
+  /* Typography & Blends */
+  .mix-diff { mix-blend-mode: difference; }
+  .mix-overlay { mix-blend-mode: overlay; }
+  .text-glow { text-shadow: 0 0 10px rgba(0, 243, 255, 0.5), 0 0 20px rgba(0, 243, 255, 0.3); }
+  .text-glow-purple { text-shadow: 0 0 10px rgba(157, 78, 221, 0.5), 0 0 20px rgba(157, 78, 221, 0.3); }
+  
+  /* Textures & SVG Filters */
+  .noise-overlay {
+    position: fixed;
+    top: 0; left: 0; width: 100vw; height: 100vh;
+    pointer-events: none;
+    z-index: 50;
+    opacity: 0.15;
+    mix-blend-mode: hard-light;
+  }
+  
+  /* Grid Background */
+  .cyber-grid {
+    position: fixed;
+    top: 0; left: 0; width: 200vw; height: 200vh;
+    background-image: 
+      linear-gradient(to right, rgba(26,26,36,0.5) 1px, transparent 1px),
+      linear-gradient(to bottom, rgba(26,26,36,0.5) 1px, transparent 1px);
+    background-size: 40px 40px;
+    transform: perspective(500px) rotateX(60deg) translateY(-100px) translateZ(-200px);
+    transform-origin: center top;
+    animation: gridMove 20s linear infinite;
+    z-index: -1;
+    opacity: 0.3;
+  }
+  
+  @keyframes gridMove {
+    0% { transform: perspective(500px) rotateX(60deg) translateY(0) translateZ(-200px); }
+    100% { transform: perspective(500px) rotateX(60deg) translateY(40px) translateZ(-200px); }
+  }
+
+  /* Fluid Blob Animation */
+  .blob {
+    position: fixed;
+    filter: blur(80px);
+    z-index: -1;
+    opacity: 0.4;
+    animation: drift 15s ease-in-out infinite alternate;
+  }
+  @keyframes drift {
+    0% { transform: translate(0, 0) scale(1); }
+    50% { transform: translate(10vw, 15vh) scale(1.2); }
+    100% { transform: translate(-10vw, 5vh) scale(0.9); }
+  }
+
+  /* Spotlight Card Effect */
+  .spotlight-card {
+    position: relative;
+    background: rgba(20, 20, 30, 0.4);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    backdrop-filter: blur(10px);
+    overflow: hidden;
+  }
+  .spotlight-card::before {
+    content: "";
+    position: absolute;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background: radial-gradient(800px circle at var(--mouse-x, 50%) var(--mouse-y, 50%), rgba(255, 255, 255, 0.06), transparent 40%);
+    z-index: 0;
+    pointer-events: none;
+    transition: background 0.2s ease;
+  }
+  .spotlight-content { position: relative; z-index: 1; }
+
+  /* Scroll Reveal */
+  .reveal {
+    opacity: 0;
+    transform: translateY(40px);
+    transition: all 1s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+  .reveal.active {
+    opacity: 1;
+    transform: translateY(0);
+  }
+
+  /* ASCII Art Styling */
+  .ascii-art {
+    color: var(--tw-colors-cyber-neon);
+    text-shadow: 0 0 5px rgba(0, 243, 255, 0.4);
+    white-space: pre-wrap;
+    word-break: break-all;
+  }
+
+  /* Custom Scrollbar */
+  ::-webkit-scrollbar { width: 8px; }
+  ::-webkit-scrollbar-track { background: #030305; }
+  ::-webkit-scrollbar-thumb { background: #333; border-radius: 4px; }
+  ::-webkit-scrollbar-thumb:hover { background: #00f3ff; }
+
+  /* Glitch Text Effect */
+  .glitch-hover:hover {
+    animation: glitch 0.2s cubic-bezier(.25, .46, .45, .94) both infinite;
+    color: #ff003c;
+  }
+  @keyframes glitch {
+    0% { transform: translate(0) } 
+    20% { transform: translate(-2px, 2px) }
+    40% { transform: translate(-2px, -2px) }
+    60% { transform: translate(2px, 2px) }
+    80% { transform: translate(2px, -2px) }
+    100% { transform: translate(0) }
+  }
+</style>
+</head>
+<body class="antialiased selection:bg-cyber-neon selection:text-black">
+
+<!-- SVG Filters & Textures -->
+<svg class="noise-overlay">
+  <filter id="noiseFilter">
+    <feTurbulence type="fractalNoise" baseFrequency="0.7" numOctaves="3" stitchTiles="stitch"/>
+    <feColorMatrix type="matrix" values="1 0 0 0 0, 0 1 0 0 0, 0 0 1 0 0, 0 0 0 0.15 0" />
+  </filter>
+  <rect width="100%" height="100%" filter="url(#noiseFilter)"/>
+</svg>
+<svg style="display:none;">
+  <filter id="fluid">
+    <feTurbulence type="fractalNoise" baseFrequency="0.02" numOctaves="3" result="noise" />
+    <feDisplacementMap in="SourceGraphic" in2="noise" scale="10" xChannelSelector="R" yChannelSelector="G" />
+  </filter>
+</svg>
+
+<!-- Background Ambience -->
+<div class="cyber-grid"></div>
+<div class="blob bg-cyber-purple w-[60vw] h-[60vh] rounded-full top-[-10vh] left-[-10vw]"></div>
+<div class="blob bg-cyber-neon w-[50vw] h-[50vh] rounded-full bottom-[-10vh] right-[-10vw]" style="animation-delay: -5s;"></div>
+<div class="blob bg-cyber-emerald w-[40vw] h-[40vh] rounded-full top-[40vh] left-[30vw]" style="animation-delay: -10s; opacity: 0.2;"></div>
+
+<!-- Navigation / Header -->
+<nav class="fixed top-0 w-full p-6 z-40 mix-diff flex justify-between items-start pointer-events-none">
+  <div class="font-mono text-xs tracking-widest text-white uppercase">
+    [ SYS.ARCH_INIT ]<br>
+    V 2.0_PRODUCTION
+  </div>
+  <div class="font-mono text-xs tracking-widest text-right text-white uppercase">
+    PROBABILISTIC DELIVERY<br>
+    DRIFT_RATE: 0.045
+  </div>
+</nav>
+
+<main class="relative z-10 container mx-auto px-6 md:px-12 py-24">
+
+  <!-- Hero Section -->
+  <section class="min-h-[80vh] flex flex-col justify-center mb-32 reveal">
+    <h1 class="text-5xl md:text-7xl lg:text-8xl font-bold uppercase tracking-tighter leading-[0.85] mb-8 mix-diff text-white" style="filter: url(#fluid);">
+      Resource<br>
+      <span class="text-transparent bg-clip-text bg-gradient-to-r from-cyber-neon to-cyber-purple">Allocation,</span><br>
+      Team Structures,<br>
+      <span class="text-transparent bg-clip-text bg-gradient-to-r from-cyber-emerald to-cyber-neon">& Critical Roles</span><br>
+      in AI Consulting Projects
+    </h1>
+  </section>
+
+  <!-- 1. Executive Summary -->
+  <section class="mb-40 grid grid-cols-1 md:grid-cols-12 gap-8 reveal">
+    <div class="md:col-span-4 border-t border-cyber-neon pt-4">
+      <h2 class="font-mono text-cyber-neon text-xl mb-4">1. Executive Summary</h2>
+      <p class="font-mono text-xs text-gray-500 mb-4">[ SHIFT: T&M -> VALUE-BASED ]</p>
+    </div>
+    <div class="md:col-span-8 space-y-6 font-sans text-lg md:text-xl font-light text-gray-300">
+      <p>As organizations transition from academic AI experimentation to enterprise-grade production environments, the architecture of AI consulting delivery teams has fundamentally evolved. AI deployments are inherently distinct from traditional IT or standard software development. They are highly probabilistic rather than deterministic, characterized by continuous model drift, intricate data dependencies, compliance requirements, and unique cost structures (such as GPU compute and token consumption).</p>
+      
+      <p>Furthermore, the industry is witnessing a structural erosion of the traditional Time & Materials (T&M) billing model. With generative AI tools, prompt libraries, synthetic data generators, and pre-built code accelerators, engineering efficiency has experienced exponential gains. A task that historically required 200 hours of manual coding can now be completed in a fraction of that time. Under hourly pricing, this compression penalizes highly efficient firms. Consequently, leading AI consulting agencies are pivoting toward Value-Based or Outcomes-Based Pricing, where projects are priced according to the business value generated (e.g., cost-savings from an automated workflow or revenue gains from an AI-driven agent).</p>
+      
+      <div class="p-6 border-l-4 border-cyber-purple bg-cyber-purple/10 backdrop-blur-sm mt-8">
+        <p class="font-bold mb-4 text-white">This transition directly alters resource allocation and utilization frameworks:</p>
+        <ul class="list-disc pl-6 space-y-2 font-mono text-sm">
+          <li><span class="text-cyber-neon">Client Billable Utilization</span> is no longer the sole metric of consultant productivity.</li>
+          <li><span class="text-cyber-neon">Internal Asset Contribution</span> (building reusable internal code libraries, agentic templates, and pipelines) has become a primary driver of firm leverage and margin expansion.</li>
+          <li><span class="text-cyber-neon">Team Leverage Models</span> must be highly optimized, shifting from flat project team structures to leveraged delivery models where senior architects govern multiple delivery pods.</li>
+        </ul>
+      </div>
+      
+      <p class="text-sm text-gray-400 font-mono mt-4 border-b border-gray-800 pb-8">This document details the critical roles within modern AI consulting, provides visual and tabular team configurations across project tiers, establishes benchmark figures for utilization and capacity planning, models the mathematical impact of leverage ratios on firm profitability, and highlights phased resource transition strategies.</p>
+    </div>
+  </section>
+
+  <!-- 2. Detailed Profiles & Workflow -->
+  <section class="mb-40 reveal">
+    <div class="flex flex-col md:flex-row justify-between items-end border-b border-white pb-4 mb-12">
+      <h2 class="text-3xl md:text-5xl font-bold uppercase">2. Detailed Profiles of Critical Roles</h2>
+      <p class="font-mono text-sm text-gray-400 mt-4 md:mt-0 max-w-sm text-right">Balancing domain expertise, software craftsmanship, and statistical rigor.</p>
+    </div>
+
+    <!-- ASCII Workflow Graphic -->
+    <div class="w-full overflow-x-auto mb-16 p-8 bg-black/50 border border-cyber-grid spotlight-card rounded-lg">
+      <div class="spotlight-content">
+        <h3 class="font-mono text-xs text-cyber-magenta mb-4 tracking-[0.2em]">CROSS-FUNCTIONAL WORKFLOW DIAGRAM</h3>
+<pre class="font-mono text-[10px] md:text-sm ascii-art leading-tight">
++------------------------------------------------------------------------------------------------+
+|                                    CROSS-FUNCTIONAL WORKFLOW                                   |
+|                                                                                                |
+|  [Business / BA] ---> [Architect] ---> [Data Engineer] ---> [Data Scientist] ---> [MLOps]      |
+|   (Scoping / SOPs)     (System Design)  (ETL & Databases)   (Model Tuning)     (CI/CD / Drift)|
++------------------------------------------------------------------------------------------------+
+</pre>
+      </div>
+    </div>
+
+    <!-- Role Cards Grid -->
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+      
+      <!-- Role A -->
+      <div class="spotlight-card p-8 rounded-xl">
+        <div class="spotlight-content">
+          <div class="text-cyber-neon font-mono text-sm mb-2">[ ROLE_A ]</div>
+          <h3 class="text-2xl font-bold mb-4">AI / Solutions Architect</h3>
+          <p class="text-sm text-gray-400 mb-6 font-mono">Primary Mandate: Bridge the gap between business requirements and technical feasibility by designing a scalable, secure, and cost-effective AI system blueprint.</p>
+          <div class="space-y-4 text-sm">
+            <div><span class="text-white font-bold">Deliverables:</span> HLD/LLD, RAG orchestration flows, Cost-benefit models, Security matrix (GDPR, SOC2).</div>
+            <div><span class="text-white font-bold">Tech Stack:</span> AWS/Azure/GCP, Pinecone, LangChain, vLLM.</div>
+            <div class="p-3 bg-white/5 rounded"><span class="text-cyber-emerald">Handoff:</span> Inputs from PM/Client -> Outputs to Data Eng & Data Scientist.</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Role B -->
+      <div class="spotlight-card p-8 rounded-xl">
+        <div class="spotlight-content">
+          <div class="text-cyber-neon font-mono text-sm mb-2">[ ROLE_B ]</div>
+          <h3 class="text-2xl font-bold mb-4">Data Scientist / AI Engineer</h3>
+          <p class="text-sm text-gray-400 mb-6 font-mono">Primary Mandate: Develop, evaluate, and optimize the algorithmic and cognitive engine of the AI application, ensuring high accuracy and low hallucination rates.</p>
+          <div class="space-y-4 text-sm">
+            <div><span class="text-white font-bold">Deliverables:</span> Gold Standard datasets, Prompt templates, Fine-tuned checkpoints (LoRA), Eval reports.</div>
+            <div><span class="text-white font-bold">Tech Stack:</span> Python, PyTorch, Hugging Face, MLflow, PEFT.</div>
+            <div class="p-3 bg-white/5 rounded"><span class="text-cyber-emerald">Handoff:</span> Inputs from Architect/Data Eng -> Outputs to MLOps.</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Role C -->
+      <div class="spotlight-card p-8 rounded-xl">
+        <div class="spotlight-content">
+          <div class="text-cyber-neon font-mono text-sm mb-2">[ ROLE_C ]</div>
+          <h3 class="text-2xl font-bold mb-4">MLOps Engineer</h3>
+          <p class="text-sm text-gray-400 mb-6 font-mono">Primary Mandate: Standardize and automate the deployment, monitoring, scaling, and governance of models in production.</p>
+          <div class="space-y-4 text-sm">
+            <div><span class="text-white font-bold">Deliverables:</span> CI/CD pipelines, Model registry, Monitoring dashboards (Grafana), Guardrails.</div>
+            <div><span class="text-white font-bold">Tech Stack:</span> Docker, Kubernetes, Terraform, Triton, Prometheus.</div>
+            <div class="p-3 bg-white/5 rounded"><span class="text-cyber-emerald">Handoff:</span> Inputs from DS/Data Eng -> Outputs to Client IT.</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Role D -->
+      <div class="spotlight-card p-8 rounded-xl">
+        <div class="spotlight-content">
+          <div class="text-cyber-neon font-mono text-sm mb-2">[ ROLE_D ]</div>
+          <h3 class="text-2xl font-bold mb-4">Data Engineer</h3>
+          <p class="text-sm text-gray-400 mb-6 font-mono">Primary Mandate: Build and maintain the high-throughput, automated, and secure data pipelines required to feed workflows.</p>
+          <div class="space-y-4 text-sm">
+            <div><span class="text-white font-bold">Deliverables:</span> ETL/ELT pipelines, Chunked parsers, Vector indices, Feature Stores.</div>
+            <div><span class="text-white font-bold">Tech Stack:</span> SQL, Spark, Databricks, Snowflake, Kafka, Airflow.</div>
+            <div class="p-3 bg-white/5 rounded"><span class="text-cyber-emerald">Handoff:</span> Inputs from Architect/IT -> Outputs to Data Scientist.</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Role E -->
+      <div class="spotlight-card p-8 rounded-xl md:col-span-2 lg:col-span-1">
+        <div class="spotlight-content">
+          <div class="text-cyber-neon font-mono text-sm mb-2">[ ROLE_E ]</div>
+          <h3 class="text-2xl font-bold mb-4">AI Product Manager / Delivery Lead</h3>
+          <p class="text-sm text-gray-400 mb-6 font-mono">Primary Mandate: Manage probabilistic timelines, align sprints with business outcomes, maintain client alignment.</p>
+          <div class="space-y-4 text-sm">
+            <div><span class="text-white font-bold">Deliverables:</span> Agile boards, ROI trackers, HITL workflows, Risk registers.</div>
+            <div><span class="text-white font-bold">Tech Stack:</span> Jira, Linear, Miro, Prompt engineering concepts.</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Role F & G Stacked -->
+      <div class="flex flex-col gap-6 md:col-span-2 lg:col-span-1">
+        <div class="spotlight-card p-8 rounded-xl flex-1">
+          <div class="spotlight-content">
+            <div class="text-cyber-neon font-mono text-sm mb-2">[ ROLE_F ]</div>
+            <h3 class="text-xl font-bold mb-2">Forward-Deployed Engineer (FDE)</h3>
+            <p class="text-xs text-gray-400 mb-4 font-mono">Primary Mandate: Embed directly within client infra to bypass data hurdles.</p>
+            <p class="text-sm"><span class="text-white font-bold">Stack:</span> Polyglot, Docker, Linux, API Design.</p>
+          </div>
+        </div>
+        <div class="spotlight-card p-8 rounded-xl flex-1">
+          <div class="spotlight-content">
+            <div class="text-cyber-neon font-mono text-sm mb-2">[ ROLE_G ]</div>
+            <h3 class="text-xl font-bold mb-2">Change Management / BA</h3>
+            <p class="text-xs text-gray-400 mb-4 font-mono">Primary Mandate: Map workflows, draft SOPs, and drive adoption.</p>
+            <p class="text-sm"><span class="text-white font-bold">Stack:</span> Visio, Lucidchart, BI tools.</p>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- 3. Standard Team Configurations -->
+  <section class="mb-40 reveal">
+    <div class="mb-12">
+      <h2 class="text-3xl md:text-5xl font-bold uppercase text-white mb-4">3. Standard Team Configurations by Project Scale</h2>
+      <p class="font-mono text-gray-400">AI consulting engagements scale dynamically depending on complexity, data sensitivity, and operational integration requirements.</p>
+    </div>
+
+    <div class="space-y-24">
+      <!-- Scale A -->
+      <div class="relative p-8 border border-gray-800 bg-gray-900/30 rounded-2xl">
+        <div class="absolute -top-4 left-8 bg-cyber-bg px-4 font-mono text-cyber-neon">A. Small-Scale AI Deployment</div>
+        <div class="grid lg:grid-cols-2 gap-8">
+          <div>
+            <ul class="space-y-2 text-sm mb-6">
+              <li><strong class="text-white">Objective:</strong> Validate feasibility, test GenAI API, PoC MVP.</li>
+              <li><strong class="text-white">Timeline:</strong> 4 - 8 weeks</li>
+              <li><strong class="text-white">Budget:</strong> $50k – $150k</li>
+              <li><strong class="text-white">Total FTE:</strong> 1.8 to 2.15</li>
+            </ul>
+<pre class="font-mono text-[10px] text-cyan-500 overflow-x-auto p-4 bg-black rounded shadow-inner">
+                  +--------------------------------+
+                  |     PM / Business Analyst      |
+                  |          (30% - 40%)           |
+                  +---------------+----------------+
+                                  |
+                                  v
+                  +--------------------------------+
+                  |      AI / Solutions Architect  |
+                  |          (20% - 25%)           |
+                  +---------------+----------------+
+                                  |
+                                  +-----------------------+
+                                  |                       |
+                                  v                       v
+                  +--------------------------------+ +----+---------------------------+
+                  |  Data Scientist / AI Engineer  | |       Data Engineer            |
+                  |             (100%)             | |        (30% - 50%)             |
+                  +--------------------------------+ +--------------------------------+
+</pre>
+          </div>
+          <div class="text-xs font-mono flex flex-col justify-center space-y-4">
+            <div class="flex justify-between border-b border-gray-800 pb-2"><span>Architect (20-25%)</span> <span class="text-gray-400">Initial stack, security, blueprint.</span></div>
+            <div class="flex justify-between border-b border-gray-800 pb-2"><span>DS/AI Eng (100%)</span> <span class="text-gray-400">API integration, prompts, testing.</span></div>
+            <div class="flex justify-between border-b border-gray-800 pb-2"><span>Data Eng (30-50%)</span> <span class="text-gray-400">Sourcing datasets, loading vector stores.</span></div>
+            <div class="flex justify-between border-b border-gray-800 pb-2"><span>PM/BA (30-40%)</span> <span class="text-gray-400">Sprints, reviews, user guides.</span></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Scale B -->
+      <div class="relative p-8 border border-gray-800 bg-gray-900/30 rounded-2xl">
+        <div class="absolute -top-4 left-8 bg-cyber-bg px-4 font-mono text-cyber-purple">B. Medium-Scale AI Deployment</div>
+        <div class="grid lg:grid-cols-2 gap-8">
+          <div class="order-2 lg:order-1 text-xs font-mono flex flex-col justify-center space-y-4">
+             <div class="flex justify-between border-b border-gray-800 pb-2"><span>Architect (40-50%)</span> <span class="text-gray-400 text-right">Hybrid cloud, cost/latency, security.</span></div>
+             <div class="flex justify-between border-b border-gray-800 pb-2"><span>Lead DS (100%)</span> <span class="text-gray-400 text-right">Fine-tuning, embeddings, guardrails.</span></div>
+             <div class="flex justify-between border-b border-gray-800 pb-2"><span>AI/ML Eng (100%)</span> <span class="text-gray-400 text-right">Agent framework, search pipeline.</span></div>
+             <div class="flex justify-between border-b border-gray-800 pb-2"><span>Data Eng (100%)</span> <span class="text-gray-400 text-right">Prod ETL pipelines, vector syncs.</span></div>
+             <div class="flex justify-between border-b border-gray-800 pb-2"><span>MLOps (50%)</span> <span class="text-gray-400 text-right">CI/CD, orchestration, Grafana.</span></div>
+             <div class="flex justify-between border-b border-gray-800 pb-2"><span>PM (50%) & BA (40-50%)</span> <span class="text-gray-400 text-right">Agile sprints & SOP redesign.</span></div>
+          </div>
+          <div class="order-1 lg:order-2">
+            <ul class="space-y-2 text-sm mb-6">
+              <li><strong class="text-white">Objective:</strong> Robust departmental system, Prod RAG.</li>
+              <li><strong class="text-white">Timeline:</strong> 3 - 6 months</li>
+              <li><strong class="text-white">Budget:</strong> $250k – $600k</li>
+              <li><strong class="text-white">Total FTE:</strong> 4.8 to 5.0</li>
+            </ul>
+<pre class="font-mono text-[8px] md:text-[10px] text-purple-400 overflow-x-auto p-4 bg-black rounded shadow-inner">
+                  +--------------------------------+
+                  |     Delivery Lead / PM         |
+                  |             (50%)              |
+                  +---------------+----------------+
+                                  |
+         +------------------------+------------------------+
+         |                                                 |
+         v                                                 v
++--------+-----------------------+                +--------+-----------------------+
+|  AI / Solutions Architect     |                |  Change Mgmt / BA              |
+|         (40% - 50%)           |                |         (40% - 50%)            |
++--------+-----------------------+                +--------------------------------+
+         |
+         +------------------------+------------------------+
+         |                        |                        |
+         v                        v                        v
++--------+---------------+ +--------+--------------+ +--------+--------------+
+|  Lead Data Scientist   | |   AI / ML Engineer     | |     Data Engineer      |
+|        (100%)          | |         (100%)         | |         (100%)         |
++------------------------+ +--------+--------------+ +-----------------------+
+                                           |
+                                           v
+                                  +--------+---------------+
+                                  |    MLOps Engineer      |
+                                  |          (50%)         |
+                                  +------------------------+
+</pre>
+          </div>
+        </div>
+      </div>
+
+      <!-- Scale C -->
+      <div class="relative p-8 border border-cyber-magenta/50 bg-gray-900/50 rounded-2xl spotlight-card">
+        <div class="spotlight-content">
+          <div class="absolute -top-4 left-8 bg-cyber-bg px-4 font-mono text-cyber-magenta font-bold">C. Enterprise-Scale AI Deployment</div>
+          <div class="grid lg:grid-cols-2 gap-8 mt-4">
+            <div>
+              <ul class="space-y-2 text-sm mb-6">
+                <li><strong class="text-white">Objective:</strong> Secure multi-tenant global AI systems, advanced agent networks, massive pipelines.</li>
+                <li><strong class="text-white">Timeline:</strong> 6 - 12+ months</li>
+                <li><strong class="text-white">Budget:</strong> $1.2M – $4M+</li>
+                <li><strong class="text-white">Total FTE:</strong> 9.1 to 9.3</li>
+              </ul>
+<pre class="font-mono text-[7px] md:text-[9px] text-pink-500 overflow-x-auto p-4 bg-black rounded shadow-inner">
+                        +--------------------------------+
+                        |     Dedicated Product Manager  |
+                        |             (100%)             |
+                        +---------------+----------------+
+                                        |
+         +------------------------------+------------------------------+
+         |                                                             |
+         v                                                             v
++--------+-----------------------+                     +--------+-----------------------+
+|  Principal AI Architect       |                     |  Change Management Specialist  |
+|         (80% - 100%)          |                     |             (80%)              |
++--------+-----------------------+                     +--------------------------------+
+         |
+         +----------------------+----------------------+----------------------+
+         |                      |                      |                      |
+         v                      v                      v                      v
++--------+--------------+ +----+-----------------+ +----+-----------------+ +----+--------------+
+| Lead MLOps Engineer   | | Senior Data Scientist| | Senior Data Engineer | | Forward-Deployed |
+|        (100%)         | |        (100%)        | |        (100%)        | |  Engineer (100%) |
++--------+--------------+ +----------------------+ +----+-----------------+ +-------------------+
+         |                                             |
+         v                                             v
++--------+--------------+                         +----+-----------------+
+| MLOps Support         |                         | Data Engineer (Mid)  |
+|         (50%)         |                         |        (100%)        |
++-----------------------+                         +----------------------+
+         |
+         v
++--------+---------------+
+| AI/ML Engineers (2x)   |
+|      (200% Total)      |
++------------------------+
+</pre>
+            </div>
+            <div class="text-[11px] font-mono flex flex-col justify-center space-y-3">
+               <div class="flex flex-col border-b border-gray-800 pb-2"><span class="text-white">Principal AI Architect (80-100%)</span> <span class="text-gray-400">Cross-regional scaling, EU AI Act, multi-tenant security.</span></div>
+               <div class="flex flex-col border-b border-gray-800 pb-2"><span class="text-white">Forward-Deployed Eng (100%)</span> <span class="text-gray-400">On-site integration, secure bypass, legacy hooks.</span></div>
+               <div class="flex flex-col border-b border-gray-800 pb-2"><span class="text-white">Sr. Data Scientist (100%)</span> <span class="text-gray-400">DPO/RLHF, advanced evals, custom embeddings.</span></div>
+               <div class="flex flex-col border-b border-gray-800 pb-2"><span class="text-white">AI / ML Engineers (200%)</span> <span class="text-gray-400">Multi-agent logic, custom tools, guardrails.</span></div>
+               <div class="flex flex-col border-b border-gray-800 pb-2"><span class="text-white">Data Engineers [Sr & Mid] (200%)</span> <span class="text-gray-400">Distributed data lake ingestion (Databricks), real-time connectors.</span></div>
+               <div class="flex flex-col border-b border-gray-800 pb-2"><span class="text-white">MLOps [Lead & Support] (150%)</span> <span class="text-gray-400">K8s hosting, automated tests, cost monitoring, alerts.</span></div>
+               <div class="flex flex-col border-b border-gray-800 pb-2"><span class="text-white">PM (100%) & Change Mgmt (80%)</span> <span class="text-gray-400">Program tracking, workflow redesign, multi-dept training.</span></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 4. Utilization & 5. Leverage Metrics (Data Tables) -->
+  <section class="mb-40 reveal grid grid-cols-1 xl:grid-cols-2 gap-16">
+    
+    <!-- Utilization -->
+    <div>
+      <h2 class="text-2xl md:text-4xl font-bold uppercase mb-6">4. Billable Utilization Targets</h2>
+      <div class="font-mono text-sm mb-6 bg-gray-900/50 p-4 border-l border-cyber-neon">
+        <p class="text-cyber-neon mb-2">[ CAPACITY FOUNDATION: 2,000-HR BASE ]</p>
+        <ul class="text-gray-400 space-y-1">
+          <li>Gross Capacity: 2,080 hrs</li>
+          <li>- PTO: 120 hrs</li>
+          <li>- Public Holidays: 80 hrs</li>
+          <li>- Training: 40 hrs</li>
+          <li class="text-white mt-2 border-t border-gray-700 pt-2">Net Delivery Capacity: 1,840 hrs (92%)</li>
+        </ul>
+      </div>
+      
+      <div class="overflow-x-auto">
+        <table class="w-full text-left border-collapse text-xs md:text-sm font-mono">
+          <thead>
+            <tr class="border-b-2 border-gray-700 text-white">
+              <th class="p-3">Role</th>
+              <th class="p-3">Target %</th>
+              <th class="p-3">Annual Hrs</th>
+            </tr>
+          </thead>
+          <tbody class="text-gray-300">
+            <tr class="border-b border-gray-800 hover:bg-gray-900/50">
+              <td class="p-3">Jr/Mid AI Eng/DS</td><td class="p-3 text-cyber-neon">80-85%</td><td class="p-3">1,600-1,700</td>
+            </tr>
+            <tr class="border-b border-gray-800 hover:bg-gray-900/50">
+              <td class="p-3">Sr DS / ML Eng</td><td class="p-3 text-cyber-neon">75-80%</td><td class="p-3">1,500-1,600</td>
+            </tr>
+            <tr class="border-b border-gray-800 hover:bg-gray-900/50">
+              <td class="p-3">MLOps / Data Eng</td><td class="p-3 text-cyber-neon">75-80%</td><td class="p-3">1,500-1,600</td>
+            </tr>
+            <tr class="border-b border-gray-800 hover:bg-gray-900/50">
+              <td class="p-3 text-white">AI / Sol Architect</td><td class="p-3 text-cyber-purple font-bold">50-70%</td><td class="p-3">1,000-1,400</td>
+            </tr>
+            <tr class="border-b border-gray-800 hover:bg-gray-900/50">
+              <td class="p-3">PM / BA</td><td class="p-3 text-cyber-neon">70-80%</td><td class="p-3">1,400-1,600</td>
+            </tr>
+            <tr class="border-b border-gray-800 hover:bg-gray-900/50">
+              <td class="p-3">MD / Partner</td><td class="p-3 text-cyber-magenta">10-30%</td><td class="p-3">200-600</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- Leverage Ratios -->
+    <div>
+      <h2 class="text-2xl md:text-4xl font-bold uppercase mb-6">5. Leverage Ratios & Margin</h2>
+      <div class="flex space-x-8 font-mono text-xs mb-8">
+<pre class="text-gray-500">
+LOW LEVERAGE (1:2)
+   [Architect]
+    /       \
+[Senior]  [Senior]
+</pre>
+<pre class="text-cyber-emerald">
+HIGH LEVERAGE (1:6)
+     [Architect]
+     /    |    \
+  [Sr]  [Sr]  [Sr]
+  / \   / \   / \
+[J][J][J][J][J][J]
+</pre>
+      </div>
+
+      <!-- Financial Modeling Cards -->
+      <div class="space-y-4">
+        <div class="p-4 border border-gray-700 bg-black/50">
+          <h4 class="text-sm font-bold text-gray-400">A. Low Leverage (1 Arch, 1 Sr, 1 Jr)</h4>
+          <p class="font-mono text-xs mt-2">Rev: $24,800 | Cost: $9,600 | <span class="text-white">Margin: 61.3%</span></p>
+        </div>
+        <div class="p-4 border border-cyber-purple bg-cyber-purple/10">
+          <h4 class="text-sm font-bold text-cyber-purple">B. High Leverage (1/2 Arch, 2 Sr, 4 Jr)</h4>
+          <p class="font-mono text-xs mt-2">Rev: $41,200 | Cost: $15,200 | <span class="text-white">Margin: 63.1%</span></p>
+        </div>
+        <div class="p-4 border border-cyber-emerald bg-cyber-emerald/10 shadow-[0_0_15px_rgba(0,255,102,0.2)]">
+          <h4 class="text-sm font-bold text-cyber-emerald">C. Value-Based + High Lev (Sweet Spot)</h4>
+          <p class="font-sans text-xs mt-2 text-gray-300">Flat Fee $60,000 using pre-built internal AI accelerators.</p>
+          <p class="font-mono text-sm mt-2 font-bold text-white">Rev: $60,000 | Cost: $15,200 | Margin: <span class="text-cyber-emerald text-lg">74.7%</span></p>
+        </div>
+      </div>
+    </div>
+
+  </section>
+
+  <!-- 6. Phased Ramp & 7. Bottlenecks -->
+  <section class="mb-20 reveal">
+    <h2 class="text-3xl md:text-5xl font-bold uppercase mb-12 border-b border-gray-700 pb-4">6. Phased Ramp & Handoff</h2>
+    
+    <div class="overflow-x-auto bg-black p-6 border border-gray-800 spotlight-card mb-16">
+<pre class="font-mono text-[10px] md:text-xs text-white">
+       [Discovery] --> [Design/Data] --> [Dev/Tuning] --> [MLOps/Deploy] --> [Handover/UAT]
+Arch:  <span class="text-cyber-magenta">[ HIGH ]</span> ------> <span class="text-cyber-alert">[ MEDIUM ]</span> -----> <span class="text-gray-600">[ LOW ]</span> --------> <span class="text-cyber-alert">[ MEDIUM ]</span> ------> <span class="text-gray-600">[ LOW ]</span>
+DataE: <span class="text-cyber-alert">[ MEDIUM ]</span> ----> <span class="text-cyber-magenta">[ HIGH ]</span> -------> <span class="text-cyber-alert">[ MEDIUM ]</span> -----> <span class="text-gray-600">[ LOW ]</span> ---------> <span class="text-gray-600">[ LOW ]</span>
+DataS: <span class="text-gray-600">[ LOW ]</span> -------> <span class="text-cyber-alert">[ MEDIUM ]</span> -----> <span class="text-cyber-magenta">[ HIGH ]</span> -------> <span class="text-cyber-alert">[ MEDIUM ]</span> ------> <span class="text-gray-600">[ LOW ]</span>
+MLOps: <span class="text-gray-600">[ LOW ]</span> -------> <span class="text-gray-600">[ LOW ]</span> --------> <span class="text-cyber-alert">[ MEDIUM ]</span> -----> <span class="text-cyber-magenta">[ HIGH ]</span> --------> <span class="text-cyber-alert">[ MEDIUM ]</span>
+PM:    <span class="text-cyber-alert">[ MEDIUM ]</span> ----> <span class="text-cyber-alert">[ MEDIUM ]</span> -----> <span class="text-cyber-alert">[ MEDIUM ]</span> -----> <span class="text-cyber-alert">[ MEDIUM ]</span> ------> <span class="text-cyber-magenta">[ HIGH ]</span>
+</pre>
+    </div>
+
+    <h2 class="text-3xl md:text-5xl font-bold uppercase text-cyber-alert mb-8 glitch-hover">7. Optimization Playbook</h2>
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+      
+      <!-- Bottleneck 1 -->
+      <div class="border-l-4 border-cyber-magenta bg-gray-900/40 p-6">
+        <h3 class="text-xl font-bold text-white mb-2">1. The Data Prep Trap</h3>
+        <p class="text-xs font-mono text-cyber-magenta mb-4">[ DS Time Wasted on Cleaning ]</p>
+        <p class="text-sm text-gray-400 mb-4">Data scientists spending 80% of billable hours manually cleaning documents.</p>
+        <p class="text-sm text-gray-200 border-t border-gray-700 pt-2"><strong class="text-cyber-emerald">Play:</strong> Enforce 2:1 Data Eng to DS ratio. Implement Snorkel / Unstructured.io automated parsing.</p>
+      </div>
+
+      <!-- Bottleneck 2 -->
+      <div class="border-l-4 border-cyber-alert bg-gray-900/40 p-6">
+        <h3 class="text-xl font-bold text-white mb-2">2. GPU vs. Idle Time</h3>
+        <p class="text-xs font-mono text-cyber-alert mb-4">[ Runaway Budgets & Waiting ]</p>
+        <p class="text-sm text-gray-400 mb-4">Teams stall during fine-tuning, leaving engineers idle. Massive GPU cost spikes.</p>
+        <p class="text-sm text-gray-200 border-t border-gray-700 pt-2"><strong class="text-cyber-emerald">Play:</strong> Tune on open-source Llama-3-8B locally first. Auto-spin down VMs post-training.</p>
+      </div>
+
+      <!-- Bottleneck 3 -->
+      <div class="border-l-4 border-cyber-neon bg-gray-900/40 p-6">
+        <h3 class="text-xl font-bold text-white mb-2">3. Scarcity of MLOps</h3>
+        <p class="text-xs font-mono text-cyber-neon mb-4">[ Senior Eng Sprawl ]</p>
+        <p class="text-sm text-gray-400 mb-4">Experienced MLOps Engineers are rare and spread too thin across deployments.</p>
+        <p class="text-sm text-gray-200 border-t border-gray-700 pt-2"><strong class="text-cyber-emerald">Play:</strong> Build Internal AI Starter Kit (Helm, Terraform). Up-skill Jr Devs to execute templates; Sr MLOps govern only.</p>
+      </div>
+
+    </div>
+  </section>
+
+</main>
+
+<footer class="py-12 border-t border-gray-800 text-center font-mono text-xs text-gray-600">
+  SYS_END // PROBABILISTIC MODEL CONVERGED.
+</footer>
+
+<script>
+  // Spotlight Effect for Cards
+  document.querySelectorAll('.spotlight-card').forEach(card => {
+    card.addEventListener('mousemove', e => {
+      const rect = card.getBoundingClientRect();
+      const x = e.clientX - rect.left;
+      const y = e.clientY - rect.top;
+      card.style.setProperty('--mouse-x', `${x}px`);
+      card.style.setProperty('--mouse-y', `${y}px`);
+    });
+  });
+
+  // Scroll Reveal Observer
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        entry.target.classList.add('active');
+      }
+    });
+  }, { threshold: 0.1 });
+
+  document.querySelectorAll('.reveal').forEach(el => observer.observe(el));
+</script>
+</body>
+</html>

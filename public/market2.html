@@ -1,0 +1,456 @@
+<!DOCTYPE html>
+<html lang="en" class="bg-[#050508] text-gray-300 font-sans antialiased overflow-x-hidden">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Institutional Integration: Crypto-Exposed Equities</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@700;900&family=Space+Grotesk:wght@300;500;700&display=swap');
+
+  :root {
+    --neon-blue: #00f0ff;
+    --neon-amber: #ffaa00;
+  }
+
+  body {
+    font-family: 'Space Grotesk', sans-serif;
+  }
+
+  h1, h2, h3, .tradfi-font {
+    font-family: 'Cinzel', serif;
+  }
+
+  /* SVG Noise Overlay */
+  .noise-bg {
+    position: fixed;
+    top: 0; left: 0; width: 100vw; height: 100vh;
+    pointer-events: none;
+    z-index: 50;
+    opacity: 0.04;
+    background: url('data:image/svg+xml;utf8,%3Csvg viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg"%3E%3Cfilter id="noiseFilter"%3E%3CfeTurbulence type="fractalNoise" baseFrequency="0.8" numOctaves="3" stitchTiles="stitch"/%3E%3C/filter%3E%3Crect width="100%25" height="100%25" filter="url(%23noiseFilter)"/%3E%3C/svg%3E');
+  }
+
+  /* Smooth Reveal Animation */
+  .reveal {
+    opacity: 0;
+    transform: translateY(40px);
+    transition: all 1.2s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+  .reveal.active {
+    opacity: 1;
+    transform: translateY(0);
+  }
+
+  /* Textural Masks & Blends */
+  .blend-lum {
+    mix-blend-mode: luminosity;
+    filter: contrast(1.2) brightness(0.8);
+  }
+  .blend-overlay {
+    mix-blend-mode: overlay;
+  }
+  
+  .glitch-line {
+    width: 100%;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, var(--neon-blue), transparent);
+    position: relative;
+    overflow: hidden;
+  }
+  .glitch-line::after {
+    content: '';
+    position: absolute;
+    top: 0; left: -100%; width: 50%; height: 100%;
+    background: var(--neon-amber);
+    animation: lineSweep 4s infinite cubic-bezier(0.8, 0, 0.2, 1);
+  }
+
+  @keyframes lineSweep {
+    0% { left: -50%; }
+    50% { left: 150%; }
+    100% { left: 150%; }
+  }
+
+  .text-glow {
+    text-shadow: 0 0 20px rgba(0, 240, 255, 0.3);
+  }
+
+  /* Custom Scrollbar */
+  ::-webkit-scrollbar {
+    width: 8px;
+  }
+  ::-webkit-scrollbar-track {
+    background: #000;
+  }
+  ::-webkit-scrollbar-thumb {
+    background: #222;
+    border-radius: 4px;
+  }
+  ::-webkit-scrollbar-thumb:hover {
+    background: var(--neon-blue);
+  }
+</style>
+</head>
+<body class="relative w-full">
+
+<!-- Persistent Noise Layer -->
+<div class="noise-bg"></div>
+
+<!-- SVG Filters Definition -->
+<svg class="hidden" width="0" height="0">
+  <defs>
+    <filter id="distort">
+      <feTurbulence type="fractalNoise" baseFrequency="0.01 0.1" numOctaves="1" result="warp" />
+      <feDisplacementMap in="SourceGraphic" in2="warp" scale="15" xChannelSelector="R" yChannelSelector="G" />
+    </filter>
+    <filter id="duotone-blue">
+      <feColorMatrix type="matrix" values="0.1 0 0 0 0  0.2 0 0 0 0  0.5 0 0 0 0  0 0 0 1 0"/>
+    </filter>
+  </defs>
+</svg>
+
+<!-- HERO SECTION -->
+<header class="relative w-full min-h-[90vh] flex flex-col justify-center px-6 md:px-16 lg:px-24 pt-20 pb-12 overflow-hidden">
+  <div class="absolute inset-0 z-0 opacity-30 blend-lum">
+    <img src="./images/mark-11.jpg" alt="Balance Sheet Abstract" class="w-full h-full object-cover object-center" style="filter: url(#distort);" />
+  </div>
+  <div class="absolute inset-0 bg-gradient-to-b from-[#050508]/10 via-[#050508]/80 to-[#050508] z-0"></div>
+  
+  <div class="relative z-10 w-full max-w-7xl mx-auto reveal">
+    <p class="text-[var(--neon-blue)] uppercase tracking-[0.3em] text-xs md:text-sm mb-6 font-bold flex items-center gap-4">
+      <span class="w-12 h-[1px] bg-[var(--neon-blue)]"></span> Research Report 2026
+    </p>
+    <h1 class="text-5xl md:text-7xl lg:text-8xl font-black text-white leading-[0.9] tracking-tight uppercase">
+      The Macroeconomic <br>
+      <span class="text-transparent text-stroke bg-clip-text bg-gradient-to-r from-gray-500 to-gray-200" style="-webkit-text-stroke: 1px rgba(255,255,255,0.2);">& Regulatory Landscape</span>
+    </h1>
+    <h2 class="text-3xl md:text-5xl lg:text-6xl font-light text-gray-400 mt-4">
+      Of Crypto-Exposed Equities
+    </h2>
+    <p class="mt-8 text-xl md:text-3xl tradfi-font italic text-[var(--neon-amber)] text-glow">
+      A New Era of Institutional Integration
+    </p>
+  </div>
+</header>
+
+<!-- EXECUTIVE SUMMARY -->
+<section class="relative z-10 w-full px-6 md:px-16 lg:px-24 py-20 bg-[#08080c]">
+  <div class="max-w-4xl mx-auto reveal">
+    <h3 class="text-2xl text-white mb-8 border-l-4 border-[var(--neon-blue)] pl-6 uppercase tracking-wider">Executive Summary</h3>
+    <p class="text-lg md:text-xl leading-relaxed text-gray-300 font-light mb-8">
+      In the period spanning 2024 through mid-2026, the market for crypto-exposed equities underwent a profound structural transformation. These assets shifted from speculative, regulatory-arbitrage vehicles to highly institutionalized corporate structures. This evolution has been catalyzed by three concurrent drivers:
+    </p>
+    <ul class="space-y-6 text-base md:text-lg text-gray-400">
+      <li class="flex gap-4">
+        <span class="text-[var(--neon-amber)] font-mono opacity-80">[01]</span>
+        <div><strong class="text-white">Accounting Modernization:</strong> The transition of US GAAP to fair value measurement under FASB ASU 2023-08 has brought corporate balance sheets in line with economic reality, ending the punitive "cost-less-impairment" era.</div>
+      </li>
+      <li class="flex gap-4">
+        <span class="text-[var(--neon-amber)] font-mono opacity-80">[02]</span>
+        <div><strong class="text-white">U.S. Regulatory Rationalization:</strong> The rescission of SAB 121 and a historic cooperative shift by the Securities and Exchange Commission (SEC) under Chair Paul Atkins have dismantled the sector's long-standing regulatory risk premium.</div>
+      </li>
+      <li class="flex gap-4">
+        <span class="text-[var(--neon-amber)] font-mono opacity-80">[03]</span>
+        <div><strong class="text-white">Macroeconomic Sensitivity:</strong> Public crypto equities have solidified their behavior as "high-beta liquidity sponges," showing outsized sensitivity to Global M2 expansion and Federal Reserve interest rate cycles relative to spot digital assets.</div>
+      </li>
+    </ul>
+  </div>
+</section>
+
+<div class="glitch-line"></div>
+
+<!-- 1. ACCOUNTING STANDARDS -->
+<section class="relative z-10 w-full py-24 overflow-hidden">
+  <div class="absolute top-0 right-0 w-1/2 h-full opacity-20 blend-lum">
+    <img src="./images/mark-12.jpg" alt="Chart Eruption" class="w-full h-full object-cover object-left" style="clip-path: polygon(20% 0, 100% 0, 100% 100%, 0 100%);" />
+  </div>
+  <div class="absolute inset-0 bg-gradient-to-r from-[#050508] via-[#050508]/90 to-transparent z-0"></div>
+
+  <div class="relative z-10 px-6 md:px-16 lg:px-24 max-w-7xl mx-auto">
+    <div class="max-w-3xl reveal">
+      <h2 class="text-4xl md:text-6xl text-white font-black uppercase mb-6">
+        <span class="text-[var(--neon-blue)] block text-sm font-mono mb-2 tracking-widest">Section 1</span>
+        Accounting Standards Revolution
+      </h2>
+      <h3 class="text-xl md:text-2xl text-gray-400 tradfi-font mb-10">FASB ASU 2023-08 vs. IFRS</h3>
+      
+      <p class="mb-6 text-gray-300 leading-relaxed">
+        For years, corporate treasury adoption of digital assets was severely stymied by the legacy "cost-less-impairment" accounting model (ASC 350 / IAS 38). Under this asymmetric framework, digital assets were written down to their lowest fair value during a reporting period, with subsequent price recoveries unrecorded until a physical sale occurred. This distorted balance sheets, depressed GAAP book values, and introduced artificial earnings drag.
+      </p>
+
+      <div class="my-12 p-8 border border-gray-800 bg-[#0a0a0f]/80 backdrop-blur-sm relative overflow-hidden">
+        <div class="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-[var(--neon-blue)] to-transparent"></div>
+        <h4 class="text-2xl text-white mb-4">FASB ASU 2023-08 (ASC 350-60)</h4>
+        <p class="text-gray-400 text-sm md:text-base">
+          The introduction of FASB ASU 2023-08 (effective for fiscal years starting after December 15, 2024) fundamentally altered this landscape. The new standard mandates that in-scope, fungible, cryptographically secured digital assets must be measured at fair value each reporting period, with changes recognized directly in Net Income. This provides investors with a transparent, real-time view of corporate asset valuations.
+        </p>
+      </div>
+
+      <h4 class="text-xl text-white mt-10 mb-4 tradfi-font">The IFRS Divide</h4>
+      <p class="mb-12 text-gray-300 leading-relaxed">
+        In contrast to the FASB's direct fair value mandate, the International Financial Reporting Standards (IFRS) continue to rely on the June 2019 IFRIC decision. This model slots holdings into either IAS 38 (Intangible Assets) or IAS 2 (Inventories). Under IAS 38, companies must choose between the Cost Model and the Revaluation Model. If the Revaluation Model is selected, fair value gains are recognized in Other Comprehensive Income (OCI) rather than Net Income, presenting a persistent global divergence in earnings presentation.
+      </p>
+    </div>
+
+    <!-- Case Studies Grid -->
+    <div class="mt-16 reveal">
+      <h4 class="text-2xl text-white mb-8 border-b border-gray-800 pb-4 inline-block">Balance Sheet Case Studies</h4>
+      <p class="text-gray-400 mb-8">The transition to fair value has yielded massive adjustments and highlights a new era of balance sheet volatility:</p>
+      
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <!-- Card 1 -->
+        <div class="bg-[#111116] p-6 border-t border-[var(--neon-amber)] hover:bg-[#1a1a24] transition-colors">
+          <h5 class="text-[var(--neon-amber)] font-bold mb-3 uppercase tracking-wider">MicroStrategy (MSTR)</h5>
+          <p class="text-sm text-gray-400">
+            Upon adopting ASU 2023-08 on January 1, 2025, the company recorded a staggering $12.745 billion cumulative-effect increase to its opening retained earnings. However, holding 818,334 BTC as of mid-2026 has introduced extreme quarterly GAAP volatility. For instance, MSTR experienced a $17 billion paper decline in Q4 2025, followed by a $12.5 billion paper decline in Q1 2026, sparking shareholder litigation regarding the adequacy of GAAP volatility disclosures.
+          </p>
+        </div>
+        <!-- Card 2 -->
+        <div class="bg-[#111116] p-6 border-t border-[var(--neon-amber)] hover:bg-[#1a1a24] transition-colors">
+          <h5 class="text-[var(--neon-amber)] font-bold mb-3 uppercase tracking-wider">Coinbase (COIN)</h5>
+          <p class="text-sm text-gray-400">
+            Early adopting on January 1, 2024, Coinbase recorded a $561.5 million net increase to opening retained earnings. To preserve operational clarity amid these swings, Coinbase modified its non-GAAP Adjusted EBITDA metrics to strip out unrealized gains and losses on investment-held crypto assets.
+          </p>
+        </div>
+        <!-- Card 3 -->
+        <div class="bg-[#111116] p-6 border-t border-[var(--neon-amber)] hover:bg-[#1a1a24] transition-colors">
+          <h5 class="text-[var(--neon-amber)] font-bold mb-3 uppercase tracking-wider">Bitcoin Miners (MARA & Riot)</h5>
+          <p class="text-sm text-gray-400">
+            Early adopting on January 1, 2023, miners now recognize self-mined assets at their block-reward timestamp value under ASC 606 (Revenue). Subsequent price changes are recorded at fair value. This shift has led institutional investors to discount GAAP EPS volatility, focusing instead on operational key performance indicators (KPIs) like hash rate and the cash cost of mining.
+          </p>
+        </div>
+      </div>
+    </div>
+
+    <div class="mt-16 max-w-3xl reveal">
+      <h4 class="text-xl text-white mb-4 tradfi-font text-[var(--neon-blue)]">Resolution of the CAMT Threat</h4>
+      <p class="text-gray-300 leading-relaxed">
+        The transition to fair value accounting threatened to create a devastating tax mismatch under the Corporate Alternative Minimum Tax (CAMT), which imposes a 15% levy on the book income of corporations earning over $1 billion. Without regulatory intervention, volatile, unrealized paper gains under ASU 2023-08 could have triggered massive, illiquid cash tax liabilities. This threat was successfully resolved on September 30, 2025, when the IRS released Notice 2025-49. This notice introduced the Fair Value Item (FVI) Exclusion Option, allowing eligible corporations to exclude unrealized crypto gains from their CAMT book income base.
+      </p>
+    </div>
+  </div>
+</section>
+
+<!-- 2. REGULATORY WATERSHED -->
+<section class="relative w-full min-h-[80vh] flex items-center">
+  <div class="absolute inset-0 z-0">
+    <img src="./images/mark-13.jpg" alt="Vault" class="w-full h-full object-cover blend-lum opacity-40" />
+    <div class="absolute inset-0 bg-[#050508]/70 backdrop-blur-[2px]"></div>
+  </div>
+  
+  <div class="relative z-10 w-full px-6 md:px-16 lg:px-24 py-24 reveal">
+    <div class="max-w-4xl mx-auto bg-[#000000]/80 p-8 md:p-12 border border-gray-800 backdrop-blur-md">
+      <h2 class="text-4xl md:text-5xl text-white font-black uppercase mb-2">
+        <span class="text-[var(--neon-blue)] block text-sm font-mono mb-2 tracking-widest">Section 2</span>
+        U.S. Regulatory Watershed
+      </h2>
+      <h3 class="text-xl text-gray-400 tradfi-font mb-8">SEC Pivot and Spot ETF Proliferation</h3>
+      
+      <p class="text-xl font-light text-white mb-10">
+        The regulatory posture of the United States shifted from aggressive enforcement to institutional facilitation between 2024 and 2025, unlocking significant capital pools.
+      </p>
+
+      <div class="space-y-10">
+        <div>
+          <h4 class="text-[var(--neon-blue)] text-lg uppercase tracking-wide mb-3">The Rescission of SAB 121</h4>
+          <p class="text-gray-300 text-sm md:text-base leading-relaxed">
+            Staff Accounting Bulletin No. 121 (SAB 121) was a highly controversial SEC policy that required public entities safeguarding crypto assets for clients to record both a liability and a corresponding asset at fair value on their balance sheets. For banks, this ballooned balance sheets and triggered punitive capital-adequacy requirements, effectively shut out traditional financial institutions from digital asset custody. Following a transition of the SEC leadership in early 2025, the SEC officially rescinded SAB 121 via SAB 122. This enabled massive custody banks like BNY Mellon and JPMorgan to offer digital asset custody without capital penalties, bridging traditional banking and digital assets.
+          </p>
+        </div>
+        <div>
+          <h4 class="text-[var(--neon-blue)] text-lg uppercase tracking-wide mb-3">Institutionalization via Spot ETFs</h4>
+          <p class="text-gray-300 text-sm md:text-base leading-relaxed">
+            The launch of Spot Bitcoin ETFs in January 2024, followed by Spot Ethereum ETFs in July 2024, fundamentally altered the market structure. The introduction of options trading on these ETFs further deepened liquidity. This product suite normalized digital assets as an institutional asset class, driving massive capital inflows and stabilizing the valuations of crypto-exposed equities.
+          </p>
+        </div>
+        <div>
+          <h4 class="text-[var(--neon-blue)] text-lg uppercase tracking-wide mb-3">The SEC Enforcement Pivot</h4>
+          <p class="text-gray-300 text-sm md:text-base leading-relaxed">
+            Under prior leadership, the SEC pursued "regulation by enforcement," targeting major public entities like Coinbase, Binance, and Kraken. However, following the 2025 transition to SEC Chair Paul Atkins, the agency established a specialized Crypto Task Force. The SEC formally acknowledged past misinterpretations of federal securities laws and voluntarily dismissed multiple high-profile civil enforcement cases. This dismantled the long-standing "regulatory risk premium" that had historically discounted the equity multiples of public crypto companies.
+          </p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<div class="glitch-line"></div>
+
+<!-- 3. MACROECONOMIC DRIVERS -->
+<section class="relative w-full py-24 bg-[#050508]">
+  <div class="max-w-7xl mx-auto px-6 md:px-16 lg:px-24">
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-16 items-center reveal">
+      
+      <!-- Text Content -->
+      <div>
+        <h2 class="text-4xl md:text-5xl text-white font-black uppercase mb-2">
+          <span class="text-[var(--neon-blue)] block text-sm font-mono mb-2 tracking-widest">Section 3</span>
+          Macroeconomic Drivers
+        </h2>
+        <h3 class="text-xl text-gray-400 tradfi-font mb-8">Global Liquidity and the Capital Flywheel</h3>
+        
+        <p class="text-lg text-gray-300 mb-8 border-l-2 border-[var(--neon-amber)] pl-4 italic">
+          Crypto-exposed equities do not merely track underlying spot asset prices; they act as high-beta liquidity sponges with amplified sensitivity to Global M2 money supply and central bank rate cycles.
+        </p>
+
+        <div class="space-y-8">
+          <div>
+            <h4 class="text-white text-xl tradfi-font mb-2">Global M2 Correlation</h4>
+            <p class="text-gray-400 text-sm leading-relaxed">
+              Historically, the rolling 4-year correlation between Bitcoin and Global M2 has sat between 0.4 and 0.6. As global central banks expanded liquidity—pushing Global M2 to approximately $101.9 Trillion by mid-2026—excess capital flowed aggressively into risk assets. Due to corporate and financial leverage, public crypto equities captured these inflows with high beta relative to spot BTC.
+            </p>
+          </div>
+          <div>
+            <h4 class="text-white text-xl tradfi-font mb-2">The Capital Markets Flywheel</h4>
+            <p class="text-gray-400 text-sm leading-relaxed">
+              Under monetary easing, a powerful reflexivity loop emerges—most prominently demonstrated by MicroStrategy. As spot prices rise, the company's equity trades at a substantial premium to its Net Asset Value (NAV). The company leverages this premium by issuing stock via At-The-Market (ATM) programs to purchase more Bitcoin, increasing its book value per share and driving the premium higher. Conversely, this flywheel presents severe downside risks. Under a hawkish Fed regime, high real yields starve the ecosystem of liquidity, compressing equity multiples into steep discounts and halting the flywheel.
+            </p>
+          </div>
+          <div>
+            <h4 class="text-white text-xl tradfi-font mb-2">Operational Leverage of Miners and Exchanges</h4>
+            <p class="text-gray-400 text-sm leading-relaxed">
+              Unlike corporate treasury plays, exchanges and miners exhibit intense operational leverage. For miners, fixed costs (energy, hardware, facilities) mean that any minor shift in the underlying spot price of Bitcoin translates into exponential changes in operating income. Similarly, exchanges rely on trading volume, which is highly elastic and scales aggressively with macro-driven volatility.
+            </p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Image/Abstract Visual -->
+      <div class="relative h-[600px] w-full rounded-full overflow-hidden border border-[#222] reveal" style="transition-delay: 200ms;">
+        <div class="absolute inset-0 bg-gradient-to-t from-[#050508] to-transparent z-10"></div>
+        <div class="absolute inset-0 mix-blend-screen opacity-60">
+          <img src="./images/mark-14.jpg" alt="Liquidity Flow" class="w-full h-full object-cover transform scale-110" style="filter: saturate(1.5) hue-rotate(-15deg);" />
+        </div>
+        <!-- Pulsing overlay to simulate flywheel -->
+        <div class="absolute inset-0 bg-[var(--neon-amber)] mix-blend-overlay opacity-20 animate-pulse"></div>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<!-- 4. INTERNATIONAL LANDSCAPES -->
+<section class="relative w-full py-24 bg-[#0a0a0f] overflow-hidden">
+  <!-- Background Image -->
+  <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-full max-w-[100vw] h-[100vh] opacity-10 blend-lum pointer-events-none">
+     <img src="./images/mark-15.jpg" alt="Global Nodes" class="w-full h-full object-contain" />
+  </div>
+
+  <div class="relative z-10 max-w-7xl mx-auto px-6 md:px-16 lg:px-24 reveal">
+    <h2 class="text-4xl md:text-5xl text-white font-black uppercase mb-2 text-center">
+      <span class="text-[var(--neon-blue)] block text-sm font-mono mb-2 tracking-widest">Section 4</span>
+      International Regulatory Landscapes
+    </h2>
+    <h3 class="text-xl text-gray-400 tradfi-font mb-16 text-center">Unified Moats vs. Arbitrage Risks</h3>
+
+    <p class="text-center max-w-3xl mx-auto text-gray-300 mb-12">
+      The global regulatory landscape has rapidly matured, transitioning from fragmented, permissive regimes to structured frameworks that penalize regulatory arbitrage.
+    </p>
+
+    <!-- Brutalist Data Table/Grid -->
+    <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-4 mb-16">
+      <!-- Header Row (Hidden on mobile, visual cue) -->
+      <div class="hidden xl:contents text-xs font-mono text-[var(--neon-blue)] uppercase tracking-wider">
+        <div class="pb-2 border-b border-gray-800">Jurisdiction</div>
+        <div class="pb-2 border-b border-gray-800">Primary Framework</div>
+        <div class="pb-2 border-b border-gray-800">Timeline</div>
+        <div class="pb-2 border-b border-gray-800">Strategic Mechanics & Moats</div>
+      </div>
+
+      <!-- Row 1 -->
+      <div class="bg-[#111] p-5 border-l-2 border-[var(--neon-blue)] xl:col-span-4 grid grid-cols-1 xl:grid-cols-4 gap-4 items-start">
+        <div class="font-bold text-white"><span class="xl:hidden text-[var(--neon-blue)] text-xs block mb-1">Jurisdiction</span>European Union (EU)</div>
+        <div class="text-gray-300"><span class="xl:hidden text-[var(--neon-blue)] text-xs block mb-1">Framework</span>Markets in Crypto-Assets (MiCA)</div>
+        <div class="text-gray-400 text-sm"><span class="xl:hidden text-[var(--neon-blue)] text-xs block mb-1">Timeline</span>Transition ends July 1, 2026</div>
+        <div class="text-sm text-gray-400"><span class="xl:hidden text-[var(--neon-blue)] text-xs block mb-1">Mechanics</span>Single passporting model across 27 member states; creates a high compliance moat that favors well-capitalized public firms.</div>
+      </div>
+
+      <!-- Row 2 -->
+      <div class="bg-[#111] p-5 border-l-2 border-[var(--neon-blue)] xl:col-span-4 grid grid-cols-1 xl:grid-cols-4 gap-4 items-start">
+        <div class="font-bold text-white"><span class="xl:hidden text-[var(--neon-blue)] text-xs block mb-1">Jurisdiction</span>United Kingdom (UK)</div>
+        <div class="text-gray-300"><span class="xl:hidden text-[var(--neon-blue)] text-xs block mb-1">Framework</span>Financial Services and Markets Act (FSMA 2026)</div>
+        <div class="text-gray-400 text-sm"><span class="xl:hidden text-[var(--neon-blue)] text-xs block mb-1">Timeline</span>Full implementation Oct 2027</div>
+        <div class="text-sm text-gray-400"><span class="xl:hidden text-[var(--neon-blue)] text-xs block mb-1">Mechanics</span>Integrates digital assets directly into the traditional Regulated Activities Order to enforce TradFi-equivalent standards.</div>
+      </div>
+
+      <!-- Row 3 -->
+      <div class="bg-[#111] p-5 border-l-2 border-[var(--neon-blue)] xl:col-span-4 grid grid-cols-1 xl:grid-cols-4 gap-4 items-start">
+        <div class="font-bold text-white"><span class="xl:hidden text-[var(--neon-blue)] text-xs block mb-1">Jurisdiction</span>Japan</div>
+        <div class="text-gray-300"><span class="xl:hidden text-[var(--neon-blue)] text-xs block mb-1">Framework</span>Financial Instruments and Exchange Act (FIEA)</div>
+        <div class="text-gray-400 text-sm"><span class="xl:hidden text-[var(--neon-blue)] text-xs block mb-1">Timeline</span>Active Integration</div>
+        <div class="text-sm text-gray-400"><span class="xl:hidden text-[var(--neon-blue)] text-xs block mb-1">Mechanics</span>Shifts digital assets directly under established securities law, mandating rigorous capital and operational resilience.</div>
+      </div>
+
+      <!-- Row 4 -->
+      <div class="bg-[#111] p-5 border-l-2 border-[var(--neon-blue)] xl:col-span-4 grid grid-cols-1 xl:grid-cols-4 gap-4 items-start">
+        <div class="font-bold text-white"><span class="xl:hidden text-[var(--neon-blue)] text-xs block mb-1">Jurisdiction</span>Hong Kong</div>
+        <div class="text-gray-300"><span class="xl:hidden text-[var(--neon-blue)] text-xs block mb-1">Framework</span>SFC Licensing</div>
+        <div class="text-gray-400 text-sm"><span class="xl:hidden text-[var(--neon-blue)] text-xs block mb-1">Timeline</span>Finalized May 2026</div>
+        <div class="text-sm text-gray-400"><span class="xl:hidden text-[var(--neon-blue)] text-xs block mb-1">Mechanics</span>Mandatory licensing for virtual asset advisors and portfolio managers; eradicates shell-company loopholes.</div>
+      </div>
+
+      <!-- Row 5 -->
+      <div class="bg-[#111] p-5 border-l-2 border-[var(--neon-blue)] xl:col-span-4 grid grid-cols-1 xl:grid-cols-4 gap-4 items-start">
+        <div class="font-bold text-white"><span class="xl:hidden text-[var(--neon-blue)] text-xs block mb-1">Jurisdiction</span>Singapore</div>
+        <div class="text-gray-300"><span class="xl:hidden text-[var(--neon-blue)] text-xs block mb-1">Framework</span>FSMA Omnibus Bill</div>
+        <div class="text-gray-400 text-sm"><span class="xl:hidden text-[var(--neon-blue)] text-xs block mb-1">Timeline</span>Enacted 2025</div>
+        <div class="text-sm text-gray-400"><span class="xl:hidden text-[var(--neon-blue)] text-xs block mb-1">Mechanics</span>Eliminates extraterritorial loopholes, ensuring strict capital thresholds and operational oversight.</div>
+      </div>
+    </div>
+
+    <div class="max-w-4xl mx-auto bg-black p-8 border border-gray-800 reveal">
+      <h4 class="text-[var(--neon-amber)] text-xl tradfi-font mb-4">The Death of Regulatory Arbitrage</h4>
+      <p class="text-gray-300 leading-relaxed">
+        Public digital asset corporations have abandoned historical attempts at regulatory arbitrage—such as establishing shell companies in permissive jurisdictions. Historically, these strategies led to institutional valuation discounts, severe banking de-risking, and expensive operational fragmentation. Today, leading firms adopt a "hub-and-spoke" model, headquartering major operations in highly regulated jurisdictions (like the EU under MiCA or the US under the new SEC framework) to secure tier-1 banking relationships and capture institutional capital.
+      </p>
+    </div>
+  </div>
+</section>
+
+<div class="glitch-line"></div>
+
+<!-- CONCLUSION -->
+<section class="relative w-full py-32 bg-[#050508] flex flex-col items-center justify-center text-center px-6 md:px-16">
+  <div class="max-w-3xl mx-auto reveal">
+    <h2 class="text-3xl md:text-5xl text-white tradfi-font mb-10">
+      Conclusion
+    </h2>
+    <p class="text-lg md:text-xl text-gray-300 leading-relaxed font-light mb-8">
+      The macroeconomic and regulatory environment for crypto-exposed equities has entered a phase of mature integration. The combination of FASB's fair value mandate (ASU 2023-08), the elimination of SAB 121, and the emergence of spot ETFs has successfully bridged traditional capital markets with digital assets. 
+    </p>
+    <p class="text-lg md:text-xl text-gray-300 leading-relaxed font-light">
+      While these equities remain highly sensitive to global liquidity cycles and carry inherent operational volatility, the removal of the regulatory risk premium and the creation of standardized tax and accounting rules have paved the way for sustained institutional adoption.
+    </p>
+  </div>
+
+  <div class="mt-24 max-w-2xl text-center reveal text-xs text-gray-600 font-mono uppercase tracking-widest border-t border-gray-800 pt-8">
+    This report synthesized research outputs from worker-Regu-1, worker-Regu-2, worker-Regu-3, and worker-Regu-4. No low-confidence flags were raised in the underlying source material.
+  </div>
+</section>
+
+<script>
+  // Intersection Observer for scroll reveals
+  document.addEventListener('DOMContentLoaded', () => {
+    const observerOptions = {
+      root: null,
+      rootMargin: '0px',
+      threshold: 0.15
+    };
+
+    const observer = new IntersectionObserver((entries, observer) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          entry.target.classList.add('active');
+          observer.unobserve(entry.target);
+        }
+      });
+    }, observerOptions);
+
+    document.querySelectorAll('.reveal').forEach(element => {
+      observer.observe(element);
+    });
+  });
+</script>
+</body>
+</html>

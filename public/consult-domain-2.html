@@ -1,0 +1,766 @@
+<!DOCTYPE html>
+<html lang='en' class='scroll-smooth'>
+<head>
+<meta charset='UTF-8'>
+<meta name='viewport' content='width=device-width, initial-scale=1.0'>
+<title>Enterprise AI Consulting Market Report 2026</title>
+<script src='https://cdn.tailwindcss.com'></script>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;800&family=Space+Mono:wght@400;700&display=swap');
+  
+  body {
+    font-family: 'Inter', sans-serif;
+    background-color: #020617;
+    color: #e2e8f0;
+    overflow-x: hidden;
+    cursor: none;
+  }
+  
+  h1, h2, h3, h4, h5, .font-mono {
+    font-family: 'Space Mono', monospace;
+  }
+
+  /* Custom Cursor */
+  #cursor {
+    position: fixed;
+    top: 0; left: 0;
+    width: 24px; height: 24px;
+    border: 1px solid rgba(34, 211, 238, 0.8);
+    border-radius: 50%;
+    pointer-events: none;
+    z-index: 9999;
+    transform: translate(-50%, -50%);
+    transition: width 0.2s ease, height 0.2s ease, background-color 0.2s ease;
+    mix-blend-mode: difference;
+  }
+  #cursor::after {
+    content: '';
+    position: absolute;
+    top: 50%; left: 50%;
+    width: 4px; height: 4px;
+    background: #22d3ee;
+    border-radius: 50%;
+    transform: translate(-50%, -50%);
+  }
+  .hover-target:hover ~ #cursor {
+    width: 48px; height: 48px;
+    background-color: rgba(34, 211, 238, 0.1);
+  }
+
+  /* UI Components */
+  .ui-box {
+    background: rgba(15, 23, 42, 0.6);
+    backdrop-filter: blur(16px);
+    border: 1px solid rgba(51, 65, 85, 0.8);
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5);
+    position: relative;
+    transition: border-color 0.5s ease;
+  }
+  .ui-box:hover {
+    border-color: rgba(34, 211, 238, 0.5);
+  }
+  .tech-corners::before, .tech-corners::after {
+    content: '';
+    position: absolute;
+    width: 16px; height: 16px;
+    border: 2px solid transparent;
+    transition: all 0.3s ease;
+    z-index: 10;
+  }
+  .tech-corners::before {
+    top: -1px; left: -1px;
+    border-top-color: #22d3ee; border-left-color: #22d3ee;
+  }
+  .tech-corners::after {
+    bottom: -1px; right: -1px;
+    border-bottom-color: #22d3ee; border-right-color: #22d3ee;
+  }
+
+  /* Scroll Reveal */
+  .reveal-on-scroll {
+    opacity: 0;
+    transform: translateY(30px) scale(0.98);
+    transition: opacity 1s cubic-bezier(0.2, 0.8, 0.2, 1), transform 1s cubic-bezier(0.2, 0.8, 0.2, 1);
+  }
+  .reveal-on-scroll.is-visible {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+
+  /* Glitch Text */
+  .glitch-text {
+    position: relative;
+  }
+  .glitch-text::before, .glitch-text::after {
+    content: attr(data-text);
+    position: absolute;
+    top: 0; left: 0;
+    width: 100%; height: 100%;
+    opacity: 0.8;
+  }
+  .glitch-text::before {
+    left: 2px;
+    text-shadow: -1px 0 red;
+    clip: rect(24px, 550px, 90px, 0);
+    animation: glitch-anim-2 3s infinite linear alternate-reverse;
+  }
+  .glitch-text::after {
+    left: -2px;
+    text-shadow: -1px 0 blue;
+    clip: rect(85px, 550px, 140px, 0);
+    animation: glitch-anim 2.5s infinite linear alternate-reverse;
+  }
+  @keyframes glitch-anim {
+    0% { clip: rect(10px, 9999px, 44px, 0); }
+    20% { clip: rect(80px, 9999px, 22px, 0); }
+    40% { clip: rect(33px, 9999px, 99px, 0); }
+    60% { clip: rect(55px, 9999px, 11px, 0); }
+    80% { clip: rect(90px, 9999px, 88px, 0); }
+    100% { clip: rect(20px, 9999px, 40px, 0); }
+  }
+  @keyframes glitch-anim-2 {
+    0% { clip: rect(65px, 9999px, 100px, 0); }
+    20% { clip: rect(10px, 9999px, 50px, 0); }
+    40% { clip: rect(80px, 9999px, 20px, 0); }
+    60% { clip: rect(30px, 9999px, 90px, 0); }
+    80% { clip: rect(50px, 9999px, 30px, 0); }
+    100% { clip: rect(90px, 9999px, 10px, 0); }
+  }
+
+  /* Grid Background */
+  .bg-grid-pattern {
+    background-size: 50px 50px;
+    background-image: 
+      linear-gradient(to right, rgba(255, 255, 255, 0.03) 1px, transparent 1px),
+      linear-gradient(to bottom, rgba(255, 255, 255, 0.03) 1px, transparent 1px);
+  }
+  
+  /* Custom Scrollbar */
+  ::-webkit-scrollbar {
+    width: 8px;
+  }
+  ::-webkit-scrollbar-track {
+    background: #020617;
+  }
+  ::-webkit-scrollbar-thumb {
+    background: #334155;
+    border-radius: 4px;
+  }
+  ::-webkit-scrollbar-thumb:hover {
+    background: #22d3ee;
+  }
+</style>
+</head>
+<body class='antialiased selection:bg-cyan-500/50 selection:text-white'>
+
+  <!-- Global Grain/Noise Overlay -->
+  <svg class='fixed inset-0 z-[100] pointer-events-none w-full h-full opacity-20 mix-blend-overlay'>
+    <filter id='noiseFilter'>
+      <feTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='3' stitchTiles='stitch'/>
+      <feColorMatrix type='matrix' values='1 0 0 0 0, 0 1 0 0 0, 0 0 1 0 0, 0 0 0 0.5 0' />
+    </filter>
+    <rect width='100%' height='100%' filter='url(#noiseFilter)'/>
+  </svg>
+
+  <!-- Intro & Executive Summary -->
+  <section class='relative min-h-screen flex flex-col justify-center py-24 overflow-hidden border-b border-slate-800'>
+    <div class='absolute inset-0 z-0'>
+      <img src='./images/con-domain-2-1.jpg' class='w-full h-full object-cover opacity-20 mix-blend-luminosity scale-105 transition-transform duration-[20s] hover:scale-100' alt='AI Hologram Cover' />
+      <div class='absolute inset-0 bg-gradient-to-b from-[#020617]/40 via-[#020617]/80 to-[#020617]'></div>
+    </div>
+    
+    <div class='relative z-10 max-w-7xl mx-auto px-6 w-full reveal-on-scroll'>
+      <div class='mb-8 inline-block px-4 py-1 border border-cyan-500/50 rounded-full text-cyan-400 text-xs font-mono uppercase tracking-widest bg-cyan-950/30 backdrop-blur-sm'>Domain Report: Client Demand and Applied Use Cases</div>
+      <h1 class='text-5xl md:text-7xl lg:text-8xl font-black tracking-tighter text-transparent bg-clip-text bg-gradient-to-br from-white via-slate-300 to-cyan-600 mb-8 uppercase leading-none' style='line-height: 1.1;'>
+        Enterprise AI<br><span class='text-cyan-400 glitch-text hover-target' data-text='Consulting'>Consulting</span> Market
+      </h1>
+      <div class='max-w-4xl border-l-4 border-cyan-500 pl-6 mb-16'>
+        <p class='text-xl md:text-2xl text-slate-400 font-light leading-relaxed'>
+          <strong class='text-white'>Goal:</strong> Research the primary industries purchasing AI consulting services today, detailing the most highly requested use cases, technological implementations, and the core business pain points clients are actively trying to solve.
+        </p>
+      </div>
+
+      <div class='ui-box tech-corners p-8 md:p-12 rounded-xl mt-12 bg-slate-900/80'>
+        <h2 class='text-3xl text-white font-bold mb-6 border-b border-slate-700 pb-4'>Enterprise AI Consulting Market Report (2026): Key Industries, High-Demand Use Cases, and Technological Architectures</h2>
+        <h3 class='text-xl text-cyan-400 font-mono mb-6 uppercase tracking-wider flex items-center gap-3'>
+          <span class='w-4 h-4 bg-cyan-400 block rounded-sm animate-pulse'></span> Executive Summary
+        </h3>
+        <div class='grid grid-cols-1 md:grid-cols-2 gap-8 text-slate-300 leading-relaxed'>
+          <div class='space-y-4'>
+            <p>The enterprise artificial intelligence (AI) consulting landscape in 2026 has transitioned from exploratory proof-of-concepts (PoCs) to high-yield, operationalized deployments. As organizations grapple with complex regulatory environments, skyrocketing data center power demands, and severe labor shortages, they are turning to specialized AI consultancies to design, secure, and integrate production-grade AI architectures.</p>
+            <p>The economic returns are stark. Across sectors like Healthcare and Life Sciences, 79% of organizations have integrated AI, achieving full return on investment (ROI) within 14 months and netting USD 3.20 for every USD 1.00 invested. In the Financial Services Industry (FSI), insurance-focused AI consulting alone is projected to grow at a compound annual growth rate (CAGR) of 35.80% through 2031, driven by a heavy industry shift toward partner-led implementations. Meanwhile, industrial and energy sectors are driving multi-billion dollar markets ($17.3 billion in energy consulting alone) to manage grid instability and physical labor gaps.</p>
+          </div>
+          <div class='space-y-4'>
+            <p>A critical horizontal shift is occurring across all industries: enterprise friction has moved from basic "model capability" to "operationalized governance." Organizations are no longer asking if a model can perform a task, but how it can be continuously governed, audited for bias and compliance (under strict guidelines like the EU AI Act), protected against intellectual property leakage, and optimized for cost efficiency (AI FinOps). Architecturally, this manifests as a transition toward stateful, multi-agent workflows with human-in-the-loop (HITL) safeguards, multi-layered guardrail control planes, and physical-digital data convergence.</p>
+            <p class='bg-cyan-950/30 p-4 border-l-2 border-cyan-500 text-cyan-100 text-sm font-mono mt-4'>All source worker research reports utilized in this synthesis exhibited high-confidence findings, with zero low-confidence results flagged. The synthesized insights represent the bleeding edge of enterprise AI consulting engagements today.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Section 1: FSI -->
+  <section class='relative py-24 bg-grid-pattern border-b border-slate-800'>
+    <!-- Glowing Orbs -->
+    <div class='absolute top-1/4 left-1/4 w-[500px] h-[500px] bg-blue-600/10 rounded-full blur-[120px] pointer-events-none'></div>
+    
+    <div class='relative z-10 max-w-7xl mx-auto px-6'>
+      <h2 class='text-4xl md:text-5xl font-bold text-white mb-16 reveal-on-scroll flex items-center gap-6'>
+        <span class='text-6xl text-slate-800 font-black'>01</span> 
+        Financial Services Industry (FSI)
+      </h2>
+
+      <div class='grid grid-cols-1 lg:grid-cols-12 gap-8'>
+        <!-- Pain Points -->
+        <div class='lg:col-span-5 space-y-6 reveal-on-scroll'>
+          <h3 class='text-xl text-rose-400 font-mono uppercase tracking-wider mb-6'>Core Business Pain Points</h3>
+          <p class='text-slate-400 mb-4'>The financial services sector is highly conservative, heavily regulated, and burdened by legacy architectures. Consultants are actively addressing four key pain points:</p>
+          <ul class='space-y-4'>
+            <li class='ui-box p-4 rounded-lg'><strong class='text-white block mb-1'>Manual Underwriting Friction:</strong> <span class='text-slate-400 text-sm'>Loan and insurance underwriting remains plagued by manual document processing, resulting in prolonged turnaround times, high operational overhead, and inconsistent risk profiling.</span></li>
+            <li class='ui-box p-4 rounded-lg'><strong class='text-white block mb-1'>Skyrocketing Compliance Costs:</strong> <span class='text-slate-400 text-sm'>Financial institutions are facing unprecedented regulatory pressure. Stricter global rules—particularly the EU AI Act, AML (Anti-Money Laundering) mandates, and KYC (Know Your Customer) guidelines—have driven compliance costs to unsustainable levels.</span></li>
+            <li class='ui-box p-4 rounded-lg'><strong class='text-white block mb-1'>High-Velocity, Sophisticated Fraud:</strong> <span class='text-slate-400 text-sm'>Traditional rule-based fraud detection engines are failing to catch modern, high-velocity fraud vectors. Dynamic, multi-channel fraud schemes require split-second detection capabilities.</span></li>
+            <li class='ui-box p-4 rounded-lg'><strong class='text-white block mb-1'>Legacy Technical Debt & Fragmentation:</strong> <span class='text-slate-400 text-sm'>Decades-old core banking and insurance systems isolate critical data in silos, preventing real-time access and making modern API-based AI integration highly complex.</span></li>
+          </ul>
+        </div>
+
+        <!-- Use Cases -->
+        <div class='lg:col-span-7 lg:mt-24 space-y-6 reveal-on-scroll delay-200'>
+          <h3 class='text-xl text-cyan-400 font-mono uppercase tracking-wider mb-6'>High-Demand Use Cases</h3>
+          <div class='grid grid-cols-1 md:grid-cols-2 gap-4'>
+            <div class='ui-box tech-corners border-t-cyan-500/50 p-6'>
+              <strong class='text-cyan-300 block mb-2'>Automated Claims Processing (Straight-Through Processing - STP):</strong>
+              <p class='text-slate-400 text-sm'>In insurance, consultants are deploying end-to-end agentic workflows that ingest claim documentation, extract key parameters, cross-reference policies, and approve low-risk claims in minutes without human intervention.</p>
+            </div>
+            <div class='ui-box tech-corners border-t-cyan-500/50 p-6'>
+              <strong class='text-cyan-300 block mb-2'>Wealth Management Virtual Assistants:</strong>
+              <p class='text-slate-400 text-sm'>Deploying advanced conversational agents (modeled after platforms like Cora or Erica) that provide personalized advisory, portfolio summaries, and dynamic financial planning by securely accessing client profiles and market feeds.</p>
+            </div>
+            <div class='ui-box tech-corners border-t-cyan-500/50 p-6'>
+              <strong class='text-cyan-300 block mb-2'>Hyper-Personalized Credit and Risk Assessment:</strong>
+              <p class='text-slate-400 text-sm'>Real-time calculation of creditworthiness utilizing alternative data streams, enabling credit access for thin-file borrowers while protecting the institution's risk envelope.</p>
+            </div>
+            <div class='ui-box tech-corners border-t-cyan-500/50 p-6'>
+              <strong class='text-cyan-300 block mb-2'>Algorithmic Trading & Portfolio Management:</strong>
+              <p class='text-slate-400 text-sm'>Real-time data synthesis, sentiment analysis on global feeds, and automated asset allocation adjustments to capture micro-alpha in highly volatile markets.</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Architecture -->
+        <div class='lg:col-span-12 mt-12 reveal-on-scroll'>
+          <div class='ui-box tech-corners p-8 bg-slate-950/90'>
+             <h3 class='text-xl text-emerald-400 font-mono uppercase tracking-wider mb-6'>Technological Implementation & Architecture</h3>
+             <div class='bg-black border border-slate-800 p-6 rounded-lg overflow-x-auto shadow-inner mb-8 group'>
+<pre class='font-mono text-xs md:text-sm text-emerald-400 leading-relaxed group-hover:text-emerald-300 transition-colors'>
+[Unstructured Financial PDFs/Reports]
+               │
+               ▼
+   [Structural OCR Parsing]
+               │
+               ▼
+[Parent-Child Document Chunking]
+               │
+               ▼
+     [Vector Database (RAG)]  &lt;───&gt; [DPFinLLM (IBM watsonx)]
+               │
+               ▼
+   [Focused Sequence Models] ───&gt; [Real-Time Fraud &amp; Risk Analysis]
+</pre>
+             </div>
+             <p class='text-slate-300 mb-6'>To deliver these use cases securely, FSI architectures leverage three main pillars:</p>
+             <div class='grid grid-cols-1 md:grid-cols-3 gap-6 text-sm text-slate-400'>
+               <div>
+                 <strong class='text-white block mb-2 text-base'>Advanced RAG with Structural Parsing:</strong> Because financial documents (prospectuses, SEC filings, policies) are highly complex, consultants deploy retrieval-augmented generation (RAG) pipelines that utilize advanced structural OCR parsing and parent-child chunking. This ensures the model retains the context of large tables, footnotes, and headers, minimizing hallucinations in critical financial reporting.
+               </div>
+               <div>
+                 <strong class='text-white block mb-2 text-base'>Focused Sequence Models (FSMs):</strong> For transaction analysis, sequence-based architectures are utilized to model transactions as a language. FSMs map sequences of banking events to detect subtle, non-linear fraud signatures in real-time.
+               </div>
+               <div>
+                 <strong class='text-white block mb-2 text-base'>Domain-Specific Fine-Tuned LLMs (DPFinLLM):</strong> To maintain absolute data privacy, enterprises are deploying domain-specific models like DPFinLLM on secure, compliant hybrid clouds (such as IBM watsonx). These models apply differential privacy during training or fine-tuning, mathematically guaranteeing that sensitive customer data cannot be extracted via prompt injection or model inversion attacks.
+               </div>
+             </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Section 2: HLS -->
+  <section class='relative py-24 border-b border-slate-800 overflow-hidden'>
+    <div class='absolute inset-0 z-0'>
+      <img src='./images/con-domain2.jpg' class='w-full h-full object-cover object-right opacity-30 mix-blend-screen filter sepia-[.3] hue-rotate-[180deg]' alt='Medical Tech' />
+      <div class='absolute inset-0 bg-gradient-to-r from-slate-950 via-slate-950/80 to-transparent'></div>
+    </div>
+
+    <div class='relative z-10 max-w-7xl mx-auto px-6'>
+      <h2 class='text-4xl md:text-5xl font-bold text-white mb-16 reveal-on-scroll flex items-center gap-6'>
+        <span class='text-6xl text-slate-800 font-black'>02</span> 
+        Healthcare and Life Sciences (HLS)
+      </h2>
+
+      <div class='grid grid-cols-1 lg:grid-cols-2 gap-16'>
+        <div class='space-y-8 reveal-on-scroll'>
+          <h3 class='text-xl text-fuchsia-400 font-mono uppercase tracking-wider'>Core Business Pain Points</h3>
+          <p class='text-slate-300'>The healthcare and biotech consulting sectors are experiencing explosive demand, with the AI healthcare market projected to scale from USD 56.01 Billion in 2026 to USD 1,033 Billion by 2034 (43.96% CAGR). This momentum is driven by the urgent need to address deep operational bottlenecks:</p>
+          <ul class='space-y-4 border-l-2 border-fuchsia-500/30 pl-4'>
+            <li><strong class='text-white'>Slow, High-Failure Drug Discovery:</strong> <span class='text-slate-400'>Traditional early-stage compound screening, lead optimization, and safety profiling take several years and cost billions of dollars, with a clinical trial failure rate exceeding 90%.</span></li>
+            <li><strong class='text-white'>Clinician Burnout & Documentation Overhead:</strong> <span class='text-slate-400'>Doctors and nurses spend a significant percentage of their workdays typing clinical notes into Electronic Health Records (EHRs), directly contributing to industry-wide staffing shortages.</span></li>
+            <li><strong class='text-white'>High Clinical Trial Patient Dropout:</strong> <span class='text-slate-400'>Identifying, recruiting, and keeping patients engaged throughout lengthy, complex clinical trials is a massive logistical challenge that frequently delays drug commercialization.</span></li>
+          </ul>
+        </div>
+
+        <div class='space-y-8 reveal-on-scroll delay-200'>
+          <h3 class='text-xl text-fuchsia-400 font-mono uppercase tracking-wider'>High-Demand Use Cases</h3>
+          <div class='grid gap-4'>
+            <div class='ui-box p-4 hover:bg-slate-800/50'>
+              <strong class='text-fuchsia-300'>Ambient AI Scribes:</strong> <span class='text-slate-400 text-sm'>Deploying ambient listening agents that capture patient-clinician conversations in real-time, structure the dialogue, and automatically draft fully compliant clinical notes, saving clinicians an average of 2.2 hours daily.</span>
+            </div>
+            <div class='ui-box p-4 hover:bg-slate-800/50'>
+              <strong class='text-fuchsia-300'>Computational Molecular Design:</strong> <span class='text-slate-400 text-sm'>Transitioning early-stage target and lead discovery to digital-first simulations, enabling rapid screening of therapeutic candidates.</span>
+            </div>
+            <div class='ui-box p-4 hover:bg-slate-800/50'>
+              <strong class='text-fuchsia-300'>AI-Assisted Medical Imaging:</strong> <span class='text-slate-400 text-sm'>Computer vision models integrated into radiology workflows to flags anomalies, lesions, and fractures in X-rays, MRIs, and CT scans, prioritizing high-risk cases for radiologists.</span>
+            </div>
+            <div class='ui-box p-4 hover:bg-slate-800/50'>
+              <strong class='text-fuchsia-300'>Precision Medicine & Genomic Targeting:</strong> <span class='text-slate-400 text-sm'>Cross-referencing patient genomic sequences, electronic health records, and lifestyle factors to tailor oncology and rare disease therapies with highly targeted efficacy.</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class='mt-16 reveal-on-scroll'>
+        <h3 class='text-xl text-cyan-400 font-mono uppercase tracking-wider mb-6'>Technological Implementation & Architecture</h3>
+        <p class='text-slate-300 mb-6'>Biotech and clinical consulting implementations utilize highly advanced, domain-specific AI models integrated deeply into existing clinical systems:</p>
+        <div class='grid grid-cols-1 md:grid-cols-3 gap-6 mb-12'>
+          <div class='ui-box tech-corners p-6'>
+            <strong class='text-white block mb-2'>Evolutionary Protein World Models:</strong>
+            <p class='text-slate-400 text-sm'>Consultants are implementing cutting-edge, open-weight protein language models such as ESMC and ESMFold2 (released in May 2026). These models allow researchers to perform computationally driven antibody and minibinder design against vital oncology targets, achieving physical laboratory hit rates of up to 88% while skipping months of wet-lab screening.</p>
+          </div>
+          <div class='ui-box tech-corners p-6'>
+            <strong class='text-white block mb-2'>Chemical Foundation Models:</strong>
+            <p class='text-slate-400 text-sm'>Platforms like ChemBERTa-3 are leveraged to predict molecular property prediction and ADMET (Absorption, Distribution, Metabolism, Excretion, and Toxicity) profiles, compressing compound screening timelines from years to hours. These are combined with Graph Neural Networks (GNNs) to model physical drug-target interactions.</p>
+          </div>
+          <div class='ui-box tech-corners p-6'>
+            <strong class='text-white block mb-2'>Bi-directional FHIR R4 API EHR Integration:</strong>
+            <p class='text-slate-400 text-sm'>For clinical deployments (like ambient scribes or imaging flags), consultants must build robust integrations with Epic or Cerner EHRs. This is achieved via secure, bi-directional HL7 FHIR R4 APIs, ensuring clinical data is written back to the patient’s record securely, maintaining HIPAA and SOC2 compliance.</p>
+          </div>
+        </div>
+
+        <!-- 10-20-70 Rule -->
+        <div class='flex flex-col md:flex-row gap-8 items-center bg-cyan-900/20 p-8 rounded-xl border border-cyan-500/30'>
+          <div class='text-6xl md:text-8xl font-black text-transparent bg-clip-text bg-gradient-to-br from-cyan-300 to-blue-600 leading-none shrink-0'>
+            10<br>20<br>70
+          </div>
+          <div class='flex-1'>
+            <h4 class='text-2xl text-white font-bold mb-4'>The 10-20-70 Rule of Transformation</h4>
+            <p class='text-slate-400 mb-4'>Successful consultancies advise clients that technology is only a minor fraction of the effort. They structure engagements around the 10-20-70 rule:</p>
+            <ul class='space-y-3 text-slate-300'>
+              <li class='flex gap-3'><span class='text-cyan-400 font-bold'>10%</span> <span>of the effort is spent on algorithmic design.</span></li>
+              <li class='flex gap-3'><span class='text-cyan-400 font-bold'>20%</span> <span>is spent on data engineering and secure cloud infrastructure.</span></li>
+              <li class='flex gap-3'><span class='text-cyan-400 font-bold'>70%</span> <span>is dedicated to operational change management, clinician workflows, and organizational redesign to drive actual adoption.</span></li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Section 3: Retail & CPG -->
+  <section class='relative py-24 border-b border-slate-800 bg-slate-950 overflow-hidden'>
+    <!-- Scanner line effect -->
+    <div class='absolute top-0 left-0 w-full h-1 bg-red-500/50 shadow-[0_0_20px_red] animate-[scan_4s_ease-in-out_infinite] z-20 pointer-events-none'></div>
+    <style>
+      @keyframes scan {
+        0% { top: 0; opacity: 0; }
+        10% { opacity: 1; }
+        90% { opacity: 1; }
+        100% { top: 100%; opacity: 0; }
+      }
+    </style>
+
+    <div class='absolute inset-0 z-0'>
+      <img src='./images/con-domain2-3.jpg' class='w-full h-full object-cover opacity-15 filter grayscale contrast-125' alt='Retail Robot' />
+      <div class='absolute inset-0 bg-slate-950/80 mix-blend-multiply'></div>
+    </div>
+
+    <div class='relative z-10 max-w-7xl mx-auto px-6'>
+      <h2 class='text-4xl md:text-5xl font-bold text-white mb-16 reveal-on-scroll flex items-center gap-6'>
+        <span class='text-6xl text-slate-800 font-black'>03</span> 
+        Retail and Consumer Packaged Goods (CPG)
+      </h2>
+
+      <div class='grid grid-cols-1 lg:grid-cols-2 gap-12'>
+        <div class='reveal-on-scroll'>
+          <div class='ui-box p-8 rounded-2xl h-full border-t-4 border-t-amber-500/50'>
+            <h3 class='text-xl text-amber-400 font-mono uppercase tracking-wider mb-6'>Core Business Pain Points</h3>
+            <p class='text-slate-400 mb-6 text-sm'>In Retail and CPG, thin margins and rapidly changing consumer preferences dictate the necessity of real-time responsiveness. Core pain points include:</p>
+            <ul class='space-y-6'>
+              <li><strong class='text-white block'>Customer Churn & Brand Dilution:</strong> <span class='text-slate-400 text-sm block mt-1'>High digital acquisition costs make customer retention paramount. Generic, non-contextual interactions drive consumers to competitors.</span></li>
+              <li><strong class='text-white block'>Supply Chain Volatility & Out-of-Stock (OOS) Events:</strong> <span class='text-slate-400 text-sm block mt-1'>Retailers suffer immense revenue loss from stockouts, while "phantom inventory" (system discrepancies where the system thinks an item is in stock but the shelf is empty) ruins the customer experience.</span></li>
+              <li><strong class='text-white block'>Low Promotional ROI:</strong> <span class='text-slate-400 text-sm block mt-1'>Untargeted, static marketing campaigns and blanket discounting erode margin without driving long-term brand loyalty.</span></li>
+              <li><strong class='text-white block'>Operational Decision Latency:</strong> <span class='text-slate-400 text-sm block mt-1'>Inability to adjust pricing, inventory allocations, and marketing spends dynamically in response to localized market trends, weather changes, or competitor activities.</span></li>
+            </ul>
+          </div>
+        </div>
+
+        <div class='reveal-on-scroll delay-200'>
+          <div class='ui-box p-8 rounded-2xl h-full border-t-4 border-t-emerald-500/50'>
+             <h3 class='text-xl text-emerald-400 font-mono uppercase tracking-wider mb-6'>High-Demand Use Cases</h3>
+             <ul class='space-y-6'>
+              <li><strong class='text-emerald-300 block'>Hyper-Personalized Recommendation Engines:</strong> <span class='text-slate-400 text-sm block mt-1'>Tailoring the online and app shopping experience down to the individual user, boosting Average Order Value (AOV) and customer lifetime value.</span></li>
+              <li><strong class='text-emerald-300 block'>Real-Time Dynamic Pricing:</strong> <span class='text-slate-400 text-sm block mt-1'>Algorithms that automatically adjust prices based on supply constraints, local demand, competitor price indexing, and expiry dates.</span></li>
+              <li><strong class='text-emerald-300 block'>Conversational Agentic Shopping Assistants:</strong> <span class='text-slate-400 text-sm block mt-1'>Natural-language virtual assistants that don't just search, but actively guide users through complex buying decisions (e.g., matching a skin type with the correct skincare routine and purchasing the bundle).</span></li>
+              <li><strong class='text-emerald-300 block'>Autonomous Shelf Execution:</strong> <span class='text-slate-400 text-sm block mt-1'>Combining store cameras, robotics, and edge computer vision to monitor shelves in real-time, detecting stockouts, planogram compliance, and misplaced inventory.</span></li>
+            </ul>
+          </div>
+        </div>
+      </div>
+
+      <div class='mt-12 ui-box tech-corners p-8 reveal-on-scroll'>
+        <h3 class='text-xl text-cyan-400 font-mono uppercase tracking-wider mb-6'>Technological Implementation & Architecture</h3>
+        <p class='text-slate-300 mb-6'>To solve these challenges, consultants design highly responsive pipelines:</p>
+        <div class='space-y-6 text-sm'>
+          <div class='flex flex-col md:flex-row gap-4 p-4 bg-slate-900/50 rounded border border-slate-700/50'>
+            <div class='md:w-1/4 font-bold text-white shrink-0'>Hybrid Recommendation Pipelines:</div>
+            <div class='text-slate-400'>Integrating traditional Collaborative Filtering with Dense Vector Search. This allows the recommendation system to combine historical user actions with semantic search intent, suggesting items that are contextually and conceptually aligned with what the user is currently browsing.</div>
+          </div>
+          <div class='flex flex-col md:flex-row gap-4 p-4 bg-slate-900/50 rounded border border-slate-700/50'>
+            <div class='md:w-1/4 font-bold text-white shrink-0'>Deep Reinforcement Learning (DRL) for Dynamic Pricing:</div>
+            <div class='text-slate-400'>Formulating pricing as a Markov Decision Process (MDP). By using policy-gradient algorithms like Proximal Policy Optimization (PPO), the pricing engine can dynamically test and discover optimal pricing boundaries without human intervention, maximizing gross margin while respecting pre-defined business guardrails.</div>
+          </div>
+          <div class='flex flex-col md:flex-row gap-4 p-4 bg-slate-900/50 rounded border border-slate-700/50'>
+            <div class='md:w-1/4 font-bold text-white shrink-0'>Model Context Protocol (MCP) Multi-Agent Systems:</div>
+            <div class='text-slate-400'>Deploying orchestrations where specialized, autonomous agents collaborate to manage supply chains. An inventory agent detects a projected stockout, a supplier agent requests quotes, and a logistics agent books transport. These agents use the Model Context Protocol (MCP) to interact securely with legacy ERPs (like SAP or Oracle) and feature deterministic Human-in-the-Loop (HITL) gates before executing high-value purchases.</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Section 4: Industrial, Energy -->
+  <section class='relative py-24 border-b border-slate-800'>
+    <div class='absolute inset-0 z-0'>
+      <img src='./images/con-domain2-4.jpg' class='w-full h-full object-cover opacity-40 mix-blend-color-dodge filter sepia-[.8] hue-rotate-[320deg]' alt='Industrial AI' />
+      <div class='absolute inset-0 bg-gradient-to-t from-slate-950 via-slate-950/90 to-slate-950/60'></div>
+    </div>
+
+    <div class='relative z-10 max-w-7xl mx-auto px-6'>
+      <h2 class='text-4xl md:text-5xl font-bold text-white mb-16 reveal-on-scroll flex items-center gap-6'>
+        <span class='text-6xl text-slate-800 font-black'>04</span> 
+        Industrial, Energy, and Logistics
+      </h2>
+
+      <div class='grid grid-cols-1 lg:grid-cols-3 gap-8'>
+        <!-- Pain Points -->
+        <div class='lg:col-span-1 space-y-6 reveal-on-scroll'>
+           <h3 class='text-xl text-orange-500 font-mono uppercase tracking-wider mb-6'>Core Business Pain Points</h3>
+           <p class='text-slate-300 text-sm'>Physical-world industries face a severe labor shortage, with manufacturing experiencing a projected 30% labor gap over the next decade. Concurrently, massive electricity grid demands from AI data centers have pushed the energy consulting market to $17.3 billion. Primary pain points include:</p>
+           <ul class='space-y-4 text-sm'>
+             <li class='bg-slate-900/60 p-4 border-l-2 border-orange-500'><strong class='text-white block'>Unplanned Machinery Downtime:</strong> <span class='text-slate-400'>Sudden equipment failures cost industrial plants an estimated $50 billion annually in lost production, emergency maintenance, and ruined raw materials.</span></li>
+             <li class='bg-slate-900/60 p-4 border-l-2 border-orange-500'><strong class='text-white block'>Grid Capacity and Renewable Intermittency:</strong> <span class='text-slate-400'>Grid operators struggle to balance volatile renewable energy inputs (solar, wind) with surging electricity demands from heavy industries and data centers.</span></li>
+             <li class='bg-slate-900/60 p-4 border-l-2 border-orange-500'><strong class='text-white block'>Inventory Stockouts and High Carrying Costs:</strong> <span class='text-slate-400'>Fragmented visibility across manufacturing schedules, port congestions, and carrier networks leads to either costly expedited shipping or high warehouse carrying costs.</span></li>
+           </ul>
+        </div>
+
+        <!-- Center Arch Diagram -->
+        <div class='lg:col-span-1 reveal-on-scroll delay-100'>
+          <div class='ui-box p-6 bg-black/80 h-full border border-orange-500/30 flex flex-col justify-center'>
+            <h3 class='text-sm text-orange-400 font-mono uppercase tracking-wider mb-4 text-center'>Edge-to-Cloud Architecture</h3>
+<pre class='font-mono text-[10px] sm:text-xs text-orange-300 leading-relaxed mx-auto'>
+[Physical Machinery / IoT Sensors]
+               │
+               ▼
+[Edge AI / TinyML Low-Latency]
+               │
+               ▼  (MQTT Sparkplug B)
+     [Unified Namespace (UNS)]
+               │
+               ▼
+   [Enterprise Cloud Analytics]
+               │
+               ▼
+  [Deep Reinforcement Learning]
+</pre>
+          </div>
+        </div>
+
+        <!-- Use Cases -->
+        <div class='lg:col-span-1 space-y-6 reveal-on-scroll delay-200'>
+           <h3 class='text-xl text-orange-500 font-mono uppercase tracking-wider mb-6'>High-Demand Use Cases</h3>
+           <ul class='space-y-4 text-sm'>
+             <li class='ui-box p-4'><strong class='text-orange-300 block'>Predictive Maintenance (PdM):</strong> <span class='text-slate-400'>Synthesizing acoustic, vibration, thermal, and electrical sensor data to forecast equipment failures weeks in advance, reducing overall maintenance costs by up to 20%.</span></li>
+             <li class='ui-box p-4'><strong class='text-orange-300 block'>Smart Grid Management & Load Balancing:</strong> <span class='text-slate-400'>Leveraging predictive AI models to forecast energy generation and consumption, improving grid uptime by 11% through dynamic demand-response dispatch.</span></li>
+             <li class='ui-box p-4'><strong class='text-orange-300 block'>Computer Vision for Quality Control:</strong> <span class='text-slate-400'>Deploying high-speed, high-resolution cameras on assembly lines to perform sub-millisecond defect detection, achieving up to 99% defect detection rates.</span></li>
+             <li class='ui-box p-4'><strong class='text-orange-300 block'>Route Optimization & Fleet Intelligence:</strong> <span class='text-slate-400'>Real-time routing engines that calculate optimal paths based on traffic, weather, fuel consumption, and driver rest mandates, saving up to 15% in logistics costs.</span></li>
+           </ul>
+        </div>
+      </div>
+
+      <!-- Tech Impl -->
+      <div class='mt-12 ui-box p-8 reveal-on-scroll'>
+        <h3 class='text-xl text-white font-mono uppercase tracking-wider mb-6'>Technological Implementation & Frameworks</h3>
+        <p class='text-slate-300 mb-6'>Industrial environments require highly resilient physical-digital architectures:</p>
+        <div class='grid md:grid-cols-2 gap-6 mb-8'>
+          <div class='bg-slate-900/50 p-6 rounded border border-slate-700'>
+            <strong class='text-white block mb-2'>IoT Edge AI (TinyML):</strong>
+            <p class='text-slate-400 text-sm'>To ensure sub-millisecond latency and continuous operation during network dropouts, consultants deploy lightweight, quantized models directly on edge gateways or microcontrollers embedded on machine sensors. These perform real-time anomaly detection locally, sending only high-value alerts back to the cloud.</p>
+          </div>
+          <div class='bg-slate-900/50 p-6 rounded border border-slate-700'>
+            <strong class='text-white block mb-2'>Unified Namespace (UNS) for OT/IT Convergence:</strong>
+            <p class='text-slate-400 text-sm'>Industrial facilities are historically siloed, with Operational Technology (OT - SCADA, PLCs) separate from Information Technology (IT - ERPs, databases). Consultants bridge this gap using UNS architectures. By utilizing MQTT brokers and Sparkplug B specifications, all industrial data, metrics, and AI predictions are published to a single, centralized, real-time data hierarchy, allowing seamless model access to shop floor events.</p>
+          </div>
+        </div>
+
+        <h4 class='text-lg text-orange-400 font-bold mb-4 border-b border-slate-700 pb-2'>4-Phase Consulting Framework:</h4>
+        <p class='text-slate-400 text-sm mb-4'>Deliveries are structured to build immediate executive trust:</p>
+        <div class='grid grid-cols-2 md:grid-cols-4 gap-4 text-sm'>
+          <div class='p-4 border border-orange-500/20 bg-orange-500/5 rounded'>
+            <strong class='text-white'>Assess:</strong> <span class='text-slate-400 block mt-1'>Map high-value assets, sensor readiness, and data pipelines.</span>
+          </div>
+          <div class='p-4 border border-orange-500/20 bg-orange-500/5 rounded'>
+            <strong class='text-white'>Proof of Value (PoV):</strong> <span class='text-slate-400 block mt-1'>Deploy models on a historical dataset to demonstrate predictive accuracy.</span>
+          </div>
+          <div class='p-4 border border-orange-500/20 bg-orange-500/5 rounded'>
+            <strong class='text-white'>Pilot:</strong> <span class='text-slate-400 block mt-1'>Implement the live model on a single production line or substation.</span>
+          </div>
+          <div class='p-4 border border-orange-500/20 bg-orange-500/5 rounded'>
+            <strong class='text-white'>Scale:</strong> <span class='text-slate-400 block mt-1'>Roll out the system enterprise-wide, integrating it with global maintenance management systems (CMMS).</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Section 5: Horizontal -->
+  <section class='relative py-24 bg-[#050b14] border-b border-slate-800'>
+    <!-- Abstract Nodes Background -->
+    <div class='absolute inset-0 z-0 overflow-hidden opacity-30'>
+       <div class='absolute top-1/2 left-1/2 w-full h-[2px] bg-gradient-to-r from-transparent via-cyan-500 to-transparent -translate-x-1/2 -translate-y-1/2 rotate-45'></div>
+       <div class='absolute top-1/2 left-1/2 w-full h-[2px] bg-gradient-to-r from-transparent via-fuchsia-500 to-transparent -translate-x-1/2 -translate-y-1/2 -rotate-45'></div>
+       <div class='absolute top-1/2 left-1/2 w-[600px] h-[600px] border border-slate-700 rounded-full -translate-x-1/2 -translate-y-1/2'></div>
+       <div class='absolute top-1/2 left-1/2 w-[800px] h-[800px] border border-slate-800 rounded-full -translate-x-1/2 -translate-y-1/2'></div>
+    </div>
+
+    <div class='relative z-10 max-w-7xl mx-auto px-6'>
+      <h2 class='text-4xl md:text-5xl font-bold text-white mb-12 reveal-on-scroll flex items-center gap-6'>
+        <span class='text-6xl text-slate-800 font-black'>05</span> 
+        Horizontal AI Consulting Trends & Governance
+      </h2>
+      <p class='text-slate-300 max-w-3xl mb-16 text-lg reveal-on-scroll'>While industry verticalization is critical, there is an enormous horizontal consulting market focused on building the underlying infrastructure, security posture, and cost controls required for any enterprise deployment.</p>
+
+      <div class='grid grid-cols-1 md:grid-cols-2 gap-12 mb-16'>
+        <div class='reveal-on-scroll'>
+          <h3 class='text-2xl text-white font-mono mb-6 pb-2 border-b border-cyan-500/50'>Universal Enterprise Pain Points</h3>
+          <p class='text-slate-400 text-sm mb-4'>Regardless of industry, enterprises deploying AI in 2026 encounter identical organizational and technical friction points:</p>
+          <ul class='space-y-4 text-sm'>
+            <li class='flex gap-3'><span class='text-cyan-500'>■</span> <div><strong class='text-white'>Continuous AI Risk and Alignment:</strong> <span class='text-slate-400'>Ensuring deployed models do not hallucinate, exhibit demographic bias, or drift in accuracy over time.</span></div></li>
+            <li class='flex gap-3'><span class='text-cyan-500'>■</span> <div><strong class='text-white'>Overlapping Regulatory Compliance:</strong> <span class='text-slate-400'>Navigating complex, sometimes contradictory, global privacy and AI regulations, such as the EU AI Act (requiring detailed conformity assessments for "high-risk" systems), CCPA, and regional data residency laws.</span></div></li>
+            <li class='flex gap-3'><span class='text-cyan-500'>■</span> <div><strong class='text-white'>Intellectual Property (IP) and Data Leakage:</strong> <span class='text-slate-400'>Deep organizational fear of proprietary code, customer records, or trade secrets being accidentally ingested by public commercial models or leaked via API endpoints.</span></div></li>
+            <li class='flex gap-3'><span class='text-cyan-500'>■</span> <div><strong class='text-white'>Operational Cost Management (AI FinOps):</strong> <span class='text-slate-400'>Uncontrolled model usage leading to massive monthly API bills. Enterprises desperately need token-level cost attribution, prompt caching optimizations, and architectural frameworks to control inference spending.</span></div></li>
+          </ul>
+        </div>
+
+        <div class='reveal-on-scroll delay-100'>
+          <h3 class='text-2xl text-white font-mono mb-6 pb-2 border-b border-fuchsia-500/50'>Highly Requested Horizontal Use Cases</h3>
+          <div class='space-y-6 text-sm'>
+             <div class='ui-box p-4'>
+               <strong class='text-fuchsia-300 block mb-1'>Advanced RAG for Corporate Knowledge Bases:</strong>
+               <span class='text-slate-400'>Consolidating millions of pages of internal PDFs, wikis, and emails into a single conversational interface. These pipelines leverage late chunking (preserving token representations from the entire document context during chunking), semantic caching, and hybrid search (combining sparse keyword search like BM25 with dense vector search) to guarantee fast, highly relevant retrieval.</span>
+             </div>
+             <div class='ui-box p-4'>
+               <strong class='text-fuchsia-300 block mb-1'>Automated Customer Support Agents:</strong>
+               <span class='text-slate-400'>Stateful, multi-agent customer service pipelines that handle complex, multi-turn troubleshooting. These are built with strict, deterministic Human-In-The-Loop (HITL) handovers triggered automatically when customer sentiment dips or when a transaction exceeds a certain financial threshold.</span>
+             </div>
+             <div class='ui-box p-4'>
+               <strong class='text-fuchsia-300 block mb-1'>Secure Developer Copilots:</strong>
+               <span class='text-slate-400'>On-premise or private-cloud deployments of code-generation models. This enables software engineering teams to achieve massive productivity boosts without risking intellectual property leakage to external third-party model providers.</span>
+             </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Control Plane Diagram -->
+      <div class='ui-box tech-corners p-8 reveal-on-scroll mb-16'>
+        <h3 class='text-xl text-cyan-400 font-mono uppercase tracking-wider mb-6 text-center'>Technical Control Plane & Infrastructure</h3>
+        <div class='bg-black/80 border border-slate-700 p-6 rounded-lg overflow-x-auto flex justify-center mb-8'>
+<pre class='font-mono text-xs md:text-sm text-cyan-300 leading-relaxed text-center'>
+                  [User Input / API Gateway]
+                              │
+                              ▼
+           [Input Guardrails (NeMo / Llama Guard)]
+                              │
+                              ▼
+[RAG vs Fine-Tuning Decision Engine / Orchestration (LangGraph)]
+                              │
+                              ▼
+          [Output Guardrails (NeMo / Llama Guard)]
+                              │
+                              ▼
+                  [Secure System Response]
+</pre>
+        </div>
+        <p class='text-slate-300 mb-6'>Consultants are designing standardized, highly secure technical stacks for horizontal enterprise deployments:</p>
+        
+        <div class='space-y-8'>
+          <div>
+            <strong class='text-white text-lg'>Multi-Layered Guardrail Control Plane:</strong>
+            <p class='text-slate-400 text-sm mt-2'>Security is enforced directly at the API gateway layer. Input and output guardrails (utilizing technologies like NeMo Guardrails, Guardrails AI, or Llama Guard as a secondary critic model) inspect every incoming prompt and outgoing response to block jailbreaks, PII leakage, prompt injections, and toxic content before they reach the LLM or the end user.</p>
+          </div>
+
+          <div class='grid grid-cols-1 lg:grid-cols-3 gap-6'>
+            <div class='bg-slate-900/50 p-5 rounded border border-slate-800'>
+              <strong class='text-cyan-400 block mb-3 border-b border-slate-700 pb-2'>Vector Database Selection Matrix</strong>
+              <ul class='space-y-3 text-xs text-slate-400'>
+                <li><strong class='text-white'>Pinecone:</strong> Fully managed, serverless, rapid-scaling cloud-native environments.</li>
+                <li><strong class='text-white'>Milvus / Qdrant:</strong> Open-source, highly customizable, on-premise, or private VPC deployments with ultra-high query throughput.</li>
+                <li><strong class='text-white'>pgvector:</strong> Deep, pre-existing PostgreSQL database infrastructure keeping transactional and vector data unified.</li>
+              </ul>
+            </div>
+            <div class='bg-slate-900/50 p-5 rounded border border-slate-800'>
+              <strong class='text-fuchsia-400 block mb-3 border-b border-slate-700 pb-2'>RAG vs. Fine-Tuning Decision Framework</strong>
+              <ul class='space-y-3 text-xs text-slate-400'>
+                <li><strong class='text-white'>RAG is mandated:</strong> Highly dynamic facts, demands strict source-traceability, strict budget.</li>
+                <li><strong class='text-white'>Fine-Tuning is recommended:</strong> Highly customized output style, deep domain jargon, optimize latency (distilled models), or completely offline, air-gapped environments.</li>
+              </ul>
+            </div>
+            <div class='bg-slate-900/50 p-5 rounded border border-slate-800'>
+              <strong class='text-emerald-400 block mb-3 border-b border-slate-700 pb-2'>Multi-Agent Orchestration Frameworks</strong>
+              <ul class='space-y-3 text-xs text-slate-400'>
+                <li><strong class='text-white'>LangGraph:</strong> Industry standard for stateful, cyclic multi-agent applications (deterministic pathways).</li>
+                <li><strong class='text-white'>CrewAI:</strong> Role-playing, collaborative agent teams performing complex marketing, sales, or research.</li>
+                <li><strong class='text-white'>AG2 (AutoGen):</strong> Highly conversational, open-ended multi-agent structures dynamically adapting patterns.</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Section 6: Playbooks -->
+  <section class='relative py-32 bg-slate-950 overflow-hidden min-h-screen flex items-center'>
+    <div class='absolute inset-0 z-0'>
+      <img src='./images/con-domain2-5.jpg' class='w-full h-full object-cover opacity-20 filter sepia-[.4] hue-rotate-[200deg] contrast-125' alt='Consulting Strategy' />
+      <div class='absolute inset-0 bg-gradient-to-b from-[#050b14] via-slate-950/80 to-slate-950'></div>
+    </div>
+
+    <div class='relative z-10 max-w-5xl mx-auto px-6 w-full'>
+      <div class='text-center mb-16 reveal-on-scroll'>
+        <h2 class='text-4xl md:text-5xl font-bold text-white mb-6'>
+          <span class='text-cyan-400 block text-lg font-mono tracking-widest mb-4'>06</span>
+          Strategic Consulting Playbooks & Transformation Methodologies
+        </h2>
+        <p class='text-slate-400 text-lg'>To deliver these complex physical, digital, and organizational transformations, top-tier AI consultancies deploy a structured, three-phase advisory playbook:</p>
+      </div>
+
+      <div class='relative border-l-2 border-cyan-500/30 ml-4 md:ml-8 pl-8 md:pl-12 space-y-20'>
+        <!-- Phase 1 -->
+        <div class='relative reveal-on-scroll'>
+          <div class='absolute -left-[42px] md:-left-[58px] top-1 w-5 h-5 bg-cyan-500 rounded-full shadow-[0_0_15px_#0ff] z-20'></div>
+          <h3 class='text-3xl font-bold text-white mb-2 flex flex-col sm:flex-row sm:items-center gap-2'>
+            Phase 1: Assess & Align <span class='text-cyan-400 text-sm font-mono bg-cyan-950/50 px-3 py-1 rounded-full w-max'>Weeks 1-6</span>
+          </h3>
+          <div class='ui-box p-6 mt-6 grid grid-cols-1 md:grid-cols-3 gap-6 text-sm text-slate-300'>
+            <div>
+              <strong class='text-white block mb-1'>Use Case Discovery & Prioritization:</strong>
+              Conduct cross-department workshops to identify operational friction points. Score each potential use case on a matrix of Business Value vs. Feasibility/Technical Complexity.
+            </div>
+            <div>
+              <strong class='text-white block mb-1'>Compliance & Risk Audit:</strong>
+              Evaluate the client’s existing data assets against global privacy regulations (GDPR, CCPA) and the EU AI Act. Determine the "Risk Category" of the proposed AI applications.
+            </div>
+            <div>
+              <strong class='text-white block mb-1'>Total Cost of Ownership (TCO) Estimation:</strong>
+              Project initial build costs, cloud/hardware infrastructure requirements, and ongoing token/maintenance costs to construct a comprehensive FinOps projection.
+            </div>
+          </div>
+        </div>
+
+        <!-- Phase 2 -->
+        <div class='relative reveal-on-scroll'>
+          <div class='absolute -left-[42px] md:-left-[58px] top-1 w-5 h-5 bg-fuchsia-500 rounded-full shadow-[0_0_15px_#f0f] z-20'></div>
+          <h3 class='text-3xl font-bold text-white mb-2 flex flex-col sm:flex-row sm:items-center gap-2'>
+            Phase 2: Deploy & Guardrail <span class='text-fuchsia-400 text-sm font-mono bg-fuchsia-950/50 px-3 py-1 rounded-full w-max'>Weeks 7-20</span>
+          </h3>
+          <div class='ui-box border-fuchsia-500/30 p-6 mt-6 grid grid-cols-1 md:grid-cols-3 gap-6 text-sm text-slate-300'>
+            <div>
+              <strong class='text-white block mb-1'>Data Pipeline & UNS Integration:</strong>
+              Clean, structure, and ingest enterprise data. Implement parent-child chunking for text databases or Unified Namespaces (UNS) for industrial sensor streams.
+            </div>
+            <div>
+              <strong class='text-white block mb-1'>Model Selection & Guardrails Setup:</strong>
+              Deploy the chosen model architecture (e.g., private cloud LLM, domain-specific FSM, or open-weight biotech models like ESMC). Configure the input/output guardrail layer at the API gateway.
+            </div>
+            <div>
+              <strong class='text-white block mb-1'>Agentic Orchestration & MVP Build:</strong>
+              Construct the multi-agent workflows using LangGraph or CrewAI. Build deterministic Human-in-the-Loop (HITL) gates. Deliver a fully functioning Minimum Viable Product (MVP).
+            </div>
+          </div>
+        </div>
+
+        <!-- Phase 3 -->
+        <div class='relative reveal-on-scroll'>
+          <div class='absolute -left-[42px] md:-left-[58px] top-1 w-5 h-5 bg-emerald-500 rounded-full shadow-[0_0_15px_#10b981] z-20'></div>
+          <h3 class='text-3xl font-bold text-white mb-2 flex flex-col sm:flex-row sm:items-center gap-2'>
+            Phase 3: Optimize & Scale <span class='text-emerald-400 text-sm font-mono bg-emerald-950/50 px-3 py-1 rounded-full w-max'>Ongoing</span>
+          </h3>
+          <div class='ui-box border-emerald-500/30 p-6 mt-6 grid grid-cols-1 md:grid-cols-3 gap-6 text-sm text-slate-300'>
+            <div>
+              <strong class='text-white block mb-1'>AI FinOps Auditing:</strong>
+              Implement token-level cost tracking, rate-limiting, and semantic prompt caching. Optimize model parameters (e.g., system-prompt compression) to continuously drive down operational costs.
+            </div>
+            <div>
+              <strong class='text-white block mb-1'>Continuous LLM Evaluation (LLM-as-a-Judge):</strong>
+              Set up automated evaluation pipelines that test model outputs against curated golden datasets, monitoring for hallucination rates, semantic drift, and accuracy.
+            </div>
+            <div>
+              <strong class='text-white block mb-1'>Workforce Enablement & Change Management:</strong>
+              Execute the 70% of the 10-20-70 transformation rule. Train clinicians, underwriters, or floor workers on prompt engineering, workflow integration, and safety protocols, ensuring long-term operational success.
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <footer class='py-8 border-t border-slate-800 text-center text-slate-500 text-xs font-mono bg-slate-950 relative z-10'>
+    [END OF REPORT] // 2026 ENTERPRISE AI CONSULTING SYNTHESIS
+  </footer>
+
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      const observerOptions = {
+        root: null,
+        rootMargin: '0px',
+        threshold: 0.15
+      };
+
+      const observer = new IntersectionObserver((entries, observer) => {
+        entries.forEach(entry => {
+          if (entry.isIntersecting) {
+            entry.target.classList.add('is-visible');
+            // Stop observing once animated in for better performance
+            observer.unobserve(entry.target);
+          }
+        });
+      }, observerOptions);
+
+      document.querySelectorAll('.reveal-on-scroll').forEach((el) => {
+        observer.observe(el);
+      });
+
+      // Custom Cursor Logic
+      const cursor = document.getElementById('cursor');
+      document.addEventListener('mousemove', e => {
+        cursor.style.left = e.clientX + 'px';
+        cursor.style.top = e.clientY + 'px';
+      });
+
+      // Add hover target classes to interactive/important elements
+      document.querySelectorAll('a, button, .ui-box, h1, h2, h3').forEach(el => {
+        el.classList.add('hover-target');
+      });
+    });
+  </script>
+</body>
+</html>

@@ -1,0 +1,447 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Domain Report: AI Consulting Economics</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;700&family=Syncopate:wght@400;700&family=JetBrains+Mono:wght@100..800&display=swap');
+
+:root {
+  --dark-bg: #030303;
+  --cyan: #00f0ff;
+  --neon-green: #39ff14;
+}
+
+body {
+  background-color: var(--dark-bg);
+  color: #ffffff;
+  font-family: 'Space Grotesk', sans-serif;
+  overflow-x: hidden;
+  margin: 0;
+  -webkit-font-smoothing: antialiased;
+}
+
+.font-display { font-family: 'Syncopate', sans-serif; }
+.font-mono { font-family: 'JetBrains Mono', monospace; }
+
+/* Visual Alchemy: Noise & Compositing */
+.noise-overlay {
+  position: fixed;
+  top: 0; left: 0; width: 100vw; height: 100vh;
+  pointer-events: none;
+  z-index: 9999;
+  opacity: 0.25;
+  mix-blend-mode: overlay;
+}
+
+.blend-luminosity { mix-blend-mode: luminosity; }
+.blend-screen { mix-blend-mode: screen; }
+.blend-color-dodge { mix-blend-mode: color-dodge; }
+
+.clip-path-slant {
+  clip-path: polygon(0 5%, 100% 0, 100% 95%, 0 100%);
+}
+
+/* Animations */
+@keyframes float {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-15px); }
+}
+.animate-float { animation: float 6s cubic-bezier(0.4, 0, 0.2, 1) infinite; }
+
+@keyframes scanline {
+  0% { transform: translateY(-100vh); }
+  100% { transform: translateY(200vh); }
+}
+.scanline {
+  position: fixed;
+  top: 0; left: 0; width: 100%; height: 1px;
+  background: rgba(0, 240, 255, 0.3);
+  box-shadow: 0 0 15px rgba(0,240,255,0.6);
+  animation: scanline 10s linear infinite;
+  z-index: 9998;
+  pointer-events: none;
+}
+
+@keyframes spin-slow {
+  100% { transform: translate(-50%, -50%) rotate(360deg); }
+}
+.animate-spin-slow { animation: spin-slow 40s linear infinite; }
+
+/* Reveal Interaction */
+.reveal {
+  opacity: 0;
+  transform: translateY(30px);
+  transition: opacity 1.2s cubic-bezier(0.16, 1, 0.3, 1), transform 1.2s cubic-bezier(0.16, 1, 0.3, 1);
+}
+.reveal.visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/* Glitch Typography */
+.glitch {
+  position: relative;
+  display: inline-block;
+}
+.glitch::before, .glitch::after {
+  content: attr(data-text);
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  clip: rect(0, 0, 0, 0);
+}
+.glitch:hover::before {
+  left: 2px;
+  text-shadow: -1px 0 #ff003c;
+  animation: glitch-anim 2s infinite linear alternate-reverse;
+}
+.glitch:hover::after {
+  left: -2px;
+  text-shadow: -1px 0 var(--cyan);
+  animation: glitch-anim-2 3s infinite linear alternate-reverse;
+}
+@keyframes glitch-anim {
+  0% { clip: rect(10px, 9999px, 44px, 0); }
+  20% { clip: rect(65px, 9999px, 20px, 0); }
+  40% { clip: rect(3px, 9999px, 50px, 0); }
+  60% { clip: rect(80px, 9999px, 90px, 0); }
+  80% { clip: rect(30px, 9999px, 10px, 0); }
+  100% { clip: rect(50px, 9999px, 30px, 0); }
+}
+@keyframes glitch-anim-2 {
+  0% { clip: rect(65px, 9999px, 100px, 0); }
+  20% { clip: rect(3px, 9999px, 20px, 0); }
+  40% { clip: rect(40px, 9999px, 80px, 0); }
+  60% { clip: rect(10px, 9999px, 50px, 0); }
+  80% { clip: rect(80px, 9999px, 10px, 0); }
+  100% { clip: rect(30px, 9999px, 60px, 0); }
+}
+
+/* Custom Image Styles */
+.bg-image-base {
+  background-size: cover;
+  background-position: center;
+}
+</style>
+</head>
+<body>
+
+<!-- Global Elements -->
+<div class="noise-overlay" style="filter: url(#noise-filter);"></div>
+<div class="scanline"></div>
+
+<svg style="display:none;">
+  <defs>
+    <filter id="noise-filter">
+      <feTurbulence type="fractalNoise" baseFrequency="0.75" numOctaves="3" stitchTiles="stitch"/>
+      <feColorMatrix type="matrix" values="1 0 0 0 0, 0 1 0 0 0, 0 0 1 0 0, 0 0 0 0.15 0"/>
+    </filter>
+  </defs>
+</svg>
+
+<!-- HERO / EXECUTIVE SUMMARY -->
+<section class="relative min-h-screen flex items-center justify-center overflow-hidden border-b border-gray-900">
+  <!-- Background Integration -->
+  <div class="absolute inset-0 bg-image-base scale-105 transform origin-center transition-transform duration-[20s] hover:scale-100 filter grayscale contrast-125 opacity-40" style="background-image: url('./images/con-1.jpg'); background-attachment: fixed;"></div>
+  <div class="absolute inset-0 bg-gradient-to-b from-[#030303]/30 via-[#030303]/80 to-[#030303]"></div>
+  
+  <div class="relative z-10 w-full max-w-7xl mx-auto px-6 py-24 flex flex-col items-center text-center reveal">
+    <div class="font-mono text-[10px] md:text-xs uppercase tracking-[0.5em] text-[#00f0ff] mb-8 border-b border-[#00f0ff]/30 pb-3 inline-block">
+      Domain Report // 2026 Landscape
+    </div>
+    <h1 class="font-display text-5xl md:text-7xl lg:text-9xl font-bold uppercase tracking-tighter leading-none mb-6 glitch" data-text="AI Consulting">
+      AI Consulting
+    </h1>
+    <h2 class="text-xl md:text-3xl font-light text-gray-400 mb-12 max-w-4xl tracking-wide">
+      Operational and Financial Structures of Modern Architectures
+    </h2>
+    <div class="max-w-2xl text-left border-l-2 border-[#00f0ff] pl-6 bg-black/40 backdrop-blur-sm p-6 rounded-r-lg shadow-2xl">
+      <p class="font-mono text-sm text-gray-300 leading-relaxed">
+        The AI consulting sector is undergoing a profound paradigm shift. Driven by GenAI, traditional IT service models are systematically restructured. This evolution has decoupled labor hours from revenue, allowing elite firms to achieve <strong>80%–90% gross margins</strong>.
+      </p>
+    </div>
+  </div>
+</section>
+
+<!-- PRICING LANDSCAPE -->
+<section class="relative py-32 bg-[#050505]">
+  <div class="absolute inset-0 opacity-10 bg-image-base blend-screen pointer-events-none filter sepia hue-rotate-[180deg]" style="background-image: url('./images/con-5.jpg');"></div>
+  
+  <div class="max-w-7xl mx-auto px-6 relative z-10">
+    <div class="reveal mb-20 flex flex-col items-start">
+      <span class="font-mono text-[#39ff14] text-xs mb-2 tracking-widest uppercase">Strategic Evolution</span>
+      <h3 class="font-display text-3xl md:text-5xl text-white mb-6 uppercase tracking-tight">01 // The Pricing Landscape</h3>
+      <p class="text-gray-400 font-mono text-sm max-w-2xl border-l border-gray-700 pl-4">
+        Traditional economics are under threat. When an AI-assisted engineer writes in minutes what took days, hourly billing penalizes efficiency.
+      </p>
+    </div>
+    
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+      <!-- T&M -->
+      <div class="bg-[#0a0a0a]/80 p-8 border border-white/5 backdrop-blur-md reveal hover:border-[#00f0ff]/50 transition-all group">
+        <div class="font-mono text-[#00f0ff] text-xs mb-6 opacity-60 group-hover:opacity-100 transition-opacity">PHASE 01.0</div>
+        <h4 class="text-xl font-bold mb-3 tracking-wide">Hourly / T&M</h4>
+        <p class="text-xs font-mono text-gray-500 mb-6 bg-white/5 inline-block px-2 py-1">Margin: 40-50%</p>
+        <p class="text-sm text-gray-400 leading-relaxed">Preferred for fluid, highly exploratory R&D and early-stage discovery. US/EU rates: $100-$500+/hr.</p>
+      </div>
+      <!-- Fixed -->
+      <div class="bg-[#0a0a0a]/80 p-8 border border-white/5 backdrop-blur-md reveal hover:border-[#00f0ff]/50 transition-all group" style="transition-delay: 100ms;">
+        <div class="font-mono text-[#00f0ff] text-xs mb-6 opacity-60 group-hover:opacity-100 transition-opacity">PHASE 01.1</div>
+        <h4 class="text-xl font-bold mb-3 tracking-wide">Fixed-Price</h4>
+        <p class="text-xs font-mono text-gray-500 mb-6 bg-white/5 inline-block px-2 py-1">Margin: 50-65%</p>
+        <p class="text-sm text-gray-400 leading-relaxed">Structured deliverables with a 15-20% risk premium buffer against API volatility and model drift.</p>
+      </div>
+      <!-- Agent Licensing -->
+      <div class="bg-[#00f0ff]/5 p-8 border border-[#00f0ff]/20 backdrop-blur-md reveal hover:bg-[#00f0ff]/10 hover:border-[#00f0ff] transition-all group relative overflow-hidden" style="transition-delay: 200ms;">
+        <div class="absolute top-0 right-0 w-16 h-16 bg-[#00f0ff] opacity-10 blur-2xl"></div>
+        <div class="font-mono text-[#00f0ff] text-xs mb-6 opacity-80 group-hover:opacity-100 transition-opacity">PHASE 01.2 // SCALING</div>
+        <h4 class="text-xl font-bold mb-3 tracking-wide text-white">Agent Licensing</h4>
+        <p class="text-xs font-mono text-[#39ff14] mb-6 bg-[#39ff14]/10 inline-block px-2 py-1">Margin: 80%+</p>
+        <p class="text-sm text-gray-300 leading-relaxed">SaaS-like MRR ($2k-$5k/mo). Agencies lease custom agents while retaining core IP.</p>
+      </div>
+      <!-- Value Based -->
+      <div class="bg-[#39ff14]/5 p-8 border border-[#39ff14]/20 backdrop-blur-md reveal hover:bg-[#39ff14]/10 hover:border-[#39ff14] transition-all group relative" style="transition-delay: 300ms;">
+        <div class="font-mono text-[#39ff14] text-xs mb-6 opacity-80 group-hover:opacity-100 transition-opacity">PHASE 01.3 // APEX</div>
+        <h4 class="text-xl font-bold mb-3 tracking-wide text-white">Value-Based</h4>
+        <p class="text-xs font-mono text-[#39ff14] mb-6 bg-[#39ff14]/10 inline-block px-2 py-1">Margin: 75%+</p>
+        <p class="text-sm text-gray-300 leading-relaxed">Aligning incentives with impact. Securing 15-25% of operational savings or revenue lift.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- DELIVERY FRAMEWORKS -->
+<section class="relative py-32 bg-[#020202] border-t border-gray-900">
+  <!-- Image Masking -->
+  <div class="absolute right-0 top-0 w-full md:w-2/3 h-full opacity-20 blend-color-dodge clip-path-slant pointer-events-none filter sepia blur-[1px] bg-image-base" style="background-image: url('./images/con-3.jpg'); background-position: center right;"></div>
+  
+  <div class="max-w-7xl mx-auto px-6 relative z-10">
+    <div class="max-w-xl reveal mb-16">
+       <span class="font-mono text-[#00f0ff] text-xs mb-2 tracking-widest uppercase block">Risk Mitigation</span>
+      <h3 class="font-display text-3xl md:text-5xl text-white mb-6 uppercase tracking-tight">02 // Delivery Frameworks</h3>
+      <p class="text-gray-400 font-mono text-sm leading-relaxed">
+        To navigate high failure rates, leading consultancies utilize a 6-phase lifecycle governed by Dual-Track Agile, separating probabilistic science from deterministic engineering.
+      </p>
+    </div>
+
+    <div class="relative max-w-4xl">
+      <div class="absolute left-[15px] top-4 bottom-4 w-[1px] bg-gradient-to-b from-[#00f0ff] via-gray-700 to-transparent"></div>
+      
+      <div class="space-y-12 pl-12">
+        <!-- Phase 1/2 -->
+        <div class="relative reveal">
+          <div class="absolute -left-[53px] top-1 w-3 h-3 rounded-none border border-[#00f0ff] bg-black transform rotate-45"></div>
+          <h4 class="text-lg md:text-2xl font-bold text-white mb-2">Phases 1-2: Scoping & PoC</h4>
+          <div class="flex flex-wrap gap-2 mb-4">
+            <span class="text-[10px] font-mono border border-gray-700 px-2 py-1 text-gray-400">Data Audits</span>
+            <span class="text-[10px] font-mono border border-gray-700 px-2 py-1 text-gray-400">Static Benchmarking</span>
+          </div>
+          <p class="text-sm text-gray-400 bg-gray-900/40 p-4 border-l border-[#00f0ff]/50 backdrop-blur">
+            <strong>Gate 1-2:</strong> Verified access, audited quality. Model must demonstrably outperform baselines. <em>Exploratory modeling is limited to a 6-week hard stop.</em>
+          </p>
+        </div>
+
+        <!-- Phase 3/4 -->
+        <div class="relative reveal">
+          <div class="absolute -left-[53px] top-1 w-3 h-3 rounded-none border border-gray-600 bg-black transform rotate-45"></div>
+          <h4 class="text-lg md:text-2xl font-bold text-white mb-2">Phases 3-4: MVP & Hardening</h4>
+          <div class="flex flex-wrap gap-2 mb-4">
+            <span class="text-[10px] font-mono border border-gray-700 px-2 py-1 text-gray-400">HITL Workflows</span>
+            <span class="text-[10px] font-mono border border-gray-700 px-2 py-1 text-gray-400">CI/CD Pipeline</span>
+          </div>
+          <p class="text-sm text-gray-400 bg-gray-900/40 p-4 border-l border-gray-700 backdrop-blur">
+            <strong>Gate 3:</strong> Requires active pilot adoption. Implementing the <em>"Error Budget"</em>—routing low confidence transactions to Human-in-the-Loop interfaces.
+          </p>
+        </div>
+
+        <!-- Phase 5/6 -->
+        <div class="relative reveal">
+          <div class="absolute -left-[53px] top-1 w-3 h-3 rounded-none border border-gray-600 bg-black transform rotate-45"></div>
+          <h4 class="text-lg md:text-2xl font-bold text-white mb-2">Phases 5-6: Scaling & MLOps</h4>
+          <div class="flex flex-wrap gap-2 mb-4">
+            <span class="text-[10px] font-mono border border-gray-700 px-2 py-1 text-gray-400">K8s Orchestration</span>
+            <span class="text-[10px] font-mono border border-gray-700 px-2 py-1 text-gray-400">Drift Monitoring</span>
+          </div>
+          <p class="text-sm text-gray-400 bg-gray-900/40 p-4 border-l border-gray-700 backdrop-blur">
+            <strong>Cost Optimization:</strong> Utilizing semantic caching and model cascades (routing simple queries to smaller models) to manage runtime costs.
+          </p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- RESOURCE ALLOCATION -->
+<section class="relative py-32 bg-[#050505] overflow-hidden">
+  <div class="absolute inset-0 opacity-15 bg-image-base blend-luminosity pointer-events-none" style="background-image: url('./images/con-2.jpg'); background-position: top center;"></div>
+  
+  <div class="max-w-7xl mx-auto px-6 relative z-10">
+    <div class="text-center reveal mb-20">
+      <h3 class="font-display text-3xl md:text-5xl text-white mb-4 uppercase">03 // Resource Allocation</h3>
+      <p class="text-[#00f0ff] font-mono tracking-widest uppercase text-xs md:text-sm bg-[#00f0ff]/10 inline-block px-4 py-2 border border-[#00f0ff]/30">
+        Deployment of Cross-Functional AI Pods
+      </p>
+    </div>
+
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-8 text-left">
+      <!-- Small -->
+      <div class="p-8 border border-white/10 bg-black/80 backdrop-blur-lg hover:border-gray-500 transition-all reveal animate-float" style="animation-delay: 0s;">
+        <div class="font-mono text-gray-500 text-xs mb-4 border-b border-white/10 pb-2">1.8 - 2.15 FTEs | 4 - 8 Weeks</div>
+        <h4 class="font-display text-xl text-white mb-4">Small-Scale</h4>
+        <ul class="text-sm text-gray-400 space-y-2 font-mono">
+          <li>> Scoping & Feasibility</li>
+          <li>> Part-time Architect</li>
+          <li>> 1x Forward-Deployed Eng.</li>
+        </ul>
+      </div>
+      <!-- Medium -->
+      <div class="p-8 border border-[#00f0ff]/40 bg-[#00f0ff]/5 backdrop-blur-lg hover:border-[#00f0ff] transition-all reveal animate-float relative shadow-[0_0_40px_rgba(0,240,255,0.05)]" style="animation-delay: 1s;">
+        <div class="absolute -top-3 left-8 bg-[#00f0ff] text-black text-[10px] font-bold px-3 py-1 uppercase tracking-wider">Optimal Pod Structure</div>
+        <div class="font-mono text-[#00f0ff] text-xs mb-4 border-b border-[#00f0ff]/20 pb-2">4.8 - 5.0 FTEs | 3 - 6 Months</div>
+        <h4 class="font-display text-xl text-white mb-4">Medium-Scale</h4>
+         <ul class="text-sm text-gray-300 space-y-2 font-mono">
+          <li>> Departmental Automation</li>
+          <li>> 1x AI Product Manager</li>
+          <li>> 1x Lead Solution Architect</li>
+          <li>> 2x Data / AI Engineers</li>
+          <li>> 1x MLOps Engineer</li>
+        </ul>
+      </div>
+      <!-- Enterprise -->
+      <div class="p-8 border border-white/10 bg-black/80 backdrop-blur-lg hover:border-gray-500 transition-all reveal animate-float" style="animation-delay: 2s;">
+        <div class="font-mono text-gray-500 text-xs mb-4 border-b border-white/10 pb-2">9.1 - 9.3 FTEs | 6 - 12+ Months</div>
+        <h4 class="font-display text-xl text-white mb-4">Enterprise-Scale</h4>
+        <ul class="text-sm text-gray-400 space-y-2 font-mono">
+          <li>> Global Multi-Agent Auth</li>
+          <li>> Prop. LLM Fine-tuning</li>
+          <li>> Deep Learning Scientists</li>
+          <li>> Dedicated MLOps Pod</li>
+        </ul>
+      </div>
+    </div>
+    
+    <div class="mt-16 p-8 border border-dashed border-gray-700 bg-black/50 backdrop-blur reveal max-w-4xl mx-auto flex flex-col md:flex-row items-center gap-8">
+      <div class="md:w-1/3">
+        <h5 class="text-2xl font-display text-white uppercase">Leverage Ratio</h5>
+      </div>
+      <div class="md:w-2/3">
+        <p class="text-gray-400 text-sm leading-relaxed font-mono">
+          By pairing a highly experienced, part-time Solution Architect with a delivery team of junior engineers (up to an <strong>8:1 ratio</strong>) and utilizing internal AI code generators, firms decouple costs from deliverables. This drives delivery-level gross margins up to <span class="text-[#39ff14] font-bold text-base">74.7%</span>.
+        </p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- FINANCIAL OUTPERFORMANCE -->
+<section class="relative min-h-screen py-32 bg-[#000000] flex flex-col justify-center overflow-hidden border-t border-[#00f0ff]/20">
+  <!-- Abstracted Corporate Image -->
+  <div class="absolute inset-0 opacity-20 filter grayscale blur-[2px] pointer-events-none bg-image-base blend-screen" style="background-image: url('./iimages/con-4.jpg');"></div>
+  
+  <div class="max-w-7xl mx-auto px-6 relative z-10 w-full">
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
+      
+      <!-- Data Side -->
+      <div class="reveal">
+        <span class="font-mono text-[#00f0ff] text-xs mb-2 tracking-widest uppercase block">Software-Like Efficiency</span>
+        <h3 class="font-display text-4xl md:text-6xl text-white mb-10 uppercase tracking-tight">04 // Financial Profile</h3>
+        
+        <div class="space-y-10 font-mono">
+          <!-- Traditional -->
+          <div>
+            <div class="flex justify-between text-xs md:text-sm mb-3">
+              <span class="text-gray-500 uppercase tracking-wider">Traditional IT Gross Margin</span>
+              <span class="text-gray-500">45 - 55%</span>
+            </div>
+            <div class="w-full bg-gray-900 h-1 rounded-none overflow-hidden flex">
+              <div class="bg-gray-600 h-full w-[50%]"></div>
+            </div>
+          </div>
+          
+          <!-- AI Gross -->
+          <div>
+            <div class="flex justify-between text-xs md:text-sm mb-3 text-[#39ff14] font-bold">
+              <span class="uppercase tracking-wider">AI Consulting Gross Margin</span>
+              <span>80 - 90%</span>
+            </div>
+            <div class="w-full bg-gray-900 h-1 rounded-none overflow-hidden flex relative">
+              <div class="bg-[#39ff14] h-full w-[85%] shadow-[0_0_15px_#39ff14]"></div>
+            </div>
+            <p class="mt-3 text-[10px] text-gray-500">Driven by proprietary prompt libraries and agent licensing frameworks.</p>
+          </div>
+          
+          <!-- AI Net -->
+          <div class="pt-6 border-t border-gray-800">
+             <div class="flex justify-between text-xs md:text-sm mb-3 text-[#00f0ff] font-bold">
+              <span class="uppercase tracking-wider">Net Profit Margin</span>
+              <span>20 - 30%+</span>
+            </div>
+            <div class="w-full bg-gray-900 h-1 rounded-none overflow-hidden flex">
+              <div class="bg-[#00f0ff] h-full w-[30%] shadow-[0_0_15px_#00f0ff]"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      <!-- Metric Side -->
+      <div class="reveal relative flex justify-center lg:justify-end">
+        <!-- Huge Revenue Stat -->
+        <div class="relative z-10 p-10 border border-white/10 bg-[#050505]/80 backdrop-blur-xl max-w-md w-full shadow-2xl">
+          <p class="text-[#00f0ff] font-mono text-xs tracking-widest uppercase mb-6">Revenue Per Employee</p>
+          <div class="font-display text-5xl md:text-7xl font-bold text-white mb-6 leading-none glitch" data-text="$2.8M+">$2.8M+</div>
+          <p class="text-gray-400 text-sm font-mono leading-relaxed mb-8">
+            Achieved by AI-Native Automated Agencies leveraging proprietary workflows to minimize headcount.
+          </p>
+          
+          <div class="p-4 border border-[#39ff14]/30 bg-[#39ff14]/5">
+            <h5 class="text-white font-bold text-sm mb-2 uppercase">The "Hidden AI Tax"</h5>
+            <ul class="text-gray-400 text-xs font-mono space-y-1 mb-4">
+              <li>- Specialized Talent Premium</li>
+              <li>- Volatile Compute & API Tokens</li>
+              <li>- Data Licensing & Prep Outlays</li>
+            </ul>
+            <div class="inline-block text-[#39ff14] text-[10px] font-bold font-mono px-2 py-1 bg-[#39ff14]/10 uppercase tracking-widest">
+              Financial Best Practice: 30% Client Pass-Through Markup
+            </div>
+          </div>
+        </div>
+        
+        <!-- Decorative SVG -->
+        <svg class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[140%] h-[140%] -z-10 opacity-20 animate-spin-slow pointer-events-none" viewBox="0 0 100 100">
+          <circle cx="50" cy="50" r="45" fill="none" stroke="#00f0ff" stroke-width="0.2" stroke-dasharray="1 4"/>
+          <circle cx="50" cy="50" r="35" fill="none" stroke="#39ff14" stroke-width="0.1" stroke-dasharray="2 6"/>
+          <polygon points="50,5 95,50 50,95 5,50" fill="none" stroke="#fff" stroke-width="0.1" opacity="0.5"/>
+        </svg>
+      </div>
+      
+    </div>
+  </div>
+</section>
+
+<footer class="bg-black py-16 border-t border-gray-900 text-center font-mono text-xs text-gray-600">
+  <p class="tracking-[0.2em] mb-4">END OF REPORT // EXECUTED IN ENVIRONMENT // FILE: DOMAIN_REPORT.MD</p>
+  <p class="text-[#00f0ff]/50 tracking-widest border border-[#00f0ff]/20 inline-block px-4 py-2">VERIFIED WITH MAXIMUM CONFIDENCE</p>
+</footer>
+
+<script>
+  document.addEventListener('DOMContentLoaded', () => {
+    const reveals = document.querySelectorAll('.reveal');
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if(entry.isIntersecting) {
+          entry.target.classList.add('visible');
+        }
+      });
+    }, { threshold: 0.15, rootMargin: "0px 0px -50px 0px" });
+    
+    reveals.forEach(r => observer.observe(r));
+  });
+</script>
+
+</body>
+</html>

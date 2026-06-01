@@ -1,0 +1,293 @@
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Industrial & Logistics AI | Consulting Research</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;600;700&family=JetBrains+Mono:wght@100;400;700&display=swap" rel="stylesheet">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Space Grotesk', 'sans-serif'],
+                        mono: ['JetBrains Mono', 'monospace'],
+                    },
+                    colors: {
+                        industrial: {
+                            bg: '#050505',
+                            surface: 'rgba(15, 17, 21, 0.6)',
+                            cyan: '#06b6d4',
+                            warning: '#eab308',
+                            danger: '#ef4444',
+                            green: '#10b981',
+                            purple: '#8b5cf6'
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        body {
+            background-color: theme('colors.industrial.bg');
+            color: #e2e8f0;
+            overflow-x: hidden;
+        }
+
+        /* Abstract Background Elements */
+        .ambient-blob {
+            position: fixed;
+            border-radius: 50%;
+            filter: blur(100px);
+            z-index: -1;
+            opacity: 0.2;
+            animation: float 20s infinite alternate ease-in-out;
+        }
+        
+        @keyframes float {
+            0% { transform: translate(0, 0) scale(1); }
+            33% { transform: translate(5vw, 10vh) scale(1.1); }
+            66% { transform: translate(-5vw, -5vh) scale(0.9); }
+            100% { transform: translate(0, 0) scale(1); }
+        }
+
+        /* Noise Overlay */
+        .noise-overlay {
+            position: fixed;
+            top: 0; left: 0; width: 100vw; height: 100vh;
+            pointer-events: none;
+            z-index: 50;
+            opacity: 0.15;
+            mix-blend-mode: hard-light;
+        }
+
+        .scanlines {
+            position: fixed;
+            top: 0; left: 0; width: 100vw; height: 100vh;
+            pointer-events: none;
+            z-index: 49;
+            background: linear-gradient(to bottom, transparent 50%, rgba(6, 182, 212, 0.05) 51%);
+            background-size: 100% 4px;
+        }
+
+        /* Glass Cards */
+        .glass-card {
+            background: theme('colors.industrial.surface');
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+            clip-path: polygon(0 0, 100% 0, 100% calc(100% - 15px), calc(100% - 15px) 100%, 0 100%);
+        }
+        
+        .glass-card:hover {
+            transform: translateY(-8px);
+            background: rgba(30, 30, 45, 0.8);
+        }
+
+        /* Glow Borders on Hover */
+        .hover-glow-cyan:hover { border-color: theme('colors.industrial.cyan'); box-shadow: 0 0 30px rgba(6, 182, 212, 0.15); }
+        .hover-glow-warning:hover { border-color: theme('colors.industrial.warning'); box-shadow: 0 0 30px rgba(234, 179, 8, 0.15); }
+        .hover-glow-danger:hover { border-color: theme('colors.industrial.danger'); box-shadow: 0 0 30px rgba(239, 68, 68, 0.15); }
+        .hover-glow-green:hover { border-color: theme('colors.industrial.green'); box-shadow: 0 0 30px rgba(16, 185, 129, 0.15); }
+        .hover-glow-purple:hover { border-color: theme('colors.industrial.purple'); box-shadow: 0 0 30px rgba(139, 92, 246, 0.15); }
+
+        /* Typography */
+        .text-gradient {
+            background-clip: text;
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        /* Staggered Reveal Animation */
+        .reveal-node {
+            opacity: 0;
+            transform: translateY(30px);
+            transition: opacity 0.8s ease-out, transform 0.8s ease-out;
+        }
+        .reveal-node.visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    </style>
+</head>
+<body class="antialiased selection:bg-industrial-warning selection:text-black min-h-screen flex flex-col">
+
+    <!-- Ambient Backgrounds -->
+    <svg class="noise-overlay" xmlns="http://www.w3.org/2000/svg">
+        <filter id="noise">
+            <feTurbulence type="fractalNoise" baseFrequency="0.65" numOctaves="3" stitchTiles="stitch"/>
+            <feColorMatrix type="matrix" values="1 0 0 0 0, 0 1 0 0 0, 0 0 1 0 0, 0 0 0 0.2 0" />
+        </filter>
+        <rect width="100%" height="100%" filter="url(#noise)"></rect>
+    </svg>
+    <div class="scanlines"></div>
+    <div class="ambient-blob bg-industrial-cyan/20 w-[40vw] h-[40vw] top-[-10%] left-[-10%]"></div>
+    <div class="ambient-blob bg-industrial-warning/20 w-[50vw] h-[50vw] bottom-[-20%] right-[-10%]" style="animation-delay: -5s;"></div>
+
+    <!-- Header / Hero Section -->
+    <header class="relative pt-32 pb-20 px-6 max-w-7xl mx-auto w-full z-10 flex-grow-0 reveal-node">
+        <div class="inline-flex items-center gap-3 px-4 py-2 rounded-none glass-card mb-8 border-industrial-warning/30 text-industrial-warning font-mono text-xs uppercase tracking-widest clip-brutal">
+            <span class="w-2 h-2 rounded-full bg-industrial-warning animate-pulse"></span>
+            SYS_STATUS: ONLINE // SECTOR: INDUSTRIAL
+        </div>
+        <h1 class="text-5xl md:text-7xl lg:text-8xl font-bold leading-[1.1] mb-6 tracking-tight uppercase">
+            Industrial &<br>
+            <span class="text-gradient bg-gradient-to-r from-industrial-cyan to-blue-600">Logistics AI</span>
+        </h1>
+        <p class="text-xl md:text-2xl text-slate-400 font-light max-w-3xl leading-relaxed">
+            Research directory for specialized AI consulting services bridging operational technology (OT) and machine learning.
+        </p>
+    </header>
+
+    <!-- Main Content Grid -->
+    <main class="relative z-10 px-6 pb-32 max-w-7xl mx-auto w-full flex-grow">
+        
+        <div class="flex items-center gap-4 mb-12 reveal-node" style="transition-delay: 100ms;">
+            <div class="h-[1px] bg-white/10 flex-grow"></div>
+            <h2 class="font-mono text-sm tracking-[0.2em] uppercase text-gray-500">Research Directory v2</h2>
+            <div class="h-[1px] bg-white/10 flex-grow"></div>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6 lg:gap-8">
+            
+            <!-- Card 1 -->
+            <a href="consult2-worker-1.html" class="glass-card hover-glow-cyan p-8 rounded-none flex flex-col reveal-node group" style="transition-delay: 150ms;">
+                <div class="font-mono text-xs text-industrial-cyan mb-4 tracking-widest uppercase flex justify-between items-center">
+                    Report 2.1
+                    <svg class="w-4 h-4 opacity-0 group-hover:opacity-100 transition-opacity transform group-hover:translate-x-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"></path></svg>
+                </div>
+                <h3 class="text-2xl font-bold mb-3 text-white">Worker Insight 1</h3>
+                <p class="text-gray-400 text-sm leading-relaxed mb-6 flex-grow">
+                    Exploration of initial methodologies and foundational models driving industrial transformation.
+                </p>
+                <div class="flex gap-2 flex-wrap mt-auto">
+                    <span class="px-2 py-1 bg-white/5 border border-white/10 font-mono text-[10px] text-gray-300">Methodology</span>
+                </div>
+            </a>
+
+            <!-- Card 2 -->
+            <a href="consult2-worker-2.html" class="glass-card hover-glow-warning p-8 rounded-none flex flex-col reveal-node group" style="transition-delay: 200ms;">
+                <div class="font-mono text-xs text-industrial-warning mb-4 tracking-widest uppercase flex justify-between items-center">
+                    Report 2.2
+                    <svg class="w-4 h-4 opacity-0 group-hover:opacity-100 transition-opacity transform group-hover:translate-x-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"></path></svg>
+                </div>
+                <h3 class="text-2xl font-bold mb-3 text-white">Worker Insight 2</h3>
+                <p class="text-gray-400 text-sm leading-relaxed mb-6 flex-grow">
+                    Analysis of Edge AI deployments, latency mitigation, and hardware-accelerated inferencing.
+                </p>
+                <div class="flex gap-2 flex-wrap mt-auto">
+                    <span class="px-2 py-1 bg-white/5 border border-white/10 font-mono text-[10px] text-gray-300">Edge Compute</span>
+                </div>
+            </a>
+
+            <!-- Card 3 -->
+            <a href="consult2-worker-3.html" class="glass-card hover-glow-green p-8 rounded-none flex flex-col reveal-node group" style="transition-delay: 250ms;">
+                <div class="font-mono text-xs text-industrial-green mb-4 tracking-widest uppercase flex justify-between items-center">
+                    Report 2.3
+                    <svg class="w-4 h-4 opacity-0 group-hover:opacity-100 transition-opacity transform group-hover:translate-x-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"></path></svg>
+                </div>
+                <h3 class="text-2xl font-bold mb-3 text-white">Worker Insight 3</h3>
+                <p class="text-gray-400 text-sm leading-relaxed mb-6 flex-grow">
+                    Computer Vision pipelines and predictive maintenance strategies for manufacturing floors.
+                </p>
+                <div class="flex gap-2 flex-wrap mt-auto">
+                    <span class="px-2 py-1 bg-white/5 border border-white/10 font-mono text-[10px] text-gray-300">Predictive Maint.</span>
+                </div>
+            </a>
+
+            <!-- Card 4 -->
+            <a href="consult2-worker4.html" class="glass-card hover-glow-danger p-8 rounded-none flex flex-col reveal-node group" style="transition-delay: 300ms;">
+                <div class="font-mono text-xs text-industrial-danger mb-4 tracking-widest uppercase flex justify-between items-center">
+                    Report 2.4
+                    <svg class="w-4 h-4 opacity-0 group-hover:opacity-100 transition-opacity transform group-hover:translate-x-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"></path></svg>
+                </div>
+                <h3 class="text-2xl font-bold mb-3 text-white">Industrial AI 2026</h3>
+                <p class="text-gray-400 text-sm leading-relaxed mb-6 flex-grow">
+                    Core pain points & solutions: Unplanned downtime, grid capacity, quality control, and ROI benchmarks.
+                </p>
+                <div class="flex gap-2 flex-wrap mt-auto">
+                    <span class="px-2 py-1 bg-white/5 border border-white/10 font-mono text-[10px] text-gray-300">ROI Benchmarks</span>
+                </div>
+            </a>
+
+            <!-- Card 5 -->
+            <a href="consult2-worker-5.html" class="glass-card hover-glow-purple p-8 rounded-none flex flex-col reveal-node group" style="transition-delay: 350ms;">
+                <div class="font-mono text-xs text-industrial-purple mb-4 tracking-widest uppercase flex justify-between items-center">
+                    Report 2.5
+                    <svg class="w-4 h-4 opacity-0 group-hover:opacity-100 transition-opacity transform group-hover:translate-x-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"></path></svg>
+                </div>
+                <h3 class="text-2xl font-bold mb-3 text-white">Worker Insight 5</h3>
+                <p class="text-gray-400 text-sm leading-relaxed mb-6 flex-grow">
+                    Logistics scaling, supply chain resilience modeling, and dynamic optimization.
+                </p>
+                <div class="flex gap-2 flex-wrap mt-auto">
+                    <span class="px-2 py-1 bg-white/5 border border-white/10 font-mono text-[10px] text-gray-300">Supply Chain</span>
+                </div>
+            </a>
+
+            <!-- Card 6 (Featured / Wide) -->
+            <a href="consult-domain-2.html" class="glass-card hover-glow-warning p-8 rounded-none flex flex-col reveal-node group md:col-span-2 xl:col-span-1 relative overflow-hidden" style="transition-delay: 400ms;">
+                <!-- Decorative background elements for featured card -->
+                <div class="absolute top-0 right-0 w-64 h-64 bg-industrial-warning opacity-5 blur-[80px] pointer-events-none transition-opacity group-hover:opacity-10"></div>
+                
+                <div class="relative z-10">
+                    <div class="font-mono text-xs text-industrial-warning mb-4 tracking-widest uppercase flex justify-between items-center">
+                        Domain Report 2
+                        <div class="flex items-center gap-2">
+                            <span class="px-2 py-0.5 bg-industrial-warning/10 text-industrial-warning border border-industrial-warning/30 text-[10px] animate-pulse">STRATEGIC OVERVIEW</span>
+                            <svg class="w-4 h-4 opacity-0 group-hover:opacity-100 transition-opacity transform group-hover:translate-x-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"></path></svg>
+                        </div>
+                    </div>
+                    
+                    <div class="flex flex-col gap-6 items-start">
+                        <div class="flex-grow">
+                            <h3 class="text-3xl font-bold mb-4 text-white">Industrial Domain Econ.</h3>
+                            <p class="text-gray-400 text-sm leading-relaxed mb-6 max-w-2xl">
+                                Synthesized macro-analysis of the logistics and manufacturing consulting sectors, forecasting constraints and growth nodes.
+                            </p>
+                            <div class="flex gap-2 flex-wrap">
+                                <span class="px-2 py-1 bg-white/5 border border-industrial-warning/30 text-industrial-warning font-mono text-[10px]">Macro Landscape</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </a>
+
+        </div>
+    </main>
+
+    <footer class="mt-auto border-t border-white/5 py-8 z-10 relative bg-industrial-bg/80 backdrop-blur-md">
+        <div class="max-w-7xl mx-auto px-6 text-center font-mono text-xs text-gray-600 flex flex-col md:flex-row justify-between items-center gap-4">
+            <p>SYSTEM ACCESS // INDUSTRIAL DIRECTORY</p>
+            <p class="tracking-[0.2em] uppercase">Status: <span class="text-industrial-cyan">Active</span></p>
+        </div>
+    </footer>
+
+    <script>
+        // Intersection Observer to trigger reveal animations
+        document.addEventListener("DOMContentLoaded", () => {
+            const observerOptions = {
+                root: null,
+                rootMargin: '0px',
+                threshold: 0.1
+            };
+
+            const observer = new IntersectionObserver((entries, observer) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        entry.target.classList.add('visible');
+                        observer.unobserve(entry.target);
+                    }
+                });
+            }, observerOptions);
+
+            document.querySelectorAll('.reveal-node').forEach(el => {
+                observer.observe(el);
+            });
+        });
+    </script>
+</body>
+</html>

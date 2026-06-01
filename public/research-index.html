@@ -1,0 +1,286 @@
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Business Models & Pricing Strategies | AI Consulting Research</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;600;700&family=JetBrains+Mono:wght@100;400;700&display=swap" rel="stylesheet">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Space Grotesk', 'sans-serif'],
+                        mono: ['JetBrains Mono', 'monospace'],
+                    },
+                    colors: {
+                        brand: {
+                            bg: '#050508',
+                            surface: 'rgba(20, 20, 28, 0.4)',
+                            cyan: '#00f0ff',
+                            neonGreen: '#39ff14',
+                            magenta: '#ff003c',
+                            purple: '#9d4edd',
+                            gold: '#ffd700'
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        body {
+            background-color: theme('colors.brand.bg');
+            color: #e2e8f0;
+            overflow-x: hidden;
+        }
+
+        /* Abstract Background Elements */
+        .ambient-blob {
+            position: fixed;
+            border-radius: 50%;
+            filter: blur(100px);
+            z-index: -1;
+            opacity: 0.3;
+            animation: float 20s infinite alternate ease-in-out;
+        }
+        
+        @keyframes float {
+            0% { transform: translate(0, 0) scale(1); }
+            33% { transform: translate(5vw, 10vh) scale(1.1); }
+            66% { transform: translate(-5vw, -5vh) scale(0.9); }
+            100% { transform: translate(0, 0) scale(1); }
+        }
+
+        /* Noise Overlay */
+        .noise {
+            position: fixed;
+            inset: 0;
+            z-index: 50;
+            pointer-events: none;
+            opacity: 0.25;
+            mix-blend-mode: overlay;
+        }
+
+        /* Glass Cards */
+        .glass-card {
+            background: theme('colors.brand.surface');
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+        
+        .glass-card:hover {
+            transform: translateY(-8px);
+            background: rgba(30, 30, 45, 0.6);
+        }
+
+        /* Glow Borders on Hover */
+        .hover-glow-cyan:hover { border-color: theme('colors.brand.cyan'); box-shadow: 0 0 30px rgba(0, 240, 255, 0.15); }
+        .hover-glow-green:hover { border-color: theme('colors.brand.neonGreen'); box-shadow: 0 0 30px rgba(57, 255, 20, 0.15); }
+        .hover-glow-magenta:hover { border-color: theme('colors.brand.magenta'); box-shadow: 0 0 30px rgba(255, 0, 60, 0.15); }
+        .hover-glow-purple:hover { border-color: theme('colors.brand.purple'); box-shadow: 0 0 30px rgba(157, 78, 221, 0.15); }
+        .hover-glow-gold:hover { border-color: theme('colors.brand.gold'); box-shadow: 0 0 30px rgba(255, 215, 0, 0.15); }
+
+        /* Typography */
+        .text-gradient {
+            background-clip: text;
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        /* Staggered Reveal Animation */
+        .reveal-node {
+            opacity: 0;
+            transform: translateY(30px);
+            transition: opacity 0.8s ease-out, transform 0.8s ease-out;
+        }
+        .reveal-node.visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        /* Decorative Grid */
+        .bg-grid {
+            position: fixed;
+            inset: 0;
+            background-size: 50px 50px;
+            background-image: 
+                linear-gradient(to right, rgba(255,255,255,0.02) 1px, transparent 1px),
+                linear-gradient(to bottom, rgba(255,255,255,0.02) 1px, transparent 1px);
+            z-index: -2;
+            mask-image: radial-gradient(circle at center, black 40%, transparent 80%);
+            -webkit-mask-image: radial-gradient(circle at center, black 40%, transparent 80%);
+        }
+    </style>
+</head>
+<body class="antialiased selection:bg-brand-cyan selection:text-black min-h-screen flex flex-col">
+
+    <!-- Ambient Backgrounds -->
+    <svg class="noise">
+        <filter id="static">
+            <feTurbulence type="fractalNoise" baseFrequency="0.65" numOctaves="3" stitchTiles="stitch"/>
+            <feColorMatrix type="matrix" values="1 0 0 0 0, 0 1 0 0 0, 0 0 1 0 0, 0 0 0 0.2 0" />
+        </filter>
+        <rect width="100%" height="100%" filter="url(#static)"/>
+    </svg>
+    <div class="bg-grid"></div>
+    <div class="ambient-blob bg-brand-cyan/20 w-[40vw] h-[40vw] top-[-10%] left-[-10%]"></div>
+    <div class="ambient-blob bg-brand-purple/20 w-[50vw] h-[50vw] bottom-[-20%] right-[-10%]" style="animation-delay: -5s;"></div>
+
+    <!-- Header / Hero Section -->
+    <header class="relative pt-32 pb-20 px-6 max-w-7xl mx-auto w-full z-10 flex-grow-0 reveal-node">
+        <div class="inline-flex items-center gap-3 px-4 py-2 rounded-full glass-card mb-8 border-brand-cyan/30 text-brand-cyan font-mono text-xs uppercase tracking-widest">
+            <span class="w-2 h-2 rounded-full bg-brand-cyan animate-pulse"></span>
+            Research Portal // For AI Consultants
+        </div>
+        <h1 class="text-5xl md:text-7xl lg:text-8xl font-bold leading-[1.1] mb-6 tracking-tight">
+            Business Models<br>
+            <span class="text-gradient bg-gradient-to-r from-brand-cyan via-blue-500 to-brand-purple">& Pricing Strategies</span>
+        </h1>
+        <p class="text-xl md:text-2xl text-gray-400 font-light max-w-3xl leading-relaxed">
+            A comprehensive repository of operational frameworks, margin analyses, and deployment architectures shaping the 2026 AI consulting landscape.
+        </p>
+    </header>
+
+    <!-- Main Content Grid -->
+    <main class="relative z-10 px-6 pb-32 max-w-7xl mx-auto w-full flex-grow">
+        
+        <div class="flex items-center gap-4 mb-12 reveal-node" style="transition-delay: 100ms;">
+            <div class="h-px bg-white/10 flex-grow"></div>
+            <h2 class="font-mono text-sm tracking-[0.2em] uppercase text-gray-500">Research Directory</h2>
+            <div class="h-px bg-white/10 flex-grow"></div>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 lg:gap-8">
+            
+            <!-- Card 1 -->
+            <a href="consult-worker1.html" class="glass-card hover-glow-cyan p-8 rounded-2xl flex flex-col reveal-node group" style="transition-delay: 150ms;">
+                <div class="font-mono text-xs text-brand-cyan mb-4 tracking-widest uppercase flex justify-between items-center">
+                    Report 01
+                    <svg class="w-4 h-4 opacity-0 group-hover:opacity-100 transition-opacity transform group-hover:translate-x-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"></path></svg>
+                </div>
+                <h3 class="text-2xl font-bold mb-3 text-white">Pricing Paradigms</h3>
+                <p class="text-gray-400 text-sm leading-relaxed mb-6 flex-grow">
+                    Analysis of the shift from hourly T&M billing to value-based, outcome-driven structures and hybrid "Agent Licensing" models.
+                </p>
+                <div class="flex gap-2 flex-wrap mt-auto">
+                    <span class="px-2 py-1 bg-white/5 border border-white/10 rounded font-mono text-[10px] text-gray-300">Monetization</span>
+                    <span class="px-2 py-1 bg-white/5 border border-white/10 rounded font-mono text-[10px] text-gray-300">Retainers</span>
+                </div>
+            </a>
+
+            <!-- Card 2 -->
+            <a href="consult-worker-2.html" class="glass-card hover-glow-magenta p-8 rounded-2xl flex flex-col reveal-node group" style="transition-delay: 200ms;">
+                <div class="font-mono text-xs text-brand-magenta mb-4 tracking-widest uppercase flex justify-between items-center">
+                    Report 02
+                    <svg class="w-4 h-4 opacity-0 group-hover:opacity-100 transition-opacity transform group-hover:translate-x-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"></path></svg>
+                </div>
+                <h3 class="text-2xl font-bold mb-3 text-white">Delivery Framework</h3>
+                <p class="text-gray-400 text-sm leading-relaxed mb-6 flex-grow">
+                    The 6-phase probabilistic lifecycle for enterprise AI deployments. Covers Dual-Track Agile and navigating the "PoC Trap."
+                </p>
+                <div class="flex gap-2 flex-wrap mt-auto">
+                    <span class="px-2 py-1 bg-white/5 border border-white/10 rounded font-mono text-[10px] text-gray-300">Project Mgmt</span>
+                    <span class="px-2 py-1 bg-white/5 border border-white/10 rounded font-mono text-[10px] text-gray-300">Risk Mitigation</span>
+                </div>
+            </a>
+
+            <!-- Card 3 -->
+            <a href="consult-worker-3.html" class="glass-card hover-glow-green p-8 rounded-2xl flex flex-col reveal-node group" style="transition-delay: 250ms;">
+                <div class="font-mono text-xs text-brand-neonGreen mb-4 tracking-widest uppercase flex justify-between items-center">
+                    Report 03
+                    <svg class="w-4 h-4 opacity-0 group-hover:opacity-100 transition-opacity transform group-hover:translate-x-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"></path></svg>
+                </div>
+                <h3 class="text-2xl font-bold mb-3 text-white">Margins Analysis</h3>
+                <p class="text-gray-400 text-sm leading-relaxed mb-6 flex-grow">
+                    Deep dive into agency financials, detailing 80-90% gross margin structures, the "hidden AI tax," and multi-million dollar revenue-per-employee benchmarks.
+                </p>
+                <div class="flex gap-2 flex-wrap mt-auto">
+                    <span class="px-2 py-1 bg-white/5 border border-white/10 rounded font-mono text-[10px] text-gray-300">Economics</span>
+                    <span class="px-2 py-1 bg-white/5 border border-white/10 rounded font-mono text-[10px] text-gray-300">COGS</span>
+                </div>
+            </a>
+
+            <!-- Card 4 -->
+            <a href="consult-worker-4.html" class="glass-card hover-glow-purple p-8 rounded-2xl flex flex-col reveal-node group md:col-span-2 lg:col-span-1" style="transition-delay: 300ms;">
+                <div class="font-mono text-xs text-brand-purple mb-4 tracking-widest uppercase flex justify-between items-center">
+                    Report 04
+                    <svg class="w-4 h-4 opacity-0 group-hover:opacity-100 transition-opacity transform group-hover:translate-x-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"></path></svg>
+                </div>
+                <h3 class="text-2xl font-bold mb-3 text-white">Architecture & Teams</h3>
+                <p class="text-gray-400 text-sm leading-relaxed mb-6 flex-grow">
+                    Resource allocation blueprints, AI Pod structures, leverage ratios, and specific capability profiles required for successful scale.
+                </p>
+                <div class="flex gap-2 flex-wrap mt-auto">
+                    <span class="px-2 py-1 bg-white/5 border border-white/10 rounded font-mono text-[10px] text-gray-300">Team Structure</span>
+                    <span class="px-2 py-1 bg-white/5 border border-white/10 rounded font-mono text-[10px] text-gray-300">Utilization</span>
+                </div>
+            </a>
+
+            <!-- Card 5 (Featured / Wide) -->
+            <a href="consult-domain-1.html" class="glass-card hover-glow-gold p-8 rounded-2xl flex flex-col reveal-node group md:col-span-2 relative overflow-hidden" style="transition-delay: 350ms;">
+                <!-- Decorative background elements for featured card -->
+                <div class="absolute top-0 right-0 w-64 h-64 bg-brand-gold opacity-5 blur-[80px] pointer-events-none transition-opacity group-hover:opacity-10"></div>
+                
+                <div class="relative z-10">
+                    <div class="font-mono text-xs text-brand-gold mb-4 tracking-widest uppercase flex justify-between items-center">
+                        Domain Report
+                        <div class="flex items-center gap-2">
+                            <span class="px-2 py-0.5 bg-brand-gold/10 text-brand-gold text-[10px] rounded animate-pulse">EXECUTIVE SUMMARY</span>
+                            <svg class="w-4 h-4 opacity-0 group-hover:opacity-100 transition-opacity transform group-hover:translate-x-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"></path></svg>
+                        </div>
+                    </div>
+                    
+                    <div class="flex flex-col md:flex-row gap-6 items-start">
+                        <div class="flex-grow">
+                            <h3 class="text-3xl md:text-4xl font-bold mb-4 text-white">AI Consulting Economics</h3>
+                            <p class="text-gray-400 text-base leading-relaxed mb-6 max-w-2xl">
+                                A synthesized executive overview bridging the operational frameworks, pricing structures, and financial outperformance metrics driving modern AI strategy firms.
+                            </p>
+                            <div class="flex gap-2 flex-wrap">
+                                <span class="px-2 py-1 bg-white/5 border border-brand-gold/20 text-brand-gold rounded font-mono text-xs">Synthesis</span>
+                                <span class="px-2 py-1 bg-white/5 border border-white/10 rounded font-mono text-xs text-gray-300">Macro Landscape</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </a>
+
+        </div>
+    </main>
+
+    <footer class="mt-auto border-t border-white/5 py-8 z-10 relative bg-brand-bg/80 backdrop-blur-md">
+        <div class="max-w-7xl mx-auto px-6 text-center font-mono text-xs text-gray-600 flex flex-col md:flex-row justify-between items-center gap-4">
+            <p>SYSTEM ACCESS // RESEARCH PORTAL</p>
+            <p class="tracking-[0.2em] uppercase">Status: <span class="text-brand-cyan">Active</span></p>
+        </div>
+    </footer>
+
+    <script>
+        // Intersection Observer to trigger reveal animations
+        document.addEventListener("DOMContentLoaded", () => {
+            const observerOptions = {
+                root: null,
+                rootMargin: '0px',
+                threshold: 0.1
+            };
+
+            const observer = new IntersectionObserver((entries, observer) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        entry.target.classList.add('visible');
+                        observer.unobserve(entry.target);
+                    }
+                });
+            }, observerOptions);
+
+            document.querySelectorAll('.reveal-node').forEach(el => {
+                observer.observe(el);
+            });
+        });
+    </script>
+</body>
+</html>

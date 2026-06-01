@@ -31,6 +31,48 @@ const articles = [
     href: "/consulting-3.html",
     icon: "⚙️",
     accent: "from-purple-500/20 to-indigo-500/20"
+  },
+  {
+    title: "FSI AI Market Demand Analysis",
+    description: "Financial Services Industry AI adoption, regulatory compliance, and risk modeling in 2026.",
+    href: "/consult2-worker-1.html",
+    icon: "🏦",
+    accent: "from-amber-500/20 to-orange-500/20"
+  },
+  {
+    title: "Healthcare & Biotech AI Services",
+    description: "Analysis of AI consulting services in healthcare, pharmaceuticals, and biotechnology.",
+    href: "/consult2-worker-2.html",
+    icon: "🧬",
+    accent: "from-rose-500/20 to-pink-500/20"
+  },
+  {
+    title: "Industrial & Logistics AI 2026",
+    description: "Autonomous supply chain architectures and operational consulting metrics.",
+    href: "/consult2-worker-4.html",
+    icon: "🏭",
+    accent: "from-teal-500/20 to-emerald-500/20"
+  },
+  {
+    title: "Manufacturing AI Consulting Matrix",
+    description: "Strategic research covering emerging capabilities and integration models in manufacturing.",
+    href: "/consult2-worker-3.html",
+    icon: "🔧",
+    accent: "from-indigo-500/20 to-blue-500/20"
+  },
+  {
+    title: "Retail & CPG AI Market Research",
+    description: "AI Consulting Services in Retail, E-commerce, and Consumer Packaged Goods.",
+    href: "/consult2-worker-5.html",
+    icon: "🛒",
+    accent: "from-fuchsia-500/20 to-purple-500/20"
+  },
+  {
+    title: "Enterprise AI Market Report",
+    description: "Comprehensive 2026 market report on enterprise AI consulting dynamics.",
+    href: "/consult-domain-2.html",
+    icon: "🌍",
+    accent: "from-cyan-500/20 to-blue-500/20"
   }
 ];
 

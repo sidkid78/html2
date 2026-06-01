@@ -1,0 +1,640 @@
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Industrial AI 2026 Report</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;500;700&family=JetBrains+Mono:wght@100;400;700&display=swap" rel="stylesheet">
+<script>
+tailwind.config = {
+  theme: {
+    extend: {
+      fontFamily: {
+        sans: ['Space Grotesk', 'sans-serif'],
+        mono: ['JetBrains Mono', 'monospace'],
+      },
+      colors: {
+        industrial: {
+          900: '#050505',
+          800: '#0f1115',
+          700: '#1a1d24',
+          warning: '#eab308',
+          danger: '#ef4444',
+          cyan: '#06b6d4',
+          green: '#10b981',
+        }
+      }
+    }
+  }
+}
+</script>
+<style>
+  :root {
+    --scanline-color: rgba(6, 182, 212, 0.05);
+  }
+  body {
+    background-color: #050505;
+    color: #e2e8f0;
+    overflow-x: hidden;
+    cursor: none;
+  }
+  ::selection {
+    background: #eab308;
+    color: #000;
+  }
+  .noise-overlay {
+    position: fixed;
+    top: 0; left: 0; width: 100vw; height: 100vh;
+    pointer-events: none;
+    z-index: 50;
+    opacity: 0.15;
+    mix-blend-mode: overlay;
+  }
+  .scanlines {
+    position: fixed;
+    top: 0; left: 0; width: 100vw; height: 100vh;
+    pointer-events: none;
+    z-index: 49;
+    background: linear-gradient(to bottom, transparent 50%, var(--scanline-color) 51%);
+    background-size: 100% 4px;
+  }
+  .custom-cursor {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 20px;
+    height: 20px;
+    border: 1px solid #06b6d4;
+    border-radius: 50%;
+    pointer-events: none;
+    transform: translate(-50%, -50%);
+    z-index: 100;
+    transition: width 0.2s, height 0.2s, background-color 0.2s;
+    mix-blend-mode: difference;
+  }
+  .custom-cursor::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: -10px;
+    right: -10px;
+    height: 1px;
+    background: #06b6d4;
+  }
+  .custom-cursor::before {
+    content: '';
+    position: absolute;
+    left: 50%;
+    top: -10px;
+    bottom: -10px;
+    width: 1px;
+    background: #06b6d4;
+  }
+  .clip-brutal {
+    clip-path: polygon(0 0, 100% 0, 100% calc(100% - 20px), calc(100% - 20px) 100%, 0 100%);
+  }
+  .clip-brutal-reverse {
+    clip-path: polygon(20px 0, 100% 0, 100% 100%, 0 100%, 0 20px);
+  }
+  @keyframes pulse-glow {
+    0%, 100% { opacity: 1; filter: drop-shadow(0 0 5px #06b6d4); }
+    50% { opacity: 0.6; filter: drop-shadow(0 0 2px #06b6d4); }
+  }
+  .animate-pulse-glow { animation: pulse-glow 3s infinite; }
+  @keyframes glitch-anim {
+    0% { clip-path: inset(10% 0 80% 0); transform: translate(-2px, 2px); }
+    20% { clip-path: inset(80% 0 5% 0); transform: translate(2px, -2px); }
+    40% { clip-path: inset(30% 0 40% 0); transform: translate(-2px, 2px); }
+    60% { clip-path: inset(5% 0 80% 0); transform: translate(2px, -2px); }
+    80% { clip-path: inset(60% 0 10% 0); transform: translate(-2px, 2px); }
+    100% { clip-path: inset(10% 0 80% 0); transform: translate(0); }
+  }
+  .glitch:hover::before {
+    content: attr(data-text);
+    position: absolute;
+    left: -2px;
+    text-shadow: 2px 0 red;
+    top: 0;
+    color: white;
+    background: #050505;
+    overflow: hidden;
+    animation: glitch-anim 0.3s infinite linear alternate-reverse;
+  }
+  .glitch:hover::after {
+    content: attr(data-text);
+    position: absolute;
+    left: 2px;
+    text-shadow: -2px 0 blue;
+    top: 0;
+    color: white;
+    background: #050505;
+    overflow: hidden;
+    animation: glitch-anim 0.4s infinite linear alternate-reverse;
+  }
+  .terminal-box {
+    background: rgba(15, 17, 21, 0.9);
+    border: 1px solid rgba(6, 182, 212, 0.3);
+    box-shadow: 0 0 20px rgba(6, 182, 212, 0.05) inset;
+  }
+  .terminal-text {
+    text-shadow: 0 0 5px rgba(6, 182, 212, 0.5);
+  }
+  .reveal {
+    opacity: 0;
+    transform: translateY(30px);
+    transition: all 0.8s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+  .reveal.active {
+    opacity: 1;
+    transform: translateY(0);
+  }
+  .hide-scrollbar::-webkit-scrollbar {
+    display: none;
+  }
+  .hide-scrollbar {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+</script>
+</head>
+<body class="antialiased">
+
+<svg class="noise-overlay" xmlns="http://www.w3.org/2000/svg">
+  <filter id="noise">
+    <feTurbulence type="fractalNoise" baseFrequency="0.65" numOctaves="3" stitchTiles="stitch"/>
+  </filter>
+  <rect width="100%" height="100%" filter="url(#noise)"></rect>
+</svg>
+<div class="scanlines"></div>
+<div class="custom-cursor" id="cursor"></div>
+
+<main class="relative w-full">
+  
+  <!-- HERO SECTION -->
+  <section class="min-h-screen flex flex-col justify-center px-6 md:px-16 lg:px-24 relative overflow-hidden">
+    <div class="absolute top-0 right-0 p-8 font-mono text-xs text-industrial-cyan/50 tracking-widest">
+      SYS_STATUS: ONLINE<br>
+      DATE: 2026.Q1<br>
+      ACCESS: CLASSIFIED
+    </div>
+    <div class="max-w-6xl z-10">
+      <p class="font-mono text-industrial-warning mb-4 tracking-widest text-sm md:text-base border-l-2 border-industrial-warning pl-4 reveal active">// MARKET REPORT_2026</p>
+      <h1 class="text-5xl md:text-7xl lg:text-8xl font-bold uppercase tracking-tighter leading-none mb-6 relative glitch" data-text="Industrial and Logistics AI Consulting">
+        Industrial and <br><span class="text-transparent bg-clip-text bg-gradient-to-r from-industrial-cyan to-blue-600">Logistics AI</span> Consulting
+      </h1>
+      <h2 class="text-xl md:text-3xl font-light text-slate-400 max-w-3xl reveal active" style="transition-delay: 0.2s">
+        2026 Market Demand & Technology Report
+      </h2>
+    </div>
+    <div class="absolute bottom-10 left-6 md:left-16 font-mono text-xs flex items-center gap-4 animate-pulse-glow">
+      <div class="w-2 h-2 bg-industrial-cyan rounded-full"></div>
+      SCROLL TO INITIALIZE SEQUENCE
+    </div>
+  </section>
+
+  <!-- EXEC SUMMARY -->
+  <section class="min-h-screen py-24 px-6 md:px-16 lg:px-24 bg-industrial-800 relative z-10 flex flex-col justify-center">
+    <div class="max-w-5xl mx-auto">
+      <div class="flex items-center gap-4 mb-12 reveal">
+        <h2 class="text-3xl md:text-5xl font-bold">1. Executive Summary</h2>
+        <div class="h-[1px] flex-grow bg-gradient-to-r from-industrial-cyan to-transparent"></div>
+      </div>
+      <div class="grid grid-cols-1 lg:grid-cols-2 gap-12">
+        <div class="space-y-6 text-lg md:text-xl font-light text-slate-300 leading-relaxed reveal">
+          <p>The year <strong class="text-white font-bold">2026</strong> represents a pivotal inflection point for artificial intelligence in heavy industries, energy utilities, and logistics. AI has officially transitioned from isolated, proof-of-concept pilot projects to a fundamental driver of operational intelligence, resilience, and survival.</p>
+        </div>
+        <div class="bg-industrial-700/50 p-8 clip-brutal border-l-4 border-industrial-warning reveal relative backdrop-blur-sm" style="transition-delay: 0.2s">
+          <div class="absolute top-2 right-2 text-industrial-warning opacity-20">
+            <svg width="40" height="40" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2L1 21h22L12 2zm0 3.83L19.17 19H4.83L12 5.83zM11 16h2v2h-2v-2zm0-7h2v5h-2V9z"/></svg>
+          </div>
+          <p class="font-mono text-sm leading-relaxed">
+            Driven by compounding macrotrends—such as unprecedented power demand from AI data centers, severe skilled labor shortages, and geopolitical supply chain disruptions—organizations in <span class="text-industrial-warning">Manufacturing, Energy, Utilities, and Supply Chain/Logistics</span> are aggressively seeking specialized AI consulting services. These bridge the gap between complex operational technology (OT), legacy IT systems, and cutting-edge machine learning.
+          </p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- SECTOR ANALYSIS -->
+  <section class="py-24 px-6 md:px-16 lg:px-24 relative">
+    <div class="absolute top-0 left-0 w-full h-[1px] bg-gradient-to-r from-transparent via-industrial-cyan to-transparent opacity-30"></div>
+    <div class="max-w-7xl mx-auto">
+      <h2 class="text-3xl md:text-5xl font-bold mb-16 reveal flex flex-col md:flex-row md:items-end gap-4">
+        <span>2. Sector Analysis</span>
+        <span class="font-mono text-lg text-industrial-cyan font-light pb-1">// 2026 DEMAND MATRIX</span>
+      </h2>
+      
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-10">
+        <!-- Manufacturing -->
+        <div class="group relative bg-industrial-800 p-8 clip-brutal hover:bg-industrial-700 transition-colors duration-300 reveal">
+          <div class="absolute top-0 right-0 w-16 h-16 bg-blue-500/10 rounded-bl-full group-hover:bg-blue-500/20 transition-colors"></div>
+          <h3 class="text-2xl font-bold mb-4 flex items-center gap-3">
+            <span class="text-blue-500 font-mono">[2.1]</span> Manufacturing
+          </h3>
+          <ul class="space-y-4 text-sm md:text-base text-slate-400 font-mono">
+            <li class="flex gap-3"><span class="text-blue-500">></span> <div><strong class="text-white">The AI Supercycle:</strong> 92% view smart manufacturing as competitive driver, but only 29% deployed facility-level AI, 24% GenAI.</div></li>
+            <li class="flex gap-3"><span class="text-blue-500">></span> <div><strong class="text-white">Consulting Driver:</strong> "Agentic AI" & "Physical AI" (robotics) needed to combat projected 30% skilled labor gap (4M unfilled positions).</div></li>
+          </ul>
+        </div>
+
+        <!-- Energy -->
+        <div class="group relative bg-industrial-800 p-8 clip-brutal hover:bg-industrial-700 transition-colors duration-300 reveal" style="transition-delay: 0.1s">
+          <div class="absolute top-0 right-0 w-16 h-16 bg-industrial-warning/10 rounded-bl-full group-hover:bg-industrial-warning/20 transition-colors"></div>
+          <h3 class="text-2xl font-bold mb-4 flex items-center gap-3">
+            <span class="text-industrial-warning font-mono">[2.2]</span> Energy
+          </h3>
+          <ul class="space-y-4 text-sm md:text-base text-slate-400 font-mono">
+            <li class="flex gap-3"><span class="text-industrial-warning">></span> <div><strong class="text-white">Data Center Demands:</strong> Surge in AI compute power demand. US energy consulting projected to reach $17.3B in 2026 (+11%).</div></li>
+            <li class="flex gap-3"><span class="text-industrial-warning">></span> <div><strong class="text-white">Consulting Driver:</strong> Remodel volatile demand spikes, accelerate transitions, balance decarbonization with nuclear/gas restarts.</div></li>
+          </ul>
+        </div>
+
+        <!-- Utilities -->
+        <div class="group relative bg-industrial-800 p-8 clip-brutal hover:bg-industrial-700 transition-colors duration-300 reveal" style="transition-delay: 0.2s">
+          <div class="absolute top-0 right-0 w-16 h-16 bg-industrial-cyan/10 rounded-bl-full group-hover:bg-industrial-cyan/20 transition-colors"></div>
+          <h3 class="text-2xl font-bold mb-4 flex items-center gap-3">
+            <span class="text-industrial-cyan font-mono">[2.3]</span> Utility
+          </h3>
+          <ul class="space-y-4 text-sm md:text-base text-slate-400 font-mono">
+            <li class="flex gap-3"><span class="text-industrial-cyan">></span> <div><strong class="text-white">Reinvention:</strong> 94% of execs expect AI to drive revenue growth, 88% expect competitive advantage by 2028.</div></li>
+            <li class="flex gap-3"><span class="text-industrial-cyan">></span> <div><strong class="text-white">Consulting Driver:</strong> Aging infra (40+ yrs), RES integration. Demand for smart grid software, DER orchestration, field optimization.</div></li>
+          </ul>
+        </div>
+
+        <!-- Supply Chain -->
+        <div class="group relative bg-industrial-800 p-8 clip-brutal hover:bg-industrial-700 transition-colors duration-300 reveal" style="transition-delay: 0.3s">
+          <div class="absolute top-0 right-0 w-16 h-16 bg-green-500/10 rounded-bl-full group-hover:bg-green-500/20 transition-colors"></div>
+          <h3 class="text-2xl font-bold mb-4 flex items-center gap-3">
+            <span class="text-green-500 font-mono">[2.4]</span> Supply Chain & Logistics
+          </h3>
+          <ul class="space-y-4 text-sm md:text-base text-slate-400 font-mono">
+            <li class="flex gap-3"><span class="text-green-500">></span> <div><strong class="text-white">Resilience:</strong> AI supply chain market projected at $157B by 2033 (42% CAGR). Shift to "AI-first".</div></li>
+            <li class="flex gap-3"><span class="text-green-500">></span> <div><strong class="text-white">Consulting Driver:</strong> 97% adoption rate. Mitigate shocks, solve WMS/ERP fragmentation. Result: 15% lower logistics costs, 35% lower inventory.</div></li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- PAIN POINTS VS USE CASES -->
+  <section class="py-24 bg-industrial-900 border-y border-industrial-cyan/20">
+    <div class="max-w-7xl mx-auto px-6 md:px-16">
+      <div class="text-center mb-16 reveal">
+        <h2 class="text-3xl md:text-5xl font-bold mb-4">Core Pain Points & AI Solutions</h2>
+        <p class="font-mono text-industrial-cyan">ANALYSIS // 3.0 -> 4.0 CROSS-MAPPING</p>
+      </div>
+
+      <div class="space-y-16">
+        <!-- Issue 1 -->
+        <div class="flex flex-col lg:flex-row gap-8 items-stretch reveal">
+          <div class="flex-1 border border-industrial-danger/30 bg-industrial-danger/5 p-6 relative clip-brutal">
+            <div class="absolute -top-3 left-6 bg-industrial-900 px-2 text-industrial-danger font-mono text-sm font-bold">PAIN_POINT 3.1</div>
+            <h4 class="text-xl font-bold mb-3 text-white">Unplanned Machinery Downtime</h4>
+            <p class="text-slate-400 text-sm mb-4">Unexpected failure of critical assets (turbines, pumps) halts production lines. Costs industrial manufacturers ~$50B annually. Run-to-failure or schedule-based maintenance is disruptive and wasteful.</p>
+          </div>
+          <div class="hidden lg:flex items-center justify-center">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#06b6d4" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"></path><path d="m12 5 7 7-7 7"></path></svg>
+          </div>
+          <div class="flex-1 border border-industrial-cyan/30 bg-industrial-cyan/5 p-6 relative clip-brutal-reverse">
+            <div class="absolute -top-3 left-6 bg-industrial-900 px-2 text-industrial-cyan font-mono text-sm font-bold">USE_CASE 4.1</div>
+            <h4 class="text-xl font-bold mb-3 text-white">Predictive Maintenance (PdM)</h4>
+            <p class="text-slate-400 text-sm mb-2">ML models ingest high-frequency time-series IoT data (vibration, acoustics, thermal). Isolation Forests for baseline, XGBoost/LSTM for Remaining Useful Life (RUL).</p>
+            <div class="mt-4 inline-block bg-industrial-cyan/20 text-industrial-cyan font-mono text-xs px-2 py-1">BENEFIT: -50% UNPLANNED DOWNTIME</div>
+          </div>
+        </div>
+
+        <!-- Issue 2 -->
+        <div class="flex flex-col lg:flex-row gap-8 items-stretch reveal">
+          <div class="flex-1 border border-industrial-warning/30 bg-industrial-warning/5 p-6 relative clip-brutal">
+            <div class="absolute -top-3 left-6 bg-industrial-900 px-2 text-industrial-warning font-mono text-sm font-bold">PAIN_POINT 3.2</div>
+            <h4 class="text-xl font-bold mb-3 text-white">Grid Capacity & Intermittency</h4>
+            <p class="text-slate-400 text-sm mb-4">Structural strain from AI data centers, EVs, and industrial electrification. Renewable intermittency causes transmission congestion, power degradation, and energy curtailment.</p>
+          </div>
+          <div class="hidden lg:flex items-center justify-center">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#06b6d4" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"></path><path d="m12 5 7 7-7 7"></path></svg>
+          </div>
+          <div class="flex-1 border border-industrial-cyan/30 bg-industrial-cyan/5 p-6 relative clip-brutal-reverse">
+            <div class="absolute -top-3 left-6 bg-industrial-900 px-2 text-industrial-cyan font-mono text-sm font-bold">USE_CASE 4.2</div>
+            <h4 class="text-xl font-bold mb-3 text-white">Smart Grid Management</h4>
+            <p class="text-slate-400 text-sm mb-2">Temporal Fusion Transformers (TFTs) & DeepAR for probabilistic forecasting. Deep Reinforcement Learning (DRL) agents optimize utility-scale battery dispatch and Virtual Power Plants.</p>
+            <div class="mt-4 inline-block bg-industrial-cyan/20 text-industrial-cyan font-mono text-xs px-2 py-1">BENEFIT: -25% RENEWABLE CURTAILMENT</div>
+          </div>
+        </div>
+
+        <!-- Issue 3 & 4 Grid -->
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-8 reveal">
+          <div class="border-l-2 border-industrial-danger p-6 bg-gradient-to-r from-industrial-danger/10 to-transparent">
+            <h4 class="font-bold mb-2 text-white">3.3 Stockouts & Bullwhip Effects</h4>
+            <p class="text-slate-400 text-sm">Traditional static demand forecasting fails under geopolitical shifts/bottlenecks, driving carrying costs up 15-25%.</p>
+            <h4 class="font-bold mt-6 mb-2 text-industrial-cyan">4.4 Route Opt. & Fleet Intelligence</h4>
+            <p class="text-slate-400 text-sm">Graph Neural Networks + DRL/Metaheuristics solve Vehicle Routing Problem in real-time. Cuts logistics costs 12-18%.</p>
+          </div>
+          <div class="border-l-2 border-industrial-warning p-6 bg-gradient-to-r from-industrial-warning/10 to-transparent">
+            <h4 class="font-bold mb-2 text-white">3.4 Visual Defect Escapes</h4>
+            <p class="text-slate-400 text-sm">Human fatigue and rigid rule-based vision systems lead to defect escapes, costly recalls, and false positives.</p>
+            <h4 class="font-bold mt-6 mb-2 text-industrial-cyan">4.3 Computer Vision for QC</h4>
+            <p class="text-slate-400 text-sm">High-speed 2D/3D pipelines via YOLOv10/Mask R-CNNs optimized with TensorRT. 99.5% defect detection rate.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- SYSTEM ARCHITECTURES (ASCII ART) -->
+  <section class="py-24 px-4 md:px-12 lg:px-24 bg-[#0a0c10] relative overflow-hidden">
+    <div class="max-w-7xl mx-auto z-10 relative">
+      <div class="mb-12 reveal">
+        <h2 class="text-3xl md:text-5xl font-bold mb-4">5. System Architectures</h2>
+        <p class="text-xl font-light text-slate-400">IoT, Computer Vision, and Physical-Digital AI</p>
+        <p class="font-mono text-sm text-industrial-cyan mt-4">> INITIALIZING BLUEPRINTS...</p>
+      </div>
+
+      <!-- ARCHITECTURE 5.1 -->
+      <div class="mb-16 reveal">
+        <h3 class="text-xl font-bold text-white mb-4 bg-industrial-800 inline-block px-4 py-2 clip-brutal">5.1 IoT Edge AI System Architecture</h3>
+        <p class="text-slate-400 mb-6 max-w-4xl">Resolves latency, bandwidth, and cybersecurity constraints by bringing intelligence directly to physical assets.</p>
+        
+        <div class="terminal-box p-4 md:p-8 overflow-x-auto hide-scrollbar rounded-md">
+<pre class="font-mono text-[10px] md:text-xs leading-tight text-industrial-cyan terminal-text w-max">
++--------------------------------------------------------------------------------------------------------+
+|                                    PHYSICAL OPERATIONAL FIELD (OT)                                     |
+|                                                                                                        |
+|  +--------------------+      +--------------------+      +---------------------+                       |
+|  | Industrial Sensors |      | Industrial Sensors |      | High-Speed Cameras  |                       |
+|  | (Vibration, Temp)  |      | (Flow, Pressure)   |      | (Visual Inspection) |                       |
+|  +---------+----------+      +---------+----------+      +----------+----------+                       |
+|            |                           |                            |                                  |
+|            | (Analog/Modbus/HART)      | (OPC-UA/Profibus)          | (GigE Vision/CoaXPress)          |
+|            +---------------------------+----------------------------+                                  |
+|                                        |                                                               |
+|                                        v                                                               |
+|                        +-------------------------------+                                               |
+|                        |  Industrial IoT Edge Gateway  |                                               |
+|                        |  (e.g., NVIDIA Jetson / IPC)  |                                               |
+|                        |                               |                                               |
+|                        |  +-------------------------+  |                                               |
+|                        |  | Local Ingestion Layer   |  |                                               |
+|                        |  | (Node-RED / MQTT Broker)|  |                                               |
+|                        |  +------------+------------+  |                                               |
+|                        |               |               |                                               |
+|                        |               v               |                                               |
+|                        |  +-------------------------+  |                                               |
+|                        |  | Inference Engine        |  |                                               |
+|                        |  | (ONNX Runtime/TensorRT) |  |                                               |
+|                        |  | * Quantized INT8 Models |  |                                               |
+|                        |  +------------+------------+  |                                               |
+|                        |               |               |                                               |
+|                        |               v               |                                               |
+|                        |  +-------------------------+  |                                               |
+|                        |  | Action & Control PLC    |  |                                               |
+|                        |  | (Low-latency actuator)  |  |                                               |
+|                        |  +------------+------------+  |                                               |
+|                        +---------------+---------------+                                               |
++----------------------------------------|---------------------------------------------------------------+
+                                         | 
+                                         | (MQTT Over TLS / Sparkplug B)
+                                         | WAN / Cellular Failover
+                                         v
++--------------------------------------------------------------------------------------------------------+
+|                                   DIGITAL ENTERPRISE CLOUD (IT)                                        |
+|                                                                                                        |
+|                        +-------------------------------+                                               |
+|                        |    Industrial Data Lake /     |                                               |
+|                        |    Unified Namespace (UNS)    |                                               |
+|                        +---------------+---------------+                                               |
+|                                        |                                                               |
+|                                        v                                                               |
+|                        +-------------------------------+                                               |
+|                        |   Central Model Management    |                                               |
+|                        |    & Model Registry (MLflow)  |                                               |
+|                        +---------------+---------------+                                               |
+|                                        |                                                               |
+|                                        v                                                               |
+|                        +-------------------------------+                                               |
+|                        |     Retraining Pipeline       |                                               |
+|                        |    (Kubeflow / Airflow)       |                                               |
+|                        +-------------------------------+                                               |
++--------------------------------------------------------------------------------------------------------+
+</pre>
+        </div>
+      </div>
+
+      <!-- ARCHITECTURE 5.2 -->
+      <div class="mb-16 reveal">
+        <h3 class="text-xl font-bold text-white mb-4 bg-industrial-800 inline-block px-4 py-2 clip-brutal">5.2 Quality Control Computer Vision Architecture</h3>
+        <div class="terminal-box p-4 md:p-8 overflow-x-auto hide-scrollbar rounded-md">
+<pre class="font-mono text-[10px] md:text-xs leading-tight text-industrial-warning terminal-text w-max">
+                                  +------------------------+
+                                  | High-Speed Conveyor/   |
+                                  | Production Line        |
+                                  +-----------+------------+
+                                              |
+                                              | (Part trigger)
+                                              v
++------------------+              +------------------------+              +-------------------------+
+| Industrial LED   +-------------&gt;| 3D Laser / GigE Camera +-------------&gt;| Frame Grabber PCIe Card |
+| Strobes          | (Strobe flash| (Image Acquisition)    | (RAW visual  | (Direct Memory Access)  |
+| (Illumination)   |  activation) +------------------------+  stream)     +------------+------------+
++------------------+                                                                   |
+                                                                                       v
++------------------+              +------------------------+              +-------------------------+
+| Automation PLC   |&lt;-------------| Edge Compute Engine    |&lt;-------------| Pre-Processing Buffer   |
+| (Control Panel)  | (Pneumatic   | (YOLOv10 Segmentation) | (Tensor      | (Resizing, Denoising,   |
++--------+---------+  reject signal)+-----------+------------+  conversion)  | Normalization)          |
+         |                                     |                          +-------------------------+
+         |                                     | (Metadata & Images)
+         v                                     v
++--------+---------+              +------------+-----------+
+| Physical Reject  |              | Central IT QMS Cloud   |
+| Actuator (Gate/  |              | (Quality Management    |
+| Pneumatic Arm)   |              |  System Dashboard)     |
++------------------+              +------------------------+
+</pre>
+        </div>
+      </div>
+
+      <!-- ARCHITECTURE 5.3 -->
+      <div class="reveal">
+        <h3 class="text-xl font-bold text-white mb-4 bg-industrial-800 inline-block px-4 py-2 clip-brutal">5.3 Cognitive Digital Twins & DRL</h3>
+        <div class="terminal-box p-4 md:p-8 overflow-x-auto hide-scrollbar rounded-md">
+<pre class="font-mono text-[10px] md:text-xs leading-tight text-industrial-cyan terminal-text w-max">
+       +---------------------------------------------------------------------------------+
+       |                          PHYSICAL ECOSYSTEM (OT WORLD)                          |
+       |                                                                                 |
+       |   +--------------------+     (OPC-UA / MQTT)     +--------------------------+   |
+       |   | Physical Factory / +------------------------&gt;| SCADA / MES Databases    |   |
+       |   | Logistics Network  |&lt;------------------------+ (Supervisory Control)    |   |
+       |   +--------------------+  (Closed-Loop Actuation)+--------------------------+   |
+       +-------------^---------------------------------------------------------+---------+
+                     |                                                         |
+                     | (Actuation / Orchestration Commands)                    | (Ingested SCADA Datastream)
+                     |                                                         v
+       +-------------+---------------------------------------------------------+---------+
+       |                           DIGITAL TWIN INFRASTRUCTURE (IT)                      |
+       |                                                                                 |
+       |  +---------------------------------------------------------------------------+  |
+       |  |                       Unified Namespace (UNS) Broker                      |  |
+       |  |                  (MQTT Kafka Bridge - Enterprise Service Bus)             |  |
+       |  +--------------------------------------+------------------------------------+  |
+       |                                         |                                       |
+       |                                         v                                       |
+       |  +---------------------------------------------------------------------------+  |
+       |  |                    Dynamic Simulation Engine (Digital Twin)               |  |
+       |  |                  (Physics-Informed Model of Physical Operations)          |  |
+       |  +--------------------------------------+------------------------------------+  |
+       |                                         |                                       |
+       |                                         v                                       |
+       |  +---------------------------------------------------------------------------+  |
+       |  |                      Deep Reinforcement Learning (DRL)                    |  |
+       |  |             * Agent evaluates state space from simulation engine           |  |
+       |  |             * Policy model selects optimal action to maximize yield        |  |
+       |  |             * Reward function balances throughput vs energy waste/wear     |  |
+       |  +---------------------------------------------------------------------------+  |
+       +---------------------------------------------------------------------------------+
+</pre>
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- METHODOLOGY & ROI -->
+  <section class="py-24 px-6 md:px-16 lg:px-24 bg-industrial-900 relative">
+    <div class="max-w-7xl mx-auto">
+      <div class="grid grid-cols-1 lg:grid-cols-2 gap-16">
+        
+        <!-- Methodology -->
+        <div class="reveal">
+          <h2 class="text-3xl font-bold mb-10 flex items-center gap-4">
+            <span>6. Implementation Framework</span>
+          </h2>
+          <div class="relative border-l-2 border-industrial-cyan/30 pl-8 space-y-12">
+            <div class="relative">
+              <div class="absolute -left-[41px] top-0 w-5 h-5 rounded-full bg-industrial-900 border-2 border-industrial-cyan flex items-center justify-center"><div class="w-1 h-1 bg-industrial-cyan rounded-full animate-ping"></div></div>
+              <h4 class="text-lg font-bold text-white">Phase 1: Data Readiness & OT/IT Convergence</h4>
+              <span class="text-industrial-cyan font-mono text-xs block mb-2">WEEKS 1–6</span>
+              <p class="text-sm text-slate-400">Audit legacy SCADA/MES/ERP. Establish OPC-UA/MQTT pipelines. Cleanse time-series telemetry to InfluxDB/TimescaleDB.</p>
+            </div>
+            <div class="relative">
+              <div class="absolute -left-[41px] top-0 w-5 h-5 rounded-full bg-industrial-900 border-2 border-industrial-cyan"></div>
+              <h4 class="text-lg font-bold text-white">Phase 2: Edge & Core Model Architecture</h4>
+              <span class="text-industrial-cyan font-mono text-xs block mb-2">WEEKS 7–14</span>
+              <p class="text-sm text-slate-400">Train custom anomaly/vision models. Use PINNs for synthetic data. Quantize (INT8) & containerize for Edge Gateways.</p>
+            </div>
+            <div class="relative">
+              <div class="absolute -left-[41px] top-0 w-5 h-5 rounded-full bg-industrial-900 border-2 border-industrial-cyan"></div>
+              <h4 class="text-lg font-bold text-white">Phase 3: Integration & Human-in-the-Loop</h4>
+              <span class="text-industrial-cyan font-mono text-xs block mb-2">WEEKS 15–20</span>
+              <p class="text-sm text-slate-400">Deploy in "Shadow Mode". Standardize UX/UI dashboards. Establish active learning feedback loops for false positives.</p>
+            </div>
+            <div class="relative">
+              <div class="absolute -left-[41px] top-0 w-5 h-5 rounded-full bg-industrial-900 border-2 border-industrial-cyan"></div>
+              <h4 class="text-lg font-bold text-white">Phase 4: Scaling & Continuous Governance</h4>
+              <span class="text-industrial-cyan font-mono text-xs block mb-2">WEEK 21+</span>
+              <p class="text-sm text-slate-400">Implement MLOps (MLflow) for drift monitoring. Setup FinOps for bandwidth costs. Ensure EU AI Act & NIST compliance.</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- ROI Benchmarks -->
+        <div class="reveal" style="transition-delay: 0.2s">
+          <h2 class="text-3xl font-bold mb-10 text-white">7. ROI Benchmarks</h2>
+          <div class="space-y-6">
+            
+            <div class="bg-industrial-800 border border-slate-700 p-6 flex items-center justify-between group hover:border-industrial-cyan transition-colors">
+              <div>
+                <h4 class="font-bold text-white">Grid Uptime & Diagnostics</h4>
+                <p class="text-xs text-slate-400 mt-1 uppercase">Reliability Improvement</p>
+              </div>
+              <div class="text-3xl font-mono font-bold text-industrial-cyan group-hover:scale-110 transition-transform">+15%</div>
+            </div>
+
+            <div class="bg-industrial-800 border border-slate-700 p-6 flex items-center justify-between group hover:border-industrial-cyan transition-colors">
+              <div>
+                <h4 class="font-bold text-white">Unplanned Downtime</h4>
+                <p class="text-xs text-slate-400 mt-1 uppercase">Unexpected Failures</p>
+              </div>
+              <div class="text-3xl font-mono font-bold text-industrial-cyan group-hover:scale-110 transition-transform">-50%</div>
+            </div>
+
+            <div class="bg-industrial-800 border border-slate-700 p-6 flex items-center justify-between group hover:border-industrial-cyan transition-colors">
+              <div>
+                <h4 class="font-bold text-white">Defect Detection</h4>
+                <p class="text-xs text-slate-400 mt-1 uppercase">Assembly Line Accuracy</p>
+              </div>
+              <div class="text-3xl font-mono font-bold text-industrial-cyan group-hover:scale-110 transition-transform">99.5%</div>
+            </div>
+
+            <div class="bg-industrial-800 border border-slate-700 p-6 flex items-center justify-between group hover:border-industrial-cyan transition-colors">
+              <div>
+                <h4 class="font-bold text-white">Inventory Stockouts</h4>
+                <p class="text-xs text-slate-400 mt-1 uppercase">Demand-forecasting</p>
+              </div>
+              <div class="text-3xl font-mono font-bold text-industrial-cyan group-hover:scale-110 transition-transform">-40%</div>
+            </div>
+
+            <div class="bg-industrial-800 border border-slate-700 p-6 flex items-center justify-between group hover:border-industrial-cyan transition-colors">
+              <div>
+                <h4 class="font-bold text-white">Logistics Efficiency</h4>
+                <p class="text-xs text-slate-400 mt-1 uppercase">Transport & Carbon</p>
+              </div>
+              <div class="text-3xl font-mono font-bold text-industrial-cyan group-hover:scale-110 transition-transform">-15%</div>
+            </div>
+
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </section>
+
+  <footer class="py-12 border-t border-slate-800 text-center font-mono text-xs text-slate-600">
+    <p>END OF REPORT // CONFIDENTIAL 2026 // SYSTEM SECURE</p>
+  </footer>
+
+</main>
+
+<script>
+  // Custom Cursor
+  const cursor = document.getElementById('cursor');
+  document.addEventListener('mousemove', (e) => {
+    cursor.style.transform = `translate(${e.clientX}px, ${e.clientY}px) translate(-50%, -50%)`;
+  });
+
+  // Reveal on scroll
+  const revealElements = document.querySelectorAll('.reveal');
+  const revealOptions = {
+    threshold: 0.15,
+    rootMargin: "0px 0px -50px 0px"
+  };
+
+  const revealOnScroll = new IntersectionObserver(function(entries, observer) {
+    entries.forEach(entry => {
+      if (!entry.isIntersecting) return;
+      entry.target.classList.add('active');
+      observer.unobserve(entry.target);
+    });
+  }, revealOptions);
+
+  revealElements.forEach(el => {
+    revealOnScroll.observe(el);
+  });
+
+  // Interactive Cursor expansion on links/interactive elements
+  const interactives = document.querySelectorAll('.group, .terminal-box, .glitch');
+  interactives.forEach(el => {
+    el.addEventListener('mouseenter', () => {
+      cursor.style.width = '40px';
+      cursor.style.height = '40px';
+      cursor.style.backgroundColor = 'rgba(6, 182, 212, 0.1)';
+    });
+    el.addEventListener('mouseleave', () => {
+      cursor.style.width = '20px';
+      cursor.style.height = '20px';
+      cursor.style.backgroundColor = 'transparent';
+    });
+  });
+</script>
+</body>
+</html>

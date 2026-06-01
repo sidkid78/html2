@@ -1,0 +1,419 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>FSI AI Market Demand Analysis (2026)</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Space+Mono:ital,wght@0,400;0,700;1,400&family=Syncopate:wght@400;700&display=swap');
+
+  :root {
+    --cyan: #00f0ff;
+    --blue: #0057ff;
+    --alert: #ff3300;
+    --void: #030712;
+    --glass: rgba(15, 23, 42, 0.6);
+  }
+
+  body {
+    background-color: var(--void);
+    color: #e2e8f0;
+    font-family: 'Space Mono', monospace;
+    overflow-x: hidden;
+    margin: 0;
+  }
+
+  h1, h2, h3, .syncopate {
+    font-family: 'Syncopate', sans-serif;
+  }
+
+  /* Custom Scrollbar */
+  ::-webkit-scrollbar {
+    width: 8px;
+  }
+  ::-webkit-scrollbar-track {
+    background: var(--void);
+  }
+  ::-webkit-scrollbar-thumb {
+    background: var(--blue);
+    border-radius: 4px;
+  }
+  ::-webkit-scrollbar-thumb:hover {
+    background: var(--cyan);
+  }
+
+  /* SVG Filters & Compositing */
+  .noise-overlay {
+    position: fixed;
+    inset: 0;
+    z-index: 999;
+    pointer-events: none;
+    opacity: 0.15;
+    mix-blend-mode: overlay;
+  }
+
+  .hologram-text {
+    text-shadow: 0 0 8px rgba(0, 240, 255, 0.6), 0 0 20px rgba(0, 87, 255, 0.4);
+  }
+  
+  .alert-text {
+    text-shadow: 0 0 8px rgba(255, 51, 0, 0.6);
+  }
+
+  /* Animations */
+  @keyframes scanline {
+    0% { transform: translateY(-100%); }
+    100% { transform: translateY(100vh); }
+  }
+  .scan {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 4px;
+    background: linear-gradient(to right, transparent, var(--cyan), transparent);
+    opacity: 0.3;
+    animation: scanline 8s linear infinite;
+    z-index: 998;
+    pointer-events: none;
+  }
+
+  @keyframes float {
+    0%, 100% { transform: translateY(0) scale(1); opacity: 0.3; }
+    50% { transform: translateY(-30px) scale(1.05); opacity: 0.5; }
+  }
+  .orb {
+    position: absolute;
+    border-radius: 50%;
+    filter: blur(80px);
+    animation: float 15s cubic-bezier(0.4, 0, 0.2, 1) infinite;
+    z-index: 0;
+    mix-blend-mode: screen;
+  }
+  .orb-1 { width: 400px; height: 400px; background: var(--blue); top: 10%; left: -10%; }
+  .orb-2 { width: 500px; height: 500px; background: rgba(0, 240, 255, 0.2); bottom: 20%; right: -15%; animation-delay: -5s; }
+  .orb-3 { width: 300px; height: 300px; background: rgba(255, 51, 0, 0.15); top: 50%; left: 40%; animation-delay: -10s; }
+
+  /* Layout & Components */
+  .glass-panel {
+    background: var(--glass);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border: 1px solid rgba(0, 240, 255, 0.1);
+    box-shadow: inset 0 0 20px rgba(0, 240, 255, 0.05), 0 8px 32px rgba(0, 0, 0, 0.5);
+    position: relative;
+    z-index: 10;
+    overflow: hidden;
+  }
+  .glass-panel::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0; height: 1px;
+    background: linear-gradient(90deg, transparent, var(--cyan), transparent);
+    opacity: 0.5;
+  }
+
+  .chamfered {
+    clip-path: polygon(0 15px, 15px 0, 100% 0, 100% calc(100% - 15px), calc(100% - 15px) 100%, 0 100%);
+  }
+
+  /* Intersection Observer Reveal */
+  .reveal {
+    opacity: 0;
+    transform: translateY(30px);
+    transition: opacity 0.8s cubic-bezier(0.16, 1, 0.3, 1), transform 0.8s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+  .reveal.active {
+    opacity: 1;
+    transform: translateY(0);
+  }
+
+  /* Decorative structural lines */
+  .grid-bg {
+    position: fixed;
+    inset: 0;
+    background-size: 50px 50px;
+    background-image: 
+      linear-gradient(to right, rgba(255, 255, 255, 0.03) 1px, transparent 1px),
+      linear-gradient(to bottom, rgba(255, 255, 255, 0.03) 1px, transparent 1px);
+    z-index: 0;
+    pointer-events: none;
+  }
+</style>
+</head>
+<body class="antialiased selection:bg-cyan-900 selection:text-cyan-50">
+
+  <!-- Visual Alchemy Elements -->
+  <svg class="noise-overlay">
+    <filter id="noise">
+      <feTurbulence type="fractalNoise" baseFrequency="0.75" numOctaves="3" stitchTiles="stitch"/>
+      <feColorMatrix type="matrix" values="1 0 0 0 0, 0 1 0 0 0, 0 0 1 0 0, 0 0 0 0.2 0" />
+    </filter>
+    <rect width="100%" height="100%" filter="url(#noise)"/>
+  </svg>
+  <div class="scan"></div>
+  <div class="grid-bg"></div>
+  <div class="orb orb-1"></div>
+  <div class="orb orb-2"></div>
+  <div class="orb orb-3"></div>
+
+  <main class="relative max-w-7xl mx-auto px-6 py-20 lg:px-12 flex flex-col gap-24">
+    
+    <!-- Header Section -->
+    <header class="reveal flex flex-col gap-6">
+      <div class="flex items-center gap-4 text-cyan-400 text-sm font-bold tracking-widest uppercase">
+        <span class="w-8 h-px bg-cyan-400"></span>
+        SYSTEM_REPORT // MAY_2026
+      </div>
+      <h1 class="text-4xl md:text-6xl font-bold uppercase tracking-tighter text-white hologram-text leading-tight">
+        Financial Services and Insurance <br/><span class="text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 to-blue-600">AI Market Demand Analysis (2026)</span>
+      </h1>
+      <p class="text-lg md:text-xl text-slate-300 max-w-3xl leading-relaxed border-l-2 border-cyan-500 pl-6">
+        This comprehensive report details the current market demand, core business pain points, highly requested use cases, and specific technological implementations of Artificial Intelligence (AI) within the Financial Services and Insurance (FSI) industries as of May 2026.
+      </p>
+    </header>
+
+    <!-- 1. Executive Summary -->
+    <section class="reveal">
+      <h2 class="text-2xl font-bold text-cyan-400 mb-8 border-b border-slate-800 pb-4">1. Executive Summary & Market Demand Overview (2026)</h2>
+      <p class="text-slate-300 mb-8">
+        The financial services and insurance industries have officially entered a new epoch of AI maturity. The focus has pivoted decisively from experimental Proof-of-Concepts (POCs) to production-grade, enterprise-wide deployments. AI is no longer treated as a marginal productivity booster; it has become core infrastructure.
+      </p>
+      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+        <div class="glass-panel chamfered p-6 hover:border-cyan-400 transition-colors duration-300">
+          <h3 class="text-cyan-300 mb-3 text-sm tracking-wider uppercase">Partner-Led Strategy</h3>
+          <p class="text-sm text-slate-400">Financial institutions are increasingly relying on external expertise. In 2026, 56.9% of FSI executives state they rely on third-party platforms and 56% rely on consulting and technology service partners, compared to only 37% who believe they can build robust AI capabilities entirely in-house.</p>
+        </div>
+        <div class="glass-panel chamfered p-6 hover:border-cyan-400 transition-colors duration-300">
+          <h3 class="text-cyan-300 mb-3 text-sm tracking-wider uppercase">Consulting Boom</h3>
+          <p class="text-sm text-slate-400">Top-tier firms (such as PwC, a recognized leader in Forrester’s Q2 2026 AI Consulting Services evaluation) are experiencing massive demand for scaling AI from simple task-automation to full process-reinvention. Consulting services are projected to experience an astronomical 35.80% CAGR through 2031 within the insurance AI space alone.</p>
+        </div>
+        <div class="glass-panel chamfered p-6 hover:border-cyan-400 transition-colors duration-300">
+          <h3 class="text-cyan-300 mb-3 text-sm tracking-wider uppercase">The Rise of "Agentic AI"</h3>
+          <p class="text-sm text-slate-400">2026 is marked by the rapid adoption of Agentic AI—autonomous systems capable of planning and executing multi-step workflows with minimal human oversight (e.g., executing end-to-end insurance quotes, compliance audits, or portfolio adjustments).</p>
+        </div>
+        <div class="glass-panel chamfered p-6 hover:border-cyan-400 transition-colors duration-300">
+          <h3 class="text-cyan-300 mb-3 text-sm tracking-wider uppercase">Investment Surge</h3>
+          <p class="text-sm text-slate-400">FSI remains the leading sector for global AI spending, with banking and financial services on track to surpass $97 billion in annual AI investments by 2027.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- 2. Core Business Pain Points -->
+    <section class="reveal">
+      <div class="flex items-baseline gap-4 mb-8">
+        <h2 class="text-2xl font-bold text-red-500 alert-text uppercase">2. Core Business Pain Points in FSI</h2>
+      </div>
+      <p class="text-slate-300 mb-8">
+        As AI systems become highly integrated, FSI firms face distinct and urgent operational bottlenecks that drive them to seek specialized AI consulting services:
+      </p>
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+        <div class="border-l-4 border-red-500 bg-red-950/20 p-6 relative overflow-hidden">
+          <div class="absolute top-0 right-0 bg-red-500/20 text-red-400 text-xs px-2 py-1">A</div>
+          <h3 class="text-lg text-white mb-2">Manual Underwriting and "Underwriting Friction"</h3>
+          <p class="text-sm text-slate-400 mb-2"><strong class="text-red-300">The Problem:</strong> Traditional underwriting relies on manual verification of disjointed documents (medical histories, tax filings, real estate appraisals) and rigid, historical rule-engines.</p>
+          <p class="text-sm text-slate-400 mb-2"><strong class="text-red-300">The Impact:</strong> Prolonged policy issuance times, higher customer friction, and loss of business to agile, digital-native competitors.</p>
+          <p class="text-sm text-slate-400"><strong class="text-red-300">The Data Bottleneck:</strong> According to 2026 industry surveys, 46% of financial professionals report reading massive volumes of documents as their primary challenge, while another 46% struggle with extracting information from multi-source, disconnected systems.</p>
+        </div>
+
+        <div class="border-l-4 border-red-500 bg-red-950/20 p-6 relative overflow-hidden">
+          <div class="absolute top-0 right-0 bg-red-500/20 text-red-400 text-xs px-2 py-1">B</div>
+          <h3 class="text-lg text-white mb-2">Skyrocketing Compliance Costs and Regulatory Pressures</h3>
+          <p class="text-sm text-slate-400 mb-2"><strong class="text-red-300">The Problem:</strong> Regulators globally have tightened rules (e.g., the EU AI Act, FCA Consumer Duty standards, and ComFrame solvency standards by the International Association of Insurance Supervisors in 2026).</p>
+          <p class="text-sm text-slate-400"><strong class="text-red-300">The Impact:</strong> Compliance teams are overwhelmed by constant regulatory updates. Manual tracking of non-compliance across millions of customer interactions is economically unviable and prone to catastrophic fines.</p>
+        </div>
+
+        <div class="border-l-4 border-red-500 bg-red-950/20 p-6 relative overflow-hidden">
+          <div class="absolute top-0 right-0 bg-red-500/20 text-red-400 text-xs px-2 py-1">C</div>
+          <h3 class="text-lg text-white mb-2">Advanced, High-Velocity Fraud & Synthetic Identity Theft</h3>
+          <p class="text-sm text-slate-400 mb-2"><strong class="text-red-300">The Problem:</strong> Cybercriminals are leveraging generative AI to execute highly sophisticated fraud, deepfake identity verification, and synthetic transaction loops.</p>
+          <p class="text-sm text-slate-400"><strong class="text-red-300">The Impact:</strong> Legacy, rule-based fraud detection engines are generate high rates of "false positives" (disrupting legitimate transactions) while missing complex, long-range behavioral fraud sequences.</p>
+        </div>
+
+        <div class="border-l-4 border-red-500 bg-red-950/20 p-6 relative overflow-hidden">
+          <div class="absolute top-0 right-0 bg-red-500/20 text-red-400 text-xs px-2 py-1">D</div>
+          <h3 class="text-lg text-white mb-2">System Fragmentation & Legacy Technical Debt</h3>
+          <p class="text-sm text-slate-400 mb-2"><strong class="text-red-300">The Problem:</strong> FSI institutions operate on decades-old legacy core banking and insurance systems. AI models require real-time, clean, and consolidated data, which is heavily gatekept by siloed databases and internal department barriers.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- 3. Highly Requested AI Use Cases -->
+    <section class="reveal glass-panel p-8 md:p-12">
+      <h2 class="text-2xl font-bold text-cyan-400 mb-6">3. Highly Requested AI Use Cases</h2>
+      <p class="text-slate-300 mb-8">
+        Consulting clients in 2026 are primarily demanding AI implementations in several high-ROI, business-critical domains:
+      </p>
+
+      <!-- Verbatim ASCII Table Injection -->
+      <div class="bg-black/80 p-4 rounded border border-cyan-800 shadow-[0_0_15px_rgba(0,255,255,0.1)] mb-10 overflow-x-auto">
+<pre class="text-cyan-500 text-xs md:text-sm">
+┌────────────────────────────────────────────────────────────────────────┐
+│                      HIGH-DEMAND FSI USE CASES (2026)                  │
+├──────────────────────────┬─────────────────────────────────────────────┤
+│ Algorithmic Trading      │ • Real-time sentiment & sequence analysis   │
+│                          │ • Autonomous, rule-governed asset allocation│
+├──────────────────────────┼─────────────────────────────────────────────┤
+│ Automated Claims         │ • Straight-Through Processing (STP)         │
+│                          │ • Visual & contextual damage assessment    │
+├──────────────────────────┼─────────────────────────────────────────────┤
+│ Risk & Credit Assessment │ • Focused Sequence Models for transactions │
+│                          │ • Real-time risk profile scoring            │
+├──────────────────────────┼─────────────────────────────────────────────┤
+│ Wealth Management Agents │ • Context-aware virtual advisors            │
+│                          │ • Multi-step "Agentic" financial planning   │
+└──────────────────────────┴─────────────────────────────────────────────┘
+</pre>
+      </div>
+
+      <div class="space-y-8">
+        <div>
+          <h3 class="text-xl text-white mb-2 flex items-center gap-2">
+            <span class="text-cyan-500">A.</span> Wealth Management Chatbots & Autonomous Virtual Assistants
+          </h3>
+          <p class="text-sm text-slate-400">
+            Traditional, rigid decision-tree chatbots are rapidly being replaced by advanced conversational agents. Large financial institutions are expanding platforms (such as NatWest's Cora, which manages over 11 million customer interactions annually, and Bank of America's Erica) to handle highly complex financial queries. Consultants are tasked with building agents that display domain expertise and conversational empathy while remaining strictly aligned with regulatory boundaries.
+          </p>
+        </div>
+        <div>
+          <h3 class="text-xl text-white mb-2 flex items-center gap-2">
+            <span class="text-cyan-500">B.</span> Automated Claims Processing (Straight-Through Processing - STP)
+          </h3>
+          <p class="text-sm text-slate-400">
+            In the insurance domain, claims processing is shifting toward a "predict-and-prevent" model. AI agents process unstructured claims reports, cross-reference them with policy documents, evaluate visual evidence (such as accident photos), and trigger immediate payouts for standard, non-fraudulent claims (STP) in seconds rather than weeks.
+          </p>
+        </div>
+        <div>
+          <h3 class="text-xl text-white mb-2 flex items-center gap-2">
+            <span class="text-cyan-500">C.</span> Algorithmic Trading & Portfolio Management
+          </h3>
+          <p class="text-sm text-slate-400">
+            Wealth and investment managers are leveraging AI to ingest millions of unstructured document flows (such as earnings reports, global regulatory filings, and market sentiment feeds) to run predictive models. These systems perform autonomous, real-time risk adjustments and execute trades within narrow, pre-configured compliance guardrails.
+          </p>
+        </div>
+        <div>
+          <h3 class="text-xl text-white mb-2 flex items-center gap-2">
+            <span class="text-cyan-500">D.</span> Hyper-Personalized Credit & Risk Assessment
+          </h3>
+          <p class="text-sm text-slate-400">
+            Traditional credit scoring models often penalize "thin-file" customers who lack extensive historical records. Today's AI platforms evaluate real-time transaction sequences, alternative data points (e.g., cash flow habits, utility bills), and macroeconomic trends to generate instantaneous, precise credit risk profiles.
+          </p>
+        </div>
+      </div>
+    </section>
+
+    <!-- 4. Technological Implementations -->
+    <section class="reveal">
+      <h2 class="text-2xl font-bold text-cyan-400 mb-6 border-b border-slate-800 pb-4">4. Specific Technological Implementations</h2>
+      <p class="text-slate-300 mb-8">
+        The bridge between high-level business goals and practical execution lies in several core AI paradigms:
+      </p>
+
+      <div class="flex flex-col gap-6">
+        <div class="bg-blue-900/10 border border-blue-500/30 p-6 rounded">
+          <h3 class="text-xl text-white mb-4"><span class="text-blue-500">A.</span> Advanced Retrieval-Augmented Generation (RAG) Systems</h3>
+          <p class="text-sm text-slate-300 mb-4">FSI institutions are deploying sophisticated RAG frameworks to allow employees and clients to query private, highly regulated document stores.</p>
+          <div class="pl-4 border-l border-blue-500/50 space-y-3">
+            <p class="text-sm text-slate-400"><strong class="text-white">Real-World Example:</strong> Royal Bank of Canada (RBC) successfully deployed Arcane, an internal RAG system that enables investment advisors to instantly locate and parse complex investment policies across semi-structured documents.</p>
+            <p class="text-sm text-slate-400"><strong class="text-white">Consulting Specialization:</strong> Standard fixed-size chunking is insufficient for highly complex insurance policies where a clause in Section 10 is modified by an exclusion in Section 2. Consultants must implement:</p>
+            <ul class="list-disc list-inside text-sm text-slate-400 space-y-1 ml-2">
+              <li><strong class="text-blue-300">Structural Parsing Passes:</strong> Mapping policy boundaries and classifying chunks (e.g., Coverage, Exclusions, Definitions) before ingestion.</li>
+              <li><strong class="text-blue-300">Parent-Child Chunking:</strong> Retaining full-section context (parent) while targeting precise clauses for retrieval (child).</li>
+              <li><strong class="text-blue-300">Intent Classification:</strong> Routing queries to specific vector indexes based on intent (e.g., distinguishing a deductible query from an exclusion query) to reduce "retrieval noise".</li>
+            </ul>
+          </div>
+        </div>
+
+        <div class="bg-blue-900/10 border border-blue-500/30 p-6 rounded">
+          <h3 class="text-xl text-white mb-4"><span class="text-blue-500">B.</span> Focused Sequence Models (FSMs) & Predictive Neural Networks</h3>
+          <ul class="space-y-4">
+            <li class="text-sm text-slate-400">
+              <strong class="text-blue-300 block mb-1">FSMs in 2026:</strong> Highlighted by FICO, FSMs represent a massive technological leap for transaction analytics. Instead of relying on traditional recursive profiling (basic averages, geographic tendencies), FSMs ingest and analyze entire long-range transaction histories in real time. This allows systems to instantly distinguish legitimate customer behavior from subtle, AI-driven fraud patterns.
+            </li>
+            <li class="text-sm text-slate-400">
+              <strong class="text-blue-300 block mb-1">Deep Neural Networks & Boosting:</strong> Underwriting platforms utilize Multi-Layer Perceptrons (MLPs), Random Forests, and Gradient Boosting (XGBoost) to evaluate physical, financial, and environmental data (such as satellite weather patterns for property insurance) to optimize loss ratios and price risk dynamically.
+            </li>
+          </ul>
+        </div>
+
+        <div class="bg-blue-900/10 border border-blue-500/30 p-6 rounded">
+          <h3 class="text-xl text-white mb-4"><span class="text-blue-500">C.</span> Fine-Tuned Large Language Models (LLMs) & Domain-Specific Foundation Models</h3>
+          <p class="text-sm text-slate-300 mb-4">General-purpose LLMs present extreme hallucination risks and fail to comprehend dense financial jargon. Consultants are heavily deploying fine-tuning pipelines using platforms like IBM watsonx or private, secure model hosting.</p>
+          <ul class="space-y-3 pl-4 border-l border-blue-500/50">
+            <li class="text-sm text-slate-400">
+              <strong class="text-blue-300">Compliance Fine-Tuning:</strong> Models are fine-tuned directly on regulatory libraries (e.g., SEC rules, FCA compliance guidelines) to act as autonomous auditors, automatically identifying compliance anomalies in advisor communications or marketing copy.
+            </li>
+            <li class="text-sm text-slate-400">
+              <strong class="text-blue-300">Generative Tabular Learning (GTL):</strong> Translating structured financial spreadsheets and database records into descriptive contexts that LLMs can process to generate precise financial summaries.
+            </li>
+            <li class="text-sm text-slate-400">
+              <strong class="text-blue-300">Privacy-Enhanced Models:</strong> Implementation of on-device/edge LLMs featuring Differential Privacy (such as DPFinLLM frameworks) to process sensitive user transactions securely without data escaping the edge device.
+            </li>
+          </ul>
+        </div>
+      </div>
+    </section>
+
+    <!-- 5. Consulting Strategies -->
+    <section class="reveal mb-20">
+      <div class="bg-black/90 p-8 border border-green-900/50 rounded-lg shadow-[0_0_30px_rgba(0,255,100,0.05)] relative">
+        <div class="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-transparent via-green-500 to-transparent opacity-50"></div>
+        <h2 class="text-2xl font-bold text-green-400 mb-6">5. Key Consulting Strategies for FSI Client Success</h2>
+        <p class="text-slate-300 mb-8">
+          For an AI consulting practice to succeed in 2026, it must structure its engagements to resolve the typical points of failure in FSI AI initiatives:
+        </p>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+          <div>
+            <h4 class="text-green-300 font-bold mb-2">> Prioritize FinOps and Cost Governance</h4>
+            <p class="text-sm text-slate-400">Running scale LLM/RAG pipelines is expensive. Top consultants build FinOps frameworks into their delivery, optimizing token usage, caching strategies, and deploying smaller, highly efficient task-specific models (e.g., fine-tuned 8B models instead of raw 70B models) where appropriate.</p>
+          </div>
+          <div>
+            <h4 class="text-green-300 font-bold mb-2">> Model-Agnostic Architecture</h4>
+            <p class="text-sm text-slate-400">Due to the rapid pace of model evolution (such as the recent release of frontier models like Anthropic's Mythos in 2026), locking a client into a single LLM provider creates immense concentration risk. Consultants must design middleware layers that allow banks to swap underlying LLMs seamlessly.</p>
+          </div>
+          <div>
+            <h4 class="text-green-300 font-bold mb-2">> Robust Change Management</h4>
+            <p class="text-sm text-slate-400">The success of predictive underwriting and advisory systems hinges on employee adoption. Consultants must run concurrent training and change-management programs to bridge the gap between technical output and human trust.</p>
+          </div>
+          <div>
+            <h4 class="text-green-300 font-bold mb-2">> Strict Guardrailing & Confidence Scoring</h4>
+            <p class="text-sm text-slate-400">Systems must be engineered with deterministic fallback mechanisms. If a RAG system cannot locate verifiable source facts for a query, it must generate a structured "I do not know" output with a low confidence score, rather than generating plausible-sounding hallucinations.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <footer class="reveal text-center pb-12 opacity-60">
+      <p class="text-xs tracking-[0.2em] text-cyan-500 uppercase">
+        Findings compiled in May 2026 for the 'workers/financial_services_ai.md' registry.
+      </p>
+    </footer>
+
+  </main>
+
+  <script>
+    // Vanilla JS Intersection Observer for scroll reveals
+    document.addEventListener('DOMContentLoaded', () => {
+      const observerOptions = {
+        root: null,
+        rootMargin: '0px',
+        threshold: 0.1
+      };
+
+      const observer = new IntersectionObserver((entries, observer) => {
+        entries.forEach(entry => {
+          if (entry.isIntersecting) {
+            entry.target.classList.add('active');
+            observer.unobserve(entry.target);
+          }
+        });
+      }, observerOptions);
+
+      document.querySelectorAll('.reveal').forEach((el) => {
+        observer.observe(el);
+      });
+    });
+  </script>
+</body>
+</html>

@@ -49,6 +49,24 @@ const hubs = [
     shadow: "hover:shadow-[0_0_40px_-10px_rgba(6,182,212,0.2)]"
   },
   {
+    title: "AI Business Models & Pricing",
+    description: "Research repository covering pricing paradigms, enterprise delivery frameworks, and margin analysis.",
+    href: "/research-index.html",
+    icon: "📈",
+    color: "from-indigo-600 to-purple-700",
+    border: "hover:border-indigo-500/50",
+    shadow: "hover:shadow-[0_0_40px_-10px_rgba(79,70,229,0.2)]"
+  },
+  {
+    title: "Industrial & Logistics AI",
+    description: "Sector analysis for manufacturing, energy, and supply chain, covering predictive maintenance and grid capacity.",
+    href: "/industrial-index.html",
+    icon: "⚙️",
+    color: "from-amber-500 to-yellow-600",
+    border: "hover:border-amber-500/50",
+    shadow: "hover:shadow-[0_0_40px_-10px_rgba(245,158,11,0.2)]"
+  },
+  {
     title: "The QUANTEON System",
     description: "Autonomous revenue performance integrations performing operational surgery to buy your life back.",
     href: "/quanteon",

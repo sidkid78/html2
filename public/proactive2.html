@@ -1,0 +1,690 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Domain Report: Strategic Expansion Briefing</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;700;900&family=JetBrains+Mono:wght@400;700&display=swap');
+
+  :root {
+    --dark: #0B0C10;
+    --slate: #1F2833;
+    --cyan: #66FCF1;
+    --teal: #45A29E;
+    --red: #FF003C;
+    --yellow: #F4D03F;
+  }
+
+  body {
+    background-color: var(--dark);
+    color: #C5C6C7;
+    font-family: 'Inter', sans-serif;
+    overflow-x: hidden;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  .font-mono { font-family: 'JetBrains Mono', monospace; }
+
+  /* SVG Background Noise */
+  .noise-bg {
+    position: fixed;
+    top: 0; left: 0; width: 100vw; height: 100vh;
+    pointer-events: none;
+    z-index: 9999;
+    opacity: 0.04;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E");
+    mix-blend-mode: overlay;
+  }
+
+  /* Smooth Reveal Animation */
+  .reveal {
+    opacity: 0;
+    transform: translateY(40px);
+    transition: opacity 1.2s cubic-bezier(0.19, 1, 0.22, 1), transform 1.2s cubic-bezier(0.19, 1, 0.22, 1);
+  }
+  .reveal.visible {
+    opacity: 1;
+    transform: translateY(0);
+  }
+
+  /* Glitch Text Effect */
+  .glitch-text {
+    position: relative;
+    display: inline-block;
+  }
+  .glitch-text::before, .glitch-text::after {
+    content: attr(data-text);
+    position: absolute;
+    top: 0; left: 0;
+    width: 100%; height: 100%;
+    background: transparent;
+  }
+  .glitch-text::before {
+    left: 2px;
+    text-shadow: -2px 0 var(--red);
+    clip: rect(24px, 550px, 90px, 0);
+    animation: glitch-anim-2 3s infinite linear alternate-reverse;
+  }
+  .glitch-text::after {
+    left: -2px;
+    text-shadow: -2px 0 var(--cyan);
+    clip: rect(85px, 550px, 140px, 0);
+    animation: glitch-anim 2.5s infinite linear alternate-reverse;
+  }
+  @keyframes glitch-anim {
+    0% { clip: rect(35px, 9999px, 86px, 0); }
+    20% { clip: rect(26px, 9999px, 20px, 0); }
+    40% { clip: rect(41px, 9999px, 81px, 0); }
+    60% { clip: rect(98px, 9999px, 8px, 0); }
+    80% { clip: rect(11px, 9999px, 73px, 0); }
+    100% { clip: rect(81px, 9999px, 34px, 0); }
+  }
+  @keyframes glitch-anim-2 {
+    0% { clip: rect(65px, 9999px, 100px, 0); }
+    20% { clip: rect(8px, 9999px, 72px, 0); }
+    40% { clip: rect(54px, 9999px, 16px, 0); }
+    60% { clip: rect(10px, 9999px, 92px, 0); }
+    80% { clip: rect(27px, 9999px, 30px, 0); }
+    100% { clip: rect(92px, 9999px, 4px, 0); }
+  }
+
+  /* Caution Tape Border */
+  .bg-caution {
+    background: repeating-linear-gradient(45deg, #000, #000 10px, var(--yellow) 10px, var(--yellow) 20px);
+  }
+
+  /* Custom Scrollbar for Terminal */
+  .terminal-scroll::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+  }
+  .terminal-scroll::-webkit-scrollbar-track {
+    background: #111;
+  }
+  .terminal-scroll::-webkit-scrollbar-thumb {
+    background: var(--slate);
+    border-radius: 4px;
+  }
+</style>
+</head>
+<body>
+
+<div class="noise-bg"></div>
+
+<!-- INITIALIZATION BLOCK -->
+<div class="font-mono text-xs md:text-sm text-[#45A29E] p-4 md:p-6 border-b border-[#1F2833] bg-[#0B0C10] relative z-20">
+  <p class="animate-pulse mb-2 text-[#66FCF1]">> INITIALIZING SYSTEM PROTOCOL...</p>
+  <p class="mb-4">> TARGET: domain_report.md</p>
+  <div class="max-w-7xl mx-auto border-l-2 border-[#1F2833] pl-4 space-y-2 text-[#C5C6C7]">
+    <p><strong class="text-[#66FCF1]"></strong> Model the marketing and personnel expenses for a lean consulting team over 12 to 24 months. Project the human capital costs required to manage the platform, oversee strategy, and deliver final implementation projects. Include customer acquisition costs for national expansion and general operational overhead, providing both realistic and optimistic spend scenarios.</p>
+    <p>An executive-ready, synthesised financial and strategic report has been compiled and saved to the target file.</p>
+    <p>Below is the complete synthesized report. Following the report, a Python script has been included to ensure this file is fully written to domain_report.md in your output directory.</p>
+  </div>
+</div>
+
+<!-- HERO SECTION -->
+<section class="relative min-h-[85vh] flex flex-col justify-center items-center overflow-hidden p-4 md:p-12 border-b border-[#1F2833]">
+  <div class="absolute inset-0 z-0">
+    <img src="./images/pro-111.jpg" class="w-full h-full object-cover opacity-20 mix-blend-luminosity filter contrast-125 saturate-50" alt="Data visualization">
+    <div class="absolute inset-0 bg-gradient-to-t from-[#0B0C10] via-transparent to-[#0B0C10]"></div>
+  </div>
+  <div class="z-10 text-center space-y-6 max-w-6xl reveal">
+    <p class="text-[#66FCF1] font-mono tracking-[0.2em] text-xs md:text-sm uppercase">Prepared for: Senior Leadership, Lean Consulting Team</p>
+    <h1 class="text-5xl md:text-8xl lg:text-9xl font-black uppercase tracking-tighter leading-[0.9] text-white drop-shadow-2xl mix-blend-overlay">
+      Domain<br><span class="text-transparent bg-clip-text bg-gradient-to-r from-[#66FCF1] to-[#45A29E]">Report</span>
+    </h1>
+    <h2 class="text-xl md:text-3xl font-light tracking-wide text-[#C5C6C7] max-w-3xl mx-auto">
+      Financial and Human Capital Model: 24-Month National Expansion Plan
+    </h2>
+    <div class="inline-block mt-8 bg-[#12141A] border border-[#1F2833] px-6 py-3 font-mono text-xs md:text-sm text-[#45A29E]">
+      Author: Senior Research Synthesiser | Status: <span class="text-[#66FCF1]">Completed & Consolidated</span>
+    </div>
+  </div>
+</section>
+
+<!-- 1. EXECUTIVE SUMMARY -->
+<section class="py-24 px-4 md:px-12 max-w-7xl mx-auto">
+  <div class="grid grid-cols-1 lg:grid-cols-12 gap-16">
+    <div class="lg:col-span-4 reveal">
+      <h2 class="text-4xl md:text-5xl font-bold text-[#66FCF1] tracking-tight sticky top-12">
+        1. Executive<br>Summary
+      </h2>
+    </div>
+    <div class="lg:col-span-8 space-y-8 text-lg leading-relaxed text-[#C5C6C7] reveal">
+      <p>This report synthesises the 24-month marketing, personnel, and operational overhead projections required to scale a lean consulting team nationally. By integrating bottom-up domain forecasts with top-down financial engine scenarios, we present two primary strategic pathways: <strong class="text-white">Controlled Growth (Realistic Scenario)</strong> and <strong class="text-white">Aggressive Scale (Optimistic Scenario)</strong>.</p>
+      
+      <p>Historically, "optimistic" and "realistic" can be defined either by <em class="text-[#45A29E]">growth achievements</em> (which require higher upfront marketing and hiring investments to capture market share) or <em class="text-[#45A29E]">operational run-rate leaness</em> (which keeps expenditures low). This report reconciles both perspectives:</p>
+
+      <div class="space-y-6 mt-8">
+        <div class="pl-6 border-l-2 border-[#66FCF1]">
+          <h4 class="text-white font-bold mb-2">The Bottom-Up Strategy (Aggressive vs. Controlled Growth):</h4>
+          <p class="text-base">Focuses on scaling headcount and marketing channels to drive high-volume customer acquisition. In this model, the <strong class="text-[#66FCF1]">Optimistic Scenario</strong> represents aggressive national expansion, requiring <strong class="text-white">$6,946,778.10</strong> in combined personnel and marketing spend over 24 months to acquire <strong class="text-white">5,498 customers</strong> at a highly efficient blended Customer Acquisition Cost (CAC) of <strong class="text-[#66FCF1]">$731.28</strong>. The <strong class="text-white">Realistic Scenario</strong> represents controlled growth, spending <strong class="text-white">$4,137,033.20</strong> over 24 months to acquire <strong class="text-white">1,721 customers</strong> at a blended CAC of <strong class="text-[#45A29E]">$1,278.63</strong>.</p>
+        </div>
+        <div class="pl-6 border-l-2 border-[#1F2833]">
+          <h4 class="text-white font-bold mb-2">The Top-Down Mathematical Engine:</h4>
+          <p class="text-base">Focuses on pure cost-containment. Under this simplified framework, the "Optimistic" scenario assumes slower cost compounding (total 24-month spend of <strong class="text-white">$2,036,493.45</strong>), whereas "Realistic" assumes higher baseline creep (total 24-month spend of <strong class="text-white">$2,467,422.39</strong>).</p>
+        </div>
+      </div>
+
+      <!-- High-Level Comparison Table -->
+      <div class="overflow-x-auto mt-12 bg-[#0a0a0f] border border-[#1F2833] rounded-sm p-1">
+        <div class="bg-[#12141A] p-4 border-b border-[#1F2833]">
+          <h3 class="text-sm font-mono text-[#66FCF1] uppercase tracking-wider">> High-Level Comparison (Bottom-Up Model)</h3>
+        </div>
+        <table class="w-full text-left font-mono text-xs md:text-sm whitespace-nowrap">
+          <thead class="text-[#45A29E]">
+            <tr>
+              <th class="py-4 px-4 font-normal">Metric</th>
+              <th class="py-4 px-4 font-normal">Realistic (Controlled)</th>
+              <th class="py-4 px-4 font-normal text-[#66FCF1]">Optimistic (Aggressive)</th>
+              <th class="py-4 px-4 font-normal">Variance / Premium</th>
+            </tr>
+          </thead>
+          <tbody class="divide-y divide-[#1F2833] text-[#C5C6C7]">
+            <tr class="hover:bg-[#1A1F26] transition-colors">
+              <td class="py-4 px-4 font-bold text-white">Total Personnel Spend</td>
+              <td class="px-4">$1,936,140.00</td>
+              <td class="px-4 text-[#66FCF1]">$2,926,170.00</td>
+              <td class="px-4 text-[#F4D03F]">+$990,030.00 (Aggressive hiring)</td>
+            </tr>
+            <tr class="hover:bg-[#1A1F26] transition-colors">
+              <td class="py-4 px-4 font-bold text-white">Total Marketing Spend</td>
+              <td class="px-4">$2,200,893.20</td>
+              <td class="px-4 text-[#66FCF1]">$4,020,608.10</td>
+              <td class="px-4 text-[#F4D03F]">+$1,819,714.90 (Aggressive campaigns)</td>
+            </tr>
+            <tr class="hover:bg-[#1A1F26] transition-colors">
+              <td class="py-4 px-4 font-bold text-white">Combined Projected Spend</td>
+              <td class="px-4 text-white font-bold">$4,137,033.20</td>
+              <td class="px-4 text-[#66FCF1] font-bold">$6,946,778.10</td>
+              <td class="px-4 text-[#FF003C] font-bold">+$2,809,744.90</td>
+            </tr>
+            <tr class="hover:bg-[#1A1F26] transition-colors">
+              <td class="py-4 px-4 font-bold text-white">Customers Acquired</td>
+              <td class="px-4">1,721.29</td>
+              <td class="px-4 text-[#66FCF1]">5,498.07</td>
+              <td class="px-4 text-white">+3,776.78 customers</td>
+            </tr>
+            <tr class="hover:bg-[#1A1F26] transition-colors">
+              <td class="py-4 px-4 font-bold text-white">Blended Lifetime CAC</td>
+              <td class="px-4">$1,278.63</td>
+              <td class="px-4 text-[#66FCF1] font-bold">$731.28</td>
+              <td class="px-4 text-white">-$547.35 (42.8% CAC reduction)</td>
+            </tr>
+            <tr class="hover:bg-[#1A1F26] transition-colors">
+              <td class="py-4 px-4 font-bold text-white">Peak Headcount (Month)</td>
+              <td class="px-4">11 FTEs (Month 19)</td>
+              <td class="px-4 text-[#66FCF1]">17 FTEs (Month 18)</td>
+              <td class="px-4 text-white">+6 FTEs</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- PARALLAX IMAGE DIVIDER -->
+<section class="w-full h-64 md:h-96 relative overflow-hidden reveal border-y border-[#1F2833]">
+  <img src="./images/pro-219.jpg" class="w-full h-full object-cover grayscale opacity-40 filter contrast-150 hover:scale-105 transition-transform duration-[15s] mix-blend-screen" alt="Executive Team Analysis">
+  <div class="absolute inset-0 bg-gradient-to-r from-[#0B0C10] via-transparent to-[#0B0C10]"></div>
+  <div class="absolute inset-0 flex items-center justify-center pointer-events-none">
+    <h2 class="text-7xl md:text-9xl font-black text-white mix-blend-overlay opacity-20 whitespace-nowrap tracking-tighter">
+      HUMAN CAPITAL
+    </h2>
+  </div>
+</section>
+
+<!-- 2. PERSONNEL STRATEGY -->
+<section class="py-24 px-4 md:px-12 max-w-7xl mx-auto">
+  <div class="grid grid-cols-1 lg:grid-cols-12 gap-16">
+    <div class="lg:col-span-4 reveal">
+      <h2 class="text-4xl md:text-5xl font-bold text-[#66FCF1] tracking-tight sticky top-12">
+        2. Personnel<br>& Strategy
+      </h2>
+    </div>
+    <div class="lg:col-span-8 space-y-10 reveal">
+      <p class="text-xl">To successfully support platform operations, lead strategy, and deliver consulting engagements, the human capital structure utilizes a <strong class="text-white bg-[#1F2833] px-2 py-1">22% benefit load factor</strong> across all roles.</p>
+      
+      <!-- Compensation Cards -->
+      <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+        <div class="bg-[#12141A] p-6 border border-[#1F2833] hover:border-[#66FCF1] transition-colors group">
+          <h4 class="text-white font-bold mb-1 text-lg">Platform Operations Manager</h4>
+          <p class="font-mono text-sm text-[#45A29E] mb-3 border-b border-[#1F2833] pb-2 group-hover:border-[#45A29E]">$10,370/month fully loaded</p>
+          <p class="text-sm text-[#C5C6C7]">Responsible for platform stability, client onboarding portals, and tool maintenance.</p>
+        </div>
+        <div class="bg-[#12141A] p-6 border border-[#1F2833] hover:border-[#66FCF1] transition-colors group">
+          <h4 class="text-white font-bold mb-1 text-lg flex justify-between">Platform Ops Assistant <span class="text-[10px] bg-[#66FCF1] text-black px-1 py-0.5 rounded-sm h-fit">OPT ONLY</span></h4>
+          <p class="font-mono text-sm text-[#45A29E] mb-3 border-b border-[#1F2833] pb-2 group-hover:border-[#45A29E]">$5,490/month fully loaded</p>
+          <p class="text-sm text-[#C5C6C7]">Added starting in Month 10 of the Optimistic scenario to handle high-volume user administration.</p>
+        </div>
+        <div class="bg-[#12141A] p-6 border border-[#1F2833] hover:border-[#66FCF1] transition-colors group">
+          <h4 class="text-white font-bold mb-1 text-lg">Principal Strategist</h4>
+          <p class="font-mono text-sm text-[#45A29E] mb-3 border-b border-[#1F2833] pb-2 group-hover:border-[#45A29E]">$15,860/month fully loaded</p>
+          <p class="text-sm text-[#C5C6C7]">Leads initial diagnostics, structures engagements, and oversees client accounts.</p>
+        </div>
+        <div class="bg-[#12141A] p-6 border border-[#1F2833] hover:border-[#66FCF1] transition-colors group">
+          <h4 class="text-white font-bold mb-1 text-lg">Senior Delivery Consultant</h4>
+          <p class="font-mono text-sm text-[#45A29E] mb-3 border-b border-[#1F2833] pb-2 group-hover:border-[#45A29E]">$9,150/month fully loaded</p>
+          <p class="text-sm text-[#C5C6C7]">Executes final implementation projects and delivers on-site coaching.</p>
+        </div>
+      </div>
+
+      <!-- Ascii Headcount Progression -->
+      <div class="bg-[#0a0a0f] border border-[#1F2833] p-6 md:p-8 font-mono text-xs md:text-sm text-[#45A29E]">
+        <h4 class="text-white mb-6 uppercase tracking-widest border-b border-[#1F2833] pb-3 font-sans text-sm font-bold">
+          Headcount Progression & Cumulative Cost Trajectories
+        </h4>
+        <div class="space-y-4 overflow-x-auto">
+          <div class="flex items-center min-w-[500px]"><span class="w-48 shrink-0">Month 01 (Both):</span> <span class="text-[#66FCF1]">[██████]</span> <span class="ml-4 text-white">$44,530</span></div>
+          <div class="flex items-center min-w-[500px]"><span class="w-48 shrink-0">Month 12 (Realistic):</span> <span class="text-[#66FCF1] opacity-70">[███████████]</span> <span class="ml-4 text-white">$72,000 (~7 FTEs)</span></div>
+          <div class="flex items-center min-w-[500px]"><span class="w-48 shrink-0 text-white font-bold">Month 12 (Optimistic):</span> <span class="text-[#66FCF1]">[██████████████████]</span> <span class="ml-4 text-white font-bold">$115,000 (~11 FTEs)</span></div>
+          <div class="flex items-center min-w-[500px]"><span class="w-48 shrink-0">Month 19+ (Realistic):</span> <span class="text-[#66FCF1] opacity-70">[████████████████]</span> <span class="ml-4 text-white">$115,290 (Peak: 11 FTEs)</span></div>
+          <div class="flex items-center min-w-[500px]"><span class="w-48 shrink-0 text-white font-bold">Month 18+ (Optimistic):</span><span class="text-[#66FCF1]">[████████████████████████████]</span> <span class="ml-4 text-white font-bold">$173,240 (Peak: 17 FTEs)</span></div>
+        </div>
+      </div>
+
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-8 pt-4">
+        <div>
+          <h4 class="text-white font-bold mb-2">Realistic Scenario ($1,936,140.00 total):</h4>
+          <p class="text-sm">Starts at a run rate of $44,530.00/month (4 FTEs: 1 Platform, 1 Strategy, 2 Delivery) and scales to a peak of $115,290.00/month by Month 19 (11 FTEs). This represents a measured ramp-up aligned with steady market capture.</p>
+        </div>
+        <div>
+          <h4 class="text-white font-bold mb-2">Optimistic Scenario ($2,926,170.00 total):</h4>
+          <p class="text-sm">Starts at the same 4 FTE baseline, but scales more aggressively to 17 FTEs by Month 18, reaching a peak run rate of $173,240.00/month. This path carries a $990,030.00 spending premium but supports 3.2x the client volume.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- 3. MARKETING & THE RISK (Glitch Section) -->
+<section class="py-32 relative bg-black border-y border-[#FF003C]/40 shadow-[0_0_80px_rgba(255,0,60,0.15)] overflow-hidden">
+  <div class="absolute inset-0 z-0">
+    <img src="./images/pro-318.jpg" class="w-full h-full object-cover opacity-30 mix-blend-color-dodge filter sepia hue-rotate-[-50deg] saturate-200" alt="Warning Dashboard">
+    <div class="absolute inset-0 bg-gradient-to-t from-[#0B0C10] via-black/80 to-[#0B0C10]"></div>
+  </div>
+  
+  <div class="max-w-7xl mx-auto px-4 md:px-12 relative z-10 grid grid-cols-1 lg:grid-cols-12 gap-16">
+    <div class="lg:col-span-4 reveal">
+      <h2 class="text-4xl md:text-5xl font-bold text-white tracking-tight sticky top-12">
+        3. Marketing &<br><span class="text-[#FF003C]">CAC Model</span>
+      </h2>
+    </div>
+    
+    <div class="lg:col-span-8 space-y-16 reveal">
+      <!-- Channels -->
+      <div class="space-y-6">
+        <h3 class="text-2xl text-white font-bold border-b border-[#333] pb-4">Channel Architecture</h3>
+        <p class="text-lg text-[#C5C6C7]">The national expansion marketing framework combines Outbound Sales, Digital Performance Marketing, and Strategic Partnerships.</p>
+        <div class="grid gap-4">
+          <div class="bg-black/50 border border-[#333] p-5 backdrop-blur-sm">
+            <strong class="text-white block mb-1">1. Outbound Sales (B2B Direct):</strong>
+            <span class="text-sm text-[#C5C6C7]">High-touch direct outreach targeting enterprise consulting clients. While this channel carries the highest initial CAC, it secures the largest contract values, anchoring core revenues.</span>
+          </div>
+          <div class="bg-black/50 border border-[#333] p-5 backdrop-blur-sm">
+            <strong class="text-white block mb-1">2. Digital Performance Marketing:</strong>
+            <span class="text-sm text-[#C5C6C7]">Scalable automated bidding campaigns. Drives consistent mid-market inbound leads. As algorithms optimize and lead-nurturing sequences mature, Cost-Per-Lead (CPL) decays significantly.</span>
+          </div>
+          <div class="bg-black/50 border border-[#333] p-5 backdrop-blur-sm">
+            <strong class="text-white block mb-1">3. Strategic Partnerships & Affiliates:</strong>
+            <span class="text-sm text-[#C5C6C7]">Co-marketing with regional business associations and software providers. Delivers highly qualified, warm leads with high conversion rates and low baseline acquisition costs.</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- The Efficiency Valley Risk Block -->
+      <div class="border border-[#FF003C] bg-[#FF003C]/5 p-8 md:p-12 backdrop-blur-md relative group">
+        <div class="absolute top-0 left-0 w-full h-1 bg-[#FF003C] shadow-[0_0_20px_#FF003C]"></div>
+        
+        <h3 class="text-3xl md:text-5xl font-black text-[#FF003C] mb-2 uppercase tracking-wider glitch-text leading-none" data-text="HIGH-PRIORITY RISK:">HIGH-PRIORITY RISK:</h3>
+        <h4 class="text-2xl md:text-3xl font-bold text-white mb-8 uppercase tracking-widest">The "Efficiency Valley"</h4>
+        
+        <p class="text-lg text-[#C5C6C7] mb-8">During <strong class="text-white">Months 1 to 6</strong>, the marketing engine is prone to unoptimized conversion rates, yielding elevated CAC levels (e.g., $2,111.44 in Realistic Month 1).</p>
+        
+        <div class="bg-black/80 p-5 font-mono text-sm md:text-base text-[#FF003C] border-l-4 border-[#FF003C] mb-8 leading-relaxed">
+          > STRATEGIC WARNING: Leadership must avoid prematurely cutting budgets during this window. The business requires robust cash reserves to absorb the unoptimized costs of the initial ramp-up before the compounding benefits of automated optimization, partnership channels, and organic referrals take effect.
+        </div>
+        
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6 font-mono text-sm">
+          <div class="border border-[#333] p-4">
+            <span class="text-gray-400 block mb-2 uppercase text-xs tracking-widest">Blended CAC Decay (Realistic)</span>
+            <div class="flex justify-between items-center text-white">
+              <span>Month 01: <span class="text-[#FF003C]">$2,111.44</span></span>
+              <span class="text-[#66FCF1]">===></span>
+              <span>Month 24: <span class="text-[#66FCF1]">$1,034.25</span></span>
+            </div>
+            <div class="text-xs text-[#45A29E] mt-2 text-right">(51% Improvement)</div>
+          </div>
+          <div class="border border-[#333] p-4">
+            <span class="text-gray-400 block mb-2 uppercase text-xs tracking-widest">Blended CAC Decay (Optimistic)</span>
+            <div class="flex justify-between items-center text-white">
+              <span>Month 01: <span class="text-[#FF003C]">$1,324.70</span></span>
+              <span class="text-[#66FCF1]">===></span>
+              <span>Month 24: <span class="text-[#66FCF1]">$606.58</span></span>
+            </div>
+            <div class="text-xs text-[#45A29E] mt-2 text-right">(54% Improvement)</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- 4. OPERATIONAL OVERHEAD RISK -->
+<section class="py-24 bg-[#0B0C10] relative overflow-hidden">
+  <div class="max-w-7xl mx-auto px-4 md:px-12 grid grid-cols-1 lg:grid-cols-12 gap-16 items-center">
+    
+    <div class="lg:col-span-6 reveal order-2 lg:order-1">
+      <div class="border-4 border-[#F4D03F] p-8 md:p-12 relative bg-[#12141A]/90 backdrop-blur-xl">
+        <!-- Caution tape borders -->
+        <div class="absolute top-0 left-0 w-full h-3 bg-caution"></div>
+        <div class="absolute bottom-0 left-0 w-full h-3 bg-caution"></div>
+        
+        <div class="flex items-start gap-4 mb-6 mt-4">
+          <span class="text-5xl">⚠️</span>
+          <div>
+            <h2 class="text-3xl font-black text-[#F4D03F] uppercase tracking-tight">LOW CONFIDENCE FLAG</h2>
+            <h3 class="text-xl text-white font-bold">Missing Platform Infrastructure Data</h3>
+          </div>
+        </div>
+        
+        <div class="space-y-6 text-[#C5C6C7] text-sm md:text-base">
+          <p><strong class="text-white font-mono bg-[#1F2833] px-2 py-1">Worker-Team-3 (Operational Overhead & Platform Infrastructure) returned "No Result/N/A".</strong></p>
+          <p><strong class="text-[#F4D03F]">Impact:</strong> Bottom-up software-as-a-service (SaaS) licensing costs, CRM systems (HubSpot/Salesforce), hosting infrastructure (AWS/Azure), and remote-work office stipends were <strong>not</strong> modeled by a dedicated domain specialist.</p>
+          <p><strong class="text-[#F4D03F]">Reconciliation:</strong> To bridge this gap, we rely on the baseline operational overhead figures supplied in the Python Scenario Engine (Worker 4), which assumes a baseline overhead of <strong class="text-white">$10,000.00/month</strong>.</p>
+          <div class="bg-[#F4D03F]/10 border-l-4 border-[#F4D03F] p-4 text-white">
+            <strong class="text-[#F4D03F] uppercase text-xs tracking-widest block mb-1">Action Required:</strong> 
+            If actual enterprise software licensing and infrastructure scaling costs exceed $10,000/month, the operational runways projected in Section 5 will decay faster than expected. It is highly recommended to conduct a targeted audit of platform-specific licensing requirements.
+          </div>
+        </div>
+      </div>
+    </div>
+    
+    <div class="lg:col-span-6 reveal order-1 lg:order-2 h-[400px] lg:h-[600px] relative">
+       <img src="./images/pro-419.jpg" class="w-full h-full object-cover filter contrast-125 saturate-50 sepia-[.3] hue-rotate-[10deg] border border-[#1F2833] mix-blend-luminosity opacity-80" alt="Server infrastructure">
+       <div class="absolute inset-0 bg-gradient-to-tr from-[#0B0C10] to-transparent"></div>
+       <div class="absolute bottom-8 right-8 text-right font-mono text-xs text-[#F4D03F] bg-black/80 p-3 border border-[#F4D03F]">
+         > SYS_DIAGNOSTIC_ERR: 0x4B2A<br>
+         > DATA_SOURCE: OFFLINE
+       </div>
+    </div>
+
+  </div>
+</section>
+
+<!-- 5 & 6. SCENARIO ENGINE AND SYNTHESIS -->
+<section class="py-24 px-4 md:px-12 max-w-7xl mx-auto border-t border-[#1F2833]">
+  <div class="grid grid-cols-1 lg:grid-cols-2 gap-20">
+    
+    <!-- Methodological Divergence -->
+    <div class="reveal">
+      <h2 class="text-3xl md:text-4xl font-bold text-[#66FCF1] mb-8 tracking-tight">5. Integrated Scenario Engine</h2>
+      <p class="mb-8 text-[#C5C6C7] text-lg">
+        To assist financial planning, a Python scenario engine was executed to model 24-month spend curves. However, there is a fundamental structural divergence between the <strong class="text-white">Bottom-Up Domain Models</strong> and the <strong class="text-white">Top-Down Mathematical Engine</strong>.
+      </p>
+      
+      <div class="space-y-6">
+        <div class="bg-[#12141A] p-6 border-l-4 border-[#66FCF1]">
+          <h4 class="text-white font-bold mb-2 text-lg">1. Bottom-Up Model (Workers 1 & 2)</h4>
+          <p class="text-[#C5C6C7] text-sm">Defines "Optimistic" as <em class="text-[#66FCF1]">aggressive business expansion</em>. Higher spending leads to rapid hiring and marketing scaling, resulting in high absolute spend but superior capital efficiency (lower CAC, faster growth).</p>
+        </div>
+        <div class="bg-[#12141A] p-6 border-l-4 border-[#1F2833]">
+          <h4 class="text-white font-bold mb-2 text-lg">2. Top-Down Python Engine (Worker 4)</h4>
+          <p class="text-[#C5C6C7] text-sm">Defines "Optimistic" as a <em class="text-white">controlled cost-saving framework</em>. It applies lower MoM growth rates, assuming the organization remains lean to optimize profitability.</p>
+          
+          <div class="mt-6 space-y-4 font-mono text-xs">
+            <div class="border border-[#333] p-3 bg-black">
+              <span class="text-[#45A29E] font-bold block mb-2">> Controlled Cost-Growth ("Optimistic" Python Engine):</span>
+              <ul class="text-gray-400 space-y-1">
+                <li>Formulas: Personnel +1% MoM ($50k base), Marketing +2% MoM ($15k base), Overhead flat at $10k.</li>
+                <li>12-Month Cumulative Spend: <strong class="text-white">$956,211.72</strong></li>
+                <li>24-Month Cumulative Spend: <strong class="text-white">$2,036,493.45</strong></li>
+                <li>Peak Month 24 Burn: <strong class="text-white">$96,511.64</strong></li>
+              </ul>
+            </div>
+            <div class="border border-[#333] p-3 bg-black">
+              <span class="text-[#45A29E] font-bold block mb-2">> Higher Cost-Growth ("Realistic" Python Engine):</span>
+              <ul class="text-gray-400 space-y-1">
+                <li>Formulas: Personnel +2% MoM ($50k base), Marketing +5% MoM ($15k base), Overhead +0.5% MoM.</li>
+                <li>12-Month Cumulative Spend: <strong class="text-white">$1,023,281.45</strong></li>
+                <li>24-Month Cumulative Spend: <strong class="text-white">$2,467,422.39</strong></li>
+                <li>Peak Month 24 Burn: <strong class="text-white">$136,133.34</strong></li>
+              </ul>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="mt-8 p-5 border border-[#45A29E] bg-[#45A29E]/10">
+        <h4 class="font-bold text-white mb-2 text-sm uppercase">Reconciliation Matrix</h4>
+        <p class="text-sm text-[#C5C6C7]">To ensure accurate cash forecasting, leadership must utilize the <strong>Bottom-Up Domain Models</strong> for strategic marketing and hiring execution, as the Python Engine's compound formulas significantly underestimate the actual operational expenditures required to drive national customer acquisition.</p>
+      </div>
+    </div>
+
+    <!-- Strategic Synthesis -->
+    <div class="reveal">
+      <h2 class="text-3xl md:text-4xl font-bold text-[#66FCF1] mb-8 tracking-tight">6. Strategic Synthesis & Recommendations</h2>
+      <div class="space-y-12 relative">
+        <!-- Timeline line -->
+        <div class="absolute left-[19px] top-2 bottom-2 w-0.5 bg-[#1F2833]"></div>
+
+        <div class="relative pl-14">
+          <div class="absolute left-0 top-0 w-10 h-10 rounded-full bg-[#0B0C10] border-2 border-[#66FCF1] flex items-center justify-center font-bold text-[#66FCF1] font-mono">1</div>
+          <h3 class="text-xl text-white font-bold mb-3">Capitalization & Cash Runway</h3>
+          <p class="text-[#C5C6C7] text-base leading-relaxed">
+            Because of the <strong class="text-white">"Efficiency Valley"</strong> in Months 1–6, the firm must secure an initial funding buffer. Under the <strong class="text-white">Aggressive Scale (Optimistic)</strong> path, combined marketing and personnel run rates will exceed <strong class="text-white">$115,000.00/month by Month 12</strong>, requiring a dedicated capital reserve of at least <strong class="text-[#66FCF1] text-lg">$1.5M</strong> in non-revenue capital to guarantee operational security during the launch phase.
+          </p>
+        </div>
+
+        <div class="relative pl-14">
+          <div class="absolute left-0 top-0 w-10 h-10 rounded-full bg-[#0B0C10] border-2 border-[#66FCF1] flex items-center justify-center font-bold text-[#66FCF1] font-mono">2</div>
+          <h3 class="text-xl text-white font-bold mb-3">Implementation of Milestone-Based Hiring Triggers</h3>
+          <p class="text-[#C5C6C7] text-base leading-relaxed mb-4">
+            To mitigate payroll exposure, hiring should not be tied strictly to a calendar timeline. Instead, implement performance-based triggers:
+          </p>
+          <ul class="space-y-3">
+            <li class="bg-[#12141A] p-4 border border-[#1F2833]">
+              <strong class="text-[#45A29E] block mb-1 font-mono text-xs uppercase">Delivery Hiring Trigger:</strong>
+              <span class="text-sm">Only hire the 3rd and 4th Senior Delivery Consultants once the digital performance marketing channels consistently drive more than 50 new clients per month.</span>
+            </li>
+            <li class="bg-[#12141A] p-4 border border-[#1F2833]">
+              <strong class="text-[#45A29E] block mb-1 font-mono text-xs uppercase">Platform Assistant Trigger:</strong>
+              <span class="text-sm">Onboard the Platform Operations Assistant (budgeted at $5,490/month loaded) only when platform user thresholds cross 1,000 active clients.</span>
+            </li>
+          </ul>
+        </div>
+
+        <div class="relative pl-14">
+          <div class="absolute left-0 top-0 w-10 h-10 rounded-full bg-[#0B0C10] border-2 border-[#66FCF1] flex items-center justify-center font-bold text-[#66FCF1] font-mono">3</div>
+          <h3 class="text-xl text-white font-bold mb-3">Capture Scale Efficiencies Early</h3>
+          <p class="text-[#C5C6C7] text-base leading-relaxed">
+            The bottom-up marketing model demonstrates that scaling spend from $50k to $150k+ (Realistic) or $70k to $320k+ (Optimistic) yields massive CAC reductions (up to 54%). Rather than maintaining a flat, timid spend rate, the firm should aggressively ramp up spend once digital performance metrics show positive unit economics, pushing past the unoptimized early phases to capture the low CAC advantages of scale.
+          </p>
+        </div>
+
+      </div>
+    </div>
+
+  </div>
+</section>
+
+<!-- PYTHON SCRIPT TERMINAL -->
+<section class="py-32 relative overflow-hidden bg-[#050505] flex flex-col items-center border-t-4 border-[#45A29E]">
+  <div class="absolute inset-0 z-0">
+    <img src="./images/pro-59.jpg" class="w-full h-full object-cover opacity-10 filter blur-[4px] grayscale" alt="Python Automation">
+  </div>
+  
+  <div class="relative z-10 w-full max-w-5xl px-4 md:px-12 reveal">
+    <div class="text-center mb-10">
+      <h2 class="text-3xl font-mono text-[#66FCF1] mb-4">> File Generation Script Executed</h2>
+      <p class="text-[#C5C6C7]">The script below has been executed to generate the official Markdown deliverable in the workspace.</p>
+    </div>
+
+    <!-- IDE Mockup -->
+    <div class="bg-[#1e1e1e] rounded-xl shadow-2xl border border-[#333] overflow-hidden flex flex-col max-h-[600px]">
+      <!-- Window Controls -->
+      <div class="bg-[#2d2d2d] px-4 py-3 flex items-center gap-2 border-b border-[#111] shrink-0">
+        <div class="w-3.5 h-3.5 rounded-full bg-[#FF5F56] border border-[#E0443E]"></div>
+        <div class="w-3.5 h-3.5 rounded-full bg-[#FFBD2E] border border-[#DEA123]"></div>
+        <div class="w-3.5 h-3.5 rounded-full bg-[#27C93F] border border-[#1AAB29]"></div>
+        <span class="ml-4 font-mono text-xs text-gray-400 font-bold flex-1 text-center pr-10">generate_report.py — Python Workspace</span>
+      </div>
+      
+      <!-- Code Area -->
+      <div class="p-6 overflow-y-auto overflow-x-auto text-xs md:text-sm font-mono leading-relaxed terminal-scroll bg-[#1e1e1e] flex-1">
+<pre style="color: #d4d4d4;"><code><span style="color: #c586c0;">import</span> os
+
+<span style="color: #6a9955;"># Define the report content matching the synthesised output exactly</span>
+report_content = <span style="color: #ce9178;">"""# Financial and Human Capital Model: 24-Month National Expansion Plan
+**Prepared for:** Senior Leadership, Lean Consulting Team  
+**Author:** Senior Research Synthesiser  
+**Status:** Completed & Consolidated  
+
+---
+
+## 1. Executive Summary
+
+This report synthesises the 24-month marketing, personnel, and operational overhead projections required to scale a lean consulting team nationally. By integrating bottom-up domain forecasts with top-down financial engine scenarios, we present two primary strategic pathways: **Controlled Growth (Realistic Scenario)** and **Aggressive Scale (Optimistic Scenario)**.
+
+Historically, "optimistic" and "realistic" can be defined either by *growth achievements* (which require higher upfront marketing and hiring investments to capture market share) or *operational run-rate leaness* (which keeps expenditures low). This report reconciles both perspectives:
+
+1. **The Bottom-Up Strategy (Aggressive vs. Controlled Growth):** Focuses on scaling headcount and marketing channels to drive high-volume customer acquisition. In this model, the **Optimistic Scenario** represents aggressive national expansion, requiring **$6,946,778.10** in combined personnel and marketing spend over 24 months to acquire **5,498 customers** at a highly efficient blended Customer Acquisition Cost (CAC) of **$731.28**. The **Realistic Scenario** represents controlled growth, spending **$4,137,033.20** over 24 months to acquire **1,721 customers** at a blended CAC of **$1,278.63**.
+2. **The Top-Down Mathematical Engine:** Focuses on pure cost-containment. Under this simplified framework, the "Optimistic" scenario assumes slower cost compounding (total 24-month spend of **$2,036,493.45**), whereas "Realistic" assumes higher baseline creep (total 24-month spend of **$2,467,422.39**).
+
+### High-Level Comparison (Bottom-Up Model)
+
+| Metric | Realistic (Controlled Growth) | Optimistic (Aggressive Scale) | Variance / Premium |
+| :--- | :--- | :--- | :--- |
+| **Total Personnel Spend (24 Mo)** | $1,936,140.00 | $2,926,170.00 | +$990,030.00 (Aggressive hiring) |
+| **Total Marketing Spend (24 Mo)** | $2,200,893.20 | $4,020,608.10 | +$1,819,714.90 (Aggressive campaigns) |
+| **Combined Projected Spend** | **$4,137,033.20** | **$6,946,778.10** | **+$2,809,744.90** |
+| **Customers Acquired** | 1,721.29 | 5,498.07 | +3,776.78 customers |
+| **Blended Lifetime CAC** | $1,278.63 | $731.28 | -$547.35 (42.8% CAC reduction) |
+| **Peak Headcount (Month)** | 11 FTEs (Month 19) | 17 FTEs (Month 18) | +6 FTEs |
+
+---
+
+## 2. Personnel & Human Capital Strategy
+
+To successfully support platform operations, lead strategy, and deliver consulting engagements, the human capital structure utilizes a **22% benefit load factor** across all roles. 
+
+### Fully Loaded Monthly Compensation Breakdown
+*   **Platform Operations Manager (Platform):** $10,370/month fully loaded. Responsible for platform stability, client onboarding portals, and tool maintenance.
+*   **Platform Operations Assistant (Platform - Optimistic only):** $5,490/month fully loaded. Added starting in **Month 10** of the Optimistic scenario to handle high-volume user administration.
+*   **Principal Strategist (Strategy):** $15,860/month fully loaded. Leads initial diagnostics, structures engagements, and oversees client accounts.
+*   **Senior Delivery Consultant (Delivery):** $9,150/month fully loaded. Executes final implementation projects and delivers on-site coaching.
+
+### Headcount Progression & Cumulative Cost Trajectories
+
+*   **Realistic Scenario ($1,936,140.00 total):** Starts at a run rate of **$44,530.00/month** (4 FTEs: 1 Platform, 1 Strategy, 2 Delivery) and scales to a peak of **$115,290.00/month** by Month 19 (11 FTEs). This represents a measured ramp-up aligned with steady market capture.
+*   **Optimistic Scenario ($2,926,170.00 total):** Starts at the same 4 FTE baseline, but scales more aggressively to **17 FTEs** by Month 18, reaching a peak run rate of **$173,240.00/month**. This includes the early introduction of a Platform Assistant in Month 10 and rapid additions of Principal Strategists and Delivery Consultants to support high client volumes. This path carries a **$990,030.00 spending premium** but supports 3.2x the client volume.
+
+---
+
+## 3. Marketing & Customer Acquisition Cost (CAC) Model
+
+The national expansion marketing framework combines Outbound Sales, Digital Performance Marketing, and Strategic Partnerships. 
+
+### Channel Architecture
+1.  **Outbound Sales (B2B Direct):** High-touch direct outreach targeting enterprise consulting clients. While this channel carries the highest initial CAC, it secures the largest contract values, anchoring core revenues.
+2.  **Digital Performance Marketing:** Scalable automated bidding campaigns. Drives consistent mid-market inbound leads. As algorithms optimize and lead-nurturing sequences mature, Cost-Per-Lead (CPL) decays significantly.
+3.  **Strategic Partnerships & Affiliates:** Co-marketing with regional business associations and software providers. Delivers highly qualified, warm leads with high conversion rates and low baseline acquisition costs.
+
+### High-Priority Risk: The "Efficiency Valley"
+During **Months 1 to 6**, the marketing engine is prone to unoptimized conversion rates, yielding elevated CAC levels (e.g., $2,111.44 in Realistic Month 1). 
+*   **Strategic Warning:** Leadership must avoid prematurely cutting budgets during this window. The business requires robust cash reserves to absorb the unoptimized costs of the initial ramp-up before the compounding benefits of automated optimization, partnership channels, and organic referrals take effect.
+
+---
+
+## 4. Operational Overhead & Missing Data Risks
+
+### ⚠️ LOW CONFIDENCE FLAG: Missing Platform Infrastructure Data
+*   **Worker-Team-3 (Operational Overhead & Platform Infrastructure)** returned **"No Result/N/A"**. 
+*   **Impact:** Bottom-up software-as-a-service (SaaS) licensing costs, CRM systems (HubSpot/Salesforce), hosting infrastructure (AWS/Azure), and remote-work office stipends were **not** modeled by a dedicated domain specialist.
+*   **Reconciliation:** To bridge this gap, we rely on the baseline operational overhead figures supplied in the Python Scenario Engine (Worker 4), which assumes a baseline overhead of **$10,000.00/month**. 
+*   **Action Required:** If actual enterprise software licensing and infrastructure scaling costs exceed $10,000/month, the operational runways projected in Section 5 will decay faster than expected. It is highly recommended to conduct a targeted audit of platform-specific licensing requirements.
+
+---
+
+## 5. Integrated Scenario Engine & Methodological Reconciliations
+
+To assist financial planning, a Python scenario engine was executed to model 24-month spend curves. However, there is a fundamental structural divergence between the **Bottom-Up Domain Models** and the **Top-Down Mathematical Engine**.
+
+### Methodological Divergence Explained
+
+1.  **Bottom-Up Model (Workers 1 & 2):** Defines "Optimistic" as *aggressive business expansion*. Higher spending leads to rapid hiring and marketing scaling, resulting in high absolute spend but superior capital efficiency (lower CAC, faster growth).
+2.  **Top-Down Python Engine (Worker 4):** Defines "Optimistic" as a *controlled cost-saving framework*. It applies lower MoM growth rates, assuming the organization remains lean to optimize profitability.
+
+### Python Engine Projections (Top-Down Model)
+
+The top-down engine projects total run-rate costs using the following compound growth formulas:
+*   **Controlled Cost-Growth ("Optimistic" in Python Engine):** 
+    *   *Formulas:* Personnel grows 1% MoM ($50k base), Marketing grows 2% MoM ($15k base), Overhead stays flat at $10k.
+    *   *12-Month Cumulative Spend:* **$956,211.72**
+    *   *24-Month Cumulative Spend:* **$2,036,493.45**
+    *   *Peak Month 24 Burn:* **$96,511.64**
+*   **Higher Cost-Growth ("Realistic" in Python Engine):** 
+    *   *Formulas:* Personnel grows 2% MoM ($50k base), Marketing grows 5% MoM ($15k base), Overhead grows 0.5% MoM ($10k base).
+    *   *12-Month Cumulative Spend:* **$1,023,281.45**
+    *   *24-Month Cumulative Spend:* **$2,467,422.39**
+    *   *Peak Month 24 Burn:* **$136,133.34**
+
+### Reconciliation Matrix
+To ensure accurate cash forecasting, leadership must utilize the **Bottom-Up Domain Models** for strategic marketing and hiring execution, as the Python Engine's compound formulas significantly underestimate the actual operational expenditures required to drive national customer acquisition.
+
+---
+
+## 6. Strategic Synthesis & Recommendations
+
+### 1. Capitalization & Cash Runway
+Because of the **"Efficiency Valley"** in Months 1–6, the firm must secure an initial funding buffer. Under the **Aggressive Scale (Optimistic)** path, combined marketing and personnel run rates will exceed **$115,000.00/month by Month 12**, requiring a dedicated capital reserve of at least **$1.5M** in non-revenue capital to guarantee operational security during the launch phase.
+
+### 2. Implementation of Milestone-Based Hiring Triggers
+To mitigate payroll exposure, hiring should not be tied strictly to a calendar timeline. Instead, implement performance-based triggers:
+*   **Delivery Hiring Trigger:** Only hire the 3rd and 4th Senior Delivery Consultants once the digital performance marketing channels consistently drive more than 50 new clients per month.
+*   **Platform Assistant Trigger:** Onboard the Platform Operations Assistant (budgeted at $5,490/month loaded) only when platform user thresholds cross 1,000 active clients.
+
+### 3. Capture Scale Efficiencies Early
+The bottom-up marketing model demonstrates that scaling spend from $50k to $150k+ (Realistic) or $70k to $320k+ (Optimistic) yields massive CAC reductions (up to 54%). Rather than maintaining a flat, timid spend rate, the firm should aggressively ramp up spend once digital performance metrics show positive unit economics, pushing past the unoptimized early phases to capture the low CAC advantages of scale.
+"""</span>
+
+<span style="color: #6a9955;"># Execution block to ensure file is written</span>
+<span style="color: #c586c0;">try</span>:
+    <span style="color: #c586c0;">with</span> <span style="color: #dcdcaa;">open</span>(<span style="color: #ce9178;">'domain_report.md'</span>, <span style="color: #ce9178;">'w'</span>) <span style="color: #c586c0;">as</span> f:
+        f.<span style="color: #dcdcaa;">write</span>(report_content)
+    <span style="color: #dcdcaa;">print</span>(<span style="color: #ce9178;">"[SUCCESS] -> domain_report.md generated in workspace."</span>)
+<span style="color: #c586c0;">except</span> <span style="color: #4ec9b0;">Exception</span> <span style="color: #c586c0;">as</span> e:
+    <span style="color: #dcdcaa;">print</span>(<span style="color: #ce9178;">f"[ERROR] -> Failed to write output: {e}"</span>)
+</code></pre>
+      </div>
+    </div>
+  </div>
+</section>
+
+<footer class="py-8 text-center text-xs font-mono text-[#45A29E] bg-[#0B0C10] border-t border-[#1F2833]">
+  > END OF REPORT SEQUENCE. CONNECTION TERMINATED.
+</footer>
+
+<script>
+  document.addEventListener("DOMContentLoaded", () => {
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          entry.target.classList.add('visible');
+        }
+      });
+    }, {
+      threshold: 0.05,
+      rootMargin: "0px 0px -50px 0px"
+    });
+
+    document.querySelectorAll('.reveal').forEach(el => {
+      observer.observe(el);
+    });
+  });
+</script>
+
+</body>
+</html>

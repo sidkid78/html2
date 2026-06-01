@@ -1,0 +1,745 @@
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Enterprise AI Project Delivery Framework</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600&family=Space+Mono:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg-color: #030305;
+    --text-main: #e2e8f0;
+    --accent-cyan: #00f0ff;
+    --accent-pink: #ff003c;
+  }
+  body {
+    background-color: var(--bg-color);
+    color: var(--text-main);
+    font-family: 'Inter', sans-serif;
+    overflow-x: hidden;
+  }
+  h1, h2, h3, h4, .mono {
+    font-family: 'Space Mono', monospace;
+  }
+  
+  /* SVG Grain & Texture */
+  .bg-noise {
+    position: fixed;
+    top: 0; left: 0; width: 100vw; height: 100vh;
+    pointer-events: none;
+    z-index: 50;
+    mix-blend-mode: overlay;
+    opacity: 0.4;
+  }
+  
+  /* Fluid Probabilistic Background */
+  .blob {
+    position: fixed;
+    border-radius: 50%;
+    filter: blur(80px);
+    z-index: -1;
+    animation: float 20s infinite ease-in-out alternate;
+    opacity: 0.15;
+  }
+  .blob-1 {
+    width: 600px; height: 600px;
+    background: var(--accent-cyan);
+    top: -10%; left: -10%;
+  }
+  .blob-2 {
+    width: 800px; height: 800px;
+    background: var(--accent-pink);
+    bottom: -20%; right: -10%;
+    animation-delay: -10s;
+  }
+  
+  @keyframes float {
+    0% { transform: translate(0, 0) scale(1); }
+    100% { transform: translate(100px, 50px) scale(1.2); }
+  }
+
+  /* Layout Elements */
+  .glass-panel {
+    background: rgba(10, 10, 15, 0.4);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border: 1px solid rgba(255, 255, 255, 0.05);
+  }
+  
+  .border-gradient {
+    position: relative;
+  }
+  .border-gradient::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background: linear-gradient(45deg, var(--accent-cyan), transparent, var(--accent-pink));
+    z-index: -1;
+    margin: -1px;
+    border-radius: inherit;
+    opacity: 0.3;
+  }
+
+  /* Typography FX */
+  .text-glow { text-shadow: 0 0 10px rgba(0, 240, 255, 0.5); }
+  .text-glow-pink { text-shadow: 0 0 10px rgba(255, 0, 60, 0.5); }
+  
+  .reveal-text {
+    opacity: 0;
+    transform: translateY(20px);
+    transition: opacity 0.8s ease-out, transform 0.8s ease-out;
+  }
+  .reveal-text.is-visible {
+    opacity: 1;
+    transform: translateY(0);
+  }
+
+  /* Custom Scrollbar */
+  ::-webkit-scrollbar { width: 8px; }
+  ::-webkit-scrollbar-track { background: var(--bg-color); }
+  ::-webkit-scrollbar-thumb { background: rgba(255, 255, 255, 0.2); border-radius: 4px; }
+  ::-webkit-scrollbar-thumb:hover { background: var(--accent-cyan); }
+
+  /* ASCII Art Container */
+  .ascii-container {
+    overflow-x: auto;
+    white-space: pre;
+    font-size: 10px;
+    line-height: 1.2;
+    color: var(--accent-cyan);
+    text-shadow: 0 0 5px rgba(0,240,255,0.3);
+  }
+  @media (min-width: 768px) {
+    .ascii-container { font-size: 12px; }
+  }
+  
+  table { width: 100%; border-collapse: collapse; margin-top: 1rem; }
+  th, td { border: 1px solid rgba(255,255,255,0.1); padding: 0.75rem; text-align: left; }
+  th { background: rgba(255,255,255,0.05); color: var(--accent-cyan); font-family: 'Space Mono', monospace; }
+</style>
+</head>
+<body class="antialiased selection:bg-cyan-500 selection:text-black">
+
+<!-- SVG Filters & Noise -->
+<svg class="bg-noise">
+  <filter id="noiseFilter">
+    <feTurbulence type="fractalNoise" baseFrequency="0.8" numOctaves="3" stitchTiles="stitch"/>
+    <feColorMatrix type="matrix" values="1 0 0 0 0, 0 1 0 0 0, 0 0 1 0 0, 0 0 0 0.2 0" />
+  </filter>
+  <rect width="100%" height="100%" filter="url(#noiseFilter)"/>
+</svg>
+
+<svg style="display:none;">
+  <filter id="glitch">
+    <feTurbulence type="fractalNoise" baseFrequency="0.05 0.9" numOctaves="1" result="warp" />
+    <feDisplacementMap in="SourceGraphic" in2="warp" scale="10" xChannelSelector="R" yChannelSelector="G" />
+  </filter>
+</svg>
+
+<!-- Fluid Background -->
+<div class="blob blob-1"></div>
+<div class="blob blob-2"></div>
+
+<div class="fixed top-0 left-0 w-full h-1 bg-gray-900 z-50">
+  <div id="progress-bar" class="h-full bg-cyan-400" style="width: 0%;"></div>
+</div>
+
+<!-- Main Content Container -->
+<main class="relative z-10 max-w-6xl mx-auto px-4 md:px-8 py-20">
+
+  <!-- HEADER -->
+  <header class="mb-24 reveal-text">
+    <div class="inline-block border border-cyan-500/50 text-cyan-400 text-xs px-3 py-1 mb-6 mono uppercase tracking-widest">
+      Status: Approved for Program Management Office (PMO) & Delivery Teams
+    </div>
+    <h1 class="text-4xl md:text-6xl lg:text-7xl font-bold tracking-tighter leading-tight mb-8 text-white mix-blend-difference">
+      ENTERPRISE AI<br>
+      <span class="text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 to-blue-600">PROJECT DELIVERY</span><br>
+      FRAMEWORK
+    </h1>
+    
+    <div class="grid md:grid-cols-3 gap-6 border-y border-white/10 py-6 text-sm text-gray-400 mono">
+      <div>
+        <span class="block text-gray-600 mb-1">Author</span>
+        Principal AI Delivery Specialist &<br>AI Program Director
+      </div>
+      <div>
+        <span class="block text-gray-600 mb-1">Date</span>
+        May 2026
+      </div>
+      <div>
+        <span class="block text-gray-600 mb-1">Scope</span>
+        End-to-End Enterprise AI Project Delivery<br>(Predictive, Generative, Agentic AI)
+      </div>
+    </div>
+  </header>
+
+  <!-- 1. EXECUTIVE SUMMARY -->
+  <section class="mb-24 reveal-text">
+    <h2 class="text-2xl md:text-3xl text-white mb-6 border-l-4 border-pink-500 pl-4">1. Executive Summary</h2>
+    <div class="grid md:grid-cols-2 gap-10 text-lg leading-relaxed text-gray-300">
+      <div>
+        <p class="mb-4">AI consulting engagements represent a unique departure from traditional software development. Unlike deterministic software engineering—where logic-based rules guarantee predictable outcomes—AI systems are fundamentally <strong class="text-pink-400">probabilistic</strong>. They rely on statistical inference, dynamic data environments, and shifting real-world distributions.</p>
+        <p>This core difference explains why traditional software delivery frameworks fail when applied to AI: they do not account for data uncertainty, model decay, or the iterative, experiment-driven nature of machine learning.</p>
+      </div>
+      <div class="glass-panel p-6 border-gradient">
+        <p class="mb-4">Historically, up to <span class="text-3xl font-bold text-white">87%</span> of machine learning projects fail to reach production.</p>
+        <p class="text-sm text-gray-400">In the modern landscape of Large Language Models (LLMs) and Agentic workflows, this "Execution Gap" has evolved. Teams frequently fall into the <strong class="text-pink-400">"PoC Trap"</strong>—building an impressive initial demo in a sanitized environment, only to realize that the model cannot scale, costs too much to run, lacks guardrails, or cannot be integrated into existing enterprise software.</p>
+      </div>
+    </div>
+    <p class="mt-8 text-gray-400 max-w-3xl">
+      This framework outlines the industry-standard delivery methodologies utilized by elite AI consulting practices (e.g., McKinsey/QuantumBlack, BCG X, and specialized AI engineering boutiques) to de-risk investments, manage uncertainty, prevent scope creep, and successfully scale AI solutions.
+    </p>
+  </section>
+
+  <!-- 2. THE 6-PHASE LIFECYCLE MAP -->
+  <section class="mb-24 reveal-text w-full">
+    <h2 class="text-2xl md:text-3xl text-white mb-6 border-l-4 border-cyan-500 pl-4">2. The 6-Phase AI Consulting Lifecycle Map</h2>
+    <p class="mb-8 text-gray-300">A typical high-performing AI consulting engagement follows a structured, gated, six-phase lifecycle designed to systematically reduce risk and build momentum.</p>
+    
+    <div class="glass-panel p-4 md:p-8 overflow-hidden relative group">
+      <div class="absolute inset-0 bg-gradient-to-r from-cyan-500/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-1000"></div>
+      <div class="ascii-container">
+                                      AI CONSULTING LIFECYCLE MAP
+                                      
++------------------+     +------------------+     +------------------+     +------------------+     +------------------+     +------------------+
+|     PHASE 1      |     |     PHASE 2      |     |     PHASE 3      |     |     PHASE 4      |     |     PHASE 5      |     |     PHASE 6      |
+|  Scoping, Data   |     |     Proof of     |     | Minimum Viable   |     |   Integration,   |     |    Scaling,      |     |  MLOps, Drift    |
+| Audit & Strategy | --> |  Concept (PoC)   | --> |  Product (MVP)   | --> |  Hardening &     | --> |   Rollout &      | --> |  Monitoring &    |
+|                  |     |                  |     |                  |     |  DevOps Bridge   |     |  Adoption (Ops)  |     |   Governance     |
++------------------+     +------------------+     +------------------+     +------------------+     +------------------+     +------------------+
+| Timeline: 2-4 Wk |     | Timeline: 4-8 Wk |     | Timeline: 8-12 Wk|     | Timeline: 4-6 Wk |     | Timeline: 6-10 Wk|     | Timeline: Ongoing|
++------------------+     +------------------+     +------------------+     +------------------+     +------------------+     +------------------+
+| Gating:          |     | Gating:          |     | Gating:          |     | Gating:          |     | Gating:          |     | Gating:          |
+| - Clear ROI      |     | - Statistical    |     | - Core system    |     | - Security sign- |     | - 100% of target |     | - Retraining     |
+| - Data exists    |     |   signal > mark  |     |   functional     |     |   off received   |     |   user base live |     |   triggers active|
+| - Exec sponsor   |     | - Latency & cost |     | - Human-in-loop  |     | - Unit/integ.    |     | - Change mgmt    |     | - Audit logs     |
+|   signed off     |     |   projections ok |     |   validated      |     |   tests pass     |     |   metrics met    |     |   compliant      |
++------------------+     +------------------+     +------------------+     +------------------+     +------------------+     +------------------+
+      </div>
+    </div>
+
+    <div class="mt-12 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+      <!-- Map over engagement flows -->
+      <div class="border border-white/10 p-5 hover:border-cyan-500/50 transition-colors">
+        <h4 class="text-cyan-400 mb-2">Pre-Engagement / Scoping (Phase 1)</h4>
+        <p class="text-sm text-gray-400">Map business pain points to mathematical and model formulations. Determine data availability, security requirements, and architectural compatibility. Establish a baseline ROI calculation.</p>
+      </div>
+      <div class="border border-white/10 p-5 hover:border-cyan-500/50 transition-colors">
+        <h4 class="text-cyan-400 mb-2">Feasibility Validation (Phase 2)</h4>
+        <p class="text-sm text-gray-400">Secure a representative, anonymized dataset. Develop simple baseline models (heuristics first, then classical ML/basic LLM prompts). Conduct offline evaluations to prove statistical signal.</p>
+      </div>
+      <div class="border border-white/10 p-5 hover:border-cyan-500/50 transition-colors">
+        <h4 class="text-cyan-400 mb-2">Core Development (Phase 3)</h4>
+        <p class="text-sm text-gray-400">Transition from a static notebook to an end-to-end working system (Minimum Valuable AI - MVAi). Integrate early data ingestion pipelines. Implement Human-in-the-Loop review mechanisms.</p>
+      </div>
+      <div class="border border-white/10 p-5 hover:border-cyan-500/50 transition-colors">
+        <h4 class="text-cyan-400 mb-2">Hardening (Phase 4)</h4>
+        <p class="text-sm text-gray-400">Refactor experimentation code into highly modular, testable libraries. Build automated tests and continuous integration (CI) workflows. Deploy within Docker containers. Secure APIs and database connections.</p>
+      </div>
+      <div class="border border-white/10 p-5 hover:border-cyan-500/50 transition-colors">
+        <h4 class="text-cyan-400 mb-2">Deployment & Transition (Phase 5)</h4>
+        <p class="text-sm text-gray-400">Conduct user acceptance testing (UAT). Deploy the solution onto production infrastructure (Kubernetes, serverless, or enterprise cloud). Establish parallel-run or canary deployments to de-risk user rollout. Train operational staff.</p>
+      </div>
+      <div class="border border-white/10 p-5 hover:border-cyan-500/50 transition-colors">
+        <h4 class="text-cyan-400 mb-2">Continuous Operations (Phase 6)</h4>
+        <p class="text-sm text-gray-400">Activate monitoring dashboards tracking operational telemetry, model accuracy, and data/concept drift. Establish automated retraining loops and ongoing compliance reporting.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- 3. DEEP DIVE -->
+  <section class="mb-24 reveal-text">
+    <h2 class="text-2xl md:text-3xl text-white mb-6 border-l-4 border-cyan-500 pl-4">3. Phase-by-Phase Deep Dive</h2>
+    <p class="mb-10 text-gray-400">To maintain control over budgets and outcomes, each phase must possess distinct boundaries, explicit deliverables, and quantifiable gating criteria.</p>
+
+    <div class="space-y-12">
+      <!-- Phase 1 -->
+      <div class="glass-panel p-6 md:p-8">
+        <div class="flex flex-col md:flex-row justify-between items-start md:items-center border-b border-white/10 pb-4 mb-6">
+          <h3 class="text-xl font-bold text-white">Phase 1: Scoping, Data Audit & Strategy (Discovery)</h3>
+          <span class="mono text-xs text-pink-400 mt-2 md:mt-0">Timeline: 2 to 4 weeks</span>
+        </div>
+        <p class="text-sm text-gray-300 mb-6"><strong>Primary Objective:</strong> Convert a business problem into an AI specification and confirm that the required data exists and is accessible.</p>
+        <div class="grid md:grid-cols-2 gap-8 text-sm">
+          <div>
+            <h4 class="text-cyan-400 mb-3 border-b border-white/10 pb-1 inline-block">Key Activities</h4>
+            <ul class="list-disc pl-4 space-y-2 text-gray-400">
+              <li><strong>Use-Case Framing:</strong> Define the business problem. (e.g., "Reduce customer churn" becomes "Predict which high-value subscribers have a >75% probability of canceling in 30 days").</li>
+              <li><strong>Data Source Audit:</strong> Review enterprise databases, APIs, unstructured storage. Classify data quality.</li>
+              <li><strong>Architecture Mapping:</strong> Document target system landscape.</li>
+              <li><strong>Feasibility Scoring:</strong> Score on Business Value vs. Technical Feasibility.</li>
+            </ul>
+          </div>
+          <div>
+            <h4 class="text-cyan-400 mb-3 border-b border-white/10 pb-1 inline-block">Key Deliverables & Gating</h4>
+            <ul class="list-disc pl-4 space-y-2 text-gray-400 mb-4">
+              <li>AI Opportunity Matrix & Roadmap</li>
+              <li>Data Diagnostics & Availability Report</li>
+              <li>Ethics, Privacy & Regulatory Compliance Assessment</li>
+            </ul>
+            <div class="bg-black/50 p-4 border border-white/5 font-mono text-xs text-gray-300 space-y-2">
+              <div>[ ] Data Viability verified</div>
+              <div>[ ] Success Metrics Signed-Off</div>
+              <div>[ ] Sponsor Commitment & Budget Secured</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Phase 2 -->
+      <div class="glass-panel p-6 md:p-8">
+        <div class="flex flex-col md:flex-row justify-between items-start md:items-center border-b border-white/10 pb-4 mb-6">
+          <h3 class="text-xl font-bold text-white">Phase 2: Proof of Concept (PoC) / Proof of Value (PoV)</h3>
+          <span class="mono text-xs text-pink-400 mt-2 md:mt-0">Timeline: 4 to 8 weeks</span>
+        </div>
+        <p class="text-sm text-gray-300 mb-6"><strong>Primary Objective:</strong> Verify technical and scientific feasibility by demonstrating that a model can extract predictive signals or generate high-quality outputs using real-world enterprise data.</p>
+        <div class="grid md:grid-cols-2 gap-8 text-sm">
+          <div>
+            <h4 class="text-cyan-400 mb-3 border-b border-white/10 pb-1 inline-block">Key Activities</h4>
+            <ul class="list-disc pl-4 space-y-2 text-gray-400">
+              <li><strong>Data Extraction & Curation:</strong> Extract static, representative snapshot.</li>
+              <li><strong>Baseline Formulation:</strong> Establish simplistic benchmark.</li>
+              <li><strong>Model Selection & Iteration:</strong> Run experiments using ML/LLMs.</li>
+              <li><strong>Offline Evaluation:</strong> Compute statistical metrics (Precision, Recall, ROC-AUC, RAG Triad).</li>
+            </ul>
+          </div>
+          <div>
+            <h4 class="text-cyan-400 mb-3 border-b border-white/10 pb-1 inline-block">Key Deliverables & Gating</h4>
+            <ul class="list-disc pl-4 space-y-2 text-gray-400 mb-4">
+              <li>Offline Model Evaluation Report</li>
+              <li>Interactive Wireframe/Prototype (Streamlit, Gradio)</li>
+              <li>Go/No-Go Decision Framework (Costed MVP recommendation)</li>
+            </ul>
+            <div class="bg-black/50 p-4 border border-white/5 font-mono text-xs text-gray-300 space-y-2">
+              <div>[ ] Algorithmic Signal > Baseline</div>
+              <div>[ ] Acceptable Latency/Throughput</div>
+              <div>[ ] Cost-to-Serve Viability confirmed</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Phase 3 -->
+      <div class="glass-panel p-6 md:p-8">
+        <div class="flex flex-col md:flex-row justify-between items-start md:items-center border-b border-white/10 pb-4 mb-6">
+          <h3 class="text-xl font-bold text-white">Phase 3: Minimum Viable Product (MVP) / "MVAi"</h3>
+          <span class="mono text-xs text-pink-400 mt-2 md:mt-0">Timeline: 8 to 12 weeks</span>
+        </div>
+        <p class="text-sm text-gray-300 mb-6"><strong>Primary Objective:</strong> Build a functional, end-to-end software application integrated with early-stage live data sources, and test it with a friendly cohort of real users.</p>
+        <div class="grid md:grid-cols-2 gap-8 text-sm">
+          <div>
+            <h4 class="text-cyan-400 mb-3 border-b border-white/10 pb-1 inline-block">Key Activities</h4>
+            <ul class="list-disc pl-4 space-y-2 text-gray-400">
+              <li><strong>Decoupled Architecture Design:</strong> Microservices separating inference from backend.</li>
+              <li><strong>Data Pipeline Automation:</strong> Scheduled ingestion pipelines.</li>
+              <li><strong>HITL Implementation:</strong> Workflows for experts to review/edit outputs (gold-standard data).</li>
+              <li><strong>Guardrail Integration:</strong> Safety filters for toxic queries/PII.</li>
+            </ul>
+          </div>
+          <div>
+            <h4 class="text-cyan-400 mb-3 border-b border-white/10 pb-1 inline-block">Key Deliverables & Gating</h4>
+            <ul class="list-disc pl-4 space-y-2 text-gray-400 mb-4">
+              <li>Deployed MVP Application (Sandbox)</li>
+              <li>Automated Feature & Inference Data Pipelines</li>
+              <li>Feedback Capture Schema</li>
+            </ul>
+            <div class="bg-black/50 p-4 border border-white/5 font-mono text-xs text-gray-300 space-y-2">
+              <div>[ ] Workflow Adoption by pilot users</div>
+              <div>[ ] Acceptable Error Rate (No catastrophic failures)</div>
+              <div>[ ] Data Pipeline Stability</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Phase 4 -->
+      <div class="glass-panel p-6 md:p-8">
+        <div class="flex flex-col md:flex-row justify-between items-start md:items-center border-b border-white/10 pb-4 mb-6">
+          <h3 class="text-xl font-bold text-white">Phase 4: Integration, Hardening, and DevOps Bridge</h3>
+          <span class="mono text-xs text-pink-400 mt-2 md:mt-0">Timeline: 4 to 6 weeks</span>
+        </div>
+        <p class="text-sm text-gray-300 mb-6"><strong>Primary Objective:</strong> Transform experimental MVP into robust enterprise software by modularizing code and building automated infrastructure.</p>
+        <div class="grid md:grid-cols-2 gap-8 text-sm">
+          <div>
+            <h4 class="text-cyan-400 mb-3 border-b border-white/10 pb-1 inline-block">Key Activities</h4>
+            <ul class="list-disc pl-4 space-y-2 text-gray-400">
+              <li><strong>Refactoring & Standardization:</strong> Extract notebook code into frameworks (Kedro, etc).</li>
+              <li><strong>Test Suite Development:</strong> Unit tests, data validation, regression tests.</li>
+              <li><strong>Containerization:</strong> Docker packaging for environment parity.</li>
+              <li><strong>DevOps CI/CD Construction:</strong> Automated pipelines.</li>
+            </ul>
+          </div>
+          <div>
+            <h4 class="text-cyan-400 mb-3 border-b border-white/10 pb-1 inline-block">Key Deliverables & Gating</h4>
+            <ul class="list-disc pl-4 space-y-2 text-gray-400 mb-4">
+              <li>Production-Grade, Modular Code Repository</li>
+              <li>Dockerized Containers & Helm Charts</li>
+              <li>Security & Vulnerability Audit Report</li>
+            </ul>
+            <div class="bg-black/50 p-4 border border-white/5 font-mono text-xs text-gray-300 space-y-2">
+              <div>[ ] Pipeline Passage (100% tests pass)</div>
+              <div>[ ] Security & Compliance InfoSec Approval</div>
+              <div>[ ] Rollout Plan Finalized</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Phase 5 -->
+      <div class="glass-panel p-6 md:p-8">
+        <div class="flex flex-col md:flex-row justify-between items-start md:items-center border-b border-white/10 pb-4 mb-6">
+          <h3 class="text-xl font-bold text-white">Phase 5: Scaling, Rollout, and Operating Model Transition</h3>
+          <span class="mono text-xs text-pink-400 mt-2 md:mt-0">Timeline: 6 to 10 weeks</span>
+        </div>
+        <p class="text-sm text-gray-300 mb-6"><strong>Primary Objective:</strong> Deploy hardened app to production, scale infrastructure, and orchestrate change management.</p>
+        <div class="grid md:grid-cols-2 gap-8 text-sm">
+          <div>
+            <h4 class="text-cyan-400 mb-3 border-b border-white/10 pb-1 inline-block">Key Activities</h4>
+            <ul class="list-disc pl-4 space-y-2 text-gray-400">
+              <li><strong>Infrastructure Provisioning:</strong> Auto-scaling clusters (KServe, SageMaker).</li>
+              <li><strong>Rollout Execution:</strong> Canary or Blue-Green Deployments.</li>
+              <li><strong>Performance Optimization:</strong> Caching, quantization, rate-limiting.</li>
+              <li><strong>Org Enablement:</strong> Training sessions, SOPs, escalation paths.</li>
+            </ul>
+          </div>
+          <div>
+            <h4 class="text-cyan-400 mb-3 border-b border-white/10 pb-1 inline-block">Key Deliverables & Gating</h4>
+            <ul class="list-disc pl-4 space-y-2 text-gray-400 mb-4">
+              <li>Scaled Production Deployment</li>
+              <li>Operational SLA & Performance Dashboard</li>
+              <li>SOP (Standard Operating Procedures) Manual</li>
+            </ul>
+            <div class="bg-black/50 p-4 border border-white/5 font-mono text-xs text-gray-300 space-y-2">
+              <div>[ ] 100% Traffic Transition</div>
+              <div>[ ] Business SLA Met under load</div>
+              <div>[ ] Support Team Handover completed</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Phase 6 -->
+      <div class="glass-panel p-6 md:p-8">
+        <div class="flex flex-col md:flex-row justify-between items-start md:items-center border-b border-white/10 pb-4 mb-6">
+          <h3 class="text-xl font-bold text-white">Phase 6: MLOps, Governance, and Continuous Maintenance</h3>
+          <span class="mono text-xs text-pink-400 mt-2 md:mt-0">Timeline: Ongoing</span>
+        </div>
+        <p class="text-sm text-gray-300 mb-6"><strong>Primary Objective:</strong> Prevent model drift, automate updates, and ensure regulatory compliance.</p>
+        <div class="grid md:grid-cols-2 gap-8 text-sm">
+          <div>
+            <h4 class="text-cyan-400 mb-3 border-b border-white/10 pb-1 inline-block">Key Activities</h4>
+            <ul class="list-disc pl-4 space-y-2 text-gray-400">
+              <li><strong>Drift Detection:</strong> Monitor Data Drift & Concept Drift.</li>
+              <li><strong>Continuous Training (CT):</strong> Automated pipelines triggered by decay.</li>
+              <li><strong>Regulatory & Bias Auditing:</strong> Fairness checks, immutable audit logs.</li>
+              <li><strong>Retirement Planning:</strong> Decommissioning strategies.</li>
+            </ul>
+          </div>
+          <div>
+            <h4 class="text-cyan-400 mb-3 border-b border-white/10 pb-1 inline-block">Key Deliverables & Gating</h4>
+            <ul class="list-disc pl-4 space-y-2 text-gray-400 mb-4">
+              <li>MLOps Observability Dashboard (Grafana, MLflow)</li>
+              <li>Continuous Training Pipeline Code</li>
+              <li>Audit & Lineage Trail</li>
+            </ul>
+            <div class="bg-black/50 p-4 border border-white/5 font-mono text-xs text-gray-300 space-y-2">
+              <div>[ ] Active Incident Response running</div>
+              <div>[ ] Audit Readiness (24hr SLA)</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 4. METHODOLOGIES -->
+  <section class="mb-24 reveal-text">
+    <h2 class="text-2xl md:text-3xl text-white mb-6 border-l-4 border-pink-500 pl-4">4. Modern AI Delivery Methodologies & Framework Integration</h2>
+    <p class="mb-6 text-gray-300">To support this structured six-phase lifecycle, consulting firms rely on customized development frameworks. They merge experimental research with software engineering through distinct, highly integrated processes.</p>
+    
+    <div class="glass-panel p-6 mb-10 overflow-hidden">
+      <div class="ascii-container text-pink-400 text-center flex justify-center">
+       [ CRISP-DM / TDSP ] &lt;--- Data-centric Science Track (Probabilistic)
+               |
+               v
+  ===========================
+  [ DUAL-TRACK AGILE MODEL  ] &lt;--- Aligned Cadences (Sprint Syncs & Spikes)
+  ===========================
+               ^
+               |
+         [ DevOps / MLOps ] &lt;--- Software & Infrastructure Track (Deterministic)
+      </div>
+    </div>
+
+    <h3 class="text-xl text-white mb-4">A. CRISP-DM vs. Microsoft's Team Data Science Process (TDSP)</h3>
+    <p class="text-sm text-gray-400 mb-4">While classic software projects use traditional Agile/Scrum, data science requires specialized lifecycles. Consulting firms adapt CRISP-DM or leverage Microsoft's modern TDSP.</p>
+    <div class="overflow-x-auto mb-10">
+      <table>
+        <thead>
+          <tr>
+            <th>Dimension</th>
+            <th>CRISP-DM (Classic)</th>
+            <th>TDSP (Modern)</th>
+          </tr>
+        </thead>
+        <tbody class="text-sm text-gray-300">
+          <tr>
+            <td>Origin / Era</td>
+            <td>1999; offline data mining/warehousing.</td>
+            <td>2016; cloud ecosystems, deep learning, LLMs.</td>
+          </tr>
+          <tr>
+            <td>Workflow</td>
+            <td>6 highly sequential, cyclical phases.</td>
+            <td>5 interactive, Agile-native, continuous phases.</td>
+          </tr>
+          <tr>
+            <td>Project Structure</td>
+            <td>No standardized template.</td>
+            <td>Mandates standardized directory structure.</td>
+          </tr>
+          <tr>
+            <td>Integration</td>
+            <td>Hard to map into modern DevOps.</td>
+            <td>Natively integrated with CI/CD & feature stores.</td>
+          </tr>
+          <tr>
+            <td>Collaboration</td>
+            <td>Siloed data scientists.</td>
+            <td>Highly collaborative cross-functional mapping.</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <h3 class="text-xl text-white mb-4">B. Dual-Track Agile: Experimentation vs. Engineering</h3>
+    <p class="text-sm text-gray-400 mb-4">Managing data scientists and software engineers in a single sprint board can lead to friction. Elite firms deploy Dual-Track Agile:</p>
+    <div class="grid md:grid-cols-2 gap-6 mb-10">
+      <div class="border border-pink-500/30 p-4 bg-pink-500/5">
+        <h4 class="text-pink-400 mb-2">Track 1: Discovery (Probabilistic)</h4>
+        <p class="text-sm text-gray-300">Operated by Data Scientists and Researchers. Focused on hypothesis testing, data exploration, and offline evaluation. Work is structured as time-boxed "spikes".</p>
+      </div>
+      <div class="border border-cyan-500/30 p-4 bg-cyan-500/5">
+        <h4 class="text-cyan-400 mb-2">Track 2: Delivery (Deterministic)</h4>
+        <p class="text-sm text-gray-300">Operated by Software Developers and Platform Engineers. Focused on building stable APIs, UI components, and architecture. Predictable velocity.</p>
+      </div>
+    </div>
+    <p class="text-sm text-gray-400 mb-10 border-l border-white/20 pl-4"><strong>Aligned Cadence:</strong> Tracks coordinate daily. Research output serves as engineering input, preventing bottlenecks.</p>
+
+    <h3 class="text-xl text-white mb-4">C. The "AI Pods" Organizational Model</h3>
+    <p class="text-sm text-gray-400 mb-4">Rather than allocating resources independently, consulting firms assemble cross-functional, highly autonomous units called AI Pods to deliver projects.</p>
+    <div class="glass-panel p-6 overflow-hidden">
+      <div class="ascii-container flex justify-center text-gray-300">
+                                  +------------------------+
+                                  |      Product Owner     |
+                                  | (Value & Scope Control)|
+                                  +------------------------+
+                                               |
+                     +-------------------------+-------------------------+
+                     |                                                   |
+        +------------------------+                          +------------------------+
+        |  Probabilistic Track   |                          |  Deterministic Track   |
+        +------------------------+                          +------------------------+
+        | * Lead Data Scientist  |                          | * Lead Platform Eng.   |
+        | * AI/LLM Engineer      |                          | * DevOps / MLOps Eng.  |
+        | * Domain Expert (SME)  |                          | * Full-stack Engineer  |
+        +------------------------+                          +------------------------+
+      </div>
+      <p class="text-sm text-gray-400 mt-6">This model prevents "siloed handovers"—the single most common cause of pilot delays.</p>
+    </div>
+  </section>
+
+  <!-- 5. RISK MANAGEMENT -->
+  <section class="mb-24 reveal-text">
+    <h2 class="text-2xl md:text-3xl text-white mb-6 border-l-4 border-cyan-500 pl-4">5. Risk Management & Scope Creep Mitigation Strategies</h2>
+    <p class="mb-8 text-gray-300">AI projects are uniquely susceptible to scope creep and cost overruns. This section details concrete strategies used by consulting firms.</p>
+
+    <div class="grid md:grid-cols-2 gap-8">
+      <!-- Risk Block -->
+      <div class="glass-panel p-5">
+        <h4 class="text-white font-bold mb-2 flex items-center gap-2"><span class="w-2 h-2 bg-pink-500 rounded-full"></span> A. Escaping "The PoC Trap"</h4>
+        <p class="text-xs text-gray-400 mb-4">Endless prototyping without production transition.</p>
+        <ul class="text-sm text-gray-300 space-y-2 list-disc pl-4">
+          <li><strong class="text-cyan-400">Time-Boxed Prototyping:</strong> Strict limit on Phase 2 (e.g., 6 weeks).</li>
+          <li><strong class="text-cyan-400">Design for Failure:</strong> Establish a Failure Threshold early.</li>
+          <li><strong class="text-cyan-400">PoC-to-MVP Contract:</strong> Conditional funding commitments beforehand.</li>
+        </ul>
+      </div>
+      
+      <!-- Risk Block -->
+      <div class="glass-panel p-5">
+        <h4 class="text-white font-bold mb-2 flex items-center gap-2"><span class="w-2 h-2 bg-pink-500 rounded-full"></span> B. Data Quality Risks</h4>
+        <p class="text-xs text-gray-400 mb-4">"Garbage in, garbage out."</p>
+        <ul class="text-sm text-gray-300 space-y-2 list-disc pl-4">
+          <li><strong class="text-cyan-400">Immediate Sanity Checks:</strong> Run in week one of Phase 1.</li>
+          <li><strong class="text-cyan-400">Synthetic Bootstrapping:</strong> Use SDV/Gretel for mock datasets parallel to approvals.</li>
+          <li><strong class="text-cyan-400">Targeted Annotation:</strong> Lightweight human labeling tools (Label Studio).</li>
+        </ul>
+      </div>
+
+      <!-- Risk Block -->
+      <div class="glass-panel p-5">
+        <h4 class="text-white font-bold mb-2 flex items-center gap-2"><span class="w-2 h-2 bg-pink-500 rounded-full"></span> C. Model Feasibility Risks</h4>
+        <p class="text-xs text-gray-400 mb-4">Inability to achieve required accuracy.</p>
+        <ul class="text-sm text-gray-300 space-y-2 list-disc pl-4">
+          <li><strong class="text-cyan-400">Baselines First Rule:</strong> Prove worth over simple heuristics before Deep Learning.</li>
+          <li><strong class="text-cyan-400">Statistical Clearances:</strong> Non-negotiable quantitative targets.</li>
+          <li><strong class="text-cyan-400">Error Budgets:</strong> Design for 5% failure; use fallback routing.</li>
+        </ul>
+      </div>
+
+      <!-- Risk Block -->
+      <div class="glass-panel p-5">
+        <h4 class="text-white font-bold mb-2 flex items-center gap-2"><span class="w-2 h-2 bg-pink-500 rounded-full"></span> D. Operational & Cost Drift Risks</h4>
+        <p class="text-xs text-gray-400 mb-4">Exponential GenAI API compute scaling.</p>
+        <ul class="text-sm text-gray-300 space-y-2 list-disc pl-4">
+          <li><strong class="text-cyan-400">Cost-to-Serve Modeling:</strong> Track token and VM costs continuously.</li>
+          <li><strong class="text-cyan-400">Inference Routing:</strong> Cascade simple queries to open-source, complex to proprietary.</li>
+          <li><strong class="text-cyan-400">Caching & Rate-Limiting:</strong> Semantic caching (GPTCache).</li>
+        </ul>
+      </div>
+
+      <!-- Risk Block -->
+      <div class="glass-panel p-5">
+        <h4 class="text-white font-bold mb-2 flex items-center gap-2"><span class="w-2 h-2 bg-pink-500 rounded-full"></span> E. Compliance & Bias Risks</h4>
+        <p class="text-xs text-gray-400 mb-4">PII leaks, toxic content, demographic bias.</p>
+        <ul class="text-sm text-gray-300 space-y-2 list-disc pl-4">
+          <li><strong class="text-cyan-400">PII Masking Gateways:</strong> Strip identifiers before API transmission.</li>
+          <li><strong class="text-cyan-400">Continuous Bias Scans:</strong> Automated fairness audits (Aequitas, Fairlearn).</li>
+          <li><strong class="text-cyan-400">Immutable Model Registry:</strong> Log code, data, and hyperparams for auditors.</li>
+        </ul>
+      </div>
+
+      <!-- Risk Block -->
+      <div class="glass-panel p-5">
+        <h4 class="text-white font-bold mb-2 flex items-center gap-2"><span class="w-2 h-2 bg-pink-500 rounded-full"></span> F. Scope Creep Safeguards</h4>
+        <p class="text-xs text-gray-400 mb-4">Stakeholder "just one more feature" syndrome.</p>
+        <ul class="text-sm text-gray-300 space-y-2 list-disc pl-4">
+          <li><strong class="text-cyan-400">MVAi Focus:</strong> Deliver narrow, high-impact workflows first.</li>
+          <li><strong class="text-cyan-400">Change Control Board:</strong> Treat prompt changes like source code.</li>
+          <li><strong class="text-cyan-400">Feature Flags:</strong> Decouple and isolate experimental features.</li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <!-- 6. SYNTHESIS MATRIX -->
+  <section class="mb-24 reveal-text">
+    <h2 class="text-2xl md:text-3xl text-white mb-6 border-l-4 border-cyan-500 pl-4">6. Synthesis: Complete AI Delivery Lifecycle Matrix</h2>
+    <div class="overflow-x-auto glass-panel">
+      <table class="min-w-[800px]">
+        <thead class="text-xs uppercase bg-black/40">
+          <tr>
+            <th>Phase</th>
+            <th>Core Objective</th>
+            <th>Methodologies</th>
+            <th>Primary Tech</th>
+            <th>Essential Roles</th>
+            <th>Key Metrics</th>
+          </tr>
+        </thead>
+        <tbody class="text-xs text-gray-300">
+          <tr>
+            <td class="font-bold text-cyan-400">1: Scoping</td>
+            <td>Align business & assess data</td>
+            <td>McKinsey 5-Layer, Prioritization</td>
+            <td>Jira, Confluence, PowerBI</td>
+            <td>AI Strategist, Architect, BA</td>
+            <td>Data Quality Score, ROI ($)</td>
+          </tr>
+          <tr>
+            <td class="font-bold text-cyan-400">2: PoC</td>
+            <td>Prove technical feasibility</td>
+            <td>Rapid prototyping, Baselines</td>
+            <td>Jupyter, Streamlit, Py, HF</td>
+            <td>Data Scientist, AI Eng, SME</td>
+            <td>F1-Score, ROC-AUC, Faithfulness</td>
+          </tr>
+          <tr>
+            <td class="font-bold text-cyan-400">3: MVP</td>
+            <td>Deliver end-to-end user value</td>
+            <td>MVAi, HITL, AI Pods</td>
+            <td>Docker, Kedro, PyTorch, LangChain</td>
+            <td>Data Scientist, Platform Eng, UX</td>
+            <td>Adoption Rate, Latency, Cost</td>
+          </tr>
+          <tr>
+            <td class="font-bold text-cyan-400">4: Hardening</td>
+            <td>Package, test, secure app</td>
+            <td>Modular refactoring, CI/CD</td>
+            <td>GitLab CI, FastAPI, GitHub Actions</td>
+            <td>DevOps Eng, ML Eng, Security</td>
+            <td>Code Coverage %, Vuln Count</td>
+          </tr>
+          <tr>
+            <td class="font-bold text-cyan-400">5: Scaling</td>
+            <td>Scale infra & org adoption</td>
+            <td>Rewired Operating Model</td>
+            <td>K8s, Triton, AWS, Databricks</td>
+            <td>Platform Eng, PO, Change Mgr</td>
+            <td>Throughput, Saturation, Uptime</td>
+          </tr>
+          <tr>
+            <td class="font-bold text-cyan-400">6: MLOps</td>
+            <td>Prevent drift, automate governance</td>
+            <td>Google MLOps Maturity</td>
+            <td>MLflow, Prometheus, Grafana</td>
+            <td>MLOps Eng, Analytics Mgr, Compliance</td>
+            <td>Data Drift, Accuracy Decay, Bias</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <!-- 7. CONCLUSION -->
+  <section class="mb-32 reveal-text">
+    <h2 class="text-2xl md:text-3xl text-white mb-6 border-l-4 border-pink-500 pl-4">7. Conclusion: Framework Implementation Blueprint</h2>
+    <div class="glass-panel p-8 text-lg text-gray-300 leading-relaxed border-t-2 border-cyan-500">
+      <p class="mb-6">Deploying AI successfully at an enterprise scale is not an algorithmic challenge; it is a delivery and discipline challenge. Consulting organizations achieve success by replacing ad-hoc experimentation with structured, repeatable processes.</p>
+      <p class="mb-4 font-bold text-white">To put this framework into immediate operation, organizations should:</p>
+      <ul class="list-disc pl-6 space-y-4 mb-6">
+        <li><strong class="text-cyan-400">Never authorize data science work without platform engineering input:</strong> Use cross-functional AI Pods to ensure models are built for target production environments from day one.</li>
+        <li><strong class="text-cyan-400">Enforce the MVAi paradigm:</strong> Build Human-in-the-Loop systems as your default production architecture to secure trust and establish active data flywheels.</li>
+        <li><strong class="text-cyan-400">Automate MLOps pipelines concurrently:</strong> Do not treat MLOps as a post-launch "nice-to-have." Establish data drift monitoring during Phase 4 to ensure the system survives in a dynamic world.</li>
+      </ul>
+      <div class="text-center mt-12">
+        <span class="mono text-sm text-pink-500 uppercase tracking-widest border border-pink-500/50 px-4 py-2">END OF TRANSMISSION</span>
+      </div>
+    </div>
+  </section>
+
+</main>
+
+<script>
+  // Intersection Observer for scroll animations
+  const observerOptions = {
+    root: null,
+    rootMargin: '0px',
+    threshold: 0.1
+  };
+
+  const observer = new IntersectionObserver((entries, observer) => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        entry.target.classList.add('is-visible');
+      }
+    });
+  }, observerOptions);
+
+  document.querySelectorAll('.reveal-text').forEach(el => {
+    observer.observe(el);
+  });
+
+  // Scroll progress bar
+  window.addEventListener('scroll', () => {
+    const winScroll = document.body.scrollTop || document.documentElement.scrollTop;
+    const height = document.documentElement.scrollHeight - document.documentElement.clientHeight;
+    const scrolled = (winScroll / height) * 100;
+    document.getElementById("progress-bar").style.width = scrolled + "%";
+  });
+</script>
+</body>
+</html>
