@@ -164,6 +164,15 @@ const hubs = [
     color: "from-red-900 to-orange-900",
     border: "hover:border-red-600/50",
     shadow: "hover:shadow-[0_0_40px_-10px_rgba(220,38,38,0.4)]"
+  },
+  {
+    title: "Operational Intelligence Plan",
+    description: "Revenue engine and operational dispatch automation implementation plan for Koehne’s Heating & Air Conditioning.",
+    href: "/implementation.html",
+    icon: "🛠️",
+    color: "from-cyan-500 to-blue-600",
+    border: "hover:border-cyan-400/50",
+    shadow: "hover:shadow-[0_0_40px_-10px_rgba(6,182,212,0.3)]"
   }
 ];
 

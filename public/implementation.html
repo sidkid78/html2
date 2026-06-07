@@ -1,0 +1,1134 @@
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth bg-black">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Operational Intelligence Implementation Plan</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Caveat:wght@400..700&family=JetBrains+Mono:wght@100..800&family=Inter:wght@300..800&display=swap"
+        rel="stylesheet">
+    <style>
+        :root {
+            --cyan: #00E5FF;
+        }
+
+        body {
+            background-color: #000000;
+            color: #E2E8F0;
+            font-family: 'Inter', sans-serif;
+            overflow-x: hidden;
+        }
+
+        .font-mono {
+            font-family: 'JetBrains Mono', monospace;
+        }
+
+        .font-handwriting {
+            font-family: 'Caveat', cursive;
+        }
+
+        .text-glow {
+            text-shadow: 0 0 15px rgba(0, 229, 255, 0.6), 0 0 30px rgba(0, 229, 255, 0.4);
+        }
+
+        .text-glow-red {
+            text-shadow: 0 0 15px rgba(239, 68, 68, 0.6);
+        }
+
+        .box-glow {
+            box-shadow: 0 0 20px rgba(0, 229, 255, 0.1), inset 0 0 20px rgba(0, 229, 255, 0.05);
+        }
+
+        .bg-grid {
+            background-size: 30px 30px;
+            background-image: linear-gradient(to right, rgba(0, 229, 255, 0.03) 1px, transparent 1px), linear-gradient(to bottom, rgba(0, 229, 255, 0.03) 1px, transparent 1px);
+        }
+
+        .reveal-on-scroll {
+            opacity: 0;
+            transform: translateY(30px);
+            transition: opacity 0.8s cubic-bezier(0.25, 0.46, 0.45, 0.94), transform 0.8s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+        }
+
+        .reveal-on-scroll.is-visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        .glitch-hover:hover {
+            filter: url(#glitch);
+            cursor: crosshair;
+        }
+
+        ::-webkit-scrollbar {
+            width: 6px;
+            height: 6px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: #050505;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: rgba(0, 229, 255, 0.3);
+            border-radius: 3px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: rgba(0, 229, 255, 0.6);
+        }
+    </style>
+</head>
+
+<body class="antialiased selection:bg-[#00E5FF] selection:text-black relative"><svg width="0" height="0"
+        class="absolute hidden">
+        <filter id="noise">
+            <feTurbulence type="fractalNoise" baseFrequency="0.75" numOctaves="3" stitchTiles="stitch" />
+            <feColorMatrix type="matrix" values="1 0 0 0 0, 0 1 0 0 0, 0 0 1 0 0, 0 0 0 0.08 0" />
+        </filter>
+        <filter id="glitch">
+            <feOffset dx="3" dy="0" in="SourceGraphic" result="red-shift" />
+            <feColorMatrix in="red-shift" type="matrix" values="1 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 1 0" result="red" />
+            <feOffset dx="-3" dy="0" in="SourceGraphic" result="cyan-shift" />
+            <feColorMatrix in="cyan-shift" type="matrix" values="0 0 0 0 0 0 1 0 0 0 0 0 1 0 0 0 0 0 1 0"
+                result="cyan" />
+            <feBlend mode="screen" in="red" in2="cyan" result="blend" />
+            <feBlend mode="screen" in="blend" in2="SourceGraphic" />
+        </filter>
+    </svg>
+    <div class="fixed inset-0 pointer-events-none z-50 mix-blend-overlay" style="filter:url(#noise);"></div>
+    <div class="fixed inset-0 pointer-events-none z-0 bg-grid"></div>
+    <main class="relative z-10 max-w-5xl mx-auto px-6 py-16 lg:px-12">
+        <div class="text-center mb-32 reveal-on-scroll">
+            <div class="inline-block relative mb-8"><img src="./images/edge-logo.png"
+                    class="w-64 md:w-80 mx-auto mix-blend-screen opacity-90 relative z-10" alt="EdgeCraft RevOps">
+                <div class="absolute inset-0 bg-[#00E5FF] blur-[100px] opacity-20 z-0"></div>
+            </div>
+            <h1
+                class="font-sans font-bold text-5xl md:text-7xl text-white tracking-tighter uppercase mb-6 leading-none glitch-hover">
+                <span class="text-transparent bg-clip-text bg-gradient-to-r from-white to-gray-400">Operational
+                    Intelligence</span><br><span class="text-[#00E5FF] text-glow">Implementation Plan</span></h1>
+            <div
+                class="flex flex-wrap justify-center gap-4 font-mono text-xs md:text-sm text-[#00E5FF] max-w-4xl mx-auto">
+                <span class="px-4 py-2 border border-[#00E5FF]/30 rounded bg-[#00E5FF]/5">Project: Revenue Engine &amp;
+                    Operational Dispatch Automation</span><span
+                    class="px-4 py-2 border border-[#00E5FF]/30 rounded bg-[#00E5FF]/5">Prepared for: Chris Koehne,
+                    Koehne’s Heating &amp; Air Conditioning</span><span
+                    class="px-4 py-2 border border-[#00E5FF]/30 rounded bg-[#00E5FF]/5">Prepared by: EdgeCraft
+                    RevOps</span><span class="px-4 py-2 border border-[#00E5FF]/30 rounded bg-[#00E5FF]/5">Date: June
+                    05, 2026</span></div>
+        </div>
+        <section class="mb-24 relative border-l-2 border-[#00E5FF]/30 pl-6 md:pl-10 reveal-on-scroll">
+            <div class="absolute -left-[5px] top-2 w-2 h-2 bg-[#00E5FF] shadow-[0_0_10px_#00E5FF]"></div>
+            <h2 class="text-2xl md:text-3xl font-bold text-white mb-6 uppercase tracking-widest">Section I: Strategic
+                Alignment &amp; Financial Blueprint</h2>
+            <div class="space-y-4 text-gray-300 font-sans leading-relaxed text-sm md:text-base">
+                <p>Koehne’s Heating &amp; Air Conditioning is currently operating under a manual administrative ceiling.
+                    During peak seasons, the overhead of managing service dispatch, manual lead triage, and delayed
+                    estimating creates an artificial bottleneck that actively limits business growth and erodes profit
+                    margins.</p>
+                <p>By transitioning to an automated RevOps architecture, we will recover approximately 15 lost hours per
+                    week of high-value administrative time and capture <span
+                        class="text-[#00E5FF] font-bold">$14,500</span> in monthly leaked revenue—all without adding
+                    headcount.</p>
+            </div>
+            <div class="my-10 border border-[#00E5FF]/30 bg-[#050505] box-glow font-mono text-sm overflow-hidden">
+                <div
+                    class="bg-[#00E5FF]/10 text-[#00E5FF] p-3 text-center border-b border-[#00E5FF]/30 font-bold tracking-widest uppercase">
+                    REVENUE LEAKAGE BREAKDOWN</div>
+                <div class="p-6 space-y-3">
+                    <div class="flex justify-between border-b border-gray-800 pb-3"><span
+                            class="text-gray-300">Administrative Labor Drag</span><span class="text-red-400">~$6,000/mo
+                            (10-15+ hours/week)</span></div>
+                    <div class="flex justify-between border-b border-gray-800 pb-3"><span
+                            class="text-gray-300">Competitive Conversion Loss</span><span
+                            class="text-red-400">~$8,000/mo (Slow speed-to-lead)</span></div>
+                    <div class="flex justify-between border-b border-gray-800 pb-3"><span class="text-gray-300">Seasonal
+                            Overtime Premiums</span><span class="text-red-400">~$500/mo (Manual dispatch loops)</span>
+                    </div>
+                    <div class="flex justify-between pt-4 text-lg font-bold"><span class="text-[#00E5FF]">TOTAL MONTHLY
+                            LEAKAGE</span><span class="text-red-500 text-glow-red">$14,500/mo</span></div>
+                    <div class="flex justify-between pt-2 text-lg font-bold border-t border-gray-800 mt-2"><span
+                            class="text-white">TOTAL ANNUAL EXPOSURE</span><span class="text-red-500">$174,000/yr</span>
+                    </div>
+                </div>
+            </div>
+            <h3 class="text-xl font-bold text-[#00E5FF] mb-3 uppercase tracking-wider">Strategic Objective</h3>
+            <p class="text-gray-300 leading-relaxed text-sm md:text-base">Accelerate &quot;Speed-to-Lead&quot; to a
+                sub-5-minute response protocol, automate manual technician dispatch, and streamline estimate follow-ups.
+                This blueprint details the step-by-step systems implementation required to build this engine.</p>
+        </section>
+        <section class="mb-24 relative border-l-2 border-[#00E5FF]/30 pl-6 md:pl-10 reveal-on-scroll">
+            <div class="absolute -left-[5px] top-2 w-2 h-2 bg-[#00E5FF] shadow-[0_0_10px_#00E5FF]"></div>
+            <h2 class="text-2xl md:text-3xl font-bold text-white mb-6 uppercase tracking-widest">Section II: Core
+                Systems Architecture</h2>
+            <p class="text-gray-300 leading-relaxed mb-8 text-sm md:text-base">Our future-state architecture bridges
+                front-end customer engagement, back-end Field Service Management (FSM) software (such as ServiceTitan,
+                Jobber, or Housecall Pro), and administrative operations into a single automated pipeline:</p>
+            <div class="w-full overflow-x-auto bg-[#050505] border border-[#00E5FF]/30 p-6 box-glow rounded-sm">
+                <div
+                    class="whitespace-pre text-center text-[#00E5FF] text-[10px] md:text-xs font-mono leading-tight glitch-hover">
+                    <div> +--------------------------------------+</div>
+                    <div> | INBOUND CHANNELS |</div>
+                    <div> | - Website Form (Gravity Forms) |</div>
+                    <div> | - Inbound Calls (VoIP/RingCentral) |</div>
+                    <div> | - Website Live Chat |</div>
+                    <div> | - Google Local Services / Ads |</div>
+                    <div> +------------------+-------------------+</div>
+                    <div> | </div>
+                    <div> v </div>
+                    <div> +--------------------------------------+</div>
+                    <div> | GOHIGHLEVEL CRM ENGINE |</div>
+                    <div> | - Sub-Account Provisioning |</div>
+                    <div> | - Core Comm Infrastructure |</div>
+                    <div> | - Conversational SMS Auto-Responder |</div>
+                    <div> +--------+--------------------+--------+</div>
+                    <div> | | </div>
+                    <div> | API | Webhook </div>
+                    <div> v v </div>
+                    <div>+----------------------------+ +----------------------------+</div>
+                    <div>| FATHOM WORKSPACE | | AUTOMATED DISPATCH |</div>
+                    <div>| - Call Transcripts | | &amp; ESTIMATING ENGINE |</div>
+                    <div>| - AI Action Item Extraction| | - Location Geocoding |</div>
+                    <div>| - CRM Automated Log | | - Tech Skill-Matching |</div>
+                    <div>+----------------------------+ | - Real-Time Scheduling |</div>
+                    <div> +-------------+--------------+</div>
+                    <div> | </div>
+                    <div> v </div>
+                    <div> +----------------------------+</div>
+                    <div> | DASH_THIS |</div>
+                    <div> | - Speed-to-Lead Gauge |</div>
+                    <div> | - Conversion Analytics |</div>
+                    <div> | - Labor Hours Saved Tracker|</div>
+                    <div> +----------------------------+</div>
+                </div>
+            </div>
+        </section>
+        <section class="mb-24 relative border-l-2 border-[#00E5FF]/30 pl-6 md:pl-10 reveal-on-scroll">
+            <div class="absolute -left-[5px] top-2 w-2 h-2 bg-[#00E5FF] shadow-[0_0_10px_#00E5FF]"></div>
+            <h2 class="text-2xl md:text-3xl font-bold text-white mb-6 uppercase tracking-widest">Section III: Phase 1
+                (Quick Wins) Implementation Guide</h2>
+            <p class="text-gray-300 leading-relaxed mb-8 text-sm md:text-base">This phase establishes your core
+                communication layer, configures automated customer engagement, and deploys workspace automation.</p>
+            <h3 class="text-xl font-bold text-[#00E5FF] mt-10 mb-4">Day 1: GoHighLevel (GHL) Sub-Account &amp; Core
+                Channels Provisioning</h3>
+            <div class="space-y-6 text-gray-300 text-sm md:text-base leading-relaxed">
+                <div class="bg-gray-900/50 p-6 rounded border border-gray-800">
+                    <h4 class="text-white font-bold mb-2">1. Sub-Account Setup</h4>
+                    <ul class="list-disc pl-5 space-y-2">
+                        <li>Log into the GHL Agency Dashboard (agency.gohighlevel.com).</li>
+                        <li>Go to Sub-Accounts and click + Create Sub-Account -&gt; Regular Account.</li>
+                        <li>Import location data via Google Maps by searching for &quot;Koehne’s Heating &amp; Air
+                            Conditioning&quot;.</li>
+                        <li>Set the account timezone to local operating time. Create the primary admin user with Chris
+                            Koehne’s contact details.</li>
+                        <li>In Settings &gt; Business Profile, toggle Enable duplicate contact merge and upload the
+                            company logo (200x200px PNG).</li>
+                    </ul>
+                </div>
+                <div class="bg-gray-900/50 p-6 rounded border border-gray-800">
+                    <h4 class="text-white font-bold mb-2">2. Email Integration (LeadConnector SMTP)</h4>
+                    <p class="mb-4">We will route all system automated notifications through a dedicated sending
+                        subdomain to protect the primary domain's sender reputation. <span
+                            class="text-[#00E5FF] font-mono">Target Subdomain: replies.koehnehvac.com</span></p>
+                    <div class="overflow-x-auto my-4">
+                        <table class="w-full text-left font-mono text-xs text-gray-300 border-collapse">
+                            <thead class="bg-[#00E5FF]/10 text-[#00E5FF]">
+                                <tr>
+                                    <th class="p-2 border border-[#00E5FF]/30">Record Type</th>
+                                    <th class="p-2 border border-[#00E5FF]/30">Host/Name</th>
+                                    <th class="p-2 border border-[#00E5FF]/30">Value/Target</th>
+                                    <th class="p-2 border border-[#00E5FF]/30">TTL</th>
+                                    <th class="p-2 border border-[#00E5FF]/30">Purpose</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr class="border-b border-gray-800 hover:bg-gray-900">
+                                    <td class="p-2 border border-gray-800">TXT</td>
+                                    <td class="p-2 border border-gray-800">replies</td>
+                                    <td class="p-2 border border-gray-800">v=spf1 include:mailgun.org ~all</td>
+                                    <td class="p-2 border border-gray-800">1 Hour</td>
+                                    <td class="p-2 border border-gray-800">SPF Deliverability</td>
+                                </tr>
+                                <tr class="border-b border-gray-800 hover:bg-gray-900">
+                                    <td class="p-2 border border-gray-800">TXT</td>
+                                    <td class="p-2 border border-gray-800">k1._domainkey.replies</td>
+                                    <td class="p-2 border border-gray-800">k=rsa; p=[Unique DKIM Key from GHL Email
+                                        Setup]</td>
+                                    <td class="p-2 border border-gray-800">1 Hour</td>
+                                    <td class="p-2 border border-gray-800">DKIM Authentication</td>
+                                </tr>
+                                <tr class="border-b border-gray-800 hover:bg-gray-900">
+                                    <td class="p-2 border border-gray-800">TXT</td>
+                                    <td class="p-2 border border-gray-800">_dmarc.replies</td>
+                                    <td class="p-2 border border-gray-800">v=DMARC1; p=quarantine; pct=100;
+                                        rua=mailto:dmarc@koehnehvac.com</td>
+                                    <td class="p-2 border border-gray-800">1 Hour</td>
+                                    <td class="p-2 border border-gray-800">DMARC Protection</td>
+                                </tr>
+                                <tr class="border-b border-gray-800 hover:bg-gray-900">
+                                    <td class="p-2 border border-gray-800">MX</td>
+                                    <td class="p-2 border border-gray-800">replies</td>
+                                    <td class="p-2 border border-gray-800">mxa.mailgun.org (Priority 10)</td>
+                                    <td class="p-2 border border-gray-800">1 Hour</td>
+                                    <td class="p-2 border border-gray-800">Inbound Mail Routing</td>
+                                </tr>
+                                <tr class="border-b border-gray-800 hover:bg-gray-900">
+                                    <td class="p-2 border border-gray-800">MX</td>
+                                    <td class="p-2 border border-gray-800">replies</td>
+                                    <td class="p-2 border border-gray-800">mxb.mailgun.org (Priority 10)</td>
+                                    <td class="p-2 border border-gray-800">1 Hour</td>
+                                    <td class="p-2 border border-gray-800">Inbound Mail Routing (Backup)</td>
+                                </tr>
+                                <tr class="hover:bg-gray-900">
+                                    <td class="p-2 border border-gray-800">CNAME</td>
+                                    <td class="p-2 border border-gray-800">email.replies</td>
+                                    <td class="p-2 border border-gray-800">mailgun.org</td>
+                                    <td class="p-2 border border-gray-800">1 Hour</td>
+                                    <td class="p-2 border border-gray-800">Click/Open Tracking</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                    <p>Verify domain ownership in GHL under Settings &gt; Email Services &gt; Dedicated Domains &gt;
+                        Verify Domain.</p>
+                </div>
+                <div class="bg-gray-900/50 p-6 rounded border border-gray-800">
+                    <h4 class="text-white font-bold mb-2">3. Phone &amp; SMS Integration (LC Phone &amp; A2P 10DLC)</h4>
+                    <p class="mb-4">To ensure compliance with carrier requirements and prevent message filtering,
+                        register the business phone line inside the GHL Trust Center:</p>
+                    <ul class="list-disc pl-5 space-y-2">
+                        <li>Go to Settings &gt; Phone Numbers &gt; Trust Center and click Start Registration.</li>
+                        <li>Brand Registration: Provide the business's legal name, Tax ID (EIN), and physical address.
+                        </li>
+                        <li>Campaign Registration: Choose Low-Volume Mixed/Customer Care. Use the following templates
+                            for the application:</li>
+                        <ul class="list-circle pl-5 space-y-1 text-gray-400 mt-2">
+                            <li>Campaign Description: &quot;Inbound lead responses and transactional dispatch
+                                notifications for residential/commercial HVAC services.&quot;</li>
+                            <li>Opt-In Flow: &quot;Customers opt-in via our website request form (koehnehvac.com) by
+                                checking an explicit box to receive automated SMS updates regarding their appointment
+                                and service status.&quot;</li>
+                            <li>Sample SMS: &quot;Hi {{contact.first_name}}, this is Chris from Koehne's Heating &amp;
+                                AC. Thanks for reaching out! We've received your request. Reply STOP to opt out.&quot;
+                            </li>
+                        </ul>
+                        <li>Purchase a dedicated local dispatch number in Settings &gt; Phone Numbers &gt; Numbers &gt;
+                            Add Number. Set the following configurations:</li>
+                        <ul class="list-circle pl-5 space-y-1 text-gray-400 mt-2">
+                            <li>Forwarding Number: Set to the office's main phone line.</li>
+                            <li>Whisper Message: &quot;Inbound call from GHL Lead.&quot;</li>
+                            <li>Call Recording: Toggle ON (Compliance statement enabled: &quot;This call is recorded for
+                                quality assurance.&quot;).</li>
+                        </ul>
+                    </ul>
+                </div>
+            </div>
+            <h3 class="text-xl font-bold text-[#00E5FF] mt-12 mb-4">Day 2: Conversational UX Workflows &amp; GHL
+                Scheduling Calendar</h3>
+            <p class="text-gray-300 leading-relaxed mb-6 text-sm md:text-base">To ensure responses feel natural and
+                authentic, we will add a 1-minute &quot;typing&quot; delay before sending the first automated message.
+                This natural delay prevents carriers from flagging the messages as spam and encourages higher conversion
+                rates.</p>
+            <div class="w-full overflow-x-auto bg-[#050505] border border-[#00E5FF]/30 p-6 box-glow rounded-sm mb-8">
+                <div class="whitespace-pre text-[#00E5FF] text-[10px] md:text-xs font-mono leading-tight">
+                    <div>[Trigger: Form Submitted]</div>
+                    <div> |</div>
+                    <div> v</div>
+                    <div>[Action: Assign to Dispatcher]</div>
+                    <div> |</div>
+                    <div> v</div>
+                    <div>[Action: Add Tag: &quot;Lead-Inbound&quot;]</div>
+                    <div> |</div>
+                    <div> v</div>
+                    <div>[Action: Update Opportunity Stage: &quot;Lead Inbound&quot;]</div>
+                    <div> |</div>
+                    <div> v</div>
+                    <div>[Action: Wait Step: 1 Minute] (Ensures human-like delivery)</div>
+                    <div> |</div>
+                    <div> v</div>
+                    <div>[Action: Split A/B Test (50/50)]</div>
+                    <div> +-----------------------+-----------------------+</div>
+                    <div> | |</div>
+                    <div> v (Path A: Direct Value) v (Path B: Micro-Commitment)</div>
+                    <div>[Send Conversational SMS] [Send Low-Friction SMS]</div>
+                    <div>&quot;Hey {{contact.first_name}}, this &quot;Hi {{contact.first_name}}! This is</div>
+                    <div>is Chris from Koehne's HVAC. I Chris with Koehne's Heating &amp; AC.</div>
+                    <div>saw you requested an estimate I'm putting your service estimate</div>
+                    <div>for {{contact.service_requested}}. together. Should I text the quote details</div>
+                    <div>Do you prefer a quick call or text to this number, or do you prefer</div>
+                    <div>to discuss?&quot; email?&quot;</div>
+                    <div> +-----------------------+-----------------------+</div>
+                    <div> |</div>
+                    <div> v</div>
+                    <div> [Wait for Reply: 2 Hours]</div>
+                    <div> |</div>
+                    <div> +------------------+------------------+</div>
+                    <div> | (Replied = YES) | (Replied = NO / Timeout)</div>
+                    <div> v v</div>
+                    <div> [Remove from Workflow] [Trigger Fallback Auto-Email]</div>
+                    <div> [Alert Dispatcher via GHL] [Wait 1 Day -&gt; Trigger Call-back Task]</div>
+                </div>
+            </div>
+            <h4 class="text-white font-bold mb-2 text-sm md:text-base">Settings for Out-of-Hours Protection (Quiet
+                Hours)</h4>
+            <ul class="list-disc pl-5 space-y-2 text-gray-300 text-sm md:text-base mb-12">
+                <li>Within GHL Workflow Settings, navigate to Execution Window.</li>
+                <li>Select Specific Time -&gt; Set to 8:00 AM to 8:00 PM based on the contact's timezone.</li>
+                <li>Leads arriving after 8:00 PM will hold in the wait step and resume sending at exactly 8:00 AM the
+                    following morning.</li>
+            </ul>
+            <h3 class="text-xl font-bold text-[#00E5FF] mt-12 mb-4">Day 3: Fathom Meeting Recorder &amp; Transcript
+                Automation</h3>
+            <p class="text-gray-300 leading-relaxed mb-6 text-sm md:text-base">To save hours of administrative
+                note-taking, we will deploy Fathom to automatically record, transcribe, and summarize customer calls and
+                team alignment meetings.</p>
+            <div class="overflow-x-auto my-6 border border-[#00E5FF]/30 box-glow">
+                <table class="w-full text-left font-mono text-xs md:text-sm text-gray-300 border-collapse">
+                    <thead class="bg-[#00E5FF]/10 text-[#00E5FF]">
+                        <tr>
+                            <th colspan="2"
+                                class="p-3 text-center border-b border-[#00E5FF]/30 font-bold uppercase tracking-widest">
+                                FATHOM RUN-BOOK &amp; TRANSCRIPTION</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr class="border-b border-gray-800 hover:bg-gray-900">
+                            <td class="p-3 border-r border-gray-800 font-bold text-white whitespace-nowrap">User Roles
+                            </td>
+                            <td class="p-3">Admin: Operations Leader | Recorder: Comfort Consultants / Techs</td>
+                        </tr>
+                        <tr class="border-b border-gray-800 hover:bg-gray-900">
+                            <td class="p-3 border-r border-gray-800 font-bold text-white whitespace-nowrap">Integrations
+                            </td>
+                            <td class="p-3">Google Calendar / Outlook Calendars</td>
+                        </tr>
+                        <tr class="hover:bg-gray-900">
+                            <td class="p-3 border-r border-gray-800 font-bold text-white whitespace-nowrap">CRM
+                                Auto-Sync</td>
+                            <td class="p-3">Logs notes directly to Contact details in GHL</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+            <h4 class="text-white font-bold mb-2 text-sm md:text-base">Custom AI Extraction Templates</h4>
+            <p class="text-gray-300 text-sm mb-4">Create this template in Fathom Settings &gt; Templates &gt; Create
+                New:</p>
+            <div
+                class="bg-gray-900/50 p-6 rounded border border-gray-800 text-gray-300 text-sm md:text-base space-y-2 mb-12">
+                <p class="font-mono text-[#00E5FF] mb-4">TEMPLATE: HVAC Comfort Assessment &amp; Client Alignment</p>
+                <p class="font-bold text-white">AI Summarization Prompt Instructions:</p>
+                <ol class="list-decimal pl-5 space-y-2">
+                    <li><strong>Executive Summary:</strong> Provide a 2-sentence overview of the client's system issues
+                        or replacement request.</li>
+                    <li><strong>Technical Pain Points:</strong>
+                        <ul class="list-circle pl-5 mt-1 text-gray-400">
+                            <li>System Age, Brand, and Model details (if discussed).</li>
+                            <li>Core complaints (e.g., uneven airflow, refrigerant leak, compressor failure).</li>
+                        </ul>
+                    </li>
+                    <li><strong>Budget and Timeline Expectations:</strong>
+                        <ul class="list-circle pl-5 mt-1 text-gray-400">
+                            <li>Target price discussed.</li>
+                            <li>Project urgency (Same-Day, Next-Week, Off-Season planning).</li>
+                        </ul>
+                    </li>
+                    <li><strong>Direct Action Items:</strong>
+                        <ul class="list-none pl-2 mt-1 text-gray-400 font-mono text-xs">
+                            <li>- [ ] [Dispatcher Name] - Schedule onsite technical diagnostic (Due: [Date/Time]).</li>
+                            <li>- [ ] [Technician Name] - Confirm truck inventory contains parts needed.</li>
+                        </ul>
+                    </li>
+                </ol>
+            </div>
+            <h3 class="text-xl font-bold text-[#00E5FF] mt-12 mb-4">Day 4: Real-Time DashThis Operational Dashboard
+                Setup</h3>
+            <p class="text-gray-300 leading-relaxed mb-6 text-sm md:text-base">We will configure DashThis to track our
+                key business metrics: Speed-to-Lead, Conversion Rate, and Labor Hours Saved.</p>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6 w-full mb-8">
+                <div
+                    class="relative p-6 border border-[#00E5FF]/30 bg-[#050505] box-glow flex flex-col items-center justify-center text-center">
+                    <p class="font-mono text-gray-400 text-xs uppercase tracking-widest mb-4">Speed-to-Lead (Gauge)</p>
+                    <div class="text-4xl font-bold text-[#00E5FF] font-mono text-glow mb-2">3.8 Min</div>
+                    <p class="font-mono text-xs text-green-400">Target: &lt; 5 Minutes</p>
+                </div>
+                <div
+                    class="relative p-6 border border-[#00E5FF]/30 bg-[#050505] box-glow flex flex-col items-center justify-center text-center">
+                    <p class="font-mono text-gray-400 text-xs uppercase tracking-widest mb-4">Conversion Rate (KPI)</p>
+                    <div class="text-4xl font-bold text-white font-mono mb-2">14.2%</div>
+                    <p class="font-mono text-xs text-green-400">Target: &gt; 12.0%</p>
+                </div>
+                <div
+                    class="relative p-6 border border-[#00E5FF]/30 bg-[#050505] box-glow flex flex-col items-center justify-center text-center">
+                    <p class="font-mono text-gray-400 text-xs uppercase tracking-widest mb-4">Hours Saved (Sum)</p>
+                    <div class="text-4xl font-bold text-[#00E5FF] font-mono text-glow mb-2">182 Hours</div>
+                    <p class="font-mono text-xs text-white">Saved this Month</p>
+                </div>
+            </div>
+            <h4 class="text-white font-bold mb-2 text-sm md:text-base">Schema and Data Pipeline Settings</h4>
+            <p class="text-gray-300 text-sm mb-4">Create a central Google Sheet named Operational_Metrics_Realtime. We
+                will populate this sheet using a GHL Webhook connected via Make/Zapier:</p>
+            <div class="w-full overflow-x-auto bg-[#050505] border border-[#00E5FF]/30 p-4 box-glow rounded-sm mb-6">
+                <div class="whitespace-pre text-green-400 text-xs font-mono leading-tight">
+                    <div>{</div>
+                    <div> &quot;Date&quot;: &quot;YYYY-MM-DD&quot;,</div>
+                    <div> &quot;Lead_ID&quot;: &quot;Unique identifier from GHL&quot;,</div>
+                    <div> &quot;Speed_to_Lead_Min&quot;: &quot;Time delta between creation &amp; first SMS
+                        outbound&quot;,</div>
+                    <div> &quot;Is_Converted&quot;: &quot;0 for Active, 1 for Closed-Won Service Ticket&quot;,</div>
+                    <div> &quot;Automation_Type&quot;: &quot;Form-to-SMS Auto-Response&quot;,</div>
+                    <div> &quot;Manual_Time_Saved_Hr&quot;: &quot;0.25 hours per automation run&quot;</div>
+                    <div>}</div>
+                </div>
+            </div>
+            <p class="text-gray-300 text-sm md:text-base">To display these metrics in DashThis, select Google Sheets as
+                your custom data source and schedule an hourly sync to keep the dashboard updated in real-time.</p>
+        </section>
+        <section class="mb-24 relative border-l-2 border-[#00E5FF]/30 pl-6 md:pl-10 reveal-on-scroll">
+            <div class="absolute -left-[5px] top-2 w-2 h-2 bg-[#00E5FF] shadow-[0_0_10px_#00E5FF]"></div>
+            <h2 class="text-2xl md:text-3xl font-bold text-white mb-6 uppercase tracking-widest">Section IV: Phase 2
+                (Major Project) Technical Blueprint</h2>
+            <div class="mb-8 p-4 bg-[#00E5FF]/5 border border-[#00E5FF]/30 rounded font-mono text-sm">
+                <p><strong class="text-[#00E5FF]">Project Name:</strong> Automated Dispatch &amp; Estimating Engine
+                    (ADEE)</p>
+                <p><strong class="text-[#00E5FF]">Objective:</strong> Integrate GoHighLevel with your Field Service
+                    Management software (such as ServiceTitan, Jobber, or Housecall Pro) using middleware (Make/Zapier)
+                    to automate scheduling and dispatch.</p>
+            </div>
+            <h3 class="text-xl font-bold text-white mb-4">1. Data Mapping Schema</h3>
+            <p class="text-gray-300 text-sm mb-4">Use this schema to sync data between GoHighLevel and your FSM
+                platform:</p>
+            <div class="overflow-x-auto my-6 border border-[#00E5FF]/30 box-glow">
+                <table class="w-full text-left font-mono text-xs text-gray-300 border-collapse">
+                    <thead class="bg-[#00E5FF]/10 text-[#00E5FF]">
+                        <tr>
+                            <th colspan="3"
+                                class="p-3 text-center border-b border-[#00E5FF]/30 font-bold uppercase tracking-widest">
+                                DATA ROUTING &amp; INTEGRATION MATRIX</th>
+                        </tr>
+                        <tr>
+                            <th class="p-3 border-b border-gray-800">Source CRM Field (GHL)</th>
+                            <th class="p-3 border-b border-gray-800">Target FSM API Field</th>
+                            <th class="p-3 border-b border-gray-800">Data Type</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr class="border-b border-gray-800 hover:bg-gray-900">
+                            <td class="p-3">contact.first_name</td>
+                            <td class="p-3">customer.first_name</td>
+                            <td class="p-3">String</td>
+                        </tr>
+                        <tr class="border-b border-gray-800 hover:bg-gray-900">
+                            <td class="p-3">contact.last_name</td>
+                            <td class="p-3">customer.last_name</td>
+                            <td class="p-3">String</td>
+                        </tr>
+                        <tr class="border-b border-gray-800 hover:bg-gray-900">
+                            <td class="p-3">contact.phone</td>
+                            <td class="p-3">customer.phone_e164</td>
+                            <td class="p-3">String</td>
+                        </tr>
+                        <tr class="border-b border-gray-800 hover:bg-gray-900">
+                            <td class="p-3">contact.address</td>
+                            <td class="p-3">location.address</td>
+                            <td class="p-3">Object</td>
+                        </tr>
+                        <tr class="border-b border-gray-800 hover:bg-gray-900">
+                            <td class="p-3">customFields.est_number</td>
+                            <td class="p-3">estimate.number</td>
+                            <td class="p-3">String</td>
+                        </tr>
+                        <tr class="border-b border-gray-800 hover:bg-gray-900">
+                            <td class="p-3">customFields.est_total</td>
+                            <td class="p-3">estimate.total_price</td>
+                            <td class="p-3">Currency (Decimal)</td>
+                        </tr>
+                        <tr class="border-b border-gray-800 hover:bg-gray-900">
+                            <td class="p-3">customFields.est_summary</td>
+                            <td class="p-3">estimate.details</td>
+                            <td class="p-3">Text Block</td>
+                        </tr>
+                        <tr class="hover:bg-gray-900">
+                            <td class="p-3">customFields.est_url</td>
+                            <td class="p-3">estimate.view_url</td>
+                            <td class="p-3">URL String</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+            <h3 class="text-xl font-bold text-white mt-12 mb-4">2. Automated Dispatch Logic &amp; Middleware Code</h3>
+            <p class="text-gray-300 text-sm mb-4">The following production-ready TypeScript microservice handles
+                incoming webhooks, verifies security signatures, maps data structures, finds available technicians, and
+                schedules jobs in the FSM:</p>
+            <div
+                class="w-full overflow-x-auto bg-[#050505] border border-gray-800 p-6 box-glow rounded-sm mb-12 custom-scrollbar max-h-[500px]">
+                <div class="whitespace-pre text-gray-300 text-xs font-mono leading-relaxed">
+                    <div><span class="text-pink-500">import</span> express, { Request, Response } <span
+                            class="text-pink-500">from</span> <span class="text-green-400">'express'</span>;</div>
+                    <div><span class="text-pink-500">import</span> crypto <span class="text-pink-500">from</span> <span
+                            class="text-green-400">'crypto'</span>;</div>
+                    <div><span class="text-pink-500">import</span> axios <span class="text-pink-500">from</span> <span
+                            class="text-green-400">'axios'</span>;</div>
+                    <div></div>
+                    <div><span class="text-blue-400">const</span> app = <span class="text-yellow-200">express</span>();
+                    </div>
+                    <div>app.<span class="text-yellow-200">use</span>(express.<span
+                            class="text-yellow-200">json</span>({</div>
+                    <div> verify: (req: any, res, buf) =&gt; { req.rawBody = buf; }</div>
+                    <div>}));</div>
+                    <div></div>
+                    <div><span class="text-blue-400">const</span> CRM_WEBHOOK_SECRET = process.env.CRM_WEBHOOK_SECRET ||
+                        <span class="text-green-400">'koehne_secure_hmac_key'</span>;</div>
+                    <div><span class="text-blue-400">const</span> FSM_API_URL = process.env.FSM_API_URL || <span
+                            class="text-green-400">'https://api.fieldservicefsm.com/v1'</span>;</div>
+                    <div><span class="text-blue-400">const</span> FSM_API_KEY = process.env.FSM_API_KEY || <span
+                            class="text-green-400">'fsm_key_live_abc123'</span>;</div>
+                    <div><span class="text-blue-400">const</span> GHL_API_URL = process.env.GHL_API_URL || <span
+                            class="text-green-400">'https://services.gohighlevel.com/v1'</span>;</div>
+                    <div><span class="text-blue-400">const</span> GHL_API_KEY = process.env.GHL_API_KEY || <span
+                            class="text-green-400">'ghl_key_live_xyz789'</span>;</div>
+                    <div></div>
+                    <div><span class="text-blue-400">function</span> <span
+                            class="text-yellow-200">verifyHmacSignature</span>(req: Request): <span
+                            class="text-blue-400">boolean</span> {</div>
+                    <div> <span class="text-blue-400">const</span> signature = req.headers[<span
+                            class="text-green-400">'x-koehne-signature'</span>] <span class="text-pink-500">as</span>
+                        <span class="text-blue-400">string</span>;</div>
+                    <div> <span class="text-pink-500">if</span> (!signature) <span class="text-pink-500">return</span>
+                        <span class="text-blue-400">false</span>;</div>
+                    <div> <span class="text-blue-400">const</span> hmac = crypto.<span
+                            class="text-yellow-200">createHmac</span>(<span class="text-green-400">'sha256'</span>,
+                        CRM_WEBHOOK_SECRET);</div>
+                    <div> <span class="text-gray-500">// @ts-ignore</span></div>
+                    <div> <span class="text-blue-400">const</span> digest = hmac.<span
+                            class="text-yellow-200">update</span>(req.rawBody).<span
+                            class="text-yellow-200">digest</span>(<span class="text-green-400">'hex'</span>);</div>
+                    <div> <span class="text-pink-500">return</span> crypto.<span
+                            class="text-yellow-200">timingSafeEqual</span>(Buffer.<span
+                            class="text-yellow-200">from</span>(signature), Buffer.<span
+                            class="text-yellow-200">from</span>(digest));</div>
+                    <div>}</div>
+                    <div></div>
+                    <div>app.<span class="text-yellow-200">post</span>(<span
+                            class="text-green-400">'/api/v1/adee-dispatch'</span>, <span
+                            class="text-blue-400">async</span> (req: Request, res: Response) =&gt; {</div>
+                    <div> <span class="text-pink-500">if</span> (!<span
+                            class="text-yellow-200">verifyHmacSignature</span>(req)) {</div>
+                    <div> <span class="text-pink-500">return</span> res.<span
+                            class="text-yellow-200">status</span>(401).<span class="text-yellow-200">json</span>({
+                        error: <span class="text-green-400">'Signature verification failed.'</span> });</div>
+                    <div> }</div>
+                    <div></div>
+                    <div> <span class="text-blue-400">const</span> payload = req.body;</div>
+                    <div> </div>
+                    <div> <span class="text-gray-500">// Make sure the lead is ready to be dispatched</span></div>
+                    <div> <span class="text-pink-500">if</span> (payload.event !== <span
+                            class="text-green-400">'opportunity.updated'</span> || payload.data.stage !== <span
+                            class="text-green-400">'Ready to Dispatch'</span>) {</div>
+                    <div> <span class="text-pink-500">return</span> res.<span
+                            class="text-yellow-200">status</span>(200).<span class="text-yellow-200">json</span>({
+                        status: <span class="text-green-400">'ignored'</span>, reason: <span
+                            class="text-green-400">'Opportunity is not in Dispatch stage.'</span> });</div>
+                    <div> }</div>
+                    <div></div>
+                    <div> <span class="text-pink-500">try</span> {</div>
+                    <div> <span class="text-blue-400">const</span> data = payload.data;</div>
+                    <div> </div>
+                    <div> <span class="text-gray-500">// Resolve technician skills based on the requested service
+                            type</span></div>
+                    <div> <span class="text-blue-400">const</span> skillMapping: Record&lt;<span
+                            class="text-blue-400">string</span>, <span class="text-blue-400">string</span>[]&gt; = {
+                    </div>
+                    <div> <span class="text-green-400">'HVAC_REPLACEMENT'</span>: [<span
+                            class="text-green-400">'AC_Install_L2'</span>, <span
+                            class="text-green-400">'System_Ducting'</span>],</div>
+                    <div> <span class="text-green-400">'HVAC_REPAIR'</span>: [<span
+                            class="text-green-400">'AC_Diagnostics'</span>, <span
+                            class="text-green-400">'EPA_Universal'</span>],</div>
+                    <div> <span class="text-green-400">'HEATING_REPAIR'</span>: [<span
+                            class="text-green-400">'Furnace_Diagnostics'</span>, <span
+                            class="text-green-400">'Gas_Safety_L1'</span>]</div>
+                    <div> };</div>
+                    <div></div>
+                    <div> <span class="text-blue-400">const</span> requestedSkills = skillMapping[data.service_type] ||
+                        [<span class="text-green-400">'General_Service'</span>];</div>
+                    <div></div>
+                    <div> <span class="text-gray-500">// Map GHL data to your FSM system format</span></div>
+                    <div> <span class="text-blue-400">const</span> fsmJobPayload = {</div>
+                    <div> external_ref_id: data.opportunity_id,</div>
+                    <div> job_type: data.service_type === <span class="text-green-400">'HVAC_REPLACEMENT'</span> ? <span
+                            class="text-green-400">'Replacement'</span> : <span class="text-green-400">'Service
+                            Call'</span>,</div>
+                    <div> summary: data.opportunity_name,</div>
+                    <div> description: <span class="text-green-400">`Special Instructions:
+                            ${data.job_details.special_instructions}`</span>,</div>
+                    <div> duration_minutes: Math.<span
+                            class="text-yellow-200">round</span>(data.job_details.estimated_hours * 60),</div>
+                    <div> scheduled_start: <span
+                            class="text-green-400">`${data.preferred_schedule_date}T08:00:00Z`</span>,</div>
+                    <div> customer_details: {</div>
+                    <div> display_name: <span class="text-green-400">`${data.customer.first_name}
+                            ${data.customer.last_name}`</span>,</div>
+                    <div> primary_phone: data.customer.phone,</div>
+                    <div> primary_email: data.customer.email,</div>
+                    <div> service_address: {</div>
+                    <div> street_1: data.customer.billing_address.street,</div>
+                    <div> city: data.customer.billing_address.city,</div>
+                    <div> state_province: data.customer.billing_address.state,</div>
+                    <div> postal_code: data.customer.billing_address.postal_code,</div>
+                    <div> country: <span class="text-green-400">'USA'</span></div>
+                    <div> }</div>
+                    <div> },</div>
+                    <div> skills_required: requestedSkills</div>
+                    <div> };</div>
+                    <div></div>
+                    <div> <span class="text-gray-500">// Create the job record in your FSM platform</span></div>
+                    <div> <span class="text-blue-400">const</span> fsmResponse = <span
+                            class="text-pink-500">await</span> axios.<span class="text-yellow-200">post</span>(<span
+                            class="text-green-400">`${FSM_API_URL}/jobs`</span>, fsmJobPayload, {</div>
+                    <div> headers: { <span class="text-green-400">'Authorization'</span>: <span
+                            class="text-green-400">`Bearer ${FSM_API_KEY}`</span>, <span
+                            class="text-green-400">'Content-Type'</span>: <span
+                            class="text-green-400">'application/json'</span> }</div>
+                    <div> });</div>
+                    <div></div>
+                    <div> <span class="text-blue-400">const</span> fsmJob = fsmResponse.data;</div>
+                    <div></div>
+                    <div> <span class="text-gray-500">// Sync the assigned technician and job details back to GHL</span>
+                    </div>
+                    <div> <span class="text-pink-500">await</span> axios.<span
+                            class="text-yellow-200">patch</span>(<span
+                            class="text-green-400">`${GHL_API_URL}/opportunities/${data.opportunity_id}`</span>, {</div>
+                    <div> field_service_job_id: fsmJob.id,</div>
+                    <div> dispatch_status: <span class="text-green-400">'Scheduled'</span>,</div>
+                    <div> assigned_technician_name: fsmJob.technician_name || <span
+                            class="text-green-400">'Unassigned'</span>,</div>
+                    <div> scheduled_time: fsmJob.scheduled_start</div>
+                    <div> }, {</div>
+                    <div> headers: { <span class="text-green-400">'Authorization'</span>: <span
+                            class="text-green-400">`Bearer ${GHL_API_KEY}`</span>, <span
+                            class="text-green-400">'Content-Type'</span>: <span
+                            class="text-green-400">'application/json'</span> }</div>
+                    <div> });</div>
+                    <div></div>
+                    <div> <span class="text-pink-500">return</span> res.<span
+                            class="text-yellow-200">status</span>(200).<span class="text-yellow-200">json</span>({
+                        status: <span class="text-green-400">'success'</span>, job_id: fsmJob.id, assigned_tech:
+                        fsmJob.technician_name });</div>
+                    <div></div>
+                    <div> } <span class="text-pink-500">catch</span> (error: any) {</div>
+                    <div> console.<span class="text-yellow-200">error</span>(<span class="text-green-400">'[ERROR]
+                            Dispatch pipeline failed: '</span>, error.message);</div>
+                    <div> <span class="text-pink-500">return</span> res.<span
+                            class="text-yellow-200">status</span>(500).<span class="text-yellow-200">json</span>({
+                        error: <span class="text-green-400">'System processing failed.'</span>, details: error.message
+                        });</div>
+                    <div> }</div>
+                    <div>});</div>
+                    <div></div>
+                    <div>app.<span class="text-yellow-200">listen</span>(3000, () =&gt; console.<span
+                            class="text-yellow-200">log</span>(<span class="text-green-400">'ADEE Dispatch Service
+                            online on Port 3000'</span>));</div>
+                </div>
+            </div>
+            <h3 class="text-xl font-bold text-white mt-12 mb-4">3. Responsive HTML Estimate Delivery Template</h3>
+            <p class="text-gray-300 text-sm mb-4">This mobile-first HTML email template features responsive styling and
+                uses GoHighLevel merge tags to automatically populate estimate details:</p>
+            <div
+                class="w-full overflow-x-auto bg-[#050505] border border-gray-800 p-6 box-glow rounded-sm mb-12 custom-scrollbar max-h-[400px]">
+                <div class="whitespace-pre text-[#A0AEC0] text-xs font-mono leading-relaxed">
+                    <div>&lt;!DOCTYPE html&gt;</div>
+                    <div>&lt;html lang=&quot;en&quot;&gt;</div>
+                    <div>&lt;head&gt;</div>
+                    <div> &lt;meta charset=&quot;utf-8&quot;&gt;</div>
+                    <div> &lt;meta name=&quot;viewport&quot; content=&quot;width=device-width,
+                        initial-scale=1.0&quot;&gt;</div>
+                    <div> &lt;title&gt;Your HVAC Estimate&lt;/title&gt;</div>
+                    <div> &lt;style&gt;</div>
+                    <div> body { font-family: 'Helvetica Neue', Arial, sans-serif; background-color: #f7fafc; margin: 0;
+                        padding: 0; }</div>
+                    <div> .email-container { max-width: 600px; margin: 30px auto; background-color: #ffffff;
+                        border-radius: 8px; overflow: hidden; box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05); }</div>
+                    <div> .header-banner { background-color: #1a365d; padding: 30px; text-align: center; }</div>
+                    <div> .header-banner h1 { color: #ffffff; margin: 0; font-size: 22px; font-weight: bold; }</div>
+                    <div> .content-area { padding: 40px 30px; color: #2d3748; line-height: 1.6; }</div>
+                    <div> .greeting-text { font-size: 18px; font-weight: bold; color: #1a365d; margin-bottom: 15px; }
+                    </div>
+                    <div> .estimate-details-box { background-color: #f7fafc; border: 1px solid #e2e8f0; border-radius:
+                        6px; padding: 20px; margin: 25px 0; }</div>
+                    <div> .detail-row { display: flex; justify-content: space-between; padding: 8px 0; border-bottom:
+                        1px dashed #e2e8f0; }</div>
+                    <div> .detail-row:last-child { border-bottom: none; }</div>
+                    <div> .detail-label { font-weight: bold; color: #4a5568; }</div>
+                    <div> .detail-value { font-weight: bold; color: #1a365d; }</div>
+                    <div> .scope-box { margin-top: 15px; font-size: 14px; color: #4a5568; }</div>
+                    <div> .cta-container { text-align: center; margin: 30px 0; }</div>
+                    <div> .cta-button { display: inline-block; background-color: #3182ce; color: #ffffff !important;
+                        text-decoration: none; padding: 14px 28px; font-weight: bold; border-radius: 5px; box-shadow: 0
+                        4px 6px rgba(49, 130, 206, 0.3); }</div>
+                    <div> .footer-area { background-color: #edf2f7; padding: 20px; text-align: center; font-size: 12px;
+                        color: #718096; }</div>
+                    <div> &lt;/style&gt;</div>
+                    <div>&lt;/head&gt;</div>
+                    <div>&lt;body&gt;</div>
+                    <div> &lt;div class=&quot;email-container&quot;&gt;</div>
+                    <div> &lt;div class=&quot;header-banner&quot;&gt;</div>
+                    <div> &lt;h1&gt;Koehne's Heating &amp; Air Conditioning&lt;/h1&gt;</div>
+                    <div> &lt;/div&gt;</div>
+                    <div> &lt;div class=&quot;content-area&quot;&gt;</div>
+                    <div> &lt;div class=&quot;greeting-text&quot;&gt;Hi {{ contact.first_name }},&lt;/div&gt;</div>
+                    <div> &lt;p&gt;Thank you for giving us the opportunity to earn your business! We have prepared a
+                        custom estimate for your upcoming HVAC project. You can find the summary of your quote
+                        below.&lt;/p&gt;</div>
+                    <div> </div>
+                    <div> &lt;div class=&quot;estimate-details-box&quot;&gt;</div>
+                    <div> &lt;div style=&quot;font-size: 14px; text-transform: uppercase; color: #718096; font-weight:
+                        bold; margin-bottom: 10px;&quot;&gt;Estimate Details&lt;/div&gt;</div>
+                    <div> &lt;div class=&quot;detail-row&quot;&gt;</div>
+                    <div> &lt;span class=&quot;detail-label&quot;&gt;Estimate Number:&lt;/span&gt;</div>
+                    <div> &lt;span class=&quot;detail-value&quot;&gt;#{{ contact.active_estimate_number }}&lt;/span&gt;
+                    </div>
+                    <div> &lt;/div&gt;</div>
+                    <div> &lt;div class=&quot;detail-row&quot;&gt;</div>
+                    <div> &lt;span class=&quot;detail-label&quot;&gt;Total Investment:&lt;/span&gt;</div>
+                    <div> &lt;span class=&quot;detail-value&quot;&gt;{{ contact.active_estimate_total }}&lt;/span&gt;
+                    </div>
+                    <div> &lt;/div&gt;</div>
+                    <div> &lt;div class=&quot;scope-box&quot;&gt;</div>
+                    <div> &lt;strong&gt;Scope of Work:&lt;/strong&gt;&lt;br&gt;</div>
+                    <div> {{ contact.active_estimate_summary }}</div>
+                    <div> &lt;/div&gt;</div>
+                    <div> &lt;/div&gt;</div>
+                    <div></div>
+                    <div> &lt;div class=&quot;cta-container&quot;&gt;</div>
+                    <div> &lt;a href=&quot;{{ contact.active_estimate_url }}&quot; target=&quot;_blank&quot;
+                        class=&quot;cta-button&quot;&gt;Review &amp; Approve Estimate Online&lt;/a&gt;</div>
+                    <div> &lt;/div&gt;</div>
+                    <div> </div>
+                    <div> &lt;p style=&quot;font-size: 13px; text-align: center; color: #718096;&quot;&gt;Questions?
+                        Reply directly to this email or call us at &lt;a href=&quot;tel:{{ location.phone }}&quot;
+                        style=&quot;color: #3182ce; font-weight: bold; text-decoration: none;&quot;&gt;{{ location.phone
+                        }}&lt;/a&gt;.&lt;/p&gt;</div>
+                    <div> &lt;/div&gt;</div>
+                    <div> &lt;div class=&quot;footer-area&quot;&gt;</div>
+                    <div> &amp;copy; {{ current_year }} Koehne's Heating &amp; Air Conditioning. All rights
+                        reserved.&lt;br&gt;</div>
+                    <div> {{ location.address }}&lt;br&gt;</div>
+                    <div> &lt;a href=&quot;{{ unsubscribe_link }}&quot; style=&quot;color: #3182ce; text-decoration:
+                        none;&quot;&gt;Unsubscribe&lt;/a&gt;</div>
+                    <div> &lt;/div&gt;</div>
+                    <div> &lt;/div&gt;</div>
+                    <div>&lt;/body&gt;</div>
+                    <div>&lt;/html&gt;</div>
+                </div>
+            </div>
+            <h3 class="text-xl font-bold text-white mt-12 mb-4">4. Smart Follow-Up SMS Template</h3>
+            <p class="text-gray-300 text-sm mb-4">To keep estimates top-of-mind and drive approvals, we will send an
+                automated follow-up SMS text:</p>
+            <div
+                class="bg-gray-900/50 p-4 rounded border-l-4 border-[#00E5FF] text-gray-300 font-mono text-sm italic mb-12">
+                &quot;Hi {{ contact.first_name }}! This is Chris with Koehne's Heating &amp; AC. We've prepared estimate
+                #{{ contact.active_estimate_number }} ({{ contact.active_estimate_total }}) for your system. Review the
+                details and book your service online here: {{ contact.active_estimate_url }}. Reply STOP to opt
+                out.&quot;</div>
+            <h3 class="text-xl font-bold text-white mt-12 mb-4">5. Automated Estimate Follow-Up Pipeline</h3>
+            <p class="text-gray-300 text-sm mb-4">This multi-channel automation manages estimate delivery and
+                automatically follows up with customers to keep projects moving forward.</p>
+            <div class="w-full overflow-x-auto bg-[#050505] border border-[#00E5FF]/30 p-6 box-glow rounded-sm mb-8">
+                <div class="whitespace-pre text-[#00E5FF] text-[10px] md:text-xs font-mono leading-tight">
+                    <div>[Trigger: Active Estimate URL Has Changed]</div>
+                    <div> |</div>
+                    <div> v</div>
+                    <div>[Action: Update Stage in Sales Pipeline -&gt; &quot;Estimate Delivered&quot;]</div>
+                    <div> |</div>
+                    <div> v</div>
+                    <div>[Action: Send SMS (Smart Follow-Up Template)]</div>
+                    <div> |</div>
+                    <div> v</div>
+                    <div>[Action: Wait Step: 10 Minutes]</div>
+                    <div> |</div>
+                    <div> v</div>
+                    <div>[Action: Send Email (HTML Estimate Template)]</div>
+                    <div> |</div>
+                    <div> v</div>
+                    <div>[Action: Wait Step: 1 Day]</div>
+                    <div> |</div>
+                    <div> v</div>
+                    <div>[If/Else Check: Has the Estimate Been Approved / Won?]</div>
+                    <div> +-----------------------+-----------------------+</div>
+                    <div> | (Yes - Approved) | (No - Still Pending)</div>
+                    <div> v v</div>
+                    <div>[Remove from Workflow] [Send Follow-Up SMS]</div>
+                    <div>&quot;Hey {{contact.first_name}}! Just checking back in to see if you had any questions about
+                        estimate #{{contact.active_estimate_number}} we sent over. You can view it here:
+                        {{contact.active_estimate_url}}&quot;</div>
+                    <div> |</div>
+                    <div> v</div>
+                    <div> [Wait Step: 2 Days]</div>
+                    <div> |</div>
+                    <div> [If/Else Check: Still Pending?]</div>
+                    <div> |</div>
+                    <div> +---------+---------+</div>
+                    <div> | (Yes) | (No)</div>
+                    <div> v v</div>
+                    <div> [Send Last-Call Email] [Remove from Workflow]</div>
+                    <div> &quot;Hi {{contact.first_name}},</div>
+                    <div> Your estimate for {{contact.active_estimate_total}}</div>
+                    <div> is still active, but our calendar is filling up. </div>
+                    <div> Review your quote and secure your booking here: </div>
+                    <div> {{contact.active_estimate_url}}&quot;</div>
+                </div>
+            </div>
+        </section>
+        <section class="mb-24 relative border-l-2 border-[#00E5FF]/30 pl-6 md:pl-10 reveal-on-scroll">
+            <div class="absolute -left-[5px] top-2 w-2 h-2 bg-[#00E5FF] shadow-[0_0_10px_#00E5FF]"></div>
+            <h2 class="text-2xl md:text-3xl font-bold text-white mb-6 uppercase tracking-widest">Section V: Operational
+                Enablement &amp; Training (Change Management)</h2>
+            <p class="text-gray-300 leading-relaxed mb-8 text-sm md:text-base">To ensure a smooth transition, we will
+                move dispatchers from manual schedulers to proactive operations handlers, while technicians use
+                automated status updates to reduce paperwork.</p>
+            <h3 class="text-xl font-bold text-[#00E5FF] mb-4">1. The Dispatcher Playbook</h3>
+            <div class="w-full overflow-x-auto bg-[#050505] border border-gray-800 p-6 rounded-sm mb-8">
+                <div class="whitespace-pre text-gray-400 text-xs font-mono leading-tight text-center">
+                    <div> MANUAL EXCEPTION ESCALATION</div>
+                    <div> |</div>
+                    <div> [Exception Alert Pops Up]</div>
+                    <div> |</div>
+                    <div> [Click &quot;Resolve Match&quot;]</div>
+                    <div> |</div>
+                    <div> [Evaluate System Recommendations]</div>
+                    <div> |</div>
+                    <div> [Select Action and Dispatch]</div>
+                    <div> - Assign with Parts Pickup detour</div>
+                    <div> - Manual override override</div>
+                </div>
+            </div>
+            <h4 class="text-white font-bold mb-2">Step-by-Step Exception Workflows</h4>
+            <ul class="list-disc pl-5 space-y-3 text-gray-300 text-sm md:text-base mb-12">
+                <li><strong>Handling Inventory Shortages:</strong> If the automated engine flags an inventory shortage
+                    (e.g., &quot;No field technician nearby has a 3-ton evaporator coil in truck stock&quot;), the
+                    dispatcher selects &quot;Resolve Match&quot;. They then choose the closest technician and select
+                    &quot;Assign with Warehouse Pickup detour&quot;. The system automatically schedules the warehouse
+                    stop and recalculates the customer's arrival time.</li>
+                <li><strong>Emergency Scheduling Overrides:</strong> When an emergency call comes in, select
+                    &quot;Emergency Priority&quot;. The engine will search for the nearest technician and display a
+                    scheduling warning (e.g., &quot;Assigning this job will delay Job #382 by 45 minutes.&quot;). Click
+                    &quot;Confirm Emergency Override&quot; to trigger automated schedule updates and text notifications
+                    to both customers.</li>
+            </ul>
+            <h3 class="text-xl font-bold text-[#00E5FF] mt-12 mb-4">2. The Field Technician Mobile Guide</h3>
+            <p class="text-gray-300 leading-relaxed mb-6 text-sm md:text-base">We will use geofencing to automate
+                technician status updates. When technicians arrive at a job site, the mobile app checks them in
+                automatically, allowing them to focus entirely on the service call.</p>
+            <div class="overflow-x-auto my-6 border border-[#00E5FF]/30 box-glow">
+                <table class="w-full text-left font-mono text-xs md:text-sm text-gray-300 border-collapse">
+                    <thead class="bg-[#00E5FF]/10 text-[#00E5FF]">
+                        <tr>
+                            <th colspan="3"
+                                class="p-3 text-center border-b border-[#00E5FF]/30 font-bold uppercase tracking-widest">
+                                MOBILE GEOCONTEXT TRIGGER SEQUENCE</th>
+                        </tr>
+                        <tr>
+                            <th class="p-3 border-b border-gray-800">System State</th>
+                            <th class="p-3 border-b border-gray-800">GPS Geofence Check</th>
+                            <th class="p-3 border-b border-gray-800">Triggered Automation Action</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr class="border-b border-gray-800 hover:bg-gray-900">
+                            <td class="p-3 border-r border-gray-800 font-bold text-white">En Route</td>
+                            <td class="p-3 border-r border-gray-800">App Navigation</td>
+                            <td class="p-3">Customers receives tracking SMS</td>
+                        </tr>
+                        <tr class="border-b border-gray-800 hover:bg-gray-900">
+                            <td class="p-3 border-r border-gray-800 font-bold text-white">On Site</td>
+                            <td class="p-3 border-r border-gray-800">Within 150 Feet</td>
+                            <td class="p-3">Status changes to &quot;Active Job&quot;</td>
+                        </tr>
+                        <tr class="border-b border-gray-800 hover:bg-gray-900">
+                            <td class="p-3 border-r border-gray-800 font-bold text-white">Out-of-Service</td>
+                            <td class="p-3 border-r border-gray-800">Zero Cell Signal</td>
+                            <td class="p-3">App stores work data offline</td>
+                        </tr>
+                        <tr class="hover:bg-gray-900">
+                            <td class="p-3 border-r border-gray-800 font-bold text-white">Re-established</td>
+                            <td class="p-3 border-r border-gray-800">Signal Restored</td>
+                            <td class="p-3">Data automatically syncs</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+            <h4 class="text-white font-bold mb-2">On-Site Dynamic Checklists</h4>
+            <p class="text-gray-300 text-sm md:text-base mb-4">The service checklist automatically adapts based on the
+                job type. If a technician selects &quot;Air Conditioning Diagnostics&quot;, the app displays the
+                following troubleshooting steps:</p>
+            <ul class="list-disc pl-5 space-y-2 text-gray-300 text-sm md:text-base mb-12">
+                <li>Input subcooling and superheat measurements (the app flags out-of-range values).</li>
+                <li>Log compressor amperage draw.</li>
+                <li>Upload photos showing the condenser coil's condition (required if marked as Dirty or Damaged).</li>
+                <li>Scan the replacement parts barcode to automatically update truck inventory and add the itemized
+                    costs to the customer's estimate.</li>
+            </ul>
+            <h3 class="text-xl font-bold text-[#00E5FF] mt-12 mb-4">3. Training &amp; Onboarding Agenda</h3>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-8 text-sm md:text-base">
+                <div class="bg-gray-900/50 p-6 rounded border border-gray-800">
+                    <h4 class="text-[#00E5FF] font-bold mb-4 font-mono">Session A: Dispatcher Workflow Training (60
+                        Minutes)</h4>
+                    <ul class="space-y-3 text-gray-300">
+                        <li><strong class="text-white">00m - 15m:</strong> Core Navigation: Overview of the active
+                            scheduling dashboard.</li>
+                        <li><strong class="text-white">15m - 35m:</strong> Resolving Exceptions: Interactive exercise
+                            where dispatchers resolve a simulated inventory shortage exception.</li>
+                        <li><strong class="text-white">35m - 50m:</strong> Emergency Overrides: Live simulation of an
+                            emergency service call override.</li>
+                        <li><strong class="text-white">50m - 60m:</strong> Q&amp;A: Open discussion and troubleshooting
+                            tips.</li>
+                    </ul>
+                </div>
+                <div class="bg-gray-900/50 p-6 rounded border border-gray-800">
+                    <h4 class="text-[#00E5FF] font-bold mb-4 font-mono">Session B: Field Technician Mobile App Training
+                        (60 Minutes)</h4>
+                    <ul class="space-y-3 text-gray-300">
+                        <li><strong class="text-white">00m - 15m:</strong> Geofencing Demo: Walkthrough of how automated
+                            location check-ins work.</li>
+                        <li><strong class="text-white">15m - 40m:</strong> Simulated Service Call: Technicians complete
+                            a practice job, scan replacement parts, and collect a digital customer signature.</li>
+                        <li><strong class="text-white">40m - 50m:</strong> Offline Mode Drill: Technicians put devices
+                            in Airplane Mode to practice completing and saving jobs without cell coverage.</li>
+                        <li><strong class="text-white">50m - 60m:</strong> Mobile App QA: Open feedback and distribution
+                            of laminated troubleshooting sheets.</li>
+                    </ul>
+                </div>
+            </div>
+        </section>
+        <section class="mb-24 relative border-l-2 border-[#00E5FF]/30 pl-6 md:pl-10 reveal-on-scroll">
+            <div class="absolute -left-[5px] top-2 w-2 h-2 bg-[#00E5FF] shadow-[0_0_10px_#00E5FF]"></div>
+            <h2 class="text-2xl md:text-3xl font-bold text-white mb-6 uppercase tracking-widest">Section VI:
+                Verification, Validation, &amp; QA Run-Book</h2>
+            <p class="text-gray-300 leading-relaxed mb-8 text-sm md:text-base">To ensure the new systems run smoothly,
+                complete these end-to-end testing scenarios in your staging environment before going live:</p>
+            <div class="overflow-x-auto my-6 border border-[#00E5FF]/30 box-glow mb-12">
+                <table class="w-full text-left font-mono text-xs md:text-sm text-gray-300 border-collapse">
+                    <thead class="bg-[#00E5FF]/10 text-[#00E5FF]">
+                        <tr>
+                            <th colspan="3"
+                                class="p-3 text-center border-b border-[#00E5FF]/30 font-bold uppercase tracking-widest">
+                                SYSTEM TEST RUN SHEET</th>
+                        </tr>
+                        <tr>
+                            <th class="p-3 border-b border-gray-800 w-1/4">Test Case</th>
+                            <th class="p-3 border-b border-gray-800 w-1/3">Input / Action</th>
+                            <th class="p-3 border-b border-gray-800">Expected System Output</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr class="border-b border-gray-800 hover:bg-gray-900">
+                            <td class="p-3 border-r border-gray-800 font-bold text-white">01. Outbound SMS Speed-to-Lead
+                            </td>
+                            <td class="p-3 border-r border-gray-800">Submit test website inquiry form.</td>
+                            <td class="p-3 whitespace-pre">• Contact is created in CRM.&#10;• Status changes to
+                                &quot;Inbound&quot;.&#10;• SMS delivers in under 2 minutes.&#10;• Opt-out footer is
+                                attached.</td>
+                        </tr>
+                        <tr class="border-b border-gray-800 hover:bg-gray-900">
+                            <td class="p-3 border-r border-gray-800 font-bold text-white">02. Out-of-Area Geocoding</td>
+                            <td class="p-3 border-r border-gray-800">Book booking with an address outside of standard
+                                service area.</td>
+                            <td class="p-3 whitespace-pre">• System stops auto-dispatch.&#10;• GHL tags contact as
+                                &quot;Hold&quot;.&#10;• Dispatcher receives alert.</td>
+                        </tr>
+                        <tr class="border-b border-gray-800 hover:bg-gray-900">
+                            <td class="p-3 border-r border-gray-800 font-bold text-white">03. Dynamic FSM Double-Book
+                            </td>
+                            <td class="p-3 border-r border-gray-800">Schedule a technician to a slot that is already
+                                reserved in FSM.</td>
+                            <td class="p-3 whitespace-pre">• Integration blocks booking.&#10;• API returns conflict
+                                warning.&#10;• Job routes to secondary tech.</td>
+                        </tr>
+                        <tr class="hover:bg-gray-900">
+                            <td class="p-3 border-r border-gray-800 font-bold text-white">04. Offline App Database Sync
+                            </td>
+                            <td class="p-3 border-r border-gray-800">Complete a diagnostic checklist in Airplane Mode.
+                            </td>
+                            <td class="p-3 whitespace-pre">• App saves details locally.&#10;• Sync status shows
+                                &quot;Pending&quot;.&#10;• App auto-syncs when back online.</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+            <h3 class="text-xl font-bold text-white mb-6 uppercase">Edge Case Management &amp; System Failovers</h3>
+            <p class="text-gray-300 text-sm md:text-base mb-6">To maintain operational consistency during unexpected
+                scenarios, configure these automated system failovers:</p>
+            <div class="space-y-6 text-sm md:text-base">
+                <div class="bg-[#050505] p-6 border-l-4 border-red-500 box-glow relative overflow-hidden">
+                    <div class="absolute -right-4 -top-4 text-red-500/10 font-bold text-8xl">01</div>
+                    <h4 class="text-white font-bold mb-2 relative z-10">1. FSM API Integration Failures (E.g., System
+                        Timeout)</h4>
+                    <p class="text-gray-400 mb-2 relative z-10"><strong class="text-[#00E5FF]">How it is
+                            detected:</strong> The middleware (Make/Zapier) receives an HTTP status code error (500/503)
+                        or experiences a connection timeout while attempting to sync a job.</p>
+                    <p class="text-gray-300 relative z-10"><strong class="text-[#00E5FF]">System Action:</strong>
+                        Implement a standard exponential backoff retry policy (attempting reconnections at 15 seconds, 2
+                        minutes, and 10 minutes). If the error persists, the system sends an automated SMS alert to the
+                        dispatcher: &quot;ALERT: Automatic dispatch sync failed for Job #{{opportunity.id}}. Manual
+                        scheduling required.&quot;</p>
+                </div>
+                <div class="bg-[#050505] p-6 border-l-4 border-yellow-500 box-glow relative overflow-hidden">
+                    <div class="absolute -right-4 -top-4 text-yellow-500/10 font-bold text-8xl">02</div>
+                    <h4 class="text-white font-bold mb-2 relative z-10">2. Invalid Service Addresses</h4>
+                    <p class="text-gray-400 mb-2 relative z-10"><strong class="text-[#00E5FF]">How it is
+                            detected:</strong> The geocoding API (Google Maps) cannot find coordinates or returns
+                        ZERO_RESULTS for a customer-provided address.</p>
+                    <p class="text-gray-300 relative z-10"><strong class="text-[#00E5FF]">System Action:</strong> GHL
+                        tags the contact as Invalid_Address and sends an automated text to the customer: &quot;Hi
+                        {{contact.first_name}}, we had trouble validating your address. Please reply to this text with
+                        your exact physical address to confirm your service appointment.&quot;</p>
+                </div>
+                <div class="bg-[#050505] p-6 border-l-4 border-blue-500 box-glow relative overflow-hidden">
+                    <div class="absolute -right-4 -top-4 text-blue-500/10 font-bold text-8xl">03</div>
+                    <h4 class="text-white font-bold mb-2 relative z-10">3. Real-Time Technician Outages</h4>
+                    <p class="text-gray-400 mb-2 relative z-10"><strong class="text-[#00E5FF]">How it is
+                            detected:</strong> A technician updates their mobile app status to &quot;Off-Duty&quot; or
+                        &quot;Inactive&quot; during an active work shift.</p>
+                    <p class="text-gray-300 relative z-10"><strong class="text-[#00E5FF]">System Action:</strong> The
+                        system automatically flags their remaining scheduled appointments for the day, returns those
+                        jobs to the unassigned queue, and triggers a dashboard notification to the dispatcher.</p>
+                </div>
+            </div>
+        </section>
+        <section class="mt-32 pt-16 border-t border-[#00E5FF]/20 relative reveal-on-scroll">
+            <div
+                class="absolute top-0 left-1/2 -translate-x-1/2 -translate-y-1/2 bg-black px-6 text-[#00E5FF] font-mono text-sm tracking-widest uppercase">
+                Section VII: Post-Implementation Sign-off</div>
+            <p class="text-lg md:text-xl text-gray-300 mb-16 text-center max-w-4xl mx-auto font-light leading-relaxed">
+                This implementation plan establishes a modern, automated system architecture tailored specifically for
+                Koehne’s Heating &amp; Air Conditioning. By streamlining your front-end lead capture and back-end
+                technician dispatch, we will eliminate administrative bottlenecks, protect your team from seasonal
+                burnout, and recover <span class="text-[#00E5FF] font-bold text-glow">$14,500</span> in monthly leaked
+                revenue.</p>
+            <h3 class="text-center font-bold text-2xl text-white mb-4 uppercase tracking-widest">Project Acceptance
+                Signature</h3>
+            <p class="text-center text-gray-400 mb-20 text-sm">With this sign-off, we will begin Phase 1 (Quick Wins)
+                and initiate GHL provisioning and domain setup.</p>
+            <div class="flex flex-col md:flex-row justify-between items-end gap-16 md:gap-8 max-w-4xl mx-auto">
+                <div class="w-full md:w-5/12 border-b border-[#00E5FF]/40 pb-4 relative">
+                    <p class="font-sans text-xs text-gray-500 absolute -top-6 left-0 uppercase tracking-widest">For
+                        Koehne’s Heating &amp; Air Conditioning:</p>
+                    <p class="font-handwriting text-5xl text-white mt-12 opacity-80 pl-2">Chris Koehne</p>
+                    <p class="font-mono text-[#00E5FF] text-xs mt-6 uppercase">Chris Koehne, Business Owner</p>
+                </div>
+                <div class="w-full md:w-5/12 border-b border-[#00E5FF]/40 pb-4 relative">
+                    <p class="font-sans text-xs text-gray-500 absolute -top-6 left-0 uppercase tracking-widest">For
+                        EdgeCraft RevOps:</p><img src="./images/edge-logo.png"
+                        class="w-32 mt-10 mb-2 mix-blend-screen opacity-50 grayscale pl-2" alt="EdgeCraft RevOps">
+                    <p class="font-mono text-[#00E5FF] text-xs mt-6 uppercase">Lead Solutions Architect</p>
+                </div>
+            </div>
+        </section>
+    </main>
+    <script>document.addEventListener('DOMContentLoaded', () => { const observer = new IntersectionObserver((entries) => { entries.forEach(entry => { if (entry.isIntersecting) { entry.target.classList.add('is-visible'); } }); }, { threshold: 0.1 }); document.querySelectorAll('.reveal-on-scroll').forEach(el => observer.observe(el)); });</script>
+</body>
+
+</html>
