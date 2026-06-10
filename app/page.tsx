@@ -173,6 +173,15 @@ const hubs = [
     color: "from-cyan-500 to-blue-600",
     border: "hover:border-cyan-400/50",
     shadow: "hover:shadow-[0_0_40px_-10px_rgba(6,182,212,0.3)]"
+  },
+  {
+    title: "EdgeCraft RevOps",
+    description: "Discover how small and mid-size businesses recover 10+ hours weekly and plug financial leaks with EdgeCraft's 24-hour Operational Intelligence Blueprint.",
+    href: "/edgecraft.html",
+    icon: "🚀",
+    color: "from-cyan-600 to-blue-700",
+    border: "hover:border-cyan-500/50",
+    shadow: "hover:shadow-[0_0_40px_-10px_rgba(6,182,212,0.2)]"
   }
 ];
 
