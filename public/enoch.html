@@ -1,0 +1,887 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>The Book of Enoch: A Monograph</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link
+    href="https://fonts.googleapis.com/css2?family=Cinzel+Decorative:wght@400;700;900&family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;0,700;1,400&family=Space+Mono:ital@0;1&display=swap"
+    rel="stylesheet">
+  <style>
+    :root {
+      --color-bg: #050505;
+      --color-text: #d4cbb8;
+      --color-accent: #b38b4d;
+      --color-highlight: #4a5d73;
+    }
+
+    body {
+      background-color: var(--color-bg);
+      color: var(--color-text);
+      font-family: 'Cormorant Garamond', serif;
+      overflow-x: hidden;
+      cursor: default;
+    }
+
+    h1,
+    h2,
+    h3,
+    .cinzel {
+      font-family: 'Cinzel Decorative', serif;
+    }
+
+    pre,
+    code,
+    .mono {
+      font-family: 'Space Mono', monospace;
+    }
+
+    /* Textures and Filters */
+    .noise-overlay {
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      z-index: 50;
+      mix-blend-mode: overlay;
+      opacity: 0.3;
+    }
+
+    /* Typography enhancements */
+    .drop-cap::first-letter {
+      font-size: 4.5em;
+      float: left;
+      line-height: 0.8;
+      margin-right: 0.1em;
+      color: var(--color-accent);
+      font-family: 'Cinzel Decorative', serif;
+    }
+
+    /* Image treatments */
+    .img-blend {
+      mix-blend-mode: luminosity;
+      filter: contrast(1.2) sepia(0.3);
+    }
+
+    .mask-gradient-bottom {
+      mask-image: linear-gradient(to bottom, black 50%, transparent 100%);
+      -webkit-mask-image: linear-gradient(to bottom, black 50%, transparent 100%);
+    }
+
+    .mask-gradient-edges {
+      mask-image: radial-gradient(ellipse at center, black 40%, transparent 80%);
+      -webkit-mask-image: radial-gradient(ellipse at center, black 40%, transparent 80%);
+    }
+
+    /* Custom Scrollbar */
+    ::-webkit-scrollbar {
+      width: 8px;
+    }
+
+    ::-webkit-scrollbar-track {
+      background: var(--color-bg);
+    }
+
+    ::-webkit-scrollbar-thumb {
+      background: var(--color-accent);
+      border-radius: 4px;
+    }
+
+    /* Animation states for Intersection Observer */
+    .reveal-base {
+      opacity: 0;
+      transform: translateY(40px) scale(0.98);
+      transition: all 1.2s cubic-bezier(0.25, 0.1, 0.25, 1);
+    }
+
+    .reveal-active {
+      opacity: 1;
+      transform: translateY(0) scale(1);
+    }
+
+    .reveal-delay-1 {
+      transition-delay: 200ms;
+    }
+
+    .reveal-delay-2 {
+      transition-delay: 400ms;
+    }
+
+    /* Special Section Styling */
+    .glass-panel {
+      background: rgba(20, 20, 20, 0.6);
+      -webkit-backdrop-filter: blur(10px);
+      backdrop-filter: blur(10px);
+      border: 1px solid rgba(179, 139, 77, 0.2);
+    }
+  </style>
+</head>
+
+<body class="antialiased selection:bg-[#b38b4d] selection:text-black">
+
+  <!-- SVG Noise Texture -->
+  <svg class="hidden">
+    <filter id="noiseFilter">
+      <feTurbulence type="fractalNoise" baseFrequency="0.8" numOctaves="4" stitchTiles="stitch" />
+      <feColorMatrix type="matrix" values="1 0 0 0 0, 0 1 0 0 0, 0 0 1 0 0, 0 0 0 0.1 0" />
+    </filter>
+  </svg>
+  <div class="noise-overlay" style="filter: url(#noiseFilter);"></div>
+
+  <!-- HEADER / HERO -->
+  <header class="relative w-full min-h-screen flex flex-col items-center justify-center pt-20 pb-12 overflow-hidden">
+    <div class="absolute inset-0 z-0 opacity-20">
+      <img src="./images/enoch-1.jpg" alt="Mount Hermon Angels"
+        class="w-full h-full object-cover img-blend mask-gradient-bottom animate-[pulse_10s_ease-in-out_infinite]">
+    </div>
+
+    <div class="relative z-10 w-full max-w-5xl px-6 text-center reveal-base">
+      <p class="mono text-xs md:text-sm tracking-[0.3em] uppercase text-[#4a5d73] mb-6">Extensive Research Monograph</p>
+      <h1
+        class="text-5xl md:text-7xl lg:text-8xl mb-6 leading-none text-transparent bg-clip-text bg-gradient-to-b from-[#d4cbb8] to-[#6b5d44] drop-shadow-lg">
+        The Book of Enoch
+      </h1>
+      <p class="cinzel text-xl md:text-3xl tracking-widest text-[#b38b4d] mb-12">( 1 ENOCH )</p>
+
+      <div
+        class="text-left max-w-4xl mx-auto space-y-6 text-lg md:text-xl leading-relaxed text-[#a39f96] drop-cap font-light">
+        <p>
+          The Book of Enoch (specifically 1 Enoch; Hebrew: סֵפֶר חֲנוֹךְ, Sēfer Ḥănōḵ; Ge'ez: መጽሐፈ ሄኖክ, Maṣḥafa Hēnok)
+          is one of the most significant, complex, and influential non-canonical apocalyptic texts to survive from the
+          Second Temple period. Rather than a singular composition, it is an ancient Jewish "library" containing five
+          distinct booklets written by different authors at different times (spanning from roughly 300 BCE to 100 BCE).
+        </p>
+        <p>
+          For centuries, the complete text was lost to the Western and Eastern Roman worlds, surviving only in Ge'ez
+          (Classical Ethiopic) within the canon of the Ethiopian Orthodox Tewahedo Church. However, the mid-20th-century
+          discovery of the Dead Sea Scrolls at Qumran revolutionized Enochic scholarship, confirming its Aramaic origin,
+          its deep popularity among ancient Jews, and its profound influence on the theological matrix of early
+          Christianity.
+        </p>
+      </div>
+    </div>
+  </header>
+
+  <!-- SECTION 1: STRUCTURAL BREAKDOWN -->
+  <main class="relative z-10 w-full">
+
+    <section class="max-w-6xl mx-auto px-6 py-24">
+      <h2 class="text-3xl md:text-5xl text-center mb-16 text-[#b38b4d] reveal-base border-b border-[#b38b4d]/30 pb-4">1.
+        Structural Breakdown of 1 Enoch (The Five Booklets)</h2>
+      <div class="max-w-4xl mx-auto mb-16 text-lg text-center reveal-base">
+        Scholars agree that 1 Enoch is a composite work. Its structure reflects a literary evolution, with various
+        sections serving as separate theological pamphlets before being compiled into a single "Pentateuch" of Enochic
+        literature.
+      </div>
+
+      <!-- ASCII Diagram -->
+      <div class="w-full overflow-x-auto mb-20 reveal-base">
+        <pre class="text-[10px] md:text-xs text-[#8a9ca8] leading-tight text-center">
+                    ┌──────────────────────────────────────────────┐
+                    │            1 Enoch (The Compilation)         │
+                    └──────────────────────┬───────────────────────┘
+                                           │
+         ┌──────────────────┬──────────────┴─────┬───────────────────┬──────────────────┐
+         ▼                  ▼                    ▼                   ▼                  ▼
+┌─────────────────┐┌─────────────────┐┌────────────────────┐┌─────────────────┐┌─────────────────┐
+│  Book of the    ││     Book of     ││   Astronomical     ││  Book of Dream  ││   Epistle of    │
+│    Watchers     ││    Parables     ││       Book         ││     Visions     ││      Enoch      │
+│  (Chs. 1–36)    ││  (Chs. 37–71)   ││   (Chs. 72–82)     ││  (Chs. 83–90)   ││  (Chs. 91–108)  │
+└─────────────────┘└─────────────────┘└────────────────────┘└─────────────────┘└─────────────────┘
+      </pre>
+      </div>
+
+      <!-- The Books Grid -->
+      <div class="grid grid-cols-1 lg:grid-cols-2 gap-12">
+
+        <!-- I. Watchers -->
+        <article class="glass-panel p-8 reveal-base relative overflow-hidden group">
+          <div
+            class="absolute top-0 right-0 w-64 h-64 opacity-20 group-hover:opacity-40 transition-opacity duration-1000 mask-gradient-edges">
+            <img src="./images/enoch-1.jpg" alt="Watchers" class="w-full h-full object-cover img-blend">
+          </div>
+          <h3 class="text-2xl text-[#b38b4d] mb-2 relative z-10">I. The Book of the Watchers</h3>
+          <p class="mono text-xs text-[#4a5d73] mb-4 relative z-10">Chapters 1–36 | Est. Date: c. 3rd Century BCE</p>
+          <p class="text-sm mb-4 italic text-gray-400 relative z-10">Summary: This section acts as a massive midrash
+            (expansion) on the highly enigmatic passage in Genesis 6:1–4, which describes the "sons of God" mating with
+            the "daughters of men."</p>
+          <ul class="space-y-4 text-[0.95rem] relative z-10">
+            <li><strong class="text-white">The Fall of the Angels:</strong> Led by Semjaza and Azazel, a group of two
+              hundred high-ranking angels known as the Watchers (Egrēgori) swear an oath on Mount Hermon to descend to
+              Earth, take human wives, and father a race of violent, monstrous giants called the Nephilim.</li>
+            <li><strong class="text-white">The Origin of Evil (Forbidden Knowledge):</strong> The Watchers corrupt
+              humanity by introducing forbidden celestial arts. Azazel teaches metalworking, weaponry, and cosmetics
+              (prompting vanity and warfare); Semjaza teaches sorcery and root-cutting; others teach astrology,
+              astronomy, and writing. This places the origin of human sin on cosmic, angelic rebellion rather than the
+              transgression of Adam and Eve.</li>
+            <li><strong class="text-white">Enoch’s Intercession:</strong> The dying Earth cries out to heaven. God
+              sentences the Watchers to be bound in darkness under the earth and their giant offspring to destroy one
+              another. The Watchers beg Enoch to write a petition to God for their forgiveness. God rejects the
+              petition, and Enoch is taken on a series of journeys through the cosmos, guided by archangels (Uriel,
+              Raphael, Michael, Gabriel), where he sees Sheol, the fiery prison of the fallen angels, and the tree of
+              life.</li>
+          </ul>
+        </article>
+
+        <!-- II. Parables -->
+        <article class="glass-panel p-8 reveal-base reveal-delay-1">
+          <h3 class="text-2xl text-[#b38b4d] mb-2">II. The Book of Parables / Similitudes</h3>
+          <p class="mono text-xs text-[#4a5d73] mb-4">Chapters 37–71 | Est. Date: c. late 1st C. BCE to early 1st C. CE
+          </p>
+          <p class="text-sm mb-4 italic text-rose-900/80 bg-rose-900/10 p-2 border-l-2 border-rose-900">Special Note:
+            This is the only section of 1 Enoch that was not found among the Dead Sea Scrolls at Qumran, suggesting a
+            later date or a different provenance (possibly Galilee).</p>
+          <ul class="space-y-4 text-[0.95rem]">
+            <li><strong class="text-white">The "Son of Man" / The Chosen One:</strong> This section contains highly
+              developed Messianic imagery. Enoch beholds a pre-existent, divine figure called the "Son of Man," "the
+              Chosen One," or "the Righteous One." He sits on a throne of glory alongside the "Lord of Spirits" to judge
+              the quick and the dead. This section provides the direct linguistic and theological framework for Jesus’
+              self-designation in the Gospels.</li>
+            <li><strong class="text-white">Eschatological Reversal:</strong> It heavily condemns "the kings and the
+              mighty"—the earthly rulers and wealthy elite who oppress the righteous poor. They are stripped of their
+              power and cast into judgment.</li>
+            <li><strong class="text-white">Resurrection:</strong> This section features one of the earliest explicit
+              references in Jewish literature to a bodily resurrection of both the righteous and the wicked.</li>
+          </ul>
+        </article>
+
+        <!-- III. Astronomical -->
+        <article
+          class="glass-panel p-0 reveal-base col-span-1 lg:col-span-2 flex flex-col md:flex-row overflow-hidden border border-[#b38b4d]/30">
+          <div class="w-full md:w-1/3 relative min-h-[300px]">
+            <img src="./images/enoch-2.jpg" alt="Astronomical Book"
+              class="absolute inset-0 w-full h-full object-cover img-blend">
+            <div class="absolute inset-0 bg-gradient-to-r from-transparent to-[#050505]"></div>
+          </div>
+          <div class="w-full md:w-2/3 p-8 flex flex-col justify-center">
+            <h3 class="text-2xl text-[#b38b4d] mb-2">III. The Astronomical Book / Book of Luminaries</h3>
+            <p class="mono text-xs text-[#4a5d73] mb-4">Chapters 72–82 | Est. Date: c. 3rd Century BCE</p>
+            <p class="text-sm mb-4 italic text-gray-400">Summary: Guided by the archangel Uriel, Enoch is shown the
+              mechanics of the heavens, detail-mapping the sun, moon, stars, and winds as they pass through specific
+              "gates" in the eastern and western horizons.</p>
+            <ul class="space-y-4 text-[0.95rem]">
+              <li><strong class="text-white">The 364-Day Solar Calendar:</strong> The primary goal of this booklet is
+                polemical. It argues fiercely for a strict 364-day solar calendar (divisible by 7, meaning holy days
+                fall on the exact same day of the week every year) over the 354-day lunar calendar used by the
+                mainstream temple priesthood in Jerusalem. The author argues that deviating from the 364-day cycle
+                causes humanity to miss holy festivals, corrupting the ritual order.</li>
+              <li><strong class="text-white">Cosmic Sympathy:</strong> The book warns that when humanity descends into
+                sin in the end times, the natural order will revolt—rains will be withheld, crops will fail, and
+                celestial bodies will alter their paths out of cosmic misalignment.</li>
+            </ul>
+          </div>
+        </article>
+
+        <!-- IV. Dream Visions -->
+        <article class="glass-panel p-8 reveal-base">
+          <h3 class="text-2xl text-[#b38b4d] mb-2">IV. The Book of Dream Visions</h3>
+          <p class="mono text-xs text-[#4a5d73] mb-4">Chapters 83–90 | Est. Date: c. 167–160 BCE</p>
+          <p class="text-sm mb-4 italic text-gray-400">Summary: Enoch recounts two highly symbolic dreams to his son,
+            Methuselah. The first is a vision of the coming Great Flood. The second is the famous Animal Apocalypse.</p>
+          <ul class="space-y-4 text-[0.95rem]">
+            <li><strong class="text-white">The Animal Apocalypse:</strong> This is a coded, allegorical retelling of
+              human history from Adam to the final judgment. Characters are represented zoomorphically:
+              <ul class="list-disc pl-5 mt-2 space-y-1 text-gray-300">
+                <li><span class="text-[#b38b4d]">Bulls:</span> The patriarchs (Adam is a white bull; Noah is a white
+                  bull that becomes a human; Abraham is a white bull).</li>
+                <li><span class="text-[#b38b4d]">Sheep:</span> The Israelites/the righteous remnant.</li>
+                <li><span class="text-[#b38b4d]">Wild Beasts & Birds:</span> Israel's Gentile enemies (Egyptians are
+                  wolves; Philistines are dogs; Babylonians are lions; Seleucid Greeks are eagles and ravens).</li>
+                <li><span class="text-[#b38b4d]">Angels:</span> White men.</li>
+              </ul>
+            </li>
+            <li><strong class="text-white">The Seventy Shepherds:</strong> The text explains Israel’s suffering during
+              the exile by alleging that God handed the "sheep" over to seventy angelic guardians ("shepherds") who
+              acted lawlessly, allowing Israel's enemies to slaughter more sheep than God had authorized.</li>
+            <li><strong class="text-white">The Horned Sheep:</strong> The vision culminates with the rise of a "sheep
+              with a great horn" (representing Judas Maccabeus), who rallies the flock to fight the eagles. A great
+              sword is given to the sheep, and a "white bull with large horns" (the Messiah) is born, to whom all wild
+              beasts submit.</li>
+          </ul>
+        </article>
+
+        <!-- V. Epistle -->
+        <article class="glass-panel p-8 reveal-base reveal-delay-1 relative overflow-hidden">
+          <div class="absolute bottom-0 right-0 w-48 h-48 opacity-30 mask-gradient-edges">
+            <img src="./images/enoch-3.jpg" alt="Birth of Noah" class="w-full h-full object-cover img-blend">
+          </div>
+          <h3 class="text-2xl text-[#b38b4d] mb-2 relative z-10">V. The Epistle of Enoch</h3>
+          <p class="mono text-xs text-[#4a5d73] mb-4 relative z-10">Chapters 91–108 | Est. Date: c. 2nd Century BCE</p>
+          <p class="text-sm mb-4 italic text-gray-400 relative z-10">Summary: Formulated as a farewell discourse or
+            ethical testament from Enoch to his children and future generations. It includes warnings, pronouncements of
+            "Woes" on the wicked, and a historic-prophetic outline.</p>
+          <ul class="space-y-4 text-[0.95rem] relative z-10">
+            <li><strong class="text-white">The Apocalypse of Weeks (Chs. 91, 93):</strong> A highly structured summary
+              of human history and destiny, dividing time into ten "weeks" (epochs). Weeks 1–7 cover past history; Weeks
+              8–10 detail the future (rise of a righteous remnant, destruction of the world, new heaven).</li>
+            <li><strong class="text-white">Ethical Dualism:</strong> Heavily contrasts the righteous poor with the
+              wicked rich, predicting immediate and terrifying cosmic justice for those who rely on ill-gotten wealth.
+            </li>
+            <li><strong class="text-white">The Birth of Noah (Chs. 106–107):</strong> Often classed as a "Noahic
+              Fragment". At birth, Noah’s body is "white as snow and red as a rose," and his hair is like wool; when he
+              opens his eyes, he lights up the entire house like the sun. His father, Lamech, is terrified that Noah is
+              actually the son of a Watcher. Enoch reassures Lamech that the child is fully human and destined to save a
+              remnant from the coming global judgment.</li>
+          </ul>
+        </article>
+      </div>
+    </section>
+
+    <!-- SECTION 2: DEAD SEA SCROLLS & GIANTS -->
+    <section class="w-full bg-[#0a0a0a] border-y border-[#333] py-24 relative overflow-hidden">
+      <div class="absolute left-0 top-0 w-1/2 h-full opacity-20 mask-gradient-edges">
+        <img src="./images/enoch-4.jpg" alt="Book of Giants" class="w-full h-full object-cover img-blend grayscale">
+      </div>
+
+      <div class="max-w-5xl mx-auto px-6 relative z-10">
+        <h2 class="text-3xl md:text-5xl mb-12 text-[#b38b4d] reveal-base text-right">2. The Dead Sea Scrolls<br>& the
+          Aramaic Original</h2>
+
+        <div class="bg-black/60 p-8 border border-white/10 reveal-base">
+          <p class="mb-8 text-lg leading-relaxed">
+            For centuries, Western scholars debated whether 1 Enoch was originally written in Greek, Hebrew, or Aramaic.
+            The discovery of the Dead Sea Scrolls at Qumran Cave 4 between 1947 and 1956 settled this definitively.
+          </p>
+
+          <div class="w-full overflow-x-auto mb-10">
+            <pre class="text-[10px] md:text-xs text-[#8a9ca8] leading-tight flex justify-center">
+                      Qumran Discoveries (Cave 4)
+                                   │
+         ┌─────────────────────────┴─────────────────────────┐
+         ▼                                                   ▼
+11 Aramaic Manuscripts of 1 Enoch                   The Book of Giants
+- Confirmed Aramaic original                         - Missing from Ethiopic canon
+- Excluded "Book of Parables"                       - Replaced by "Book of Parables"
+- Highly esteemed by Qumran sect                    - Featured Mesopotamian figures
+          </pre>
+          </div>
+
+          <h4 class="text-xl text-white mb-2">The Qumran Manuscripts</h4>
+          <p class="mb-6 text-sm text-gray-400">Scribes at Qumran preserved eleven Aramaic manuscripts of various parts
+            of 1 Enoch (labeled 4Q201–202, 4Q204–212), alongside several Hebrew/Aramaic fragments of the Astronomical
+            Book (4Q208–211). The density of copies shows that for the Essene sect, the Enochic library was treated with
+            a status equivalent to, or perhaps exceeding, books of the Hebrew Bible.</p>
+
+          <h4 class="text-xl text-white mb-2">The Mystery of the Missing "Book of Parables"</h4>
+          <p class="mb-4 text-sm text-gray-400">Intriguingly, not a single fragment of the Book of Parables (Chs. 37–71)
+            was found at Qumran. Two main scholarly schools of thought:</p>
+          <ul class="list-disc pl-5 mb-8 text-sm text-gray-400 space-y-2">
+            <li><strong class="text-[#b38b4d]">The Late Composition Theory:</strong> Scribes did not copy it because it
+              did not exist yet; composed late 1st century CE.</li>
+            <li><strong class="text-[#b38b4d]">The Sectarian Exclusion Theory:</strong> The "Son of Man" messianism
+              conflicted with the Qumran sect’s expectation of two distinct Messiahs (priestly and royal).</li>
+          </ul>
+
+          <div class="border-t border-[#333] pt-8">
+            <h4 class="text-2xl cinzel text-[#b38b4d] mb-4">What is the Book of Giants?</h4>
+            <p class="mb-4 text-gray-300">
+              Pioneering Qumran scholar Józef Milik hypothesized that the original Aramaic Enochic collection was
+              structured as a five-book "Pentateuch," but with the <span class="text-white">Book of Giants</span>
+              instead of the Book of Parables. When translated by later Christians, the highly mythological Book of
+              Giants was replaced by the Christological Parables. The Aramaic fragments reveal a bizarre narrative:
+            </p>
+            <ul class="space-y-4 text-sm text-gray-400">
+              <li><strong class="text-white">Mesopotamian Syncretism:</strong> The text names several giants, including
+                Ohya, Hahya, and Mahway. Astonishingly, one of the giants is named <em>Gilgamesh</em>—the legendary hero
+                of the ancient Mesopotamian epic. This shows a direct fusion of Babylonian mythology and Jewish
+                apocalyptic thought.</li>
+              <li><strong class="text-white">Apocalyptic Nightmares:</strong> The giants suffer terrifying, prophetic
+                dreams of a garden submerged in water, leaving only three shoots (the Deluge and Noah).</li>
+              <li><strong class="text-white">Flight to Enoch:</strong> Desperate, the giants send Mahway, who flies
+                across the heavens to locate Enoch in his remote sanctuary. Enoch translates the dreams as a final,
+                unalterable sentence of physical destruction, though their disembodied spirits will remain on Earth to
+                torment humanity (origin of demons).</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- SECTION 3 & 4: INFLUENCE & RECEPTION -->
+    <section class="max-w-6xl mx-auto px-6 py-24 grid grid-cols-1 md:grid-cols-2 gap-16">
+
+      <!-- Influence on NT -->
+      <div class="reveal-base">
+        <h2 class="text-3xl mb-8 text-[#b38b4d] border-b border-[#b38b4d]/30 pb-2">3. Influence on the New Testament
+        </h2>
+        <p class="mb-6 text-gray-300">
+          The New Testament does not exist in a vacuum; it was written by authors immersed in Second Temple apocalyptic
+          thought. The Book of Enoch left an indelible mark on early Christian theology.
+        </p>
+
+        <div class="space-y-8">
+          <div class="bg-[#111] p-6 rounded-sm border-l-4 border-[#b38b4d]">
+            <h4 class="text-lg text-white mb-2 cinzel">The Epistle of Jude</h4>
+            <p class="text-sm text-gray-400 mb-4">Jude does not simply reference Enoch; he utilizes a classic Jewish
+              formula of scriptural citation: "Enoch... prophesied, saying..." confirming he viewed 1 Enoch as divinely
+              inspired.</p>
+            <blockquote class="italic text-sm text-[#a39f96] pl-4 border-l-2 border-[#4a5d73] mb-2">
+              "It was also about these that Enoch, the seventh from Adam, prophesied, saying: 'See, the Lord is coming
+              with ten thousands of his holy ones...'" <br><span class="not-italic text-xs text-gray-600">— Jude
+                1:14-15</span>
+            </blockquote>
+            <blockquote class="italic text-sm text-[#a39f96] pl-4 border-l-2 border-[#4a5d73]">
+              "And behold! He cometh with ten thousands of holy ones..." <br><span
+                class="not-italic text-xs text-gray-600">— 1 Enoch 1:9</span>
+            </blockquote>
+          </div>
+
+          <div class="bg-[#111] p-6 rounded-sm border-l-4 border-[#b38b4d]">
+            <h4 class="text-lg text-white mb-2 cinzel">The Bound Angels (Jude 6 & 2 Pet 2:4)</h4>
+            <p class="text-sm text-gray-400">Both epistles reference angels kept in eternal chains in deep darkness.
+              This draws directly from the sentence passed on Semjaza and Azazel in 1 Enoch 10:4–12, where Raphael casts
+              Azazel into the darkness of Dudael.</p>
+          </div>
+
+          <div class="bg-[#111] p-6 rounded-sm border-l-4 border-[#b38b4d]">
+            <h4 class="text-lg text-white mb-2 cinzel">The "Son of Man" and the Gospels</h4>
+            <p class="text-sm text-gray-400">In the Gospels, Jesus uses "Son of Man" as a pre-existent, divine, and
+              judging cosmic figure (e.g., Mark 14:62). This specific synthesis of Daniel's symbol with a throne-sharing
+              divine judge is the primary theology developed in the Book of Parables (1 Enoch 46–48).</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Patristic Reception -->
+      <div class="reveal-base reveal-delay-1">
+        <h2 class="text-3xl mb-8 text-[#b38b4d] border-b border-[#b38b4d]/30 pb-2">4. Patristic Reception & the
+          "Sethite" Shift</h2>
+        <p class="mb-6 text-gray-300">
+          During the first three centuries, 1 Enoch's status was highly debated. Early Fathers used it for angelology,
+          but later theology rejected its literalism.
+        </p>
+
+        <div class="w-full overflow-x-auto mb-8">
+          <pre class="text-[10px] text-[#8a9ca8] leading-tight">
+Patristic Era (2nd–3rd c.)                          Post-Nicene Era (4th–5th c.)
+- Tertullian: "Scriptura Enoch"                     - Augustine: Rejects "Watchers" literalism
+- Justin Martyr: Basis for Demonology               - Developed "Sethite" Theory
+- Clement: Accepted Jude's citation                 - Jerome: Explicitly labels Enoch "Apocrypha"
+        </pre>
+        </div>
+
+        <div class="space-y-6">
+          <div>
+            <h4 class="text-xl text-white mb-2">I. The Peak of Acceptance</h4>
+            <ul class="list-disc pl-5 text-sm text-gray-400 space-y-2">
+              <li><strong class="text-[#b38b4d]">Justin Martyr:</strong> Used the Watchers to construct doctrine of
+                demons; pagan gods are disembodied Nephilim spirits.</li>
+              <li><strong class="text-[#b38b4d]">Tertullian:</strong> Most ardent advocate. Called it "Scriptura Enoch"
+                and defended its survival via Noah's Ark and its Apostolicity via Jude.</li>
+            </ul>
+          </div>
+
+          <div class="mt-8 border-t border-[#333] pt-6">
+            <h4 class="text-xl text-white mb-2">II. The Fourth-Century Shift</h4>
+            <p class="text-sm text-gray-400 mb-4">
+              By the 4th/5th centuries, theologians like <strong class="text-white">Augustine</strong> popularized the
+              <span class="text-[#b38b4d]">"Sethite" interpretation</span> of Genesis 6: The "sons of God" were
+              righteous descendants of Seth, and "daughters of men" were wicked descendants of Cain. Angels physically
+              mating with women became heretical.
+            </p>
+            <blockquote class="italic text-sm text-[#a39f96] p-4 bg-[#111] border-l-2 border-red-900/50">
+              "Let us omit the fables of those writings which are called apocryphal... they have no canonical authority
+              on account of the many false things they contain." <br><span class="not-italic text-xs text-gray-600">—
+                Augustine, The City of God</span>
+            </blockquote>
+            <p class="text-sm text-gray-400 mt-4">
+              Jerome formally classified 1 Enoch as apocryphal. Enoch was discarded, cast out of copying rotations, and
+              effectively lost to Western history for over a millennium.
+            </p>
+          </div>
+        </div>
+      </div>
+
+    </section>
+
+    <!-- SECTION 5: CANONICAL SURVIVAL -->
+    <section class="relative w-full min-h-[70vh] flex items-center py-24 overflow-hidden">
+      <div class="absolute inset-0 z-0">
+        <img src="./images/enoch-5.jpg" alt="Ethiopian Monk"
+          class="w-full h-full object-cover img-blend opacity-40 mix-blend-screen">
+        <div class="absolute inset-0 bg-gradient-to-t from-black via-black/60 to-transparent"></div>
+      </div>
+
+      <div class="max-w-4xl mx-auto px-6 relative z-10 text-center reveal-base">
+        <h2 class="text-4xl md:text-6xl mb-8 text-[#b38b4d] drop-shadow-lg">5. Canonical Survival: The Ethiopic Church
+        </h2>
+        <p class="text-xl text-gray-200 mb-8 font-light">
+          While the Roman, Byzantine, and Syriac churches suppressed 1 Enoch, one ancient Christian empire preserved it
+          in its entirety: the Kingdom of Aksum.
+        </p>
+
+        <div
+          class="grid grid-cols-1 md:grid-cols-2 gap-8 text-left bg-black/70 p-8 backdrop-blur-sm border border-[#b38b4d]/20">
+          <div>
+            <h4 class="text-xl text-white mb-3 cinzel">Ethiopian Orthodox Church</h4>
+            <p class="text-sm text-gray-300 leading-relaxed">
+              Translated from Greek to Ge'ez during the golden age of monastic translation (4th-5th c.). Developed in
+              geographic isolation from Mediterranean councils (like Laodicea) which forbade non-canonical books.
+              Unaffected by the "Sethite" shift, they placed it in their "narrower canon" of 81 books.
+            </p>
+          </div>
+          <div>
+            <h4 class="text-xl text-white mb-3 cinzel">Beta Israel & Rediscovery</h4>
+            <p class="text-sm text-gray-300 leading-relaxed">
+              The Beta Israel (Ethiopian Jews) also preserved it in their holy scriptures (Orit), proving its authority
+              predated Christian-Jewish divergence in the region. In 1773, Scottish explorer James Bruce acquired three
+              complete Ge'ez manuscripts, bringing them to Europe and ending 1,500 years of Western obscurity.
+            </p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- SECTION 6: COMPARATIVE ANALYSIS TABLE -->
+    <section class="max-w-6xl mx-auto px-6 py-24 reveal-base">
+      <h2 class="text-3xl md:text-4xl mb-12 text-[#b38b4d] text-center">6. Comparative Analysis: 1, 2, and 3 Enoch</h2>
+      <p class="text-center text-gray-400 mb-8 max-w-3xl mx-auto">It is critical to distinguish the famous 1 Enoch from
+        two other books that bear the patriarch's name. They represent three completely different theological eras,
+        languages, and geographic origins.</p>
+
+      <div class="overflow-x-auto">
+        <table class="w-full text-left border-collapse">
+          <thead>
+            <tr class="bg-[#111] text-[#b38b4d] cinzel border-b-2 border-[#b38b4d]">
+              <th class="p-4 whitespace-nowrap">Feature</th>
+              <th class="p-4 min-w-[250px]">1 Enoch</th>
+              <th class="p-4 min-w-[250px]">2 Enoch</th>
+              <th class="p-4 min-w-[250px]">3 Enoch</th>
+            </tr>
+          </thead>
+          <tbody class="text-sm text-gray-300 divide-y divide-[#333]">
+            <tr class="hover:bg-white/5 transition-colors">
+              <td class="p-4 font-bold text-white">Common Name</td>
+              <td class="p-4">The Ethiopic Book of Enoch</td>
+              <td class="p-4">The Slavonic Book of Enoch</td>
+              <td class="p-4">The Hebrew Book of Enoch (Sefer Hekhalot)</td>
+            </tr>
+            <tr class="hover:bg-white/5 transition-colors">
+              <td class="p-4 font-bold text-white">Approx. Date</td>
+              <td class="p-4">300 BCE – 100 BCE (Second Temple)</td>
+              <td class="p-4">Late 1st Century CE (Post-Temple)</td>
+              <td class="p-4">5th – 6th Century CE (Late Antiquity)</td>
+            </tr>
+            <tr class="hover:bg-white/5 transition-colors">
+              <td class="p-4 font-bold text-white">Preserved Language</td>
+              <td class="p-4">Ge'ez (Ethiopic)</td>
+              <td class="p-4">Old Church Slavonic</td>
+              <td class="p-4">Hebrew</td>
+            </tr>
+            <tr class="hover:bg-white/5 transition-colors">
+              <td class="p-4 font-bold text-white">Core Narrative</td>
+              <td class="p-4">Fall of Watchers, Nephilim, cosmic tours, coming of Son of Man.</td>
+              <td class="p-4">Ascent through ten heavens, creation dictation, birth of Melchizedek.</td>
+              <td class="p-4">Rabbi Ishmael meets Enoch, who is transformed into archangel Metatron.</td>
+            </tr>
+            <tr class="hover:bg-white/5 transition-colors">
+              <td class="p-4 font-bold text-white">Enoch's Destiny</td>
+              <td class="p-4">Cosmic scribe and intercessor.</td>
+              <td class="p-4">Taken to heaven after 30 days of instruction.</td>
+              <td class="p-4">Body expands to fill universe; crowned as "The Lesser YHWH."</td>
+            </tr>
+            <tr class="hover:bg-white/5 transition-colors">
+              <td class="p-4 font-bold text-white">Primary Theology</td>
+              <td class="p-4">Apocalypticism (origin of evil, messianic restoration).</td>
+              <td class="p-4">Mysticism/Cosmology (architecture of heavens).</td>
+              <td class="p-4">Kabbalah / Merkabah Mysticism (divine throne room).</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- SECTION 8: COSMOLOGY & ANGELOLOGY -->
+    <section class="w-full bg-[#070707] border-y border-[#b38b4d]/20 py-24 relative overflow-hidden">
+      <div class="absolute right-0 top-0 w-1/3 h-full opacity-10 mask-gradient-edges pointer-events-none">
+        <img src="./images/enoch-2.jpg" alt="Heavenly Cosmology" class="w-full h-full object-cover img-blend grayscale">
+      </div>
+
+      <div class="max-w-6xl mx-auto px-6 relative z-10">
+        <h2 class="text-3xl md:text-5xl mb-4 text-[#b38b4d] reveal-base text-center">8. Cosmology &amp; Angelology of 1 Enoch</h2>
+        <p class="text-center text-gray-400 mb-16 max-w-3xl mx-auto reveal-base">
+          Perhaps no aspect of 1 Enoch has proven more theologically fertile than its elaborately detailed cosmic geography
+          and its systematic ordering of the angelic and demonic realms — frameworks that became foundational to both
+          Jewish mysticism and Christian theology.
+        </p>
+
+        <!-- Subsection A: The Cosmic Geography -->
+        <div class="mb-20">
+          <h3 class="text-2xl text-white cinzel mb-8 reveal-base border-b border-[#b38b4d]/20 pb-3">
+            A. The Cosmic Geography: Mountains, Gates &amp; the Ends of the Earth
+          </h3>
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-12 items-start">
+            <div class="reveal-base">
+              <p class="text-gray-300 leading-relaxed mb-6">
+                In the Book of the Watchers (Chs. 17–36), Enoch is transported on a series of guided tours across the
+                entirety of the cosmos. Unlike any biblical vision, these chapters constitute an actual cosmological
+                <em>map</em> — the universe as a bounded, architecturally structured space governed by divine law.
+              </p>
+              <ul class="space-y-5 text-[0.95rem]">
+                <li>
+                  <strong class="text-white">The Seven Mountains of Fire (Ch. 18):</strong>
+                  <span class="text-gray-400"> Enoch beholds seven magnificent mountains of precious stone in the
+                  northwest. The central mountain reaches to heaven and its summit is a throne of God. This locale
+                  connects to the later description of the <em>Tree of Life</em>, whose fruit will be given to the
+                  righteous at the final judgment, filling them with an indescribable fragrance.</span>
+                </li>
+                <li>
+                  <strong class="text-white">The Prison of the Stars (Ch. 18):</strong>
+                  <span class="text-gray-400"> Beyond these mountains, Enoch sees a void of chaos — a place without
+                  sky or earth — where great blazing stars are bound in chains. The angel Uriel reveals that these
+                  are the stars that transgressed God's command and failed to rise at their appointed time. This
+                  prison for disobedient stars prefigures the prison of the Watchers, suggesting a cosmic principle:
+                  all creation operates under binding covenantal law.</span>
+                </li>
+                <li>
+                  <strong class="text-white">Sheol &amp; the Three Hollow Places (Ch. 22):</strong>
+                  <span class="text-gray-400"> Enoch is shown a high mountain in the west containing a vast hollow
+                  place with three separate compartments for the dead, awaiting judgment. The souls of the righteous
+                  dwell in a spring of water with light; the souls of sinners (who were not punished on Earth) dwell
+                  in pain; the souls of sinners (who <em>were</em> punished in life) wait in a third, dry hollow.
+                  This represents one of the earliest systematic topographies of the afterlife in Jewish literature.</span>
+                </li>
+                <li>
+                  <strong class="text-white">The Paradise of Righteousness (Ch. 32):</strong>
+                  <span class="text-gray-400"> Enoch reaches the ends of the Earth and is shown the Garden of Eden
+                  in the Far East, still existing as a living place guarded by the archangel Raphael, containing the
+                  Tree of Wisdom (the tree whose fruit Eve and Adam ate) and the Tree of Life.</span>
+                </li>
+              </ul>
+            </div>
+            <!-- ASCII Cosmic Map -->
+            <div class="reveal-base reveal-delay-1">
+              <div class="w-full overflow-x-auto glass-panel p-6">
+                <pre class="text-[10px] md:text-xs text-[#8a9ca8] leading-tight">
+        ┌──────────────────────────────────────────────────────┐
+        │               THE ENOCHIC COSMOS                     │
+        │                                                      │
+        │  [HEAVEN]  ═══ God's Throne & Holy Ones ═══         │
+        │                        │                             │
+        │        ┌───────────────┼───────────────┐            │
+        │        ▼               ▼               ▼            │
+        │   [7 Mountains]  [Gates of Sun]  [Stars' Prison]    │
+        │   (NW - Throne   (E &amp; W Horizons  (Disobedient     │
+        │    &amp; Tree of     / Uriel guards)   stars bound)    │
+        │    Life)                                             │
+        │                        │                             │
+        │         ┌──────────────┼──────────────┐             │
+        │         ▼              ▼              ▼             │
+        │   [SHEOL - 3     [MIDDLE EARTH]  [Ends of Earth]   │
+        │    Chambers]     (humanity)      Garden of Eden     │
+        │   (Righteous /   Watchers fell   (Raphael guards)  │
+        │    Sinners /     from sky)                          │
+        │    Punished)                                         │
+        │                        │                             │
+        │              ▼ Watchers' Prison ▼                   │
+        │         [Tartarus / Dudael - Ch. 10]                 │
+        │         (Azazel bound under rocks)                   │
+        └──────────────────────────────────────────────────────┘
+                </pre>
+              </div>
+              <p class="text-xs text-gray-600 mt-3 text-center mono">Schematic reconstruction of Enochic spatial cosmology</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Subsection B: The Archangel Hierarchy -->
+        <div class="mb-20">
+          <h3 class="text-2xl text-white cinzel mb-8 reveal-base border-b border-[#b38b4d]/20 pb-3">
+            B. The Archangel Hierarchy: The Holy Watchers
+          </h3>
+          <p class="text-gray-300 mb-8 reveal-base max-w-4xl">
+            1 Enoch is the primary ancient text that developed the concept of a defined hierarchy of named archangels —
+            individual divine beings with specific cosmic portfolios. This framework was entirely absent from the Hebrew
+            Bible (where angels are largely anonymous) but is assumed throughout the New Testament.
+          </p>
+          <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 reveal-base">
+
+            <!-- Michael -->
+            <div class="glass-panel p-6 border-t-2 border-[#b38b4d] hover:border-white transition-colors duration-500">
+              <p class="mono text-xs text-[#4a5d73] mb-1 uppercase tracking-widest">Archangel I</p>
+              <h4 class="text-xl text-white cinzel mb-3">Michael</h4>
+              <p class="text-sm text-gray-400 leading-relaxed">
+                <strong class="text-[#b38b4d]">Portfolio:</strong> Mercy, patience, and the nation of Israel.
+                Oversees the best part of humanity and chaos. In 1 Enoch 10:11–14, he is commanded by God to
+                bind Semjaza and the Watchers in the valleys of the Earth for 70 generations until the final
+                judgment. He is the protector of the righteous dead.
+              </p>
+            </div>
+
+            <!-- Raphael -->
+            <div class="glass-panel p-6 border-t-2 border-[#b38b4d] hover:border-white transition-colors duration-500">
+              <p class="mono text-xs text-[#4a5d73] mb-1 uppercase tracking-widest">Archangel II</p>
+              <h4 class="text-xl text-white cinzel mb-3">Raphael</h4>
+              <p class="text-sm text-gray-400 leading-relaxed">
+                <strong class="text-[#b38b4d]">Portfolio:</strong> Healing and the spirits of men.
+                Commanded to bind Azazel <em>hand and foot</em> and cast him into the darkness of Dudael,
+                covering him with rocks, until the Day of Judgment (1 Enoch 10:4–8). Also serves as Enoch's
+                primary guide through Sheol and the compartments of the dead. His name means "God heals."
+              </p>
+            </div>
+
+            <!-- Gabriel -->
+            <div class="glass-panel p-6 border-t-2 border-[#b38b4d] hover:border-white transition-colors duration-500">
+              <p class="mono text-xs text-[#4a5d73] mb-1 uppercase tracking-widest">Archangel III</p>
+              <h4 class="text-xl text-white cinzel mb-3">Gabriel</h4>
+              <p class="text-sm text-gray-400 leading-relaxed">
+                <strong class="text-[#b38b4d]">Portfolio:</strong> Paradise, the Serpents, and the Cherubim.
+                Sent against the Nephilim giants directly, commanding them to turn on each other in internecine
+                warfare (1 Enoch 10:9). Gabriel functions as God's instrument of violent judgment where
+                Raphael and Michael operate through binding and restraint. His name means "God is my strength."
+              </p>
+            </div>
+
+            <!-- Uriel -->
+            <div class="glass-panel p-6 border-t-2 border-[#b38b4d] hover:border-white transition-colors duration-500">
+              <p class="mono text-xs text-[#4a5d73] mb-1 uppercase tracking-widest">Archangel IV</p>
+              <h4 class="text-xl text-white cinzel mb-3">Uriel</h4>
+              <p class="text-sm text-gray-400 leading-relaxed">
+                <strong class="text-[#b38b4d]">Portfolio:</strong> The world and Tartarus.
+                Serves as Enoch's primary guide through the Astronomical Book (Chs. 72–82), explaining the
+                mechanics of the sun, moon, and stars. He oversees the prison of the disobedient stars and
+                reveals the divine calendar. Uriel is almost entirely absent from the Hebrew Bible — 1 Enoch
+                is the source of his identity. His name means "God is my light."
+              </p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Subsection C: Origin of Demons -->
+        <div class="mb-4">
+          <h3 class="text-2xl text-white cinzel mb-8 reveal-base border-b border-[#b38b4d]/20 pb-3">
+            C. The Origin of Demons: A Systematic Demonology
+          </h3>
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-12">
+            <div class="reveal-base">
+              <p class="text-gray-300 leading-relaxed mb-6">
+                One of 1 Enoch's most consequential and theologically innovative contributions is its systematic
+                explanation for the <em>origin of evil spirits</em> — a question the Hebrew Bible leaves almost
+                entirely unaddressed.
+              </p>
+              <div class="bg-[#111] border-l-4 border-[#b38b4d] p-6 mb-6">
+                <h4 class="text-lg text-white mb-3 cinzel">The Enochic Answer</h4>
+                <blockquote class="italic text-sm text-[#a39f96] leading-relaxed">
+                  "And now the giants who were born from the union of spirits and flesh will be called evil spirits
+                  upon the earth, and on the earth will be their dwelling place. Evil spirits proceed from their
+                  bodies... They will rise up against the children of men and against the women, for they have
+                  proceeded from them."
+                  <br><span class="not-italic text-xs text-gray-600 mt-2 block">— 1 Enoch 15:8–9</span>
+                </blockquote>
+              </div>
+              <p class="text-gray-300 leading-relaxed text-sm">
+                The logic is precise and revolutionary: the Nephilim giants were hybrid beings — part angelic spirit,
+                part human flesh. When God destroyed their physical bodies in the Flood, they could not return to
+                heaven (their angelic nature was corrupted), nor could they rest in Sheol (their physical nature was
+                destroyed). They therefore became <strong class="text-white">disembodied spirits condemned to roam
+                the Earth</strong>, seeking to afflict, possess, and destroy humanity until the final judgment.
+                This is the origin of the concept of <em>demons</em> as it appears throughout the New Testament.
+              </p>
+            </div>
+
+            <div class="reveal-base reveal-delay-1 space-y-6">
+              <div class="glass-panel p-5">
+                <h4 class="text-base text-[#b38b4d] mb-2 cinzel">Azazel: Scapegoat Theology</h4>
+                <p class="text-sm text-gray-400 leading-relaxed">
+                  The Watchers leader Azazel appears to be a direct mythological expansion of the mysterious
+                  <em>Azazel</em> of Leviticus 16 — the entity to whom the ancient Israelite scapegoat was
+                  dispatched into the wilderness on Yom Kippur. In 1 Enoch, Azazel is explicitly held <em>solely
+                  responsible</em> for all the sins of the world: <span class="text-white italic">"to him ascribe
+                  all sin"</span> (1 Enoch 10:8). This represents a striking cosmic theodicy: the root of evil is
+                  not humanity, but a rebel angel.
+                </p>
+              </div>
+              <div class="glass-panel p-5">
+                <h4 class="text-base text-[#b38b4d] mb-2 cinzel">Semjaza &amp; the Oath</h4>
+                <p class="text-sm text-gray-400 leading-relaxed">
+                  The leader Semjaza (also Shemihaza) is uniquely portrayed as <em>morally complex</em>. Before
+                  descending, he expresses doubt to his fellow Watchers: <span class="text-white italic">"I fear
+                  you will not agree to do this deed, and I alone will have to pay the penalty."</span> The others
+                  swear a binding oath together on the summit of Mount Hermon — the oath of collective rebellion —
+                  absolving any single angel of sole blame. Unlike Azazel, who is bound in the earth, Semjaza is
+                  bound in the stars (Ch. 18), forced to watch his fallen world from above until judgment.
+                </p>
+              </div>
+              <div class="glass-panel p-5">
+                <h4 class="text-base text-[#b38b4d] mb-2 cinzel">Enoch as Cosmic Scribe</h4>
+                <p class="text-sm text-gray-400 leading-relaxed">
+                  Throughout 1 Enoch, the patriarch himself is not merely a passive witness. He is designated
+                  <strong class="text-white">"the scribe of righteousness"</strong> (1 Enoch 12:4) — a celestial
+                  notary who records the deeds of all, good and evil, to be presented at the final judgment. This
+                  identity as divine record-keeper becomes the seed of the later Jewish concept of Metatron (3 Enoch)
+                  and forms a direct parallel to the role ascribed to Jesus as the divine Logos in John 1 — the
+                  pre-existent being through whom all of God's purposes are mediated and articulated.
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- SECTION 7: LEGACY -->
+    <footer class="w-full bg-[#050505] py-24 border-t border-[#b38b4d]/20 relative">
+      <div class="max-w-4xl mx-auto px-6 text-center reveal-base">
+        <h2 class="text-3xl md:text-5xl mb-8 text-[#b38b4d] cinzel">7. Modern Scholarly Consensus & Legacy</h2>
+        <p class="text-lg text-gray-300 leading-relaxed mb-12">
+          Today, the scholarly consensus (led by figures like Milik, VanderKam, and Nickelsburg) views 1 Enoch not as a
+          fringe product, but as:
+        </p>
+
+        <div class="grid gap-8 text-left">
+          <div class="glass-panel p-6 border-l-4 border-[#b38b4d]">
+            <h3 class="text-xl text-white mb-2">A Primary Mirror of Second Temple Judaism</h3>
+            <p class="text-gray-400">Proving ancient Judaism was a diverse, highly creative theological sandbox filled
+              with competing calendars, complex angelologies, and deep cosmic mythologies.</p>
+          </div>
+          <div class="glass-panel p-6 border-l-4 border-[#b38b4d]">
+            <h3 class="text-xl text-white mb-2">The Direct Cradle of Christian Christology</h3>
+            <p class="text-gray-400">Without 1 Enoch (specifically the Parables), the transition from the Old
+              Testament’s nationalistic messianism to the New Testament's cosmic, pre-existent, judging Savior is
+              incredibly difficult to map.</p>
+          </div>
+          <div class="glass-panel p-6 border-l-4 border-[#b38b4d]">
+            <h3 class="text-xl text-white mb-2">The Key to Ancient Demonology</h3>
+            <p class="text-gray-400">The primary text explaining why the New Testament assumes an active spirit world
+              filled with demons and spiritual warfare—concepts absent in the Hebrew Bible but fully systematized in 1
+              Enoch.</p>
+          </div>
+        </div>
+
+        <div class="mt-24 mb-12 flex justify-center">
+          <div class="w-1 h-24 bg-gradient-to-b from-[#b38b4d] to-transparent"></div>
+        </div>
+        <p class="mono tracking-[0.4em] text-[#4a5d73] uppercase text-sm">End of Monograph</p>
+      </div>
+    </footer>
+
+  </main>
+
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      const observerOptions = {
+        root: null,
+        rootMargin: '0px',
+        threshold: 0.15
+      };
+
+      const observer = new IntersectionObserver((entries, observer) => {
+        entries.forEach(entry => {
+          if (entry.isIntersecting) {
+            entry.target.classList.add('reveal-active');
+            // Optional: Unobserve after revealing to keep the state
+            // observer.unobserve(entry.target);
+          }
+        });
+      }, observerOptions);
+
+      const revealElements = document.querySelectorAll('.reveal-base');
+      revealElements.forEach(el => observer.observe(el));
+    });
+  </script>
+</body>
+
+</html>
