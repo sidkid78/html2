@@ -1,0 +1,624 @@
+<!DOCTYPE html>
+<html lang='en'>
+
+<head>
+    <meta charset='UTF-8'>
+    <meta name='viewport' content='width=device-width, initial-scale=1.0'>
+    <title>Agentic Project Manager</title>
+    <script src='https://cdn.tailwindcss.com'></script>
+    <script>tailwind.config = { theme: { extend: { fontFamily: { mono: ['Courier New', 'Courier', 'monospace'] }, colors: { syscyan: '#00f3ff', sysred: '#ff3c3c', sysorange: '#ff9d00', sysgreen: '#00ff66', sysdark: '#050505' } } } }; </script>
+    <style>
+        body {
+            background-color: #050505;
+            color: #d1d5db;
+            overflow-x: hidden;
+            scroll-behavior: smooth;
+        }
+
+        ::selection {
+            background-color: #00f3ff;
+            color: #000;
+        }
+
+        .noise-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            pointer-events: none;
+            z-index: 50;
+            mix-blend-mode: overlay;
+            opacity: 0.25;
+        }
+
+        .scanline {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 2px;
+            background: rgba(0, 243, 255, 0.3);
+            box-shadow: 0 0 10px rgba(0, 243, 255, 0.5);
+            z-index: 40;
+            pointer-events: none;
+            animation: scan 8s linear infinite;
+        }
+
+        @keyframes scan {
+            0% {
+                top: -10vh;
+            }
+
+            100% {
+                top: 110vh;
+            }
+        }
+
+        .loop-bg {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 150vw;
+            height: 150vw;
+            max-width: 1200px;
+            max-height: 1200px;
+            z-index: 0;
+            pointer-events: none;
+            opacity: 0.1;
+            animation: spin 120s linear infinite;
+            mix-blend-mode: exclusion;
+        }
+
+        @keyframes spin {
+            100% {
+                transform: translate(-50%, -50%) rotate(360deg);
+            }
+        }
+
+        .loop-bg-reverse {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 130vw;
+            height: 130vw;
+            max-width: 1000px;
+            max-height: 1000px;
+            z-index: 0;
+            pointer-events: none;
+            opacity: 0.15;
+            animation: spin-reverse 90s linear infinite;
+        }
+
+        @keyframes spin-reverse {
+            100% {
+                transform: translate(-50%, -50%) rotate(-360deg);
+            }
+        }
+
+        .glow-text {
+            text-shadow: 0 0 10px currentColor;
+        }
+
+        .obs-target {
+            transition: all 1.2s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        .phase-block {
+            background: linear-gradient(180deg, rgba(15, 15, 20, 0.8) 0%, rgba(5, 5, 5, 0.9) 100%);
+            border: 1px solid rgba(0, 243, 255, 0.1);
+            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.5);
+            backdrop-filter: blur(10px);
+        }
+
+        .decision-gate {
+            background: repeating-linear-gradient(45deg, rgba(255, 60, 60, 0.05), rgba(255, 60, 60, 0.05) 10px, transparent 10px, transparent 20px);
+            border-left: 4px solid #ff3c3c;
+        }
+
+        .verbatim-pre {
+            white-space: pre-wrap;
+            word-break: break-all;
+            line-height: 1.5;
+            font-size: 0.85rem;
+        }
+
+        @media (min-width: 768px) {
+            .verbatim-pre {
+                font-size: 0.95rem;
+            }
+        }
+
+        .glitch-effect {
+            position: relative;
+        }
+
+        .glitch-effect::before,
+        .glitch-effect::after {
+            content: attr(data-text);
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            opacity: 0.8;
+        }
+
+        .glitch-effect::before {
+            left: 2px;
+            text-shadow: -2px 0 red;
+            animation: glitch-anim-1 2s infinite linear alternate-reverse;
+        }
+
+        .glitch-effect::after {
+            left: -2px;
+            text-shadow: -2px 0 blue;
+            animation: glitch-anim-2 3s infinite linear alternate-reverse;
+        }
+
+        @keyframes glitch-anim-1 {
+            0% {
+                clip-path: inset(20% 0 80% 0);
+            }
+
+            20% {
+                clip-path: inset(60% 0 10% 0);
+            }
+
+            40% {
+                clip-path: inset(40% 0 50% 0);
+            }
+
+            60% {
+                clip-path: inset(80% 0 5% 0);
+            }
+
+            80% {
+                clip-path: inset(10% 0 70% 0);
+            }
+
+            100% {
+                clip-path: inset(30% 0 40% 0);
+            }
+        }
+
+        @keyframes glitch-anim-2 {
+            0% {
+                clip-path: inset(10% 0 60% 0);
+            }
+
+            20% {
+                clip-path: inset(30% 0 20% 0);
+            }
+
+            40% {
+                clip-path: inset(70% 0 10% 0);
+            }
+
+            60% {
+                clip-path: inset(50% 0 30% 0);
+            }
+
+            80% {
+                clip-path: inset(5% 0 80% 0);
+            }
+
+            100% {
+                clip-path: inset(40% 0 50% 0);
+            }
+        }
+    </style>
+</head>
+
+<body class='font-mono antialiased relative'><svg class='hidden'>
+        <filter id='noise'>
+            <feTurbulence type='fractalNoise' baseFrequency='0.7' numOctaves='3' stitchTiles='stitch' />
+        </filter>
+    </svg>
+    <div class='noise-overlay'
+        style='background: url("data:image/svg+xml,%3Csvg viewBox=%220 0 200 200%22 xmlns=%22http://www.w3.org/2000/svg%22%3E%3Cfilter id=%22noiseFilter%22%3E%3CfeTurbulence type=%22fractalNoise%22 baseFrequency=%220.65%22 numOctaves=%223%22 stitchTiles=%22stitch%22/%3E%3C/filter%3E%3Crect width=%22100%25%22 height=%22100%25%22 filter=%22url(%23noiseFilter)%22/%3E%3C/svg%3E");'>
+    </div>
+    <div class='scanline'></div><svg class='loop-bg' viewBox='0 0 100 100' fill='none' stroke='#00f3ff'
+        stroke-width='0.5' stroke-dasharray='4 2'>
+        <circle cx='50' cy='50' r='48' />
+        <circle cx='50' cy='50' r='40' stroke-dasharray='1 4' />
+        <circle cx='50' cy='50' r='30' stroke-dasharray='10 5' />
+    </svg><svg class='loop-bg-reverse' viewBox='0 0 100 100' fill='none' stroke='#ff3c3c' stroke-width='0.2'
+        stroke-dasharray='2 6'>
+        <circle cx='50' cy='50' r='45' />
+        <circle cx='50' cy='50' r='35' />
+    </svg>
+    <main class='relative z-10 max-w-5xl mx-auto px-4 py-20 flex flex-col gap-16'>
+        <header class='obs-target opacity-0 translate-y-10'>
+            <div class='text-syscyan text-xs tracking-widest mb-4'></div>
+            <div class='w-full border-t border-b border-syscyan/30 py-8 text-center my-8 bg-syscyan/5'>
+                <h1 class='text-4xl md:text-6xl font-bold text-white tracking-widest mb-4 glitch-effect glow-text'
+                    data-text='AGENTIC PROJECT MANAGER'>AGENTIC PROJECT MANAGER</h1>
+                <h2 class='text-xl text-syscyan/80 tracking-wide'>The Loop-Based Approach to AI-Driven Project
+                    Management</h2>
+                <p class='mt-6 text-gray-400 max-w-2xl mx-auto leading-relaxed'>Systems prioritize agentic workflows —
+                    referred to as "playbooks" — which are high-leverage primitives that compose individual tools into
+                    guided, multi-step solutions.</p>
+            </div>
+        </header>
+        <section class='obs-target opacity-0 translate-y-10 phase-block p-6 rounded-lg'>
+            <div class='border-b border-syscyan/20 pb-4 mb-6 flex justify-between items-end'>
+                <h3 class='text-2xl text-syscyan glow-text uppercase tracking-widest'>PHASE 1 / 6 — Project Kickoff</h3>
+                <span class='text-xs text-gray-500'>Playbook: project_kickoff · Tool: create_project</span>
+            </div>
+            <div class='text-sm text-gray-300 space-y-4'>
+                <div class='bg-black/50 p-4 border-l-2 border-syscyan'>
+                    <p>🔧 Tool Call: create_project()</p>
+                    <p class='text-syscyan'>Calling create_project(): "AI-Powered Analytics Platform"</p>
+                </div>
+                <div class='mt-6'>
+                    <h4 class='text-white uppercase tracking-wider mb-2'>Classification Results</h4>
+                    <ul class='grid grid-cols-1 md:grid-cols-2 gap-2 text-gray-400'>
+                        <li>📋 Project ID: <span class='text-white'>88919e92</span></li>
+                        <li>🏷️ Detected Type: <span class='text-white'>ProjectType.DATA_ANALYTICS</span></li>
+                        <li>⚡ Complexity Score: <span
+                                class='text-sysorange glow-text'>ProjectComplexity.VERY_HIGH</span></li>
+                        <li>👥 Team Size: <span class='text-white'>7 members</span></li>
+                        <li>📅 Duration: <span class='text-white'>24 weeks</span></li>
+                        <li>💰 Budget Envelope: <span class='text-sysgreen'>$1,344,000 – $2,016,000</span></li>
+                    </ul>
+                </div>
+                <div class='decision-gate p-4 mt-6 rounded'>
+                    <h4 class='text-sysred font-bold mb-2 uppercase tracking-widest glow-text'>┌─ DECISION GATE
+                        ─────────────────────────┐</h4>
+                    <p class='text-white mb-2'>Sponsor must confirm:</p>
+                    <ul class='list-disc pl-5 space-y-1 text-gray-300'>
+                        <li>Committing to a ProjectComplexity.VERY_HIGH-complexity ProjectType.DATA_ANALYTICS project
+                        </li>
+                        <li>24-week timeline with $1,344,000–$2,016,000 budget</li>
+                        <li>Stakeholder matrix (Decision Maker, Technical Lead, BA) filled</li>
+                        <li>Scope clarity score ≥ 50/100</li>
+                    </ul>
+                    <p class='text-sysred font-bold mt-2'>└─────────────────────────────────────────┘</p>
+                </div>
+                <div class='mt-4 p-3 bg-black/40 border border-gray-800 text-syscyan'>
+                    <p>➡ Next Playbook: risk_assessment → milestone_planning</p>
+                    <p class='text-gray-500 text-xs mt-1'>Reason: Complexity is ProjectComplexity.VERY_HIGH — risk
+                        landscape must be mapped before scheduling.</p>
+                </div>
+            </div>
+        </section>
+        <section class='obs-target opacity-0 translate-y-10 phase-block p-6 rounded-lg'>
+            <div class='border-b border-syscyan/20 pb-4 mb-6 flex justify-between items-end'>
+                <h3 class='text-2xl text-syscyan glow-text uppercase tracking-widest'>PHASE 2 / 6 — Milestone Planning
+                </h3><span class='text-xs text-gray-500'>Playbook: milestone_planning · Tool: generate_timeline</span>
+            </div>
+            <div class='text-sm text-gray-300 space-y-4'>
+                <div class='bg-black/50 p-4 border-l-2 border-syscyan'>
+                    <p>🔧 Tool Call: generate_timeline()</p>
+                    <p class='text-syscyan'>Scheduling 8 milestones with CPM algorithm</p>
+                </div>
+                <h4 class='text-white uppercase tracking-wider mt-6 mb-2'>CPM Schedule — Critical Path Analysis</h4>
+                <div class='overflow-x-auto'>
+                    <pre class='verbatim-pre text-gray-400 bg-black/60 p-4 rounded border border-gray-800'>Milestone                           Window            Float    CP    Buffer
+─────────────────────────────────── ──────────────── ──────  ────  ────────
+Requirements &amp; Architecture         Wk 0→3           0.0w  <span class='text-sysred'>🔴 YES</span>    —
+Data Pipeline (Kafka/ETL)           Wk 3→10          0.8w  <span class='text-sysgreen'>🟢  no</span>  +1.2w
+ML Model Development                Wk 3→9           2.0w  <span class='text-sysgreen'>🟢  no</span>  +1.0w
+REST API Layer                      Wk 3→7           0.0w  <span class='text-sysred'>🔴 YES</span>    —
+React Dashboard                     Wk 7→11          0.0w  <span class='text-sysred'>🔴 YES</span>    —
+ML-API Integration                  Wk 11→15         0.0w  <span class='text-sysred'>🔴 YES</span>  +0.6w
+Security Audit (SOC2)               Wk 15→17         0.0w  <span class='text-sysred'>🔴 YES</span>  +0.4w
+Multi-Region Deployment             Wk 17→19         0.0w  <span class='text-sysred'>🔴 YES</span>  +0.4w</pre>
+                </div>
+                <ul class='space-y-2 mt-4 text-gray-300'>
+                    <li class='flex gap-2'><span class='text-sysred'>🔴</span> <span>HIGH CRITICAL PATH DENSITY: 6/8
+                            milestones (75%) have zero float.</span></li>
+                    <li class='flex gap-2'><span class='text-sysred'>🔴</span> <span>Any single day of delay on a
+                            critical milestone = project slips.</span></li>
+                    <li class='flex gap-2'><span class='text-sysgreen'>✅</span> <span>5 high-risk milestone(s) received
+                            a 20% time buffer automatically.</span></li>
+                </ul>
+                <div class='decision-gate p-4 mt-6 rounded'>
+                    <h4 class='text-sysred font-bold mb-2 uppercase tracking-widest glow-text'>┌─ DECISION GATE
+                        ─────────────────────────┐</h4>
+                    <p class='text-white mb-2'>Tech Lead must verify:</p>
+                    <ul class='list-disc pl-5 space-y-1 text-gray-300'>
+                        <li>Dependency chain is logically correct (no circular deps)</li>
+                        <li>Parallel milestones (m2, m3, m4) are genuinely independent</li>
+                        <li>Total duration aligns with the 24-week commitment</li>
+                    </ul>
+                    <p class='text-sysred font-bold mt-2'>└─────────────────────────────────────────┘</p>
+                </div>
+                <div class='mt-4 p-3 bg-black/40 border border-gray-800 text-syscyan'>
+                    <p>➡ Next Playbook: resource_optimization</p>
+                    <p class='text-gray-500 text-xs mt-1'>Reason: Schedule approved — match team members to milestones
+                        using skill-weighted scoring.</p>
+                </div>
+            </div>
+        </section>
+        <section class='obs-target opacity-0 translate-y-10 phase-block p-6 rounded-lg'>
+            <div class='border-b border-syscyan/20 pb-4 mb-6 flex justify-between items-end'>
+                <h3 class='text-2xl text-syscyan glow-text uppercase tracking-widest'>PHASE 3 / 6 — Resource Opt.</h3>
+                <span class='text-xs text-gray-500'>Playbook: resource_optimization · Tool: assign_tasks</span>
+            </div>
+            <div class='text-sm text-gray-300 space-y-4'>
+                <div class='bg-black/50 p-4 border-l-2 border-syscyan'>
+                    <p>🔧 Tool Call: assign_tasks() — strategy: skill-based</p>
+                    <p class='text-syscyan'>Assigning tasks using skill-weighted matching:
+                        Complexity=ProjectComplexity.VERY_HIGH → skill-based strategy</p>
+                </div>
+                <h4 class='text-white uppercase tracking-wider mt-6 mb-2'>Resource Utilization Dashboard</h4>
+                <div class='overflow-x-auto'>
+                    <pre class='verbatim-pre text-gray-400 bg-black/60 p-4 rounded border border-gray-800'>Name         Role                    Utilization  Status                 Burn Rate
+──────────── ────────────────────── ────────────  ────────────────────  ──────────
+Alice        Backend Engineer               100%  <span class='text-sysred'>🔴 BURNOUT RISK</span>  $1,800/wk
+Bob          Frontend Engineer              100%  <span class='text-sysred'>🔴 BURNOUT RISK</span>  $1,800/wk
+Charlie      DevOps Engineer                100%  <span class='text-sysred'>🔴 BURNOUT RISK</span>  $1,800/wk</pre>
+                </div>
+                <ul class='space-y-2 mt-4 text-gray-300'>
+                    <li class='flex gap-2'><span class='text-sysred'>🔴</span> <span>Burnout risk: Alice, Bob, Charlie.
+                            Redistribute non-critical tasks.</span></li>
+                    <li class='flex gap-2'><span class='text-sysgreen'>✅</span> <span>6 tasks assigned. Skill coverage
+                            verified.</span></li>
+                </ul>
+                <div class='decision-gate p-4 mt-6 rounded'>
+                    <h4 class='text-sysred font-bold mb-2 uppercase tracking-widest glow-text'>┌─ DECISION GATE
+                        ─────────────────────────┐</h4>
+                    <p class='text-white mb-2'>Tech Lead must confirm:</p>
+                    <ul class='list-disc pl-5 space-y-1 text-gray-300'>
+                        <li>No team member exceeds 95% sustained utilization</li>
+                        <li>Skill gaps (if any) are resolved before dependent milestones start</li>
+                        <li>Re-call assign_tasks with strategy='balanced' if redistribution needed</li>
+                    </ul>
+                    <p class='text-sysred font-bold mt-2'>└─────────────────────────────────────────┘</p>
+                </div>
+                <div class='mt-4 p-3 bg-black/40 border border-gray-800 text-syscyan'>
+                    <p>➡ Next Playbook: risk_assessment</p>
+                    <p class='text-gray-500 text-xs mt-1'>Reason: Resource allocation healthy. Risk assessment runs as
+                        mandatory governance step before execution.</p>
+                </div>
+            </div>
+        </section>
+        <section class='obs-target opacity-0 translate-y-10 phase-block p-6 rounded-lg'>
+            <div class='border-b border-syscyan/20 pb-4 mb-6 flex justify-between items-end'>
+                <h3 class='text-2xl text-syscyan glow-text uppercase tracking-widest'>PHASE 4 / 6 — Risk Assessment</h3>
+                <span class='text-xs text-gray-500'>Playbook: risk_assessment · Tools: identify_blockers,
+                    send_notifications</span>
+            </div>
+            <div class='text-sm text-gray-300 space-y-4'>
+                <div class='bg-black/50 p-4 border-l-2 border-syscyan'>
+                    <p>🔧 Tool Call: identify_blockers() — scope: Comprehensive</p>
+                    <p class='text-syscyan'>Scanning all 4 blocker categories: Milestone · Resource · Dependency ·
+                        Technical Debt</p>
+                </div>
+                <h4 class='text-white uppercase tracking-wider mt-6 mb-2'>Blocker Registry</h4>
+                <p class='text-sysorange'>Total impact points: 12 → estimated ~24 delay days</p>
+                <div class='overflow-x-auto mt-2'>
+                    <pre
+                        class='verbatim-pre text-gray-400 bg-black/60 p-4 rounded border border-gray-800'>Severity   Type               Description
+────────── ────────────────── ─────────────────────────────────────────────
+<span class='text-sysred'>🔴 High</span> BlockerType.RESOURCE 'Alice' is overutilized (100.0%). Burnout ri
+<span class='text-sysred'>🔴 High</span> BlockerType.RESOURCE 'Bob' is overutilized (100.0%). Burnout risk
+<span class='text-sysred'>🔴 High</span> BlockerType.RESOURCE 'Charlie' is overutilized (100.0%). Burnout
+<span class='text-sysorange'>🟠 Medium</span> BlockerType.TECHNICAL_DEBT High-risk critical milestone 'ML-API Integra
+<span class='text-sysorange'>🟠 Medium</span> BlockerType.TECHNICAL_DEBT High-risk critical milestone 'Security Audit
+<span class='text-sysorange'>🟠 Medium</span> BlockerType.TECHNICAL_DEBT High-risk critical milestone 'Multi-Region D</pre>
+                </div>
+                <h4 class='text-white uppercase tracking-wider mt-6 mb-2'>Proactive Risk Register</h4>
+                <div class='overflow-x-auto'>
+                    <pre
+                        class='verbatim-pre text-gray-400 bg-black/60 p-4 rounded border border-gray-800'>Risk                                     P        I         ~Days  Class                   Strategy
+──────────────────────────────────────── ──────── ──────── ──────  ──────────────────────  ────────────
+Distributed system bottlenecks           High High         16d  <span class='text-sysred'>🔴 Critical Threat</span>       Prevention
+Third-party API failure                  Medium High          8d  <span class='text-sysorange'>🟠 Major Risk</span>            Mitigation
+Scope creep from stakeholders            High Medium        6d  <span class='text-sysorange'>🟠 Schedule Risk</span>         Prevention
+ML model accuracy below threshold        Medium High          8d  <span class='text-sysorange'>🟠 Major Risk</span>            Contingency
+Security vulnerability (SOC2)            Medium High          8d  <span class='text-sysorange'>🟠 Major Risk</span>            Prevention
+Key engineer departure                   Low High          4d  <span class='text-yellow-500'>🟡 Contingency Risk</span>      Contingency</pre>
+                </div>
+                <div class='p-4 bg-sysorange/10 border border-sysorange/30 rounded mt-4'>
+                    <p class='text-sysorange flex gap-2 mb-2'><span>📣</span> <span>Auto-firing send_notifications():
+                            recipients: Decision Makers, Tech Lead</span></p>
+                    <p class='text-gray-400 text-xs font-mono'>[2026-06-14 10:29] Notification dispatched — Type:
+                        'critical_risk_detected' | Project: 'AI-Powered Analytics Platform' | Recipients: Decision
+                        Makers, Tech Lead</p>
+                    <p class='text-sysred font-bold mt-2'>🔴 CRITICAL risks require an assigned owner and action within
+                        24 hours.</p>
+                </div>
+                <div class='decision-gate p-4 mt-6 rounded'>
+                    <h4 class='text-sysred font-bold mb-2 uppercase tracking-widest glow-text'>┌─ DECISION GATE
+                        ─────────────────────────┐</h4>
+                    <p class='text-white mb-2'>Risk owners must be assigned before execution begins:</p>
+                    <ul class='list-disc pl-5 space-y-1 text-gray-300'>
+                        <li>Every 🔴 Critical risk: immediate action started within 24h</li>
+                        <li>Every 🟠 Moderate risk: owner assigned by end of meeting</li>
+                        <li>All risks documented in project log</li>
+                    </ul>
+                    <p class='text-sysred font-bold mt-2'>└─────────────────────────────────────────┘</p>
+                </div>
+                <div class='mt-4 p-3 bg-black/40 border border-gray-800 text-syscyan'>
+                    <p>➡ Next Playbook: progress_review</p>
+                    <p class='text-gray-500 text-xs mt-1'>Reason: Risk landscape mapped. Proceed to active monitoring.
+                    </p>
+                </div>
+            </div>
+        </section>
+        <section class='obs-target opacity-0 translate-y-10 phase-block p-6 rounded-lg'>
+            <div class='border-b border-syscyan/20 pb-4 mb-6 flex justify-between items-end'>
+                <h3 class='text-2xl text-syscyan glow-text uppercase tracking-widest'>PHASE 5 / 6 — Progress Review</h3>
+                <span class='text-xs text-gray-500'>Week 6 of 24 Check-in</span>
+            </div>
+            <div class='text-sm text-gray-300 space-y-4'>
+                <div class='bg-black/50 p-4 border-l-2 border-syscyan'>
+                    <p>🔧 Tool Call: track_progress()</p>
+                    <p class='text-syscyan'>Generating full health report: progress · velocity · quality · schedule
+                        variance · prediction</p>
+                </div>
+                <h4 class='text-white uppercase tracking-wider mt-6 mb-2'>Health Dashboard</h4>
+                <p class='text-sysgreen glow-text mb-4'>Overall Status: 🟢 ON TRACK</p>
+                <p class='text-gray-400 font-mono mb-4'>Progress [░░░░░░░░░░░░░░░░░░░░] 0.0%</p>
+                <div class='overflow-x-auto'>
+                    <pre class='verbatim-pre text-gray-400 bg-black/60 p-4 rounded border border-gray-800'>Metric                          Value           Target   Status
+────────────────────── ──────────────   ──────────────   ──────────
+Schedule Variance        +32.2d ahead          ±5 days   <span class='text-sysred'>🔴</span>
+Velocity                   0% of pace        ≥80% pace   <span class='text-yellow-500'>🟡</span>
+Quality Score                  100.0%             ≥95%   <span class='text-sysgreen'>🟢</span></pre>
+                </div>
+                <ul class='grid grid-cols-1 md:grid-cols-2 gap-2 text-gray-400 mt-4'>
+                    <li>Predicted completion: <span class='text-white'>Week 24 (planned: Week 24)</span></li>
+                    <li>Predicted date: <span class='text-white'>2026-11-29</span></li>
+                    <li>Confidence: <span class='text-white'>50%</span></li>
+                    <li>On-time probability: <span class='text-sysgreen'>90%</span></li>
+                </ul>
+                <p class='mt-4 flex gap-2'><span class='text-sysgreen'>✅</span> <span>No automated alerts triggered —
+                        all metrics within thresholds.</span></p>
+                <div class='p-4 border border-syscyan/30 bg-syscyan/5 mt-6 rounded'>
+                    <h4 class='text-syscyan font-bold mb-2 uppercase tracking-widest'>┌─ AI RECOMMENDATION
+                        ─────────────────────┐</h4>
+                    <p class='text-gray-300'>POSITIVE: Project is on track at 0% complete.<br>Predicted completion Week
+                        24 with 50% confidence.<br>Maintain current velocity. Continue weekly monitoring.</p>
+                    <h4 class='text-syscyan font-bold mt-2'>└─────────────────────────────────────────┘</h4>
+                </div>
+                <div class='decision-gate p-4 mt-6 rounded'>
+                    <h4 class='text-sysred font-bold mb-2 uppercase tracking-widest glow-text'>┌─ DECISION GATE
+                        ─────────────────────────┐</h4>
+                    <p class='text-white mb-2'>Week 6 Status Brief for Project Sponsor:</p>
+                    <ul class='list-disc pl-5 space-y-1 text-gray-300'>
+                        <li>Status: <span class='text-sysgreen'>🟢 ON TRACK</span></li>
+                        <li>Progress: 0% | Schedule: +32.2d ahead</li>
+                        <li>Velocity: 0% of pace | Quality: 100.0%</li>
+                        <li>Predicted: Week 24 (50% confidence)</li>
+                        <li>Action required: No — maintain course</li>
+                    </ul>
+                    <p class='text-sysred font-bold mt-2'>└─────────────────────────────────────────┘</p>
+                </div>
+                <div class='mt-4 p-3 bg-black/40 border border-gray-800 text-syscyan'>
+                    <p>➡ Next Playbook: progress_review</p>
+                    <p class='text-gray-500 text-xs mt-1'>Reason: Continue weekly monitoring. Re-run next week with
+                        updated milestone statuses.</p>
+                </div>
+            </div>
+        </section>
+        <section class='obs-target opacity-0 translate-y-10 phase-block p-6 rounded-lg'>
+            <div class='border-b border-syscyan/20 pb-4 mb-6 flex justify-between items-end'>
+                <h3 class='text-2xl text-syscyan glow-text uppercase tracking-widest'>PHASE 6 / 6 — Delivery Planning
+                </h3><span class='text-xs text-gray-500'>Playbook: delivery_planning · Tool: send_notifications</span>
+            </div>
+            <div class='text-sm text-gray-300 space-y-4'>
+                <div class='bg-black/50 p-4 border-l-2 border-syscyan mb-6'>
+                    <h4 class='text-white uppercase tracking-wider mb-2'>Delivery Strategy — Auto-Selected</h4>
+                    <p class='flex gap-2 mb-1'><span>🎯</span> <span>Selected Strategy: Phased (Sequential
+                            Blocks)</span></p>
+                    <p class='flex gap-2'><span>🔀</span> <span>Selection Logic: Complexity=Very High +
+                            Status=on_track</span></p>
+                </div>
+                <h4 class='text-white uppercase tracking-wider mt-6 mb-2'>Deployment Pipeline — 5 Quality Gates</h4>
+                <div class='overflow-x-auto'>
+                    <pre
+                        class='verbatim-pre text-gray-400 bg-black/60 p-4 rounded border border-gray-800'>1  Build                  15 min      <span class='text-sysgreen'>✅ Automated</span>  Build succeeds with 0 errors
+2  Unit &amp; Integration Tests 30 min      <span class='text-sysgreen'>✅ Automated</span>  All tests pass, coverage &gt;= 80%
+3  Security Scan          10 min      <span class='text-sysgreen'>✅ Automated</span>  No critical vulnerabilities
+4  Deploy to Staging      5 min       <span class='text-sysgreen'>✅ Automated</span>  Smoke tests pass
+5  Production             10 min      <span class='text-sysorange glow-text'>🚦 MANUAL GATE  MANUAL APPROVAL REQUIRED</span></pre>
+                </div>
+                <ul class='space-y-2 mt-4 text-gray-300'>
+                    <li class='flex gap-2'><span class='text-sysgreen'>✅</span> <span>Automation target: 95% of pipeline
+                            stages (4 of 5 automated).</span></li>
+                    <li class='flex gap-2'><span class='text-sysred'>🔴</span> <span>Production stage requires NAMED
+                            HUMAN sign-off — AI cannot approve production autonomously.</span></li>
+                </ul>
+                <h4 class='text-white uppercase tracking-wider mt-8 mb-2'>Rollback Strategy</h4>
+                <p class='text-gray-400 mb-2'>Blue-Green Deployment — target restore time: &lt; 5 minutes</p>
+                <div class='overflow-x-auto'>
+                    <pre class='verbatim-pre text-gray-400 bg-black/60 p-4 rounded border border-gray-800'>Scenario               Action                               Owner            Recovery
+────────────────────── ──────────────────────────────────── ────────────── ──────────
+Build failure          Revert commit, re-trigger pipeline   DevOps Lead      &lt; 30 min
+Test regression        Hotfix branch, targeted re-test      QA Lead         1–4 hours
+Production issue       Blue-green switch to stable env      DevOps Lead    &lt; 5 min
+Data corruption        Restore from pre-launch backup       DBA             1–2 hours</pre>
+                </div>
+                <div class='p-4 bg-syscyan/10 border border-syscyan/30 rounded mt-6'>
+                    <p class='text-syscyan flex gap-2 mb-2'><span>📣</span> <span>Sending launch prep notification to
+                            all stakeholders</span></p>
+                    <p class='text-gray-400 text-xs font-mono'>[2026-06-14 10:29] Notification dispatched — Type:
+                        'delivery_planning_initiated' | Project: 'AI-Powered Analytics Platform' | Recipients: Decision
+                        Makers, Tech Lead, Business, Support</p>
+                </div>
+                <div class='decision-gate p-4 mt-6 rounded bg-sysred/10 border-sysred'>
+                    <h4 class='text-sysred font-bold mb-2 uppercase tracking-widest glow-text'>┌─ DECISION GATE
+                        ─────────────────────────┐</h4>
+                    <p class='text-white mb-2 font-bold'>Executive Approval Required — FINAL GATE:</p>
+                    <ul class='list-disc pl-5 space-y-1 text-gray-300'>
+                        <li>Project: AI-Powered Analytics Platform</li>
+                        <li>Strategy: Phased (Sequential Blocks)</li>
+                        <li>All quality gates passed ✅</li>
+                        <li>Rollback mechanism tested ✅</li>
+                        <li>Do you authorize PRODUCTION DEPLOYMENT? (Yes/No)</li>
+                    </ul>
+                    <p class='text-sysred font-bold mt-2'>└─────────────────────────────────────────┘</p>
+                </div>
+            </div>
+        </section>
+        <section class='obs-target opacity-0 translate-y-10 my-16'>
+            <div class='border border-syscyan/50 p-8 text-center bg-black/80 shadow-[0_0_50px_rgba(0,243,255,0.1)]'>
+                <h2 class='text-3xl md:text-5xl font-bold text-white tracking-widest mb-4 glow-text glitch-effect'
+                    data-text='THE LOOP CONTINUES'>THE LOOP CONTINUES</h2>
+                <p class='text-syscyan text-lg mb-8'>Delivery is not the end — it is the beginning of the maintenance
+                    phase.</p>
+                <div class='text-left max-w-2xl mx-auto space-y-4 text-gray-300 text-sm md:text-base font-mono'>
+                    <p>Post-Launch Monitoring Cadence:</p>
+                    <p class='flex'><span class='text-syscyan mr-4'>→</span> <span class='w-48 text-white'>Week 1
+                            post-launch</span> <span>Run progress_review (Track adoption metrics, production
+                            health)</span></p>
+                    <p class='flex'><span class='text-syscyan mr-4'>→</span> <span class='w-48 text-white'>Month
+                            1</span> <span>Run identify_blockers (Surface post-launch technical debt)</span></p>
+                    <p class='flex'><span class='text-syscyan mr-4'>→</span> <span
+                            class='w-48 text-white'>Retrospective</span> <span>Document lessons learned (Feed insights
+                            into the next project_kickoff)</span></p>
+                    <div class='mt-8 p-4 border-l-4 border-sysred bg-sysred/5'>
+                        <p class='text-white font-bold text-lg text-center tracking-widest'>The system is always
+                            watching. The loop does not stop.</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+        <footer class='obs-target opacity-0 translate-y-10 mb-20'>
+            <div class='w-full border-t border-b border-gray-800 py-12 bg-black'>
+                <h3 class='text-2xl text-white tracking-widest text-center mb-8'>DEMO COMPLETE — What You Just Witnessed
+                </h3>
+                <div class='max-w-3xl mx-auto grid grid-cols-1 md:grid-cols-2 gap-6 text-sm text-gray-400 px-4'>
+                    <div class='flex items-start'><span class='text-syscyan mr-3'>◆</span>
+                        <div><span class='text-white'>6 Playbooks</span><br>Composed individual tools into governed,
+                            multi-step workflows</div>
+                    </div>
+                    <div class='flex items-start'><span class='text-syscyan mr-3'>◆</span>
+                        <div><span class='text-white'>7 Tools called</span><br>create_project, generate_timeline,
+                            assign_tasks, track_progress, identify_blockers, send_notifications × 2</div>
+                    </div>
+                    <div class='flex items-start'><span class='text-syscyan mr-3'>◆</span>
+                        <div><span class='text-white'>3 Decision Gates</span><br>Milestone approval, risk owner
+                            assignment, production deployment</div>
+                    </div>
+                    <div class='flex items-start'><span class='text-syscyan mr-3'>◆</span>
+                        <div><span class='text-white'>2 Auto-Notifications</span><br>Critical risk detected → leadership
+                            alerted automatically</div>
+                    </div>
+                    <div class='flex items-start'><span class='text-syscyan mr-3'>◆</span>
+                        <div><span class='text-white'>AI Recommendations</span><br>The system told you what to do next
+                            at every phase</div>
+                    </div>
+                    <div class='flex items-start'><span class='text-syscyan mr-3'>◆</span>
+                        <div><span class='text-white'>The Loop</span><br>Kickoff → Plan → Resource → Risk → Monitor →
+                            Deliver → Kickoff</div>
+                    </div>
+                </div>
+                <div class='mt-12 text-center text-gray-500'>
+                    <p>This is the approach. AI does not just answer questions.</p>
+                    <p class='text-white mt-2 glow-text'>AI runs a governed, multi-step process — and never stops
+                        watching.</p>
+                </div>
+            </div>
+        </footer>
+    </main>
+    <script>document.addEventListener('DOMContentLoaded', () => { const observer = new IntersectionObserver((entries) => { entries.forEach(entry => { if (entry.isIntersecting) { entry.target.classList.remove('opacity-0', 'translate-y-10'); entry.target.classList.add('opacity-100', 'translate-y-0'); } }); }, { threshold: 0.1, rootMargin: '0px 0px -50px 0px' }); document.querySelectorAll('.obs-target').forEach(el => { observer.observe(el); }); });</script>
+</body>
+
+</html>

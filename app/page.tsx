@@ -182,6 +182,15 @@ const hubs = [
     color: "from-cyan-600 to-blue-700",
     border: "hover:border-cyan-500/50",
     shadow: "hover:shadow-[0_0_40px_-10px_rgba(6,182,212,0.2)]"
+  },
+  {
+    title: "Agentic Project Manager",
+    description: "A high-density technical dashboard for managing projects using AI agents.",
+    href: "/agentic-project-manager.html",
+    icon: "📋",
+    color: "from-emerald-600 to-teal-700",
+    border: "hover:border-emerald-500/50",
+    shadow: "hover:shadow-[0_0_40px_-10px_rgba(16,185,129,0.2)]"
   }
 ];
 
