@@ -1,0 +1,548 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Trend Analysis | The Data Horizon</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;600;700&family=Space+Mono:wght@400;700&display=swap');
+
+  :root {
+    --neon-cyan: #0ff;
+    --neon-magenta: #f0f;
+    --neon-gold: #fbbf24;
+  }
+
+  body, html {
+    margin: 0;
+    padding: 0;
+    background-color: #030305;
+    color: #e2e8f0;
+    font-family: 'Space Grotesk', sans-serif;
+    overflow: hidden;
+    overscroll-behavior-x: none;
+  }
+
+  h1, h2, h3, .font-mono {
+    font-family: 'Space Mono', monospace;
+  }
+
+  /* Hide Scrollbar but keep functionality */
+  .no-scrollbar::-webkit-scrollbar {
+    display: none;
+  }
+  .no-scrollbar {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+
+  /* SVG Noise Overlay */
+  .noise-overlay {
+    position: fixed;
+    inset: 0;
+    pointer-events: none;
+    z-index: 50;
+    opacity: 0.15;
+    mix-blend-mode: overlay;
+  }
+
+  /* Glassmorphism */
+  .glass-panel {
+    background: rgba(255, 255, 255, 0.03);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    border: 1px solid rgba(255, 255, 255, 0.05);
+    box-shadow: 0 4px 30px rgba(0, 0, 0, 0.5);
+  }
+
+  /* Dynamic Grid Background */
+  .grid-bg {
+    position: fixed;
+    inset: 0;
+    background-size: 50px 50px;
+    background-image: 
+      linear-gradient(to right, rgba(255, 255, 255, 0.02) 1px, transparent 1px),
+      linear-gradient(to bottom, rgba(255, 255, 255, 0.02) 1px, transparent 1px);
+    transform: perspective(500px) rotateX(60deg) translateY(-100px) scale(3);
+    transform-origin: top center;
+    z-index: 0;
+    pointer-events: none;
+  }
+
+  /* Ambient Orbs */
+  .orb {
+    position: fixed;
+    border-radius: 50%;
+    filter: blur(100px);
+    z-index: 0;
+    opacity: 0.4;
+    animation: float 20s infinite ease-in-out alternate;
+  }
+  .orb-1 { width: 40vw; height: 40vw; background: var(--neon-cyan); top: -10vw; left: -10vw; }
+  .orb-2 { width: 30vw; height: 30vw; background: var(--neon-magenta); bottom: -10vw; right: -10vw; animation-delay: -10s; }
+
+  @keyframes float {
+    0% { transform: translate(0, 0) scale(1); }
+    100% { transform: translate(10vw, 5vw) scale(1.2); }
+  }
+
+  /* Persistent Animated Line */
+  #data-line-container {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    pointer-events: none;
+    z-index: 5;
+  }
+
+  #data-path {
+    fill: none;
+    stroke: url(#line-gradient);
+    stroke-width: 4;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+    filter: drop-shadow(0 0 10px var(--neon-cyan));
+  }
+
+  /* Entrance Animations */
+  .reveal {
+    opacity: 0;
+    transform: translateY(30px);
+    transition: all 1s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+  .reveal.active {
+    opacity: 1;
+    transform: translateY(0);
+  }
+  
+  .text-glow {
+    text-shadow: 0 0 10px currentColor;
+  }
+
+  /* Custom Scroll Snapping */
+  .carousel-container {
+    display: flex;
+    width: 100vw;
+    height: 100vh;
+    overflow-x: auto;
+    scroll-snap-type: x mandatory;
+    scroll-behavior: smooth;
+    z-index: 10;
+    position: relative;
+  }
+
+  .carousel-slide {
+    flex: 0 0 100vw;
+    height: 100vh;
+    scroll-snap-align: center;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    padding: 2rem 5vw;
+    position: relative;
+  }
+
+  .terminal-text {
+    color: #4ade80;
+    text-shadow: 0 0 8px rgba(74, 222, 128, 0.4);
+  }
+</style>
+</head>
+<body>
+
+<!-- SVG Filters & Definitions -->
+<svg class="hidden">
+  <defs>
+    <filter id="noiseFilter">
+      <feTurbulence type="fractalNoise" baseFrequency="0.8" numOctaves="4" stitchTiles="stitch"/>
+      <feColorMatrix type="matrix" values="1 0 0 0 0, 0 1 0 0 0, 0 0 1 0 0, 0 0 0 0.4 0" />
+    </filter>
+    <linearGradient id="line-gradient" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#0ff" />
+      <stop offset="50%" stop-color="#f0f" />
+      <stop offset="100%" stop-color="#fbbf24" />
+    </linearGradient>
+  </defs>
+</svg>
+
+<div class="noise-overlay" style="filter: url(#noiseFilter);"></div>
+<div class="grid-bg"></div>
+<div class="orb orb-1"></div>
+<div class="orb orb-2"></div>
+
+<!-- Global Data Line -->
+<svg id="data-line-container" viewBox="0 0 1000 500" preserveAspectRatio="none">
+  <path id="data-path" d="M -100,400 Q 100,400 200,300 T 400,250 T 600,150 T 800,200 T 1100,50" />
+</svg>
+
+<!-- Carousel Narrative -->
+<main class="carousel-container no-scrollbar" id="scroll-container">
+
+  <!-- Slide 1: The Ascent -->
+  <section class="carousel-slide">
+    <div class="max-w-6xl mx-auto w-full grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
+      <div class="reveal z-20">
+        <h2 class="text-cyan-400 font-mono tracking-widest text-sm mb-4 uppercase">01 // Executive Summary</h2>
+        <h1 class="text-5xl md:text-7xl font-bold mb-6 leading-tight bg-clip-text text-transparent bg-gradient-to-r from-white to-gray-500">
+          📈 Trend Analysis<br>Complete
+        </h1>
+        <div class="glass-panel p-6 rounded-2xl mb-6">
+          <p class="text-lg leading-relaxed text-gray-300">
+            Trend Analysis of sample_sales.xlsx reveals upward strong trends with <span class="text-cyan-400 font-bold text-glow">8.3% monthly compound growth trajectory.</span> Forecasting models show high confidence in continued positive momentum with clear seasonal patterns identified.
+          </p>
+        </div>
+        <ul class="font-mono text-sm space-y-2 text-gray-400 border-l-2 border-cyan-500/30 pl-4">
+          <li>📊 Dataset: sample_sales.xlsx</li>
+          <li>📅 Time Column: Auto-detected time series</li>
+          <li>📋 Metrics Analyzed: All temporal metrics</li>
+          <li>🔮 Forecast Horizon: 12 months (quarterly detail)</li>
+        </ul>
+      </div>
+      
+      <div class="reveal z-20 glass-panel p-8 rounded-3xl relative overflow-hidden group">
+        <div class="absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-20 transition-opacity">
+           <svg width="120" height="120" viewBox="0 0 24 24" fill="none" stroke="var(--neon-cyan)" stroke-width="1"><path d="M23 6l-9.5 9.5-5-5L1 18"/><path d="M17 6h6v6"/></svg>
+        </div>
+        <h3 class="text-2xl font-bold mb-6 text-white">Overall Trend Assessment</h3>
+        <div class="grid grid-cols-2 gap-6">
+          <div>
+            <p class="text-xs text-gray-500 uppercase tracking-widest mb-1">Direction</p>
+            <p class="text-xl text-green-400">Upward (Strong)</p>
+          </div>
+          <div>
+            <p class="text-xs text-gray-500 uppercase tracking-widest mb-1">Confidence</p>
+            <p class="text-xl text-cyan-400">92.0%</p>
+          </div>
+          <div>
+            <p class="text-xs text-gray-500 uppercase tracking-widest mb-1">Growth Rate</p>
+            <p class="text-xl text-white">8.3% compound</p>
+          </div>
+          <div>
+            <p class="text-xs text-gray-500 uppercase tracking-widest mb-1">R² Value</p>
+            <p class="text-xl text-white">0.890</p>
+          </div>
+        </div>
+        <div class="mt-8 pt-6 border-t border-white/10">
+          <p class="text-sm text-gray-300"><strong>🎯 Key Metrics:</strong> Revenue (High Predictability), Customer Acquisition (Accelerating), Average Order Value (Steady Growth).</p>
+        </div>
+      </div>
+    </div>
+    <div class="absolute bottom-10 left-1/2 -translate-x-1/2 animate-bounce text-gray-500">
+      <span class="font-mono text-xs tracking-widest uppercase">Scroll to explore</span><br>
+      <svg class="mx-auto mt-2" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+    </div>
+  </section>
+
+  <!-- Slide 2: Rhythms & Tides -->
+  <section class="carousel-slide">
+    <div class="max-w-6xl mx-auto w-full z-20">
+      <h2 class="text-magenta-400 font-mono tracking-widest text-sm mb-4 uppercase text-[#f0f]">02 // Seasonality & Cyclical Patterns</h2>
+      <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+        
+        <div class="reveal glass-panel p-8 rounded-2xl border-t-4 border-t-[#f0f]">
+          <div class="flex justify-between items-center mb-4">
+            <h3 class="text-xl font-bold">Quarterly</h3>
+            <span class="text-[#f0f] font-mono">91% SIG</span>
+          </div>
+          <p class="text-3xl font-light mb-4">+35%</p>
+          <p class="text-sm text-gray-400 mb-4">Strong Q4 revenue surge above trend.</p>
+          <div class="bg-black/40 p-3 rounded border border-white/5">
+            <p class="text-xs text-gray-300"><strong>Impact:</strong> Holiday and year-end purchasing drives peak.</p>
+          </div>
+        </div>
+
+        <div class="reveal glass-panel p-8 rounded-2xl border-t-4 border-t-cyan-400" style="transition-delay: 200ms;">
+          <div class="flex justify-between items-center mb-4">
+            <h3 class="text-xl font-bold">Monthly</h3>
+            <span class="text-cyan-400 font-mono">78% SIG</span>
+          </div>
+          <p class="text-3xl font-light mb-4">+18%</p>
+          <p class="text-sm text-gray-400 mb-4">End-of-month sales spike in final week.</p>
+          <div class="bg-black/40 p-3 rounded border border-white/5">
+            <p class="text-xs text-gray-300"><strong>Impact:</strong> Budget cycles and quarterly targets create patterns.</p>
+          </div>
+        </div>
+
+        <div class="reveal glass-panel p-8 rounded-2xl border-t-4 border-t-amber-400" style="transition-delay: 400ms;">
+          <div class="flex justify-between items-center mb-4">
+            <h3 class="text-xl font-bold">Weekly</h3>
+            <span class="text-amber-400 font-mono">65% SIG</span>
+          </div>
+          <p class="text-3xl font-light mb-4">Tue-Wed</p>
+          <p class="text-sm text-gray-400 mb-4">Peak performance days.</p>
+          <div class="bg-black/40 p-3 rounded border border-white/5">
+            <p class="text-xs text-gray-300"><strong>Impact:</strong> Business customer buying patterns drive cycles.</p>
+          </div>
+        </div>
+
+      </div>
+      
+      <div class="reveal mt-12 glass-panel p-6 rounded-xl flex items-center justify-between" style="transition-delay: 600ms;">
+        <div>
+          <h4 class="font-bold text-lg mb-1">📈 Deseasonalized Trend</h4>
+          <p class="text-gray-400 text-sm">Underlying growth rate of 6.1% monthly after removing seasonal effects.</p>
+        </div>
+        <div class="text-right">
+           <p class="font-mono text-sm text-gray-500">18-MONTH BUSINESS CYCLE</p>
+           <p class="font-mono text-cyan-400">±15% AMPLITUDE</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Slide 3: Pivot Points -->
+  <section class="carousel-slide">
+    <div class="max-w-6xl mx-auto w-full z-20">
+      <h2 class="text-amber-400 font-mono tracking-widest text-sm mb-8 uppercase text-[#fbbf24]">03 // Change Points & Anomalies</h2>
+      
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+        <!-- Change Point 1 -->
+        <div class="reveal glass-panel p-8 rounded-3xl relative">
+          <div class="absolute -left-4 top-10 w-8 h-8 rounded-full bg-green-500/20 flex items-center justify-center border border-green-500/50">
+             <div class="w-3 h-3 bg-green-500 rounded-full animate-ping"></div>
+          </div>
+          <p class="font-mono text-green-400 text-sm mb-2">2024-06-15 // ACCELERATION</p>
+          <h3 class="text-2xl font-bold mb-4">Growth Rate: 5.2% → 8.3%</h3>
+          <p class="text-gray-300 text-sm mb-4">Magnitude: +60% growth rate increase. Confidence: 94.0%.</p>
+          <div class="border-l-2 border-white/20 pl-4">
+            <p class="text-xs text-gray-400"><strong>Impact:</strong> Positive - sustainable acceleration in revenue growth.</p>
+            <p class="text-xs text-gray-400 mt-2"><strong>Causes:</strong> Product launch, Market expansion, Pricing optimization.</p>
+          </div>
+        </div>
+
+        <!-- Change Point 2 -->
+        <div class="reveal glass-panel p-8 rounded-3xl relative" style="transition-delay: 200ms;">
+          <div class="absolute -left-4 top-10 w-8 h-8 rounded-full bg-blue-500/20 flex items-center justify-center border border-blue-500/50">
+             <div class="w-3 h-3 bg-blue-500 rounded-full animate-pulse"></div>
+          </div>
+          <p class="font-mono text-blue-400 text-sm mb-2">2024-02-28 // VOLATILITY REDUCTION</p>
+          <h3 class="text-2xl font-bold mb-4">-45% Reduction in Variance</h3>
+          <p class="text-gray-300 text-sm mb-4">Revenue volatility decreased significantly. Confidence: 87.0%.</p>
+          <div class="border-l-2 border-white/20 pl-4">
+            <p class="text-xs text-gray-400"><strong>Impact:</strong> Positive - improved predictability and stability.</p>
+            <p class="text-xs text-gray-400 mt-2"><strong>Causes:</strong> Process improvements, Customer base maturation.</p>
+          </div>
+        </div>
+
+        <!-- Anomalies -->
+        <div class="reveal col-span-1 md:col-span-2 mt-4 grid grid-cols-1 md:grid-cols-2 gap-4" style="transition-delay: 400ms;">
+           <div class="bg-green-900/20 border border-green-500/30 p-4 rounded-xl">
+             <h4 class="font-bold text-green-400 mb-1">📈 Spike: 2024-07-23</h4>
+             <p class="text-xs text-gray-300">Revenue 87% above expected trend (Single week). Investigate for replication.</p>
+           </div>
+           <div class="bg-red-900/20 border border-red-500/30 p-4 rounded-xl">
+             <h4 class="font-bold text-red-400 mb-1">📉 Dip: 2024-03-15</h4>
+             <p class="text-xs text-gray-300">Sales 34% below expected (5-day). Recovery complete, systems improved.</p>
+           </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Slide 4: The Horizon -->
+  <section class="carousel-slide">
+    <div class="max-w-6xl mx-auto w-full z-20">
+      <h2 class="text-white font-mono tracking-widest text-sm mb-8 uppercase">04 // Forecasting Results</h2>
+      
+      <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-center">
+        <div class="lg:col-span-5 space-y-6">
+           <div class="reveal glass-panel p-6 rounded-2xl">
+             <h3 class="text-xl font-bold text-cyan-400 mb-2">Total Revenue</h3>
+             <div class="font-mono text-sm space-y-2 text-gray-300">
+               <p>Current: <span class="text-white">$2.4M</span></p>
+               <p>6 Month: <span class="text-white">$3.8M</span></p>
+               <p>12 Month: <span class="text-green-400 font-bold text-lg">$5.2M</span></p>
+             </div>
+             <p class="text-xs text-gray-400 mt-4">6M CI: $3.4M - $4.2M</p>
+           </div>
+           
+           <div class="reveal glass-panel p-6 rounded-2xl" style="transition-delay: 200ms;">
+             <h3 class="text-xl font-bold text-[#f0f] mb-2">Customer Acquisition</h3>
+             <div class="font-mono text-sm space-y-2 text-gray-300">
+               <p>Current: <span class="text-white">847/mo</span></p>
+               <p>6 Month: <span class="text-white">1,340/mo</span></p>
+               <p>12 Month: <span class="text-white">1,890/mo</span></p>
+             </div>
+             <p class="text-xs text-gray-400 mt-4">Trajectory: Strong growth, increasing efficiency</p>
+           </div>
+        </div>
+
+        <div class="lg:col-span-7">
+          <div class="reveal glass-panel p-8 rounded-3xl h-full flex flex-col justify-center" style="transition-delay: 400ms;">
+            <h3 class="text-2xl font-bold mb-6">🎯 Scenario Analysis</h3>
+            
+            <div class="space-y-6">
+              <div class="relative">
+                <div class="flex justify-between mb-1">
+                  <span class="font-mono text-green-400 text-sm">Optimistic (25%)</span>
+                  <span class="font-mono text-white text-sm">+35%</span>
+                </div>
+                <div class="w-full bg-white/10 h-2 rounded-full overflow-hidden">
+                  <div class="bg-green-400 h-full w-[85%]"></div>
+                </div>
+              </div>
+
+              <div class="relative">
+                <div class="flex justify-between mb-1">
+                  <span class="font-mono text-cyan-400 text-sm">Base Scenario (50%)</span>
+                  <span class="font-mono text-white text-sm">Trend</span>
+                </div>
+                <div class="w-full bg-white/10 h-2 rounded-full overflow-hidden">
+                  <div class="bg-cyan-400 h-full w-[60%]"></div>
+                </div>
+              </div>
+
+              <div class="relative">
+                <div class="flex justify-between mb-1">
+                  <span class="font-mono text-amber-500 text-sm">Pessimistic (25%)</span>
+                  <span class="font-mono text-white text-sm">-25%</span>
+                </div>
+                <div class="w-full bg-white/10 h-2 rounded-full overflow-hidden">
+                  <div class="bg-amber-500 h-full w-[35%]"></div>
+                </div>
+              </div>
+            </div>
+
+            <div class="mt-8 pt-6 border-t border-white/10 grid grid-cols-2 gap-4">
+              <div>
+                 <p class="text-xs text-gray-500 font-mono">DIRECTIONAL ACCURACY</p>
+                 <p class="text-2xl font-bold text-white">92% <span class="text-xs font-normal text-gray-400">(Excellent)</span></p>
+              </div>
+              <div>
+                 <p class="text-xs text-gray-500 font-mono">6-MO MAPE</p>
+                 <p class="text-2xl font-bold text-white">8.3% <span class="text-xs font-normal text-gray-400">(Very Good)</span></p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Slide 5: The Blueprint -->
+  <section class="carousel-slide">
+    <div class="max-w-5xl mx-auto w-full z-20">
+      <h2 class="text-green-400 font-mono tracking-widest text-sm mb-6 uppercase">05 // Strategic Recommendations</h2>
+      
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-8 mb-8">
+        <div class="reveal glass-panel p-6 rounded-2xl">
+          <h3 class="text-xl font-bold mb-4">Implementation Roadmap</h3>
+          <ul class="space-y-4 text-sm text-gray-300">
+            <li class="flex gap-3">
+              <span class="text-green-400">▶</span>
+              <div>
+                <strong class="text-white">Immediate (30 Days):</strong>
+                <p class="mt-1">Set up automated trend monitoring dashboards. Schedule monthly reviews. Document seasonal planning.</p>
+              </div>
+            </li>
+            <li class="flex gap-3">
+              <span class="text-cyan-400">▶</span>
+              <div>
+                <strong class="text-white">Short-term (90 Days):</strong>
+                <p class="mt-1">Prepare for Q4 revenue surge (+35%). Investigate causal factors for acceleration replication.</p>
+              </div>
+            </li>
+            <li class="flex gap-3">
+              <span class="text-purple-400">▶</span>
+              <div>
+                <strong class="text-white">Medium-term (6-12 Mo):</strong>
+                <p class="mt-1">Monitor assumptions, develop contingency plans, implement predictive early detection analytics.</p>
+              </div>
+            </li>
+          </ul>
+        </div>
+
+        <div class="reveal glass-panel p-6 rounded-2xl bg-black/60" style="transition-delay: 200ms;">
+          <h3 class="text-xl font-bold mb-4 font-mono">> Follow-up_Workflows</h3>
+          <div class="font-mono text-xs space-y-3">
+            <p class="terminal-text">$ /bi/correlation-deep-dive sample_sales.xlsx</p>
+            <p class="text-gray-500 pl-4"># Analyze relationships between trending metrics</p>
+            
+            <p class="terminal-text mt-2">$ /bi/insight-investigation sample_sales.xlsx</p>
+            <p class="text-gray-500 pl-4"># Deep dive into trend drivers and impact</p>
+            
+            <p class="terminal-text mt-2">$ /bi/executive-summary</p>
+            <p class="text-gray-500 pl-4"># Generate C-suite presentation</p>
+            
+            <p class="terminal-text mt-2">$ /bi/action-recommendations</p>
+            <p class="text-gray-500 pl-4"># Convert insights into business actions</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="reveal text-center" style="transition-delay: 400ms;">
+         <h3 class="text-2xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-green-400 to-cyan-500 inline-block">
+           Analysis Complete ✅
+         </h3>
+         <p class="text-gray-400 mt-2 max-w-2xl mx-auto">
+           Trend analysis reveals excellent momentum with high predictability. The organization is well-positioned to leverage trend insights for competitive advantage.
+         </p>
+      </div>
+    </div>
+  </section>
+
+</main>
+
+<script>
+  // Scroll-driven Data Line Animation
+  const container = document.getElementById('scroll-container');
+  const path = document.getElementById('data-path');
+  
+  // Calculate initial path length
+  const pathLength = path.getTotalLength();
+  path.style.strokeDasharray = pathLength;
+  path.style.strokeDashoffset = pathLength;
+
+  container.addEventListener('scroll', () => {
+    // Calculate scroll percentage
+    const maxScrollLeft = container.scrollWidth - container.clientWidth;
+    const scrollPercentage = container.scrollLeft / maxScrollLeft;
+    
+    // Draw line based on scroll
+    const drawLength = pathLength * scrollPercentage;
+    path.style.strokeDashoffset = pathLength - drawLength;
+  });
+
+  // Intersection Observer for Reveal Animations
+  const observerOptions = {
+    root: container,
+    rootMargin: '0px',
+    threshold: 0.2
+  };
+
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        entry.target.classList.add('active');
+      } else {
+        // Optional: remove class to re-animate when scrolling back
+        // entry.target.classList.remove('active');
+      }
+    });
+  }, observerOptions);
+
+  document.querySelectorAll('.reveal').forEach(el => {
+    observer.observe(el);
+  });
+
+  // Horizontal Scroll with Mouse Wheel Desktop mapping
+  container.addEventListener('wheel', (evt) => {
+    if (evt.deltaY !== 0) {
+      evt.preventDefault();
+      container.scrollBy({
+        left: evt.deltaY * 3,
+        behavior: 'auto'
+      });
+    }
+  });
+
+  // Ensure initial state check for line (if reloaded mid-scroll)
+  setTimeout(() => {
+    container.dispatchEvent(new Event('scroll'));
+  }, 100);
+</script>
+</body>
+</html>

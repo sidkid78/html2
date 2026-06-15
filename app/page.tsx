@@ -191,6 +191,33 @@ const hubs = [
     color: "from-emerald-600 to-teal-700",
     border: "hover:border-emerald-500/50",
     shadow: "hover:shadow-[0_0_40px_-10px_rgba(16,185,129,0.2)]"
+  },
+  {
+    title: "Data Horizon Trend Analysis",
+    description: "Advanced data trend analysis, seasonal forecasting, and actionable strategic insights for enterprise revenue growth.",
+    href: "/trend-analysis.html",
+    icon: "📊",
+    color: "from-cyan-600 to-blue-700",
+    border: "hover:border-cyan-500/50",
+    shadow: "hover:shadow-[0_0_40px_-10px_rgba(6,182,212,0.2)]"
+  },
+  {
+    title: "Sentient Codebase Review",
+    description: "Deep codebase analysis, review workflows, architecture auditing, and technical debt reporting via MCP Servers.",
+    href: "/codebase-review.html",
+    icon: "🔍",
+    color: "from-purple-600 to-fuchsia-700",
+    border: "hover:border-purple-500/50",
+    shadow: "hover:shadow-[0_0_40px_-10px_rgba(168,85,247,0.2)]"
+  },
+  {
+    title: "Project Data Core Kickoff",
+    description: "Project scope analysis, stakeholder matrices, timeline estimates, and risk management for data analytics initiatives.",
+    href: "/project-kickoff.html",
+    icon: "🚀",
+    color: "from-blue-600 to-cyan-700",
+    border: "hover:border-blue-500/50",
+    shadow: "hover:shadow-[0_0_40px_-10px_rgba(59,130,246,0.2)]"
   }
 ];
 

@@ -1,0 +1,736 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>MEGA_AGENTIC_SYSTEM // CORE_TERMINAL</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Fira+Code:wght@300;400;700&display=swap');
+
+  :root {
+    --phosphor-dim: #0f3f1f;
+    --phosphor-bright: #00ff66;
+    --phosphor-cyan: #00ffff;
+  }
+
+  body {
+    margin: 0;
+    overflow: hidden;
+    background-color: #020202;
+    font-family: 'Fira Code', monospace;
+    color: var(--phosphor-bright);
+  }
+
+  /* CRT & Scanline Effects */
+  .crt-overlay {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    z-index: 50;
+    background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.25) 50%), linear-gradient(90deg, rgba(255, 0, 0, 0.06), rgba(0, 255, 0, 0.02), rgba(0, 0, 255, 0.06));
+    background-size: 100% 4px, 6px 100%;
+    box-shadow: inset 0 0 150px rgba(0,0,0,0.9);
+  }
+
+  .scanline {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 10px;
+    background: rgba(0, 255, 100, 0.1);
+    opacity: 0.4;
+    animation: scanline 8s linear infinite;
+    pointer-events: none;
+    z-index: 49;
+  }
+
+  @keyframes scanline {
+    0% { transform: translateY(-100%); }
+    100% { transform: translateY(100vh); }
+  }
+
+  /* Custom Scrollbar */
+  .terminal-scroll::-webkit-scrollbar {
+    width: 6px;
+  }
+  .terminal-scroll::-webkit-scrollbar-track {
+    background: rgba(0, 20, 0, 0.5);
+    border-left: 1px solid rgba(0, 255, 100, 0.2);
+  }
+  .terminal-scroll::-webkit-scrollbar-thumb {
+    background: var(--phosphor-dim);
+    box-shadow: 0 0 10px var(--phosphor-bright);
+  }
+  .terminal-scroll::-webkit-scrollbar-thumb:hover {
+    background: var(--phosphor-bright);
+  }
+
+  /* Layer Blending & Masking */
+  .dim-layer {
+    color: var(--phosphor-dim);
+    text-shadow: 0 0 2px rgba(0, 255, 100, 0.1);
+    white-space: pre-wrap;
+  }
+
+  .bright-layer {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    color: var(--phosphor-cyan);
+    text-shadow: 0 0 5px var(--phosphor-cyan), 0 0 15px var(--phosphor-cyan), 0 0 30px rgba(0, 255, 255, 0.5);
+    white-space: pre-wrap;
+    /* The magic masking tied to CSS variables set by JS */
+    -webkit-mask-image: radial-gradient(circle 250px at var(--mouse-x, 50%) var(--mouse-y, 50%), black 0%, rgba(0,0,0,0.8) 40%, transparent 100%);
+    mask-image: radial-gradient(circle 250px at var(--mouse-x, 50%) var(--mouse-y, 50%), black 0%, rgba(0,0,0,0.8) 40%, transparent 100%);
+  }
+
+  /* Glitch Animation for specific spans */
+  @keyframes glitch-anim {
+    0% { clip-path: inset(10% 0 80% 0); transform: translate(-2px, 2px); }
+    20% { clip-path: inset(80% 0 5% 0); transform: translate(2px, -2px); }
+    40% { clip-path: inset(40% 0 40% 0); transform: translate(2px, 2px); }
+    60% { clip-path: inset(15% 0 60% 0); transform: translate(-2px, -2px); }
+    80% { clip-path: inset(60% 0 15% 0); transform: translate(2px, 2px); }
+    100% { clip-path: inset(30% 0 50% 0); transform: translate(-2px, -2px); }
+  }
+  .glitch {
+    position: relative;
+    display: inline-block;
+  }
+  .glitch::before, .glitch::after {
+    content: attr(data-text);
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    opacity: 0.8;
+  }
+  .glitch::before {
+    left: 2px;
+    text-shadow: -2px 0 red;
+    animation: glitch-anim 2s infinite linear alternate-reverse;
+  }
+  .glitch::after {
+    left: -2px;
+    text-shadow: -2px 0 blue;
+    animation: glitch-anim 3s infinite linear alternate-reverse;
+  }
+
+  /* Grid Background */
+  .bg-grid {
+    background-size: 40px 40px;
+    background-image: 
+      linear-gradient(to right, rgba(0, 255, 100, 0.05) 1px, transparent 1px),
+      linear-gradient(to bottom, rgba(0, 255, 100, 0.05) 1px, transparent 1px);
+    mask-image: linear-gradient(to bottom, transparent, black 10%, black 90%, transparent);
+  }
+</style>
+</head>
+<body class="h-screen w-screen relative isolate bg-black flex items-center justify-center p-4 sm:p-8">
+
+  <!-- SVG Filters Definition -->
+  <svg class="hidden">
+    <filter id="noise">
+      <feTurbulence type="fractalNoise" baseFrequency="0.7" numOctaves="3" stitchTiles="stitch"/>
+      <feColorMatrix type="matrix" values="0 0 0 0 0, 0 1 0 0 0, 0 0 0 0 0, 0 0 0 0.15 0" />
+    </filter>
+  </svg>
+
+  <!-- Noise Overlay -->
+  <div class="absolute inset-0 pointer-events-none mix-blend-screen opacity-50 z-0" style="filter: url(#noise)"></div>
+  
+  <!-- Background Grid -->
+  <div class="absolute inset-0 pointer-events-none bg-grid z-0"></div>
+
+  <!-- CRT Frame / Scanline -->
+  <div class="crt-overlay"></div>
+  <div class="scanline"></div>
+
+  <!-- Main Terminal Container -->
+  <main class="relative w-full max-w-7xl h-full border border-green-500/30 bg-black/80 backdrop-blur-sm shadow-[0_0_80px_rgba(0,255,100,0.15)] flex flex-col z-10 overflow-hidden" style="box-shadow: inset 0 0 30px rgba(0,255,100,0.1), 0 0 50px rgba(0,0,0,0.8);">
+    
+    <!-- Terminal Header HUD -->
+    <header class="h-14 border-b border-green-500/40 bg-green-900/10 flex items-center justify-between px-6 shrink-0">
+      <div class="flex items-center gap-4">
+        <div class="flex gap-1.5">
+          <div class="w-3 h-3 border border-green-500 bg-green-500/20 animate-pulse"></div>
+          <div class="w-3 h-3 border border-green-500 bg-green-500/80 animate-[pulse_1s_ease-in-out_infinite]"></div>
+          <div class="w-3 h-3 border border-green-500 bg-green-500/20"></div>
+        </div>
+        <h1 class="text-xs sm:text-sm font-bold tracking-[0.3em] uppercase glitch" data-text="MegaAgenticSystem // OP_INTEL_ACTIVE">MegaAgenticSystem // OP_INTEL_ACTIVE</h1>
+      </div>
+      <div class="text-[10px] sm:text-xs opacity-60 tracking-widest flex items-center gap-4">
+        <span id="sys-time">00:00:00</span>
+        <span class="hidden sm:inline-block px-2 py-0.5 border border-green-500/50 text-green-400 bg-green-500/10">STABLE_ORBIT</span>
+      </div>
+    </header>
+
+    <!-- Terminal Body (Scrollable) -->
+    <div class="flex-1 relative overflow-hidden">
+      <div id="scroll-container" class="absolute inset-0 overflow-y-auto terminal-scroll p-6 sm:p-12 text-[10px] sm:text-xs md:text-sm leading-relaxed tracking-tight">
+        
+        <!-- The text content wrapped in relative container for layering -->
+        <div class="relative min-h-full" id="text-wrapper">
+          
+          <!-- Dim Background Layer (Always visible, low contrast) -->
+          <pre class="dim-layer" id="verbatim-dim"></pre>
+
+          <!-- Bright Spotlight Layer (Revealed by mouse hover mask) -->
+          <pre class="bright-layer" id="verbatim-bright"></pre>
+
+        </div>
+      </div>
+    </div>
+
+    <!-- Terminal Footer HUD -->
+    <footer class="h-8 border-t border-green-500/20 bg-black flex items-center justify-between px-6 shrink-0 text-[9px] tracking-widest opacity-50">
+      <span>DATA_MIGRATION_NODE_09</span>
+      <span>HOVER TO SCAN // AUTO-SCROLL ENABLED</span>
+      <span>INTEGRITY: 100%</span>
+    </footer>
+
+    <!-- Decorative SVG Corners -->
+    <svg class="absolute inset-0 w-full h-full pointer-events-none" xmlns="http://www.w3.org/2000/svg">
+      <!-- Top Left -->
+      <path d="M 0,20 L 0,0 L 20,0" fill="none" stroke="#00ff66" stroke-width="2" opacity="0.5"/>
+      <!-- Top Right -->
+      <path d="M calc(100% - 20px),0 L 100%,0 L 100%,20" fill="none" stroke="#00ff66" stroke-width="2" opacity="0.5"/>
+      <!-- Bottom Left -->
+      <path d="M 0,calc(100% - 20px) L 0,100% L 20,100%" fill="none" stroke="#00ff66" stroke-width="2" opacity="0.5"/>
+      <!-- Bottom Right -->
+      <path d="M calc(100% - 20px),100% L 100%,100% L 100%,calc(100% - 20px)" fill="none" stroke="#00ff66" stroke-width="2" opacity="0.5"/>
+    </svg>
+
+  </main>
+
+  <!-- Raw verbatim payload stored as non-executed text to avoid JS escaping issues -->
+  <script type="text/plain" id="raw-payload">```log
+2026-06-05 19:26:04 - MegaAgenticSystem - INFO - Logging initialized. Log file: logs\mega_system_20260605_192604.log
+2026-06-05 19:26:07 - MegaAgenticSystem - INFO - Initializing Mega Agentic System: API-Server
+2026-06-05 19:26:07 - MegaAgenticSystem - DEBUG - Initializing subsystems...
+2026-06-05 19:26:07 - MegaAgenticSystem - DEBUG - Created agent: Analyst_0 (Data analysis and pattern recognition)
+2026-06-05 19:26:07 - MegaAgenticSystem - DEBUG - Created agent: Architect_1 (System design and architecture)
+2026-06-05 19:26:07 - MegaAgenticSystem - DEBUG - Created agent: Critic_2 (Finding flaws and weaknesses)
+2026-06-05 19:26:07 - MegaAgenticSystem - DEBUG - Created agent: Creative_3 (Innovation and ideation)
+2026-06-05 19:26:07 - MegaAgenticSystem - DEBUG - Created agent: Executor_4 (Implementation and action)
+2026-06-05 19:26:07 - MegaAgenticSystem - DEBUG - Created agent: Mediator_5 (Conflict resolution and synthesis)
+2026-06-05 19:26:07 - MegaAgenticSystem - DEBUG - Created agent: Researcher_6 (Information gathering)
+2026-06-05 19:26:07 - MegaAgenticSystem - DEBUG - Created agent: Strategist_7 (Planning and optimization)
+2026-06-05 19:26:07 - MegaAgenticSystem - DEBUG - Created agent: Teacher_8 (Explanation and education)
+2026-06-05 19:26:07 - MegaAgenticSystem - DEBUG - Created agent: Validator_9 (Quality assurance)
+2026-06-05 19:26:07 - MegaAgenticSystem - INFO - Agent pool initialized with 10 agents
+2026-06-05 19:26:07 - MegaAgenticSystem - DEBUG - Performance metrics initialized for all modes
+2026-06-05 19:26:07 - MegaAgenticSystem - INFO - System API-Server initialized successfully with 10 agents
+2026-06-05 19:26:08 - MegaAgenticSystem - INFO - Loading system state from mega_system_state.pkl
+2026-06-05 19:26:08 - MegaAgenticSystem - INFO - System state loaded successfully: 10 executions, 10 agents
+2026-06-05 19:26:08 - MegaAgenticSystem - INFO - Performance metrics: {"hierarchical": {"executions": 7, "avg_quality": 8.491980054770325, "avg_time": 394.075432402747, "success_rate": 1.0}, "swarm": {"executions": 1, "avg_quality": 8.873273360754363, "avg_time": 39.566527366638184, "success_rate": 1.0}, "debate": {"executions": 0, "avg_quality": 0.0, "avg_time": 0.0, "success_rate": 0.0}, "negotiate": {"executions": 0, "avg_quality": 0.0, "avg_time": 0.0, "success_rate": 0.0}, "red_blue": {"executions": 0, "avg_quality": 0.0, "avg_time": 0.0, "success_rate": 0.0}, "reflective": {"executions": 0, "avg_quality": 0.0, "avg_time": 0.0, "success_rate": 0.0}, "meta_learning": {"executions": 0, "avg_quality": 0.0, "avg_time": 0.0, "success_rate": 0.0}, "background": {"executions": 0, "avg_quality": 0.0, "avg_time": 0.0, "success_rate": 0.0}, "socratic": {"executions": 2, "avg_quality": 8.0, "avg_time": 51.300090312957764, "success_rate": 1.0}}
+2026-06-05 19:28:19 - MegaAgenticSystem - INFO - Starting execution of task: f85d8c10-3e1e-40aa-a0ae-bd002ec2efa3
+2026-06-05 19:28:19 - MegaAgenticSystem - DEBUG - Task details - Complexity: complex, Threshold: 8.0, Max iterations: 3
+2026-06-05 19:28:19 - MegaAgenticSystem - INFO - Phase 1: Planning execution for task f85d8c10-3e1e-40aa-a0ae-bd002ec2efa3
+2026-06-05 19:28:19 - MegaAgenticSystem - DEBUG - Planning execution for task f85d8c10-3e1e-40aa-a0ae-bd002ec2efa3
+2026-06-05 19:28:26 - MegaAgenticSystem - DEBUG - Execution plan created: {
+  "primary_mode": "hierarchical",
+  "backup_modes": [
+    "swarm",
+    "reflective"
+  ],
+  "strategy": "Establish a lead coordinator agent to orchestrate the 4-day execution plan, delegating specific integration tasks (GoHighLevel setup, Stripe/PayPal connection, CRM data migration, and DashThis reporting) to specialized sub-agents while monitoring progress against the daily milestones.",
+  "estimated_agents": 3,
+  "estimated_time": 4,
+  "potential_challenges": [
+    "Legacy billing spreadsheet data formatting inconsistencies during CRM import",
+    "Stripe/PayPal API authorization and webhook configuration errors",
+    "SMS/Email deliverability and compliance constraints for automated outreach sequences"
+  ],
+  "success_criteria": [
+    "GoHighLevel successfully integrated with payment gateways to automate partial payment tracking",
+    "Historical client data imported into CRM with automated 'Save Your Spot' campaigns active",
+    "DashThis dashboard configured and displaying real-time collection rates",
+    "Reduction of manual billing and outreach overhead from 55 hours/week to under 10 hours/week"
+  ],
+  "reasoning": "A hierarchical approach is optimal because the implementation plan has strict sequential dependencies (e.g., auditing billing data must happen before CRM import, and payment integrations must precede automated reminders). A coordinator agent can manage these dependencies, while specialized sub-agents execute the technical configurations."
+}
+2026-06-05 19:28:26 - MegaAgenticSystem - INFO - Execution plan created - Primary mode: hierarchical, Estimated agents: 3
+2026-06-05 19:28:26 - MegaAgenticSystem - INFO - Phase 2: Executing with hierarchical mode
+2026-06-05 19:28:26 - MegaAgenticSystem - INFO - Executing with hierarchical mode
+2026-06-05 19:28:26 - MegaAgenticSystem - INFO - Starting hierarchical execution
+2026-06-05 19:28:36 - MegaAgenticSystem - INFO - Decomposed into 7 sub-tasks
+2026-06-05 19:28:36 - MegaAgenticSystem - INFO - Created dynamic agent: Data_&_Operations_Analyst_0
+2026-06-05 19:28:36 - MegaAgenticSystem - INFO - Created dynamic agent: CRM_Systems_Integrator_1
+2026-06-05 19:28:36 - MegaAgenticSystem - INFO - Created dynamic agent: Marketing_Automation_Engineer_2
+2026-06-05 19:28:36 - MegaAgenticSystem - INFO - Created dynamic agent: Data_&_Operations_Analyst_3
+2026-06-05 19:28:36 - MegaAgenticSystem - INFO - Created dynamic agent: Conversational_Designer_&_Automation_Architect_4
+2026-06-05 19:28:36 - MegaAgenticSystem - INFO - Created dynamic agent: IT_Support_&_Productivity_Specialist_5
+2026-06-05 19:28:36 - MegaAgenticSystem - INFO - Created dynamic agent: BI_Dashboard_Developer_6
+2026-06-05 19:28:36 - MegaAgenticSystem - DEBUG - Assigning subtask subtask_1 to Data_&_Operations_Analyst_0
+2026-06-05 19:28:36 - MegaAgenticSystem - INFO - Agent Data_&_Operations_Analyst_0 starting task execution
+2026-06-05 19:28:36 - MegaAgenticSystem - DEBUG - Agent details - Specialization: Audit and clean historical billing spreadsheets. Identify all outstanding partial payments, upcoming, Skills: ['Data Cleansing', 'Google Sheets/MS Excel', 'Financial Auditing']
+2026-06-05 19:28:36 - MegaAgenticSystem - DEBUG - Task assigned to Data_&_Operations_Analyst_0: Audit and clean historical billing spreadsheets. Identify all outstanding partial payments, upcoming deadlines, and current booth fee statuses to prepare the raw data for CRM import.
+2026-06-05 19:28:53 - MegaAgenticSystem - INFO - Agent Data_&_Operations_Analyst_0 completed task - Quality score: 7.25
+2026-06-05 19:28:53 - MegaAgenticSystem - DEBUG - === FULL OUTPUT FROM Data_&_Operations_Analyst_0 ===
+2026-06-05 19:28:53 - MegaAgenticSystem - DEBUG - Task: Audit and clean historical billing spreadsheets. Identify all outstanding partial payments, upcoming...
+2026-06-05 19:28:53 - MegaAgenticSystem - DEBUG - Output Length: 7160 characters
+2026-06-05 19:28:53 - MegaAgenticSystem - DEBUG - Full Output:
+# Historical Billing Data Audit & CRM Import Preparation Report
+**Prepared by:** Data & Operations Analyst 0  
+**Status:** Audit Complete & Data Cleaned (Ready for CRM Import)  
+**Target System:** CRM (Salesforce/HubSpot) Financial & Accounts Module  
+
+---
+
+## 1. Executive Summary
+
+This audit was conducted on the historical billing spreadsheets for the upcoming annual trade show. The primary objective was to clean the raw, inconsistent financial records, reconcile outstanding balances, standardize booth fee statuses, and format the dataset to ensure a seamless, error-free import into the CRM.
+
+### Key Audit Findings:
+*   **Total Revenue Contracted:** $147,000.00
+*   **Total Revenue Collected:** $98,250.00
+*   **Total Outstanding Balance:** $48,750.00
+*   **Data Anomalies Resolved:** 42 instances of inconsistent date formatting, 18 mismatched currency formats, 7 duplicate records, and 12 unstandardized payment statuses.
+*   **High-Risk Accounts:** 5 accounts identified as "Overdue" with zero payments made past their respective deadlines, totaling $18,000.00 in outstanding collections.
+
+---
+
+## 2. Data Cleansing & Transformation Protocol
+
+To prepare the raw spreadsheet data for CRM import, the following data cleansing and transformation steps were executed:
+
+1.  **Deduplication:** Identified and removed duplicate rows based on a concatenated unique key: '[Company Name] + [Booth Number]'.
+2.  **Text Standardization:** Applied 'TRIM()'' and 'PROPER()'' functions to eliminate leading/trailing spaces and standardize company names.
+3.  **Currency Normalization:** Removed non-numeric characters (e.g., '$', commas, spaces) and formatted all financial columns as decimal numbers ('0.00') to prevent import errors in CRM currency fields.
+4.  **Date Standardization:** Converted all inconsistent date formats (e.g., "10/12/24", "Nov-15-2024", "2024.12.01") to the ISO-8601 standard format: 'YYYY-MM-DD'.
+5.  **Status Mapping:** Standardized historical, non-uniform payment statuses into a strict, predefined CRM Picklist:
+    *   *Raw:* "PD", "Paid in Full", "fully paid" -> **CRM Picklist:** 'Fully Paid'
+    *   *Raw:* "part paid", "deposit", "half" -> **CRM Picklist:** 'Partially Paid'
+    *   *Raw:* "waiting", "nil", "unpaid" -> **CRM Picklist:** 'Unpaid'
+    *   *Raw:* "late", "past due", "overdue" -> **CRM Picklist:** 'Overdue'
+    *   *Raw:* "comp", "free", "sponsor" -> **CRM Picklist:** 'Complimentary'
+
+---
+
+## 3. Cleansed & Audited Billing Dataset (CRM Import-Ready)
+
+The table below represents the clean, reconciled, and formatted dataset. All calculated fields have been verified using the formula:  
+'Balance Due = Total Booth Fee - Amount Paid'
+
+| Account ID (CRM) | Company Name | Booth No. | Booth Size | Total Booth Fee ($) | Amount Paid ($) | Balance Due ($) | Payment Status | Last Payment Date | Next Deadline | Outstanding Risk Level |
+| :--- | :--- | :---: | :---: | :---: | :---: | :---: | :--- | :---: | :---: | :--- |
+| ACC-2024-001 | Apex Technologies | 104 | 10x10 | 3,000.00 | 3,000.00 | 0.00 | 'Fully Paid' | 2024-08-12 | N/A | None |
+| ACC-2024-002 | Biomax Labs | 208 | 10x20 | 6,000.00 | 3,000.00 | 3,000.00 | 'Partially Paid' | 2024-09-01 | 2024-11-15 | Medium |
+| ACC-2024-003 | CryoGen Systems | 112 | 10x10 | 3,000.00 | 0.00 | 3,000.00 | 'Overdue' | N/A | 2024-10-01 | High |
+| ACC-2024-004 | Delta Aviation | 305 | 20x20 | 12,000.00 | 12,000.00 | 0.00 | 'Fully Paid' | 2024-07-22 | N/A | None |
+| ACC-2024-005 | EcoSolutions Group | 410 | 10x10 | 3,000.00 | 1,500.00 | 1,500.00 | 'Partially Paid' | 2024-08-30 | 2024-11-15 | Low |
+
+---
+
+## 4. Key Financial Insights & Outstanding Action Items
+
+### A. Outstanding Partial Payments (Action Required)
+Three major accounts have paid their initial deposits but still hold significant outstanding balances. 
+*   **Total Outstanding Partial Payments:** $10,500.00
+*   **Action:** Send automated "Balance Due" invoice reminders via the CRM workflow once imported, targeting the **2024-11-15** deadline.
+
+### B. Upcoming Payment Deadlines
+*   **Immediate Action (Overdue Accounts):** $12,000.00 is currently overdue from **CryoGen Systems, Future Dynamics, and Zenith Logistics** (Deadline was 2024-10-01). Collections/Sales team must reach out to these accounts immediately before releasing their booth spaces back to the public pool.
+*   **Mid-Term Deadline (2024-11-15):** $10,500.00 is due from **Biomax Labs, EcoSolutions Group, and Genesis Robotics**.
+*   **Long-Term Deadline (2024-11-30):** $3,000.00 is due from **Horizon Energy**.
+
+---
+
+## 5. CRM Data Mapping Schema
+
+When executing the CSV import into the CRM, use the following exact field mapping guide to ensure data integrity:
+
+| Source CSV Column | Target CRM Field | Data Type | Validation Rules / Notes |
+| :--- | :--- | :--- | :--- |
+| 'Account ID (CRM)' | 'Account.External_ID__c' | Text (Unique) | Match to existing account to prevent duplicates. |
+| 'Company Name' | 'Account.Name' | Text | Standardized casing. |
+| 'Booth No.' | 'Opportunity.Booth_Number__c' | Text / Picklist | Numeric/Alpha-numeric booth identifiers. |
+| 'Total Booth Fee ($)' | 'Opportunity.Amount' | Currency | Standard numeric decimal format. |
+| 'Amount Paid ($)' | 'Opportunity.Amount_Paid__c' | Currency | Custom field; numeric decimal format. |
+| 'Balance Due ($)' | 'Opportunity.Balance_Due__c' | Currency | Custom formula field or mapped numeric decimal. |
+| 'Payment Status' | 'Opportunity.Payment_Status__c' | Picklist | Restricted to: 'Fully Paid', 'Partially Paid', 'Unpaid', 'Overdue', 'Complimentary'. |
+| 'Last Payment Date' | 'Opportunity.Last_Payment_Date__c' | Date | Must import as 'YYYY-MM-DD'. Nulls allowed. |
+| 'Next Deadline' | 'Opportunity.Payment_Due_Date__c' | Date | Must import as 'YYYY-MM-DD'. Nulls allowed. |
+
+---
+
+## 6. Recommendations for Ongoing Data Hygiene
+
+1.  **Implement Validation Rules in CRM:** Prevent future manual entries of inconsistent dates or unauthorized payment statuses by locking down the `Payment_Status__c` picklist and enforcing `YYYY-MM-DD` date formats via validation rules.
+2.  **Automate Balance Calculations:** Do not allow manual entry of the `Balance Due` field. Set up a CRM formula field: `Amount - Amount_Paid__c` to ensure real-time mathematical accuracy.
+3.  **Automate Dunning Workflows:** Configure CRM email alerts to automatically trigger 14 days, 7 days, and 1 day prior to the `Payment_Due_Date__c` for any account with a status of `Partially Paid` or `Unpaid`.
+2026-06-05 19:28:53 - MegaAgenticSystem - DEBUG - === END OUTPUT FROM Data_&_Operations_Analyst_0 ===
+2026-06-05 19:28:53 - MegaAgenticSystem - DEBUG - Assigning subtask subtask_2 to CRM_Systems_Integrator_1
+2026-06-05 19:28:53 - MegaAgenticSystem - INFO - Agent CRM_Systems_Integrator_1 starting task execution
+2026-06-05 19:28:53 - MegaAgenticSystem - DEBUG - Agent details - Specialization: Set up the GoHighLevel environment, configure Stripe/PayPal payment gateway integrations, and establ, Skills: ['GoHighLevel Configuration', 'Payment Gateway Integration', 'Stripe API', 'PayPal Merchant Setup']
+2026-06-05 19:28:53 - MegaAgenticSystem - DEBUG - Task assigned to CRM_Systems_Integrator_1: Set up the GoHighLevel environment, configure Stripe/PayPal payment gateway integrations, and establish the custom fields required to track booth fees and partial payments.
+2026-06-05 19:29:06 - MegaAgenticSystem - INFO - Agent CRM_Systems_Integrator_1 completed task - Quality score: 8.61
+2026-06-05 19:29:06 - MegaAgenticSystem - DEBUG - === FULL OUTPUT FROM CRM_Systems_Integrator_1 ===
+2026-06-05 19:29:06 - MegaAgenticSystem - DEBUG - Task: Set up the GoHighLevel environment, configure Stripe/PayPal payment gateway integrations, and establ...
+2026-06-05 19:29:06 - MegaAgenticSystem - DEBUG - Output Length: 7607 characters
+2026-06-05 19:29:06 - MegaAgenticSystem - DEBUG - Full Output:
+# Technical Integration Blueprint: GoHighLevel Environment Setup & Payment Gateway Configuration
+
+**Prepared by:** CRM Systems Integrator 1  
+**Objective:** Configure a production-ready GoHighLevel (GHL) sub-account, integrate Stripe and PayPal payment gateways, and establish a robust custom field schema to track booth fees, partial payments, and outstanding balances.
+
+---
+
+## Phase 1: GoHighLevel Environment & Sub-Account Initialization
+
+To ensure a clean environment for tracking booth sales and payments, we must first establish the structural settings of the GHL sub-account.
+
+### 1.1 General Settings & Localization
+1. Navigate to **Settings > Business Profile**.
+2. **Company Information:** Input the event hosting organization's legal name, physical address, and primary contact details.
+3. **Localization:**
+   * Set the **Time Zone** to match the event's local time zone (e.g., `America/New_York`).
+   * Set the **Platform Currency** to `USD ($)` (or local currency equivalent for the event).
+4. **Enable Features:** Under **Settings > Labs** (or standard settings), ensure that **Advanced Workflows** and the **New Funnel/Website Builder** are active.
+
+### 1.2 Sales Pipeline Creation (Booth Sales Pipeline)
+To track the sales lifecycle of exhibitors, navigate to **Settings > Pipelines** and click **Create New Pipeline**:
+* **Pipeline Name:** `Exhibitor Booth Sales`
+* **Stages:**
+  1. `Inquiry / Lead`
+  2. `Booth Selected / Invoice Sent`
+  3. `Partial Payment Received`
+  4. `Fully Paid / Confirmed`
+  5. `Cancelled / Refunded`
+
+---
+
+## Phase 2: Payment Gateway Integrations
+
+We will configure both Stripe and PayPal within the GoHighLevel environment to allow flexible payment options for exhibitors.
+
+### 2.1 Stripe Integration (Primary Gateway)
+Stripe allows for seamless, embedded credit card payments on GHL order forms and supports partial payment logic via workflows.
+
+#### Step-by-Step Configuration:
+1. Navigate to **Payments > Integrations** in the GHL sidebar.
+2. Locate the **Stripe** card and click **Connect**.
+3. Log into the client’s Stripe Dashboard when prompted via the OAuth window. Ensure you select the correct Stripe Account.
+4. **Webhook Verification:** GoHighLevel automatically registers webhooks in Stripe to listen for payment events. To verify or manually configure:
+   * Go to the **Stripe Dashboard > Developers > Webhooks**.
+   * Ensure the endpoint pointing to `https://services.leadconnectorhq.com/...` is active.
+   * Verify the following events are being monitored:
+     * `charge.succeeded`
+     * `payment_intent.succeeded`
+     * `invoice.paid`
+5. **Test Mode Toggle:** Ensure the toggle in GHL is set to **Test Mode** during staging and switched to **Live Mode** prior to launch.
+
+### 2.2 PayPal Integration (Secondary Gateway)
+PayPal provides an alternative payment method for international or corporate exhibitors.
+
+#### Step-by-Step Configuration:
+1. Navigate to **Payments > Integrations**.
+2. Locate the **PayPal** card and click **Connect**.
+3. To complete the integration, you require the **Client ID** and **Client Secret** from the PayPal Developer Portal:
+   * Go to [developer.paypal.com](https://developer.paypal.com/) and log in with the merchant credentials.
+   * Navigate to **Apps & Credentials** and create a new App named `GHL Booth Payments`.
+   * Copy the **Sandbox Client ID** and **Secret** (for testing), then switch to **Live** and copy the **Live Client ID** and **Secret**.
+4. Paste these credentials into the respective fields in GHL and click **Save**.
+
+---
+
+## Phase 3: Custom Fields Schema (Booth Fee & Payment Tracking)
+
+To accurately track financial balances, installment payments, and booth allocation details on a per-contact/company level, we must define custom fields. 
+
+Navigate to **Settings > Custom Fields > Add Field** and create the following schema:
+
+| Field Display Name | Unique Key / Custom Value | Data Type | Description / Purpose |
+| :--- | :--- | :--- | :--- |
+| **Booth Number Assigned** | `{{ contact.booth_number_assigned }}` | Text | The physical booth number allocated to the exhibitor. |
+| **Booth Fee Total** | `{{ contact.booth_fee_total }}` | Monetary / Currency | Total cost of the selected booth space. |
+| **Booth Amount Paid** | `{{ contact.booth_amount_paid }}` | Monetary / Currency | Cumulative amount paid by the exhibitor to date. |
+| **Booth Balance Due** | `{{ contact.booth_balance_due }}` | Monetary / Currency | Outstanding balance (`Total` minus `Amount Paid`). |
+| **Booth Payment Status** | `{{ contact.booth_payment_status }}` | Dropdown (Single Select) | Status options: `Unpaid`, `Partially Paid`, `Fully Paid`, `Refunded`. |
+| **Last Payment Date** | `{{ contact.booth_last_payment_date }}` | Date | Date of the most recent transaction. |
+| **Last Transaction ID** | `{{ contact.booth_last_transaction_id }}` | Text | Stripe/PayPal transaction reference ID for auditing. |
+
+---
+
+## Phase 4: Automation Logic & Calculations (Workflow Setup)
+
+To make these custom fields dynamic, we must construct a GHL Workflow that calculates partial payments and updates the contact records in real-time when a payment is processed.
+
+### Workflow: "Exhibitor Payment Processing & Balance Calculation"
+
+#### 1. Trigger
+* **Trigger:** `Order Submitted` (or `Stripe/PayPal Payment Received`)
+* **Filters:** 
+  * *Global Product is* `Exhibitor Booth Space` (or specific funnel step)
+
+#### 2. Action 1: Update Payment Record (Mathematical Calculation)
+Use GHL's **Custom Tool / Math Operation** action to update the custom fields dynamically.
+* **Operation 1: Add Payment to Cumulative Total**
+  * *Formula:* `{{ contact.booth_amount_paid }} + {{ trigger.payment_amount }}`
+  * *Store Result in:* `Booth Amount Paid`
+* **Operation 2: Calculate Remaining Balance**
+  * *Formula:* `{{ contact.booth_fee_total }} - {{ contact.booth_amount_paid }}`
+  * *Store Result in:* `Booth Balance Due`
+
+#### 3. Action 2: Conditional Branch (Update Payment Status)
+Create an **If/Else** branch to determine the `Booth Payment Status`:
+* **Branch A: Fully Paid**
+  * *Condition:* If `Booth Balance Due` **is less than or equal to** `0`
+  * *Actions:*
+    * Update Contact Field `Booth Payment Status` to `Fully Paid`
+    * Move Opportunity to Pipeline Stage: `Fully Paid / Confirmed`
+    * Send "Exhibitor Confirmation Email" with booth details.
+* **Branch B: Partially Paid**
+  * *Condition:* If `Booth Balance Due` **is greater than** `0` AND `Booth Amount Paid` **is greater than** `0`
+  * *Actions:*
+    * Update Contact Field `Booth Payment Status` to `Partially Paid`
+    * Move Opportunity to Pipeline Stage: `Partial Payment Received`
+    * Send "Partial Payment Invoice / Receipt" showing outstanding balance and next due date.
+
+---
+
+## Phase 5: Testing & Verification Protocol
+
+Before moving this configuration to production, the following verification steps must be executed:
+
+1. **Stripe Test Mode Transaction:**
+   * Submit a test order on the GHL registration funnel using the Stripe test card (`4242 4242 4242 4242`).
+   * Verify that the contact record is created, the pipeline stage changes to `Partial Payment Received`, and `Booth Amount Paid` updates correctly.
+2. **Sequential Payment Test (Partial Payments):**
+   * Process a second test payment of $500 against a $1,500 total booth fee.
+   * Confirm that `Booth Amount Paid` increments to $1,000, and `Booth Balance Due` drops to $500.
+3. **Webhook Verification:**
+   * Check **Payments > Transactions** inside GHL to ensure the Stripe and PayPal transaction IDs match the values populated in the `Last Transaction ID` custom field.
+2026-06-05 19:29:06 - MegaAgenticSystem - DEBUG - === END OUTPUT FROM CRM_Systems_Integrator_1 ===
+2026-06-05 19:29:06 - MegaAgenticSystem - DEBUG - Assigning subtask subtask_3 to Marketing_Automation_Engineer_2
+2026-06-05 19:29:06 - MegaAgenticSystem - INFO - Agent Marketing_Automation_Engineer_2 starting task execution
+2026-06-05 19:29:06 - MegaAgenticSystem - DEBUG - Agent details - Specialization: Build automated billing and collection workflows within GoHighLevel. Program automated SMS and Email, Skills: ['GoHighLevel Automation Workflows', 'SMS/Email Copywriting', 'Triggers & Actions']
+2026-06-05 19:29:06 - MegaAgenticSystem - DEBUG - Task assigned to Marketing_Automation_Engineer_2: Build automated billing and collection workflows within GoHighLevel. Program automated SMS and Email triggers to notify exhibitors of payment deadlines and track outstanding balances.
+2026-06-05 19:29:34 - MegaAgenticSystem - INFO - Agent Marketing_Automation_Engineer_2 completed task - Quality score: 7.77
+2026-06-05 19:29:34 - MegaAgenticSystem - DEBUG - === FULL OUTPUT FROM Marketing_Automation_Engineer_2 ===
+2026-06-05 19:29:34 - MegaAgenticSystem - DEBUG - Task: Build automated billing and collection workflows within GoHighLevel. Program automated SMS and Email...
+2026-06-05 19:29:34 - MegaAgenticSystem - DEBUG - Output Length: 16380 characters
+2026-06-05 19:29:34 - MegaAgenticSystem - DEBUG - Full Output:
+# GoHighLevel Exhibitor Automated Billing & Collections Blueprint
+
+This comprehensive, step-by-step implementation guide is designed to automate the billing, notification, and collection workflow for event exhibitors within GoHighLevel (GHL). This system ensures timely payments, reduces manual outreach, tracks outstanding balances, and automates notifications via SMS and Email.
+
+---
+
+## Phase 1: Custom Fields, Values, & Pipeline Setup
+
+To make this automation dynamic, we must first establish the data structure within GoHighLevel.
+
+### 1. Custom Fields (Settings > Custom Fields)
+Create the following custom fields under the **Contact** or **Opportunity** level (Contact level is recommended for ease of merging into SMS/Email templates):
+
+| Field Name | Folder/Group | Field Type | Description | GHL Merge Tag |
+| :--- | :--- | :--- | :--- | :--- |
+| **Exhibitor Booth Number** | Exhibitor Info | Text | Assigned booth number (e.g., B-102) | `{{ contact.exhibitor_booth_number }}` |
+| **Invoice Total Amount** | Billing Info | Currency | Total cost of the booth space | `{{ contact.invoice_total_amount }}` |
+| **Outstanding Balance** | Billing Info | Currency | Remaining balance to be paid | `{{ contact.outstanding_balance }}` |
+| **Payment Due Date** | Billing Info | Date | Deadline for final payment | `{{ contact.payment_due_date }}` |
+| **Invoice Payment Link** | Billing Info | URL | Direct link to the GHL invoice/Stripe checkout | `{{ contact.invoice_payment_link }}` |
+| **Billing Status** | Billing Info | Dropdown | Status: Unpaid, Partially Paid, Paid, Past Due | `{{ contact.billing_status }}` |
+
+### 2. Custom Values (Settings > Custom Values)
+Define global values so you can update them once for future events without editing individual workflows:
+*   `{{ custom_values.event_name }}`: *e.g., "National Enterprise Expo 2025"*
+*   `{{ custom_values.organizer_support_email }}`: *e.g., "exhibitors@enterpriseexpo.com"*
+*   `{{ custom_values.organizer_phone }}`: *e.g., "+1 (800) 555-0199"*
+
+### 3. Pipeline Setup (Settings > Pipelines)
+Create a pipeline named **"Exhibitor Billing & Collections"** with the following stages:
+1.  **Invoice Issued** (Initial invoice sent, balance outstanding)
+2.  **Deposit Paid** (Partial payment received, balance remains)
+3.  **Reminders Active** (Approaching due date)
+4.  **Past Due** (Grace period exceeded, manual intervention queue)
+5.  **Paid in Full** (Account settled, booth locked in)
+6.  **Cancelled / Forfeited** (Failed collections, booth released)
+
+---
+
+## Phase 2: Workflow Architecture
+
+We will build three main workflows to handle the entire lifecycle:
+1.  **Workflow 1: Invoice Issuance & Initial Notification**
+2.  **Workflow 2: Dynamic Payment Reminders (Date-Based)**
+3.  **Workflow 3: Payment Reconciliation & Goal Achievement**
+
+---
+
+### Workflow 1: Invoice Issuance & Initial Notification
+
+This workflow triggers when an invoice is generated or when a contact is marked as an "Exhibitor" with a balance due.
+
+```
+[Trigger: Opportunity Stage Changed to "Invoice Issued"]
+                           |
+                           v
+             [Action: Add Tag: "Exhibitor"]
+                           |
+                           v
+     [Action: Update Custom Field: Billing Status = "Unpaid"]
+                           |
+                           v
+          [Action: Send Email: Invoice Issued]
+                           |
+                           v
+           [Action: Send SMS: Invoice Issued]
+```
+
+---
+
+## Phase 3: Copywriting Templates (SMS & Email)
+
+These templates use GoHighLevel merge tags to automatically pull dynamic data.
+
+### 1. Invoice Issued (Initial Bill)
+
+#### Email Template
+*   **Subject:** Invoice Issued: Secure your booth at {{ custom_values.event_name }}
+*   **Body:**
+    > Hi {{ contact.first_name }},
+    >
+    > Congratulations on being accepted as an exhibitor for the upcoming **{{ custom_values.event_name }}**!
+    >
+    > Your space has been provisionally reserved. To confirm and secure **Booth #{{ contact.exhibitor_booth_number }}**, please review and settle your initial invoice.
+    >
+    > **Invoice Summary:**
+    > *   **Total Amount:** ${{ contact.invoice_total_amount }}
+    > *   **Outstanding Balance:** ${{ contact.outstanding_balance }}
+    > *   **Payment Due Date:** {{ contact.payment_due_date }}
+    >
+    > [Click Here to Pay Your Invoice]({{ contact.invoice_payment_link }})
+    >
+    > Please note that booth spaces are in high demand and are only fully locked in once payment (or deposit) is received.
+    >
+    > If you have any questions regarding your billing or booth layout, reply directly to this email or contact us at {{ custom_values.organizer_support_email }}.
+    >
+    > Best regards,  
+    > **The {{ custom_values.event_name }} Exhibitor Relations Team**
+
+#### SMS Template
+> Hi {{ contact.first_name }}, your invoice for Booth #{{ contact.exhibitor_booth_number }} at {{ custom_values.event_name }} is ready. Bal: ${{ contact.outstanding_balance }} due by {{ contact.payment_due_date }}. Pay here: {{ contact.invoice_payment_link }}
+
+---
+2026-06-05 19:29:34 - MegaAgenticSystem - DEBUG - === END OUTPUT FROM Marketing_Automation_Engineer_2 ===
+2026-06-05 19:29:34 - MegaAgenticSystem - DEBUG - Assigning subtask subtask_4 to Data_&_Operations_Analyst_3
+2026-06-05 19:29:34 - MegaAgenticSystem - INFO - Agent Data_&_Operations_Analyst_3 starting task execution
+2026-06-05 19:29:50 - MegaAgenticSystem - INFO - Agent Data_&_Operations_Analyst_3 completed task - Quality score: 8.57
+2026-06-05 19:30:17 - MegaAgenticSystem - INFO - Agent Conversational_Designer_&_Automation_Architect_4 completed task - Quality score: 7.54
+2026-06-05 19:30:31 - MegaAgenticSystem - INFO - Agent IT_Support_&_Productivity_Specialist_5 completed task - Quality score: 7.32
+2026-06-05 19:30:50 - MegaAgenticSystem - INFO - Agent BI_Dashboard_Developer_6 completed task - Quality score: 8.70
+2026-06-05 19:30:50 - MegaAgenticSystem - INFO - Synthesizing 7 results
+2026-06-05 19:32:08 - MegaAgenticSystem - INFO - Initial execution complete - Quality: 8.2/10
+2026-06-05 19:32:08 - MegaAgenticSystem - INFO - Task f85d8c10-3e1e-40aa-a0ae-bd002ec2efa3 completed - Quality: 8.2/10, Time: 228.97s, Agents: 7, Iterations: 1
+2026-06-05 19:32:08 - MegaAgenticSystem - INFO - Phase 5: Learning from execution
+2026-06-05 19:32:08 - MegaAgenticSystem - INFO - Learning from execution results
+2026-06-05 19:32:08 - MegaAgenticSystem - DEBUG - Updated metrics for mode 'hierarchical': executions=8, avg_quality=8.5, success_rate=100.0%
+
+
+Operational Intelligence Implementation Playbook
+Prepared for: Brenda Johnson, Crafters Convention
+Projected Annual Recovery: $259,800 Net of Tool Costs
+Recovered Hours: 55 Hours per Week
+Implementation Timeline: 4-Day Operational Sprint
+
+Unified System Architecture & Data Flow
+This playbook details the end-to-end technical configuration required to automate Crafters Convention’s manual billing operations and convert legacy cold-calling spreadsheets into an automated exhibitor re-booking engine.
+
+                                      [ LEGACY & ACTIVE DATA SOURCES ]
+                                     /                                
+                       [ Historical Billing Ledger ]           [ Legacy Cold-Calling Sheet ]
+                                    |                                        |
+                             (Day 1 Cleanse)                          (Day 3 Cleanse)
+                                                                            /
+                                     v                                      v
+                                  +--------------------------------------------+
+                                  |         GoHighLevel (GHL) CRM              |
+                                  |  - Centralized Database (Smart Lists)     |
+                                  |  - Pipeline Management (Sales/Billing)     |
+                                  +--------------------------------------------+
+                                    /                               /        
+                                   /                               /          
+                                  v            v                   v            v
+                       [ Stripe Gateway ]  [ PayPal Gateway ]  [ Billing Engine ]  [ Re-Engagement Engine ]
+                              |                     |            (Dunning Automation)  (Multi-Channel Nurture)
+                                                   /                  |                        |
+                               v                   v                   |                        |
+                            +--------------------------+               |                        |
+                            |   API / Webhook Sync     |               |                        |
+                            +--------------------------+               |                        |
+                                         |                             v                        v
+                                         v                     [ Direct Payments ]     [ Dynamic Safe Triage ]
+                            +--------------------------+               |                   (Stop on Response)
+                            |        Make.com          |               |                            |
+                            |  (GHL, Stripe, PayPal)   |               |                            |
+                            +--------------------------+               v                            v
+                                         |                     +---------------+            +---------------+
+                                         v                     |  Paid In Full |            | Conversational|
+                            +--------------------------+       |  Registration |            |  Sales Pipeline|
+                            +--------------------------+       +---------------+            +---------------+
+                            |   Google Sheets Bridge   |       
+                            +--------------------------+
+                                         |
+                                         v
+                            +--------------------------+
+                            |    DashThis Platform     |
+                            |  - Collections KPI       |
+                            |  - Outstanding Balances  |
+                            |  - Outreach ROI Dashboard|
+                            +--------------------------+
+
+```</script>
+  <script>
+    // The massive verbatim text payload, read from the non-executed #raw-payload element
+    const rawText = document.getElementById('raw-payload').textContent;
+
+    // Insert verbatim text into the DOM
+    document.getElementById('verbatim-dim').textContent = rawText;
+    document.getElementById('verbatim-bright').textContent = rawText;
+
+    const scrollContainer = document.getElementById('scroll-container');
+    const textWrapper = document.getElementById('text-wrapper');
+    const brightLayer = document.getElementById('verbatim-bright');
+    
+    // Handle Mouse movement for the Spotlight effect
+    scrollContainer.addEventListener('mousemove', (e) => {
+      // Get coordinates relative to the text wrapper, not just the visible viewport
+      const rect = textWrapper.getBoundingClientRect();
+      const x = e.clientX - rect.left;
+      const y = e.clientY - rect.top;
+      
+      brightLayer.style.setProperty('--mouse-x', `${x}px`);
+      brightLayer.style.setProperty('--mouse-y', `${y}px`);
+    });
+
+    // Auto-Scroll Logic
+    let isHovering = false;
+    scrollContainer.addEventListener('mouseenter', () => isHovering = true);
+    scrollContainer.addEventListener('mouseleave', () => isHovering = false);
+
+    setInterval(() => {
+      if (!isHovering) {
+        // Smooth auto scroll
+        scrollContainer.scrollTop += 1;
+        // Reset if we hit the bottom
+        if (scrollContainer.scrollTop + scrollContainer.clientHeight >= scrollContainer.scrollHeight - 1) {
+          scrollContainer.scrollTop = 0;
+        }
+      }
+    }, 40);
+
+    // Update System Time
+    setInterval(() => {
+      const now = new Date();
+      document.getElementById('sys-time').textContent = now.toISOString().split('T')[1].substring(0, 8) + ' UTC';
+    }, 1000);
+
+  </script>
+</body>
+</html>
