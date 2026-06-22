@@ -1,0 +1,648 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Domain Report: Macroeconomic Health</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Space+Mono:ital,wght@0,400;0,700;1,400&family=Syncopate:wght@400;700&family=Inter:wght@300;400;600;900&display=swap');
+
+        :root {
+            --c-ai: #00f0ff;
+            --c-strain: #ff2a2a;
+            --c-labor: #8a8d91;
+            --c-heat: #ff7300;
+            --c-fed: #ffffff;
+        }
+
+        body,
+        html {
+            margin: 0;
+            padding: 0;
+            background-color: #050505;
+            color: #e0e0e0;
+            font-family: 'Inter', sans-serif;
+            overflow-x: hidden;
+            scroll-behavior: smooth;
+        }
+
+        /* Cinematic Scroll Container */
+        .reel-container {
+            height: 100vh;
+            overflow-y: scroll;
+            scroll-snap-type: y mandatory;
+            scrollbar-width: none;
+        }
+
+        .reel-container::-webkit-scrollbar {
+            display: none;
+        }
+
+        .reel-section {
+            height: 100vh;
+            width: 100vw;
+            scroll-snap-align: start;
+            position: relative;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+
+        /* Typography */
+        .font-display {
+            font-family: 'Syncopate', sans-serif;
+        }
+
+        .font-mono {
+            font-family: 'Space Mono', monospace;
+        }
+
+        h1,
+        h2,
+        h3 {
+            text-transform: uppercase;
+        }
+
+        .text-huge {
+            font-size: clamp(3rem, 8vw, 10rem);
+            line-height: 0.85;
+            letter-spacing: -0.05em;
+        }
+
+        /* Advanced Filters & Blend Modes */
+        .mix-blend-diff {
+            mix-blend-mode: difference;
+        }
+
+        .mix-blend-overlay {
+            mix-blend-mode: overlay;
+        }
+
+        .mix-blend-exclusion {
+            mix-blend-mode: exclusion;
+        }
+
+        .bg-img-base {
+            position: absolute;
+            inset: 0;
+            background-size: cover;
+            background-position: center;
+            z-index: 0;
+            transform: scale(1.1);
+            transition: transform 1.5s cubic-bezier(0.19, 1, 0.22, 1);
+        }
+
+        .reel-section.is-active .bg-img-base {
+            transform: scale(1);
+        }
+
+        /* Custom Section Themes */
+        .theme-intro {
+            background: radial-gradient(circle at center, #111 0%, #000 100%);
+        }
+
+        .theme-ai .bg-img-base {
+            filter: grayscale(100%) contrast(1.2) url(#duotone-cyan);
+            opacity: 0.4;
+        }
+
+        .theme-consumer .bg-img-base {
+            filter: grayscale(100%) contrast(1.5) url(#duotone-red);
+            opacity: 0.3;
+        }
+
+        .theme-labor .bg-img-base {
+            filter: grayscale(100%) blur(3px) brightness(0.4);
+            opacity: 0.5;
+        }
+
+        .theme-inflation .bg-img-base {
+            filter: url(#heat-distortion) saturate(200%) brightness(0.6) contrast(1.5);
+            opacity: 0.5;
+        }
+
+        .theme-fed .bg-img-base {
+            filter: grayscale(100%) contrast(2) brightness(0.5);
+            opacity: 0.4;
+        }
+
+        /* Animations */
+        .reveal-up {
+            opacity: 0;
+            transform: translateY(40px);
+            transition: opacity 1s ease-out, transform 1s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        .reveal-up.delay-1 {
+            transition-delay: 0.2s;
+        }
+
+        .reveal-up.delay-2 {
+            transition-delay: 0.4s;
+        }
+
+        .reveal-up.delay-3 {
+            transition-delay: 0.6s;
+        }
+
+        .reel-section.is-active .reveal-up {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        /* Noise Overlay */
+        .noise-overlay {
+            position: fixed;
+            inset: 0;
+            z-index: 9999;
+            pointer-events: none;
+            background: url('data:image/svg+xml;utf8,<svg viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg"><filter id="noiseFilter"><feTurbulence type="fractalNoise" baseFrequency="0.8" numOctaves="3" stitchTiles="stitch"/></filter><rect width="100%" height="100%" filter="url(%23noiseFilter)"/></svg>');
+            opacity: 0.05;
+            mix-blend-mode: overlay;
+        }
+
+        /* Layout Utilities */
+        .content-layer {
+            position: relative;
+            z-index: 10;
+            padding: 2rem;
+            max-width: 90vw;
+            margin: 0 auto;
+            width: 100%;
+        }
+
+        .data-box {
+            background: rgba(0, 0, 0, 0.7);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            padding: 1.5rem;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        th,
+        td {
+            padding: 0.75rem;
+            text-align: left;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        th {
+            font-family: 'Space Mono', monospace;
+            text-transform: uppercase;
+            font-size: 0.75rem;
+            color: var(--c-labor);
+        }
+
+        /* Scroll indicator */
+        .scroll-indicator {
+            position: absolute;
+            bottom: 2rem;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 1px;
+            height: 60px;
+            background: rgba(255, 255, 255, 0.2);
+            overflow: hidden;
+        }
+
+        .scroll-indicator::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 50%;
+            background: white;
+            animation: scrollDown 2s infinite ease-in-out;
+        }
+
+        @keyframes scrollDown {
+            0% {
+                transform: translateY(-100%);
+            }
+
+            100% {
+                transform: translateY(200%);
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <!-- SVG Filters Definition -->
+    <svg style="display:none;">
+        <defs>
+            <filter id="duotone-cyan">
+                <feColorMatrix type="matrix" values="
+                    0.33 0.33 0.33 0 0
+                    0.33 0.33 0.33 0 0.94
+                    0.33 0.33 0.33 0 1
+                    0    0    0    1 0" />
+            </filter>
+            <filter id="duotone-red">
+                <feColorMatrix type="matrix" values="
+                    0.33 0.33 0.33 0 1
+                    0.33 0.33 0.33 0 0.16
+                    0.33 0.33 0.33 0 0.16
+                    0    0    0    1 0" />
+            </filter>
+            <filter id="heat-distortion">
+                <feTurbulence type="fractalNoise" baseFrequency="0.01 0.05" numOctaves="2" result="noise" />
+                <feDisplacementMap in="SourceGraphic" in2="noise" scale="20" xChannelSelector="R"
+                    yChannelSelector="G" />
+            </filter>
+        </defs>
+    </svg>
+
+    <div class="noise-overlay"></div>
+
+    <main class="reel-container" id="reel">
+
+        <!-- 00: Intro & Exec Summary -->
+        <section class="reel-section theme-intro">
+            <div class="content-layer flex flex-col justify-between h-full py-12">
+                <div class="reveal-up">
+                    <h1 class="text-xs font-mono text-gray-500 mb-4 tracking-widest">// Domain Report: Macroeconomic
+                        Health</h1>
+                    <div class="font-mono text-sm border-l-2 border-white pl-4 max-w-2xl text-gray-300">
+                        <strong>Goal:</strong> Analyze the current state of the U.S. economy by examining key
+                        macroeconomic indicators. Your brief is to research and report on current GDP growth, inflation
+                        rates, unemployment figures, consumer spending, and interest rate trends. Focus strictly on
+                        aggregate economic performance and the current trajectory of the broader U.S. economy.
+                    </div>
+                </div>
+
+                <div class="reveal-up delay-1 mt-auto mb-12">
+                    <h2 class="font-display text-huge text-white mix-blend-exclusion mb-6">
+                        THE U.S.<br>ECONOMY<br><span class="text-gray-500">MID-2026</span>
+                    </h2>
+                    <p class="text-xl max-w-3xl font-light leading-relaxed">
+                        Growth Resilience Amid Inflationary Pressures and a Hawkish Policy Pivot.
+                    </p>
+                </div>
+
+                <div class="reveal-up delay-2 grid grid-cols-1 md:grid-cols-2 gap-8 text-sm text-gray-400 font-mono">
+                    <p>This report provides a comprehensive, multi-dimensional synthesis of the U.S. economy in
+                        mid-2026. It integrates key macroeconomic indicators—including Gross Domestic Product (GDP),
+                        consumer spending behavior, labor market dynamics, inflationary pressures, and monetary policy
+                        trajectory—to map the current health and direction of the broader economy.</p>
+                    <div class="data-box">
+                        <h3 class="text-white mb-2 font-display">Executive Summary</h3>
+                        <p>The U.S. economy in mid-2026 presents a complex picture of resilience contrasted with
+                            underlying structural strain. On the surface, growth has rebounded, and the labor market
+                            remains stable with steady hiring. However, a deeper examination reveals critical
+                            vulnerabilities.</p>
+                    </div>
+                </div>
+            </div>
+            <div class="scroll-indicator"></div>
+        </section>
+
+        <!-- 01: Growth & AI -->
+        <section class="reel-section theme-ai">
+            <div class="bg-img-base" style="background-image: url('./images/econ-1.jpg');"></div>
+            <div class="content-layer relative h-full flex flex-col justify-center">
+                <div class="grid grid-cols-1 lg:grid-cols-12 gap-8">
+                    <div class="lg:col-span-7 reveal-up">
+                        <h2 class="font-display text-5xl md:text-7xl mb-6 text-[var(--c-ai)] leading-tight">
+                            1. ECONOMIC GROWTH &<br>THE INVESTMENT ENGINE
+                        </h2>
+                        <div class="bg-black/60 backdrop-blur p-6 border-l-4 border-[var(--c-ai)] mb-6">
+                            <p class="mb-4">Following a sluggish fourth quarter in 2025, during which a federal
+                                government shutdown suppressed growth to just 0.5%, the U.S. economy demonstrated
+                                renewed momentum in early 2026. Real GDP expanded at an annualized rate of <strong>1.6%
+                                    in Q1 2026</strong>. This recovery is projected to accelerate, with Q2 2026 nowcast
+                                models tracking at a robust <strong>3.0%</strong>.</p>
+                            <h3 class="font-bold text-[var(--c-ai)] mt-6 mb-2">The AI Capital Expenditure Boom</h3>
+                            <p>The primary engine behind this growth is private nonresidential business investment,
+                                which surged by <strong>8.7%</strong> in Q1. This expansion is heavily concentrated in
+                                the technology sector, driven by massive infrastructure investments to support the
+                                ongoing AI technology buildout. Corporate capital expenditure on data centers, advanced
+                                microprocessors, and software integration has acted as a vital buffer against tighter
+                                financial conditions.</p>
+                        </div>
+                    </div>
+                    <div class="lg:col-span-5 flex flex-col justify-center reveal-up delay-1">
+                        <div class="data-box font-mono text-xs md:text-sm text-[var(--c-ai)] overflow-x-auto mb-6">
+                            <pre class="leading-relaxed">
+U.S. GDP Growth Rate (Annualized)
+=================================
+Q4 2025: █ 0.5% (Shutdown Impact)
+Q1 2026: ███ 1.6%
+Q2 2026: ██████ 3.0% (Projected Nowcast)
+</pre>
+                        </div>
+                        <div class="bg-black/80 p-6 border border-[var(--c-ai)]/30">
+                            <h3 class="font-mono text-white mb-3">Macroeconomic Headwinds</h3>
+                            <ul class="list-none space-y-3 text-sm">
+                                <li class="flex gap-2"><span>></span><span><strong>Geopolitical Energy Shocks:</strong>
+                                        Escalating tensions in the Middle East have pushed Brent crude prices above
+                                        <strong>$126 per barrel</strong>. Economists estimate this energy shock will
+                                        shave approximately 0.3 percentage points off total 2026 GDP growth.</span></li>
+                                <li class="flex gap-2"><span>></span><span><strong>Inventory Drawdowns:</strong>
+                                        Businesses are actively thinning inventories rather than restocking, reflecting
+                                        caution regarding future demand.</span></li>
+                                <li class="flex gap-2"><span>></span><span><strong>Restrictive Monetary Policy:</strong>
+                                        Elevated interest rates continue to suppress capital-intensive sectors such as
+                                        commercial real estate and manufacturing.</span></li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- 02: K-Shaped Consumer -->
+        <section class="reel-section theme-consumer">
+            <div class="bg-img-base" style="background-image: url('./images/econ-2.jpg');"></div>
+            <div class="content-layer relative h-full flex items-center">
+                <div class="max-w-4xl mx-auto w-full">
+                    <div class="reveal-up bg-black/90 p-8 md:p-12 border-t-8 border-[var(--c-strain)] mix-blend-normal">
+                        <h2 class="font-display text-4xl md:text-6xl mb-6 text-white">
+                            2. THE <span class="text-[var(--c-strain)]">K-SHAPED</span><br>CONSUMER
+                        </h2>
+                        <p class="text-lg mb-8 font-light">
+                            Consumer spending, the traditional bedrock of the U.S. economy, rose by a modest
+                            <strong>1.6% in Q1 2026</strong> (matching real GDP growth). However, this aggregate figure
+                            masks a profound structural divide.
+                        </p>
+
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-8 mb-8">
+                            <div>
+                                <h3
+                                    class="font-bold text-white mb-2 uppercase tracking-wider text-sm border-b border-gray-700 pb-2">
+                                    The Upper Tier (Insulated)</h3>
+                                <p class="text-sm text-gray-300">Wealthier households continue to spend robustly,
+                                    particularly on experiential services, travel, and luxury goods. This tier remains
+                                    insulated from macroeconomic pressure due to strong asset appreciation, particularly
+                                    in the equity markets.</p>
+                            </div>
+                            <div>
+                                <h3
+                                    class="font-bold text-[var(--c-strain)] mb-2 uppercase tracking-wider text-sm border-b border-[var(--c-strain)] pb-2">
+                                    The Lower-to-Middle Tier (Strained)</h3>
+                                <p class="text-sm text-gray-300">Lower-income households are facing severe budget
+                                    constraints. The combination of high credit costs (auto loans, credit card APRs) and
+                                    everyday expenses has significantly eroded purchasing power. Retail gasoline
+                                    averages <strong>$4.30 per gallon</strong>, eating into disposable income that would
+                                    otherwise support discretionary retail.</p>
+                            </div>
+                        </div>
+
+                        <div class="bg-[var(--c-strain)]/10 p-6 rounded-sm border border-[var(--c-strain)]/30">
+                            <h3 class="font-mono text-[var(--c-strain)] mb-2">Retail Sales Resilience</h3>
+                            <p class="text-sm">Despite these headwinds, nominal demand remains remarkably sticky.
+                                Nominal retail sales rose <strong>0.9% month-over-month (MoM) in May 2026</strong>,
+                                bringing the year-over-year (YoY) increase to <strong>6.9%</strong> ($763.7 billion
+                                total). While this reflects sustained transaction volumes, much of the nominal increase
+                                is driven by higher prices (especially in fuel and grocery categories) rather than an
+                                increase in real, volume-based consumption.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- 03: Labor Market -->
+        <section class="reel-section theme-labor">
+            <div class="bg-img-base" style="background-image: url('./images/econ-3.jpg');"></div>
+            <div class="content-layer relative h-full flex flex-col justify-center">
+                <div class="reveal-up mb-12 text-center">
+                    <h2 class="font-display text-4xl md:text-5xl text-white mix-blend-overlay">
+                        3. LABOR MARKET DYNAMICS
+                    </h2>
+                    <p class="font-mono text-[var(--c-labor)] text-xl mt-2 tracking-widest uppercase">
+                        Headline Strength, Structural Cooling
+                    </p>
+                </div>
+
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
+                    <div class="reveal-up delay-1 data-box">
+                        <p class="mb-6 text-sm text-gray-300">
+                            The U.S. labor market in mid-2026 is characterized by a "low-hire, low-fire" equilibrium.
+                            While headline figures suggest a highly resilient market, underlying metrics indicate
+                            structural cooling and declining worker leverage.
+                        </p>
+                        <div class="overflow-x-auto">
+                            <table>
+                                <thead>
+                                    <tr>
+                                        <th>Indicator</th>
+                                        <th>May 2026 Value</th>
+                                        <th>Context & Implications</th>
+                                    </tr>
+                                </thead>
+                                <tbody class="text-xs font-mono">
+                                    <tr>
+                                        <td class="font-bold text-white">Unemployment Rate</td>
+                                        <td>4.3%</td>
+                                        <td>Steady; reflects historically low layoff rates.</td>
+                                    </tr>
+                                    <tr>
+                                        <td class="font-bold text-white">Nonfarm Payrolls</td>
+                                        <td class="text-green-400">+172,000</td>
+                                        <td>Exceeded forecasts; supported by +93,000 in upward revisions for prior
+                                            months.</td>
+                                    </tr>
+                                    <tr>
+                                        <td class="font-bold text-white">Labor Force Part.</td>
+                                        <td>61.8%</td>
+                                        <td>Stagnated at a multi-year low; points to a structurally tight labor supply.
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td class="font-bold text-white">Nominal Wage Growth</td>
+                                        <td>3.4% YoY</td>
+                                        <td>Slowing down; indicates diminishing wage-push inflation pressure.</td>
+                                    </tr>
+                                    <tr>
+                                        <td class="font-bold text-[var(--c-strain)]">Real Wage Growth</td>
+                                        <td class="text-[var(--c-strain)]">-0.7% YoY</td>
+                                        <td>Negative; wage growth failed to keep pace with 4.2% inflation, eroding
+                                            consumer power.</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                    <div class="reveal-up delay-2 bg-black/80 p-8 border-r-4 border-[var(--c-labor)]">
+                        <h3 class="font-display text-white mb-4">Concentration and Slack</h3>
+                        <p class="text-sm text-gray-300 mb-4">
+                            The labor market's apparent strength is heavily concentrated. In May, <strong>73.4% of all
+                                job gains</strong> occurred in just two sectors: Leisure and Hospitality, and Local
+                            Government. This leaves the majority of the private sector—such as professional services,
+                            technology, and manufacturing—flat or contracting in headcount.
+                        </p>
+                        <p class="text-sm text-gray-300">
+                            Furthermore, labor market slack is quietly accumulating. Long-term unemployment (those
+                            jobless for 27 weeks or more) has climbed to <strong>27.5% of the total unemployed
+                                population</strong>. This indicates that while employers are hesitant to lay off workers
+                            (retaining talent acquired during the pandemic recovery), those who do lose their jobs are
+                            finding it increasingly difficult to secure new employment.
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- 04: Inflation & Energy -->
+        <section class="reel-section theme-inflation">
+            <div class="bg-img-base" style="background-image: url('./images/econ-4.jpg');"></div>
+            <div class="content-layer relative h-full flex flex-col justify-end pb-24">
+                <div class="grid grid-cols-1 lg:grid-cols-12 gap-8">
+                    <div class="lg:col-span-8 reveal-up">
+                        <h2 class="font-display text-5xl md:text-8xl text-[var(--c-heat)] mix-blend-exclusion mb-4">
+                            4. INFLATION
+                        </h2>
+                        <h3 class="font-mono text-2xl text-white bg-black/50 inline-block px-4 py-2 mb-6 backdrop-blur">
+                            AND THE GEOPOLITICAL ENERGY SHOCK
+                        </h3>
+                        <div class="bg-black/70 backdrop-blur p-6 text-gray-200 border-t border-[var(--c-heat)]">
+                            <p class="mb-4">Inflation has re-accelerated in mid-2026, presenting the most significant
+                                risk to the current expansion.</p>
+                            <ul class="space-y-4 text-sm">
+                                <li><strong>Consumer Price Index (CPI):</strong> May 2026 CPI jumped to <strong
+                                        class="text-[var(--c-heat)]">+4.2% YoY</strong> (+0.5% MoM), driven primarily by
+                                    spiking energy and transportation costs.</li>
+                                <li><strong>Core CPI:</strong> Excluding volatile food and energy, Core CPI remained
+                                    comparatively anchored at <strong>+2.9% YoY</strong> (+0.2% MoM), indicating that
+                                    core goods and services are stabilizing.</li>
+                                <li><strong>PCE Price Index:</strong> The Federal Reserve’s preferred inflation metric,
+                                    April PCE, stood at <strong>+3.8% YoY</strong> (+0.40% MoM), with Core PCE at
+                                    <strong>+3.3% YoY</strong> (+0.24% MoM).
+                                </li>
+                            </ul>
+                            <p class="mt-4 text-xs font-mono opacity-80">
+                                The main catalyst for the CPI surge is the Middle East geopolitical crisis, which has
+                                maintained Brent crude at more than $126 per barrel. This has led to a direct
+                                passthrough into gasoline, aviation fuel, and logistics costs, keeping headline
+                                inflation well above the Federal Reserve's 2.0% target.
+                            </p>
+                        </div>
+                    </div>
+                    <div class="lg:col-span-4 flex items-end reveal-up delay-1">
+                        <div class="data-box w-full font-mono text-[var(--c-heat)] text-xs">
+                            <pre class="leading-relaxed overflow-x-hidden">
+Inflation Metrics (YoY)
+=========================
+Core CPI:  ██████ 2.9%
+Core PCE:  ███████ 3.3%
+April PCE: ████████ 3.8%
+May CPI:   █████████ 4.2%
+(Highest in 3 years)
+</pre>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- 05: Fed Policy & Conclusion -->
+        <section class="reel-section theme-fed">
+            <div class="bg-img-base" style="background-image: url('./images/econ-5.jpg');"></div>
+            <div class="content-layer relative h-full flex flex-col justify-center">
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-12">
+                    <div class="reveal-up bg-white text-black p-8 md:p-12">
+                        <h2 class="font-display text-4xl mb-4">
+                            5. MONETARY POLICY
+                        </h2>
+                        <h3 class="font-mono font-bold mb-6 text-xl">
+                            The "Warsh Fed" and the Hawkish Pivot
+                        </h3>
+                        <p class="mb-4 text-sm font-medium">
+                            In response to persistent inflation and resilient employment data, the Federal Open Market
+                            Committee (FOMC) underwent a major regime shift at its June 16–17, 2026 meeting under newly
+                            appointed Fed Chair Kevin Warsh.
+                        </p>
+                        <h4 class="font-bold text-lg mb-2 border-b border-black pb-1">The "Inflation First" Regime</h4>
+                        <p class="text-sm mb-6">
+                            While the Fed held the federal funds target range steady at <strong>3.50% to 3.75%</strong>
+                            (marking its fourth consecutive pause), the tone of the meeting was intensely hawkish. Chair
+                            Warsh has instituted a streamlined, hardline communication style, stripping out
+                            forward-looking easing language and slashing the length of the official FOMC statement to
+                            just 114 words. Under this regime, the Fed has made it clear that combating inflation will
+                            take precedence over supporting maximum employment.
+                        </p>
+
+                        <h4 class="font-bold text-lg mb-2 border-b border-black pb-1">Trajectory and Market Reaction
+                        </h4>
+                        <ul class="text-sm space-y-2 list-disc pl-4">
+                            <li><strong>The Dot Plot:</strong> 9 out of 18 FOMC participants now project rate hikes in
+                                2026 (with 6 committee members expecting two separate hikes).</li>
+                            <li><strong>Market Pricing:</strong> Financial markets have aligned with this hawkish tone,
+                                pricing in an <strong>85%+ probability of at least one rate hike</strong> by the end of
+                                2026.</li>
+                            <li><strong>Treasury Yields:</strong> The 2-year U.S. Treasury yield spiked to
+                                <strong>4.216%</strong> following the June meeting, reflecting expectations of
+                                higher-for-longer policy rates.
+                            </li>
+                        </ul>
+                    </div>
+
+                    <div class="reveal-up delay-1 flex flex-col justify-end">
+                        <div class="bg-black p-8 md:p-12 border border-white">
+                            <h2 class="font-display text-3xl text-white mb-6 tracking-widest">
+                                CONCLUSION & OUTLOOK
+                            </h2>
+                            <p class="text-gray-300 text-sm mb-4 leading-relaxed">
+                                The U.S. economy enters the second half of 2026 on a knife-edge. The tech-led investment
+                                boom and nominal retail resilience are keeping the economy out of recession, with Q2 GDP
+                                poised for a strong showing. However, this growth is running alongside a highly
+                                restrictive interest rate environment and persistent, energy-driven inflation.
+                            </p>
+                            <p class="text-gray-300 text-sm leading-relaxed">
+                                With real wages declining, consumer spending bifurcating, and the Federal Reserve
+                                actively preparing to raise rates further, the risk of a growth slowdown or a "hard
+                                landing" in late 2026 or early 2027 remains elevated. The key variable to watch over the
+                                coming quarters will be whether the AI capital expenditure boom and service-sector
+                                hiring can continue to withstand the pressure of a hawkish Federal Reserve and
+                                $126-per-barrel oil.
+                            </p>
+                            <div class="w-full h-px bg-gradient-to-r from-transparent via-white to-transparent mt-8">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <script>
+        // Vanilla JS Intersection Observer to trigger animations on scroll
+        document.addEventListener("DOMContentLoaded", () => {
+            const sections = document.querySelectorAll('.reel-section');
+
+            const observerOptions = {
+                root: document.querySelector('#reel'),
+                threshold: 0.5 // Trigger when 50% of the section is visible
+            };
+
+            const observer = new IntersectionObserver((entries) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        entry.target.classList.add('is-active');
+                    } else {
+                        // Optional: remove class if you want animations to replay on scroll up/down
+                        // entry.target.classList.remove('is-active');
+                    }
+                });
+            }, observerOptions);
+
+            sections.forEach(sec => {
+                observer.observe(sec);
+            });
+        });
+    </script>
+</body>
+
+</html>

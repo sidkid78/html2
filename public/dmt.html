@@ -1,0 +1,609 @@
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Mapping the Impossible: DMT</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Space+Mono:ital,wght@0,400;0,700;1,400&family=Syne:wght@400;600;800&display=swap');
+
+    :root {
+      --glow-cyan: #00f0ff;
+      --glow-pink: #ff003c;
+      --bg-dark: #050508;
+    }
+
+    body {
+      background-color: var(--bg-dark);
+      color: #e2e8f0;
+      font-family: 'Syne', sans-serif;
+      overflow-x: hidden;
+    }
+
+    h1,
+    h2,
+    h3,
+    .mono {
+      font-family: 'Space Mono', monospace;
+    }
+
+    /* SVG Filter Textures */
+    .noise-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
+      pointer-events: none;
+      z-index: 9999;
+      opacity: 0.15;
+      mix-blend-mode: overlay;
+    }
+
+    /* Custom Animations */
+    @keyframes hueShift {
+      0% {
+        filter: hue-rotate(0deg) contrast(1.2);
+      }
+
+      50% {
+        filter: hue-rotate(180deg) contrast(1.5);
+      }
+
+      100% {
+        filter: hue-rotate(360deg) contrast(1.2);
+      }
+    }
+
+    @keyframes float {
+      0% {
+        transform: translateY(0px) rotate(0deg);
+      }
+
+      50% {
+        transform: translateY(-20px) rotate(2deg);
+      }
+
+      100% {
+        transform: translateY(0px) rotate(0deg);
+      }
+    }
+
+    @keyframes glitch-anim {
+      0% {
+        clip-path: inset(10% 0 80% 0);
+        transform: translate(-2px, 2px);
+      }
+
+      20% {
+        clip-path: inset(80% 0 5% 0);
+        transform: translate(2px, -2px);
+      }
+
+      40% {
+        clip-path: inset(40% 0 40% 0);
+        transform: translate(2px, 2px);
+      }
+
+      60% {
+        clip-path: inset(20% 0 60% 0);
+        transform: translate(-2px, -2px);
+      }
+
+      80% {
+        clip-path: inset(60% 0 20% 0);
+        transform: translate(2px, 2px);
+      }
+
+      100% {
+        clip-path: inset(5% 0 90% 0);
+        transform: translate(-2px, -2px);
+      }
+    }
+
+    /* Classes */
+    .glitch-text {
+      position: relative;
+    }
+
+    .glitch-text::before,
+    .glitch-text::after {
+      content: attr(data-text);
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      opacity: 0.8;
+    }
+
+    .glitch-text::before {
+      color: var(--glow-cyan);
+      z-index: -1;
+      animation: glitch-anim 3s infinite linear alternate-reverse;
+    }
+
+    .glitch-text::after {
+      color: var(--glow-pink);
+      z-index: -2;
+      animation: glitch-anim 2.5s infinite linear alternate-reverse;
+    }
+
+    .hyperspace-bg {
+      animation: hueShift 15s infinite linear;
+      mix-blend-mode: screen;
+    }
+
+    .glass-card {
+      background: rgba(10, 10, 15, 0.6);
+      backdrop-filter: blur(12px);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      box-shadow: 0 4px 30px rgba(0, 0, 0, 0.5);
+    }
+
+    /* Scroll Reveals */
+    .reveal {
+      opacity: 0;
+      transform: translateY(50px);
+      transition: all 1s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    .reveal.active {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    .carrier-wave {
+      width: 100%;
+      height: 100px;
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 800 100'%3E%3Cpath d='M0,50 Q100,0 200,50 T400,50 T600,50 T800,50' fill='none' stroke='%2300f0ff' stroke-width='2' stroke-opacity='0.5'/%3E%3C/svg%3E");
+      background-size: 400px 100%;
+      animation: waveMove 2s linear infinite;
+    }
+
+    @keyframes waveMove {
+      from {
+        background-position: 0 0;
+      }
+
+      to {
+        background-position: -400px 0;
+      }
+    }
+
+    .text-stroke {
+      color: transparent;
+      -webkit-text-stroke: 1px rgba(255, 255, 255, 0.8);
+    }
+  </style>
+</head>
+
+<body class="antialiased selection:bg-cyan-500 selection:text-black">
+
+  <!-- SVG Filters Container -->
+  <svg class="hidden">
+    <filter id="noise">
+      <feTurbulence type="fractalNoise" baseFrequency="0.7" numOctaves="3" stitchTiles="stitch" />
+      <feColorMatrix type="matrix" values="1 0 0 0 0, 0 1 0 0 0, 0 0 1 0 0, 0 0 0 0.15 0" />
+    </filter>
+    <filter id="displacement">
+      <feTurbulence type="fractalNoise" baseFrequency="0.02" numOctaves="3" result="noise" />
+      <feDisplacementMap in="SourceGraphic" in2="noise" scale="30" xChannelSelector="R" yChannelSelector="G" />
+    </filter>
+  </svg>
+
+  <div class="noise-overlay" style="filter: url(#noise);"></div>
+
+  <!-- Ticker / Meta -->
+  <div
+    class="fixed top-0 w-full z-50 border-b border-white/10 bg-black/50 backdrop-blur-md py-2 overflow-hidden pointer-events-none">
+    <div
+      class="whitespace-nowrap flex space-x-8 animate-[waveMove_10s_linear_infinite] text-xs mono text-cyan-400 tracking-widest uppercase">
+      <span>#DMT</span> <span>#Neuroscience</span> <span>#Psychedelics</span> <span>#DMT-PI</span>
+      <span>#Neuroimaging</span> <span>#Psychopharmacology</span>
+      <span>#DMT</span> <span>#Neuroscience</span> <span>#Psychedelics</span> <span>#DMT-PI</span>
+      <span>#Neuroimaging</span> <span>#Psychopharmacology</span>
+    </div>
+  </div>
+
+  <!-- HERO SECTION -->
+  <section class="relative h-screen flex items-center justify-center overflow-hidden">
+    <div class="absolute inset-0 z-0">
+      <img src="./images/dmt-1.png" alt="Brain Mapping" class="w-full h-full object-cover opacity-60 mix-blend-lighten"
+        style="filter: url(#displacement);">
+      <div class="absolute inset-0 bg-gradient-to-b from-transparent via-black/50 to-[#050508]"></div>
+    </div>
+
+    <div class="relative z-10 text-center px-4 max-w-5xl mx-auto flex flex-col items-center">
+      <h1 class="text-6xl md:text-8xl font-black uppercase tracking-tighter leading-none mb-6 glitch-text"
+        data-text="Mapping the Impossible">
+        Mapping the <br><span class="text-stroke">Impossible</span>
+      </h1>
+      <h2 class="text-xl md:text-2xl mono text-cyan-300 max-w-3xl mb-8 leading-relaxed">
+        The Neurobiology, Phenomenology, and Clinical Future of N,N-Dimethyltryptamine (DMT)
+      </h2>
+      <p class="text-sm text-gray-400 max-w-2xl mx-auto font-light leading-loose">
+        Explore the neuroscience and clinical future of DMT. Discover fMRI brain mapping, participant-reported entity
+        encounters, and Extended-State DMT (DMT-PI).
+      </p>
+      <div class="mt-12 w-[1px] h-24 bg-gradient-to-b from-cyan-400 to-transparent"></div>
+    </div>
+  </section>
+
+  <!-- INTRODUCTION -->
+  <section class="py-24 px-6 md:px-12 relative z-10">
+    <div class="max-w-4xl mx-auto glass-card p-8 md:p-12 reveal">
+      <div class="text-cyan-400 mono text-sm mb-4">/// 00. INTRODUCTION</div>
+      <h3 class="text-3xl md:text-5xl font-bold mb-8">Deciphering the 'Spirit Molecule' through the Dual Lenses of
+        Modern Neuroscience and Quantitative Phenomenology</h3>
+      <div class="space-y-6 text-gray-300 text-lg leading-relaxed">
+        <p>
+          N,N-Dimethyltryptamine (DMT) is a naturally occurring, highly potent tryptamine alkaloid that stands as one of
+          the most enigmatic compounds in psychopharmacology. Classified as a classic psychedelic alongside psilocybin
+          and LSD, DMT produces an exceptionally rapid, visually intense, and ontologically disruptive altered state of
+          consciousness.
+        </p>
+        <p>
+          Historically utilized for centuries in South American shamanic rituals as the psychoactive engine of the brew
+          ayahuasca, modern clinical research has shifted toward investigating isolated, vaporized, or intravenously
+          administered DMT.
+        </p>
+        <p>
+          This scientific pivot has revealed a highly consistent, structured, and biologically complex phenomenon that
+          challenges our traditional understanding of brain function and subjective reality. By integrating cutting-edge
+          functional neuroimaging, electrophysiological data, and rigorous phenomenological mapping, researchers are
+          beginning to decode the mechanics of the DMT state. This report explores the neurochemical pathways, the
+          dramatic neural reconfigurations under its influence, the chronological phases of the subjective experience,
+          the mysterious consistency of entity encounters, and the emerging clinical applications of extended-state
+          infusions. Through this dual investigation, DMT emerges not merely as a hallucinogen, but as a powerful
+          scientific instrument for mapping the furthest frontiers of human consciousness.
+        </p>
+      </div>
+    </div>
+  </section>
+
+  <!-- 1. PHARMACOLOGY -->
+  <section class="py-24 px-6 md:px-12 bg-black relative">
+    <div class="absolute left-0 top-1/4 w-96 h-96 bg-cyan-900/20 rounded-full blur-[100px]"></div>
+    <div class="max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-2 gap-16 items-center">
+      <div class="reveal">
+        <div class="text-pink-500 mono text-sm mb-4">/// 01. PATHWAYS</div>
+        <h3 class="text-4xl font-bold mb-6">Pharmacological Profiles and Neurochemical Pathways</h3>
+        <div class="text-gray-400 space-y-4 leading-relaxed">
+          <p>
+            DMT is structurally derived from the essential amino acid L-tryptophan, sharing a core indole ring with the
+            neurotransmitter serotonin (5-hydroxytryptamine, or 5-HT). Its primary psychedelic effects are mediated via
+            high-affinity agonism at the <span class="text-white mono">5-HT2A serotonin receptor</span>, located on the
+            apical dendrites of pyramidal cells in layer V of the prefrontal cortex.
+          </p>
+          <p>
+            This activation disrupts normal cortical processing, sparking profound sensory and cognitive alterations.
+            Uniquely, DMT also binds with high affinity to the Sigma-1 receptor, an intracellular chaperone protein in
+            the endoplasmic reticulum associated with calcium signaling, neuroprotection, and synaptic plasticity.
+          </p>
+          <p>
+            In terms of pharmacokinetics, inhaled or intravenous DMT bypasses first-pass metabolism, producing an
+            instantaneous onset (5–15 seconds) and a peak that subsides within 15–30 minutes—a rapid profile that earned
+            it the mid-20th-century colloquial moniker of the "businessman's trip" due to its brief duration.
+            Conversely, oral ingestion requires co-administration with monoamine oxidase inhibitors (MAOIs), as seen in
+            the indigenous Amazonian brew ayahuasca, which extends the experience to 4–8 hours by preventing enzymatic
+            breakdown of DMT by MAO-A in the gut.
+          </p>
+        </div>
+      </div>
+      <div class="relative reveal glass-card p-6 border-pink-500/20">
+        <div class="text-xs mono text-pink-400 mb-2">Receptor Affinity Model</div>
+        <!-- Abstract representation of molecule/receptor -->
+        <div
+          class="w-full aspect-square border border-white/10 relative overflow-hidden flex items-center justify-center">
+          <div class="absolute inset-0 bg-[radial-gradient(circle_at_center,rgba(255,0,60,0.1)_0,transparent_100%)]">
+          </div>
+          <div class="w-32 h-32 border border-pink-500/50 rounded-full animate-ping absolute"></div>
+          <div class="w-16 h-16 bg-pink-500 rounded-full shadow-[0_0_50px_#ff003c]"></div>
+          <div class="absolute top-4 left-4 text-xs mono">5-HT2A</div>
+          <div class="absolute bottom-4 right-4 text-xs mono">Sigma-1</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 2. NEUROIMAGING (EEG/fMRI) -->
+  <section class="py-24 relative overflow-hidden">
+    <div class="absolute inset-0 z-0">
+      <img src="./images/dmt-2.png" alt="EEG Data" class="w-full h-full object-cover opacity-30 mix-blend-difference">
+      <div class="absolute inset-0 bg-gradient-to-t from-[#050508] via-transparent to-[#050508]"></div>
+    </div>
+    <div class="relative z-10 max-w-5xl mx-auto px-6">
+      <div class="reveal text-center mb-16">
+        <div class="text-cyan-400 mono text-sm mb-4">/// 02. BRAIN MAPPING</div>
+        <h3 class="text-4xl md:text-6xl font-bold">The Neuroimaging Frontier</h3>
+      </div>
+
+      <div class="grid md:grid-cols-2 gap-8">
+        <div class="glass-card p-8 reveal border-t-2 border-t-cyan-500">
+          <h4 class="text-xl mono mb-4">Electrophysiology (EEG)</h4>
+          <p class="text-gray-300 leading-relaxed">
+            Breakthrough research led by Imperial College London has mapped the neural correlates of the DMT state using
+            simultaneous fMRI and EEG. Electrophysiologically, DMT causes a dramatic suppression of alpha and beta
+            oscillations (8–30 Hz), which normally maintain waking baseline consciousness. Simultaneously, there is a
+            pronounced spike in slow-frequency delta (1–4 Hz) and theta (4–8 Hz) waves, a pattern highly reminiscent of
+            REM sleep and active dreaming states. This is accompanied by a massive increase in signal diversity,
+            indicating a highly entropic, information-rich brain state.
+          </p>
+        </div>
+        <div class="glass-card p-8 reveal border-t-2 border-t-pink-500">
+          <h4 class="text-xl mono mb-4">Functional MRI (fMRI)</h4>
+          <p class="text-gray-300 leading-relaxed">
+            On a functional level, fMRI scans reveal the profound dissolution of the Default Mode Network (DMN), the
+            brain's executive hub responsible for the narrative self and ego boundaries. The normal hierarchical,
+            top-down processing of the brain collapses, transitioning into an "anarchic" state of hyper-connectivity.
+            Sensory and reflective networks fire in direct synchronization, blurring the line between internal imagery
+            and external reality, making DMT visions feel, to the participant, "more real than real."
+          </p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 3. PHENOMENOLOGY (The Journey) -->
+  <section class="relative">
+    <!-- Sticky Background for Journey -->
+    <div class="sticky top-0 h-screen w-full z-0 overflow-hidden">
+      <img src="./images/dmt-3.png" alt="Hyperspace" class="w-full h-full object-cover hyperspace-bg opacity-80">
+      <div class="absolute inset-0 bg-black/60"></div>
+      <!-- Carrier Wave overlay -->
+      <div class="absolute top-1/2 left-0 w-full transform -translate-y-1/2 opacity-30 mix-blend-screen">
+        <div class="carrier-wave"></div>
+        <div class="carrier-wave" style="animation-direction: reverse; filter: hue-rotate(90deg);"></div>
+      </div>
+    </div>
+
+    <!-- Scrolling Content -->
+    <div class="relative z-10 -mt-[100vh]">
+      <div class="max-w-4xl mx-auto px-6 pt-32 pb-64">
+        <div class="text-center mb-32 reveal">
+          <div class="text-white mono text-sm mb-4 bg-white/10 inline-block px-4 py-1 rounded-full backdrop-blur">///
+            03. CHRONOLOGICAL PHENOMENOLOGY</div>
+          <h3 class="text-5xl md:text-7xl font-bold text-white drop-shadow-[0_0_20px_rgba(255,255,255,0.5)]">
+            Mapping the Subjective Experience
+          </h3>
+          <p class="mt-6 text-xl text-white/80">The subjective trajectory of a breakthrough DMT dose unfolds in four
+            distinct phases:</p>
+        </div>
+
+        <div class="space-y-[50vh]">
+          <!-- Phase 1 -->
+          <div
+            class="glass-card p-10 reveal transform transition-transform hover:scale-105 border-l-4 border-l-red-500">
+            <div
+              class="text-5xl font-black text-transparent bg-clip-text bg-gradient-to-br from-red-400 to-red-600 mb-2">
+              PHASE 1</div>
+            <h4 class="text-2xl mono text-white mb-6">"The Blast Off" <span class="text-sm text-gray-400">(0–60
+                seconds)</span></h4>
+            <p class="text-xl text-gray-200 leading-relaxed">
+              Characterized by extreme cognitive acceleration, a rising high-pitched auditory "carrier wave," and
+              physical dissolution as motor control is lost.
+            </p>
+          </div>
+
+          <!-- Phase 2 -->
+          <div
+            class="glass-card p-10 reveal transform transition-transform hover:scale-105 border-l-4 border-l-orange-500 ml-0 md:ml-12">
+            <div
+              class="text-5xl font-black text-transparent bg-clip-text bg-gradient-to-br from-orange-400 to-yellow-500 mb-2">
+              PHASE 2</div>
+            <h4 class="text-2xl mono text-white mb-6">"The Threshold" or "Waiting Room" <span
+                class="text-sm text-gray-400">(1–2 minutes)</span></h4>
+            <p class="text-xl text-gray-200 leading-relaxed">
+              Presents a highly complex, fast-moving geometric membrane or cosmic curtain, where users feel a sense of
+              intense anticipation.
+            </p>
+          </div>
+
+          <!-- Phase 3 -->
+          <div
+            class="glass-card p-10 reveal transform transition-transform hover:scale-105 border-l-4 border-l-cyan-500 ml-0 md:ml-24">
+            <div
+              class="text-5xl font-black text-transparent bg-clip-text bg-gradient-to-br from-cyan-400 to-blue-600 mb-2">
+              PHASE 3</div>
+            <h4 class="text-2xl mono text-white mb-6">"The Breakthrough" or "Hyperspace" <span
+                class="text-sm text-gray-400">(2–10 minutes)</span></h4>
+            <p class="text-xl text-gray-200 leading-relaxed">
+              Occurs when this geometric veil shatters, thrusting consciousness into a fully realized, non-Euclidean
+              three-dimensional space. Here, the user experiences a complete loss of physical self-awareness, navigating
+              an alternate universe populated by impossible architecture and seemingly autonomous intelligences.
+            </p>
+          </div>
+
+          <!-- Phase 4 -->
+          <div
+            class="glass-card p-10 reveal transform transition-transform hover:scale-105 border-l-4 border-l-purple-500 ml-0 md:ml-12">
+            <div
+              class="text-5xl font-black text-transparent bg-clip-text bg-gradient-to-br from-purple-400 to-pink-600 mb-2">
+              PHASE 4</div>
+            <h4 class="text-2xl mono text-white mb-6">"The Return" <span class="text-sm text-gray-400">(10–20
+                minutes)</span></h4>
+            <p class="text-xl text-gray-200 leading-relaxed">
+              Features the gradual re-localization of the ego and narrative memory in reverse order, leaving a profound
+              visual afterglow and intense feelings of awe, gratitude, and cognitive clarity.
+            </p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 4. ENTITIES & HOPKINS SURVEY -->
+  <section class="py-32 px-6 bg-[#020204] relative z-20">
+    <div class="max-w-6xl mx-auto">
+      <div class="text-center reveal mb-20">
+        <div class="text-purple-400 mono text-sm mb-4">/// 04. AUTONOMOUS INTELLIGENCES</div>
+        <h3 class="text-4xl md:text-5xl font-bold mb-8">The Phenomenology of Entity Encounters</h3>
+        <p class="text-xl text-gray-400 max-w-4xl mx-auto">
+          The most extraordinary aspect of the DMT experience is the frequent encounter with seemingly autonomous,
+          intelligent, non-human entities. These encounters consistently align with specific participant-reported
+          archetypes:
+        </p>
+      </div>
+
+      <!-- Archetypes Grid -->
+      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-24 reveal">
+        <div class="border border-white/10 p-6 hover:bg-white/5 transition-colors">
+          <h5 class="text-cyan-300 mono text-lg mb-2">Machine Elves</h5>
+          <p class="text-sm text-gray-400">Mischievous beings presenting geometric linguistic toys.</p>
+        </div>
+        <div class="border border-white/10 p-6 hover:bg-white/5 transition-colors">
+          <h5 class="text-cyan-300 mono text-lg mb-2">Insectoids / Mantis</h5>
+          <p class="text-sm text-gray-400">Clinical beings performing cognitive or biological upgrades.</p>
+        </div>
+        <div class="border border-white/10 p-6 hover:bg-white/5 transition-colors">
+          <h5 class="text-cyan-300 mono text-lg mb-2">Jesters</h5>
+          <p class="text-sm text-gray-400">Mocking entities testing the user's ego and attachments.</p>
+        </div>
+        <div class="border border-white/10 p-6 hover:bg-white/5 transition-colors lg:col-span-1">
+          <h5 class="text-cyan-300 mono text-lg mb-2">Ancient Guides</h5>
+          <p class="text-sm text-gray-400">Wise figures imparting existential or personal knowledge.</p>
+        </div>
+        <div class="border border-white/10 p-6 hover:bg-white/5 transition-colors lg:col-span-2">
+          <h5 class="text-cyan-300 mono text-lg mb-2">Beings of Light</h5>
+          <p class="text-sm text-gray-400">Formless entities radiating unconditional love and unity.</p>
+        </div>
+      </div>
+
+      <!-- Stats -->
+      <div class="glass-card p-12 reveal">
+        <h4 class="text-2xl mb-8 text-center">Johns Hopkins University 2020 Survey (2,561 respondents)</h4>
+        <div class="grid grid-cols-2 md:grid-cols-4 gap-8 text-center">
+          <div>
+            <div class="text-5xl md:text-7xl font-black text-cyan-400 mb-2">81<span class="text-3xl">%</span></div>
+            <div class="text-xs mono text-gray-400">Felt encounter was "more real than real" during experience</div>
+          </div>
+          <div>
+            <div class="text-5xl md:text-7xl font-black text-pink-500 mb-2">65<span class="text-3xl">%</span></div>
+            <div class="text-xs mono text-gray-400">Maintained belief in realness post-trip</div>
+          </div>
+          <div>
+            <div class="text-5xl md:text-7xl font-black text-purple-400 mb-2">85<span class="text-3xl">%</span></div>
+            <div class="text-xs mono text-gray-400">Reported telepathic communication</div>
+          </div>
+          <div>
+            <div class="text-5xl md:text-7xl font-black text-yellow-400 mb-2">80<span class="text-3xl">%</span></div>
+            <div class="text-xs mono text-gray-400">Experience fundamentally altered reality conception</div>
+          </div>
+        </div>
+        <div class="mt-12 text-center text-gray-300 border-t border-white/10 pt-8">
+          <p>A massive metaphysical shift was documented: <span class="text-white font-bold">atheist identification
+              dropped from 28% to just 10%</span> post-encounter, with participants overwhelmingly transitioning toward
+            panpsychism or spiritual frameworks.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 5. CLINICAL FUTURE (DMT-PI) -->
+  <section class="py-32 relative bg-white text-black overflow-hidden z-20">
+    <div class="absolute inset-0 z-0">
+      <img src="./images/dmt-4.png" alt="Clinical Setting" class="w-full h-full object-cover opacity-10">
+    </div>
+
+    <div class="relative z-10 max-w-6xl mx-auto px-6 grid grid-cols-1 md:grid-cols-2 gap-16 items-center">
+      <div class="reveal">
+        <div class="w-full aspect-video rounded-xl overflow-hidden shadow-2xl relative">
+          <img src="./images/dmt-4.png" alt="Clinical Research Lab" class="w-full h-full object-cover">
+          <div class="absolute bottom-4 left-4 bg-black/80 text-white text-xs mono px-3 py-1 rounded backdrop-blur">
+            TARGET-CONTROLLED INFUSION ACTIVE</div>
+        </div>
+      </div>
+      <div class="reveal">
+        <div class="text-blue-600 mono text-sm mb-4 font-bold">/// 05. CLINICAL APPLICATION</div>
+        <h3 class="text-4xl md:text-5xl font-bold mb-6 tracking-tight">Extended-State DMT (DMT-PI)</h3>
+        <div class="space-y-6 text-gray-800 text-lg">
+          <p>
+            While sharing a 5-HT2A activation profile with psilocybin and LSD, vaporized DMT is distinguished by its
+            ultra-rapid onset, brief duration, and high frequency of autonomous entity encounters. However, its brief
+            10-minute window historically limited its utility in standard psychotherapy.
+          </p>
+          <p>
+            To overcome this, researchers at Imperial College London have pioneered <strong>Extended-State DMT (DMT-PI,
+              or DMT Prolonged Infusion)</strong> using target-controlled intravenous infusions—a technology adapted
+            from surgical anesthesia.
+          </p>
+          <div class="bg-blue-50 border-l-4 border-blue-500 p-6">
+            <p class="text-sm text-blue-900 font-medium">
+              By continuously administering micro-adjusted doses of IV DMT, clinical researchers can safely prolong the
+              breakthrough state for 30, 45, or 60 minutes.
+            </p>
+          </div>
+          <p>
+            This extended window offers unprecedented therapeutic potential, allowing patients to navigate deep
+            subconscious spaces, interact with therapeutic insights, and process complex trauma under the active,
+            real-time guidance of a trained therapist, opening a revolutionary pathway for treating depression,
+            addiction, and existential anxiety.
+          </p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- CONCLUSION -->
+  <section class="py-40 px-6 bg-[#050508] relative text-center z-20 flex flex-col justify-center items-center">
+    <div class="max-w-4xl mx-auto reveal">
+      <h2
+        class="text-3xl md:text-5xl font-bold mb-12 bg-clip-text text-transparent bg-gradient-to-r from-cyan-400 to-purple-500">
+        Redefining Reality
+      </h2>
+      <div class="space-y-8 text-xl text-gray-400 font-light leading-relaxed">
+        <p>
+          In conclusion, N,N-Dimethyltryptamine represents a profound intersection of molecular biology, neuroimaging,
+          and existential philosophy. By dismantling the brain's default networks and flattening its cognitive
+          hierarchy, DMT allows the human mind to step outside its evolutionary filters, revealing a highly structured,
+          hyper-dimensional phenomenological landscape.
+        </p>
+        <p>
+          The consistent nature of entity encounters and the permanent metaphysical shifts observed in clinical surveys
+          challenge materialist paradigms of consciousness.
+        </p>
+        <p class="text-2xl text-white font-normal mt-12">
+          As pioneering techniques like Extended-State DMT (DMT-PI) extend this state into viable therapeutic windows,
+          DMT is transitioning from an exotic ethnobotanical anomaly into an invaluable clinical instrument. Ultimately,
+          the scientific investigation of the "spirit molecule" promises not only to revolutionize psychiatric medicine
+          but also to redefine our fundamental understanding of the relationship between brain activity, subjective
+          experience, and the nature of reality itself.
+        </p>
+      </div>
+      <div class="mt-24 text-xs mono text-gray-600">
+        [ END OF REPORT ]
+      </div>
+    </div>
+  </section>
+
+  <script>
+    // Scroll Reveal Logic
+    document.addEventListener('DOMContentLoaded', () => {
+      const reveals = document.querySelectorAll('.reveal');
+
+      const revealObserver = new IntersectionObserver((entries, observer) => {
+        entries.forEach(entry => {
+          if (entry.isIntersecting) {
+            entry.target.classList.add('active');
+            // Optional: stop observing once revealed
+            // observer.unobserve(entry.target);
+          } else {
+            // Optional: hide again when scrolling up
+            entry.target.classList.remove('active');
+          }
+        });
+      }, {
+        root: null,
+        threshold: 0.15,
+        rootMargin: "0px 0px -50px 0px"
+      });
+
+      reveals.forEach(el => revealObserver.observe(el));
+    });
+  </script>
+</body>
+
+</html>

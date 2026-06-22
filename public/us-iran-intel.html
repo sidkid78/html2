@@ -1,0 +1,272 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>US-IRAN INTELLIGENCE DIRECTORY // 2026</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Syncopate:wght@400;700&display=swap"
+        rel="stylesheet">
+    <style>
+        :root {
+            --phosphor: #00ff66;
+            --phosphor-dim: #005522;
+            --alert: #ff3300;
+            --bg: #050505;
+        }
+
+        body {
+            margin: 0;
+            background-color: var(--bg);
+            color: #e0e0e0;
+            font-family: 'Share Tech Mono', monospace;
+            overflow-x: hidden;
+            min-height: 100vh;
+        }
+
+        h1, h2, h3, .title-font {
+            font-family: 'Syncopate', sans-serif;
+            text-transform: uppercase;
+        }
+
+        ::-webkit-scrollbar { width: 0; background: transparent; }
+
+        .crt-overlay {
+            position: fixed;
+            inset: 0;
+            pointer-events: none;
+            z-index: 9999;
+            background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.25) 50%), linear-gradient(90deg, rgba(255, 0, 0, 0.06), rgba(0, 255, 0, 0.02), rgba(0, 0, 255, 0.06));
+            background-size: 100% 3px, 6px 100%;
+            opacity: 0.15;
+        }
+
+        .noise-bg {
+            position: fixed;
+            inset: 0;
+            z-index: -1;
+            opacity: 0.25;
+            mix-blend-mode: overlay;
+            background-image: url('./images/us-iran-mood-bg.png');
+            background-size: cover;
+            background-position: center;
+            filter: contrast(150%) grayscale(100%);
+        }
+
+        .scanline {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 10px;
+            background: rgba(0, 255, 100, 0.25);
+            opacity: 0.4;
+            z-index: 9998;
+            pointer-events: none;
+            animation: scan 7s linear infinite;
+        }
+
+        @keyframes scan {
+            0% { top: -10px; }
+            100% { top: 100vh; }
+        }
+
+        .text-glow { text-shadow: 0 0 5px rgba(0, 255, 100, 0.7), 0 0 10px rgba(0, 255, 100, 0.4); }
+        .text-glow-red { text-shadow: 0 0 5px rgba(255, 50, 50, 0.7), 0 0 10px rgba(255, 50, 50, 0.4); }
+
+        .blink { animation: blinker 1.2s linear infinite; }
+        @keyframes blinker { 50% { opacity: 0; } }
+
+        .hud-corner::before,
+        .hud-corner::after {
+            content: '';
+            position: absolute;
+            width: 14px;
+            height: 14px;
+        }
+        .hud-corner::before {
+            top: -1px; left: -1px;
+            border-top: 2px solid var(--phosphor);
+            border-left: 2px solid var(--phosphor);
+        }
+        .hud-corner::after {
+            bottom: -1px; right: -1px;
+            border-bottom: 2px solid var(--phosphor);
+            border-right: 2px solid var(--phosphor);
+        }
+
+        .dossier {
+            position: relative;
+            background: rgba(5, 12, 6, 0.6);
+            -webkit-backdrop-filter: blur(8px);
+            backdrop-filter: blur(8px);
+            border: 1px solid rgba(0, 255, 100, 0.18);
+            transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1), border-color 0.4s, box-shadow 0.4s;
+            overflow: hidden;
+        }
+        .dossier:hover {
+            transform: translateY(-6px);
+            border-color: rgba(0, 255, 100, 0.5);
+            box-shadow: 0 0 30px rgba(0, 255, 100, 0.12);
+        }
+        .dossier:hover .arrow { transform: translateX(4px); opacity: 1; }
+        .dossier:hover .thumb { filter: grayscale(40%) contrast(120%); transform: scale(1.05); }
+
+        .dossier.alert { border-color: rgba(255, 51, 0, 0.25); }
+        .dossier.alert:hover { border-color: rgba(255, 51, 0, 0.6); box-shadow: 0 0 30px rgba(255, 51, 0, 0.14); }
+
+        .dossier.exec { border-color: rgba(255, 215, 0, 0.25); }
+        .dossier.exec:hover { border-color: rgba(255, 215, 0, 0.6); box-shadow: 0 0 30px rgba(255, 215, 0, 0.14); }
+
+        .thumb {
+            transition: transform 0.6s ease, filter 0.6s ease;
+            filter: grayscale(100%) contrast(130%);
+        }
+        .arrow { transition: transform 0.3s ease, opacity 0.3s ease; opacity: 0.4; }
+
+        .reveal {
+            opacity: 0;
+            transform: translateY(28px);
+            transition: opacity 0.8s ease-out, transform 0.8s ease-out;
+        }
+        .reveal.visible { opacity: 1; transform: translateY(0); }
+    </style>
+</head>
+
+<body class="selection:bg-green-500 selection:text-black">
+    <div class="crt-overlay"></div>
+    <div class="noise-bg"></div>
+    <div class="scanline"></div>
+
+    <div class="fixed top-4 right-4 z-50 flex items-center gap-2 border border-green-500/50 bg-black/80 px-3 py-1 text-xs">
+        <div class="w-2 h-2 rounded-full bg-red-600 blink"></div><span>SECURE UPLINK // REC</span>
+    </div>
+
+    <header class="relative max-w-6xl mx-auto px-6 md:px-8 pt-28 pb-12">
+        <p class="text-[#ff3333] mb-4 tracking-[0.2em] text-xs animate-pulse uppercase">[CLASSIFIED] // CLEARANCE: TS/SCI // EYES ONLY</p>
+        <h1 class="text-4xl md:text-6xl lg:text-7xl font-bold leading-none mb-6 text-glow text-white">US&ndash;Iran Intelligence Directory</h1>
+        <p class="text-sm md:text-base text-gray-400 max-w-3xl leading-relaxed">
+            Consolidated intelligence package on the 2026 US&ndash;Iran crisis. Three correlated dossiers cover the
+            political&ndash;economic relationship, regional proxy &amp; kinetic warfare, and the executive strategic synthesis.
+            Select a report to access.
+        </p>
+        <div class="mt-6 flex flex-wrap gap-4 text-xs text-gray-500 border-t border-green-500/20 pt-4">
+            <span>DATE: MID-2026</span>
+            <span class="text-green-500">// </span>
+            <span>RECORDS: 03</span>
+            <span class="text-green-500">// </span>
+            <span>STATUS: <span class="text-[#00ff66]">ACTIVE</span></span>
+        </div>
+    </header>
+
+    <main class="max-w-6xl mx-auto px-6 md:px-8 pb-24">
+        <div class="flex items-center gap-4 mb-10">
+            <div class="h-px bg-green-500/20 flex-grow"></div>
+            <h2 class="text-xs tracking-[0.25em] text-gray-500 uppercase">Report Directory</h2>
+            <div class="h-px bg-green-500/20 flex-grow"></div>
+        </div>
+
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+
+            <!-- Report 01 -->
+            <a href="us-iran-domain-report-1.html" class="dossier hud-corner lg:col-span-6 p-7 flex flex-col reveal group" style="transition-delay: 80ms;">
+                <div class="absolute inset-0 -z-10 opacity-20">
+                    <img src="./images/us-iran-1.jpg" alt="" class="thumb w-full h-full object-cover">
+                </div>
+                <div class="flex justify-between items-center text-xs text-[#00ff66] tracking-widest uppercase mb-5">
+                    <span>Domain Report 01</span>
+                    <span class="text-gray-500">DIPLOMATIC // ECONOMIC</span>
+                </div>
+                <h3 class="text-2xl md:text-3xl font-bold text-white mb-3 text-glow">Political &amp; Economic Relations</h3>
+                <p class="text-sm text-gray-400 leading-relaxed mb-6 flex-grow">
+                    The June 17 14-point MoU, the 60-day negotiation clock, economic warfare and sanctions,
+                    the naval blockade, and the post-Khamenei domestic pressures on both Washington and Tehran.
+                </p>
+                <div class="flex justify-between items-center mt-auto">
+                    <div class="flex gap-2 flex-wrap">
+                        <span class="px-2 py-1 bg-white/5 border border-green-500/20 rounded text-[10px] text-gray-300">MoU</span>
+                        <span class="px-2 py-1 bg-white/5 border border-green-500/20 rounded text-[10px] text-gray-300">Sanctions</span>
+                        <span class="px-2 py-1 bg-white/5 border border-green-500/20 rounded text-[10px] text-gray-300">Nuclear</span>
+                    </div>
+                    <span class="arrow text-[#00ff66] text-xl">&rarr;</span>
+                </div>
+            </a>
+
+            <!-- Report 02 -->
+            <a href="us-iran-domain-report-2.html" class="dossier alert hud-corner lg:col-span-6 p-7 flex flex-col reveal group" style="transition-delay: 160ms;">
+                <div class="absolute inset-0 -z-10 opacity-20">
+                    <img src="./images/us-iran-(2).jpg" alt="" class="thumb w-full h-full object-cover">
+                </div>
+                <div class="flex justify-between items-center text-xs text-[#ff3333] tracking-widest uppercase mb-5">
+                    <span>Domain Report 02</span>
+                    <span class="text-gray-500">MILITARY // KINETIC</span>
+                </div>
+                <h3 class="text-2xl md:text-3xl font-bold text-white mb-3 text-glow-red">Regional Proxy Conflicts</h3>
+                <p class="text-sm text-gray-400 leading-relaxed mb-6 flex-grow">
+                    The Axis of Resistance command structure, arsenals and supply corridors, US base attacks and
+                    retaliatory operations, Red Sea maritime warfare, and Israel&rsquo;s multi-front buffer-zone strategy.
+                </p>
+                <div class="flex justify-between items-center mt-auto">
+                    <div class="flex gap-2 flex-wrap">
+                        <span class="px-2 py-1 bg-white/5 border border-red-500/20 rounded text-[10px] text-gray-300">Axis</span>
+                        <span class="px-2 py-1 bg-white/5 border border-red-500/20 rounded text-[10px] text-gray-300">Maritime</span>
+                        <span class="px-2 py-1 bg-white/5 border border-red-500/20 rounded text-[10px] text-gray-300">Epic Fury</span>
+                    </div>
+                    <span class="arrow text-[#ff3333] text-xl">&rarr;</span>
+                </div>
+            </a>
+
+            <!-- Executive Brief (featured / wide) -->
+            <a href="us-iran-executive.html" class="dossier exec hud-corner lg:col-span-12 p-8 flex flex-col reveal group relative" style="transition-delay: 240ms;">
+                <div class="absolute inset-0 -z-10 opacity-15">
+                    <img src="./images/us-iran-11.jpg" alt="" class="thumb w-full h-full object-cover">
+                </div>
+                <div class="absolute top-0 right-0 w-64 h-64 bg-[#ffd700] opacity-5 blur-[80px] pointer-events-none"></div>
+                <div class="flex justify-between items-center text-xs text-[#ffd700] tracking-widest uppercase mb-5">
+                    <span>Synthesis Master // Executive</span>
+                    <span class="px-2 py-0.5 bg-[#ffd700]/10 text-[#ffd700] text-[10px] rounded animate-pulse">PRIORITY BRIEF</span>
+                </div>
+                <div class="flex flex-col md:flex-row gap-6 md:items-end justify-between">
+                    <div class="max-w-2xl">
+                        <h3 class="text-3xl md:text-4xl font-bold text-white mb-3">Executive Strategy Brief</h3>
+                        <p class="text-sm md:text-base text-gray-400 leading-relaxed">
+                            Cross-domain synthesis for C-suite leadership: highest-impact insights (BLUF), strategic
+                            dynamics, key tensions and contradictions, and four prioritized next steps spanning the
+                            60-day MoU window.
+                        </p>
+                        <div class="flex gap-2 flex-wrap mt-5">
+                            <span class="px-2 py-1 bg-white/5 border border-[#ffd700]/20 text-[#ffd700] rounded text-[10px]">BLUF</span>
+                            <span class="px-2 py-1 bg-white/5 border border-white/10 rounded text-[10px] text-gray-300">Strategic Posture</span>
+                            <span class="px-2 py-1 bg-white/5 border border-white/10 rounded text-[10px] text-gray-300">Next Steps</span>
+                        </div>
+                    </div>
+                    <span class="arrow text-[#ffd700] text-2xl shrink-0">EXECUTE_BRIEFING &rarr;</span>
+                </div>
+            </a>
+
+        </div>
+    </main>
+
+    <footer class="border-t border-green-500/10 py-8 bg-black/60">
+        <div class="max-w-6xl mx-auto px-6 md:px-8 flex flex-col md:flex-row justify-between items-center gap-3 text-[10px] text-gray-600 tracking-widest uppercase">
+            <p>System Access // Intelligence Directory</p>
+            <p>END OF TRANSMISSION // <span id="timestamp"></span></p>
+        </div>
+    </footer>
+
+    <script>
+        document.getElementById('timestamp').innerText = new Date().toISOString();
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.classList.add('visible');
+                    observer.unobserve(entry.target);
+                }
+            });
+        }, { threshold: 0.1 });
+        document.querySelectorAll('.reveal').forEach(el => observer.observe(el));
+    </script>
+</body>
+
+</html>

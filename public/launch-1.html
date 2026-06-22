@@ -1,0 +1,588 @@
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>HOMEase | AR Delivery Strategy</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<script>
+  tailwind.config = {
+    theme: {
+      extend: {
+        colors: {
+          ar: {
+            cyan: '#00F0FF',
+            amber: '#FFB800',
+            dark: '#020617',
+            panel: 'rgba(15, 23, 42, 0.7)'
+          }
+        },
+        fontFamily: {
+          mono: ['ui-monospace', 'SFMono-Regular', 'Menlo', 'Monaco', 'Consolas', 'monospace'],
+          sans: ['ui-sans-serif', 'system-ui', '-apple-system', 'BlinkMacSystemFont', 'Segoe UI', 'Roboto', 'sans-serif'],
+        }
+      }
+    }
+  }
+</script>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;600;700&display=swap');
+
+  body {
+    background-color: #020617;
+    color: #e2e8f0;
+    font-family: 'Space Grotesk', sans-serif;
+    overflow-x: hidden;
+  }
+
+  /* SVG Noise Overlay */
+  .noise-overlay {
+    position: fixed;
+    inset: 0;
+    z-index: 50;
+    pointer-events: none;
+    opacity: 0.15;
+    mix-blend-mode: overlay;
+  }
+
+  /* Blueprint Grid Background */
+  .blueprint-grid {
+    position: fixed;
+    inset: 0;
+    z-index: 0;
+    background-size: 50px 50px;
+    background-image:
+      linear-gradient(to right, rgba(0, 240, 255, 0.05) 1px, transparent 1px),
+      linear-gradient(to bottom, rgba(0, 240, 255, 0.05) 1px, transparent 1px);
+    pointer-events: none;
+    transform: perspective(500px) rotateX(60deg) scale(2);
+    transform-origin: top center;
+    animation: gridMove 20s linear infinite;
+  }
+
+  @keyframes gridMove {
+    0% { transform: perspective(500px) rotateX(60deg) translateY(0) scale(2); }
+    100% { transform: perspective(500px) rotateX(60deg) translateY(50px) scale(2); }
+  }
+
+  /* LiDAR Scan Line */
+  .scan-line {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 2px;
+    background: #00F0FF;
+    box-shadow: 0 0 20px 5px rgba(0, 240, 255, 0.5);
+    z-index: 45;
+    pointer-events: none;
+    animation: scan 6s ease-in-out infinite alternate;
+    mix-blend-mode: screen;
+  }
+
+  @keyframes scan {
+    0% { top: -10%; opacity: 0; }
+    10% { opacity: 1; }
+    90% { opacity: 1; }
+    100% { top: 110%; opacity: 0; }
+  }
+
+  /* AR Cursor Lens */
+  #ar-lens {
+    position: fixed;
+    width: 400px;
+    height: 400px;
+    border-radius: 50%;
+    pointer-events: none;
+    z-index: 40;
+    border: 1px solid rgba(0, 240, 255, 0.3);
+    box-shadow: inset 0 0 40px rgba(0, 240, 255, 0.1);
+    backdrop-filter: hue-rotate(180deg) saturate(200%) contrast(1.2);
+    transform: translate(-50%, -50%);
+    transition: width 0.3s, height 0.3s;
+    mix-blend-mode: luminosity;
+  }
+
+  /* HUD Panels */
+  .hud-panel {
+    background: rgba(2, 6, 23, 0.6);
+    border: 1px solid rgba(0, 240, 255, 0.2);
+    backdrop-filter: blur(12px);
+    position: relative;
+    overflow: hidden;
+  }
+
+  .hud-panel::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0;
+    width: 20px; height: 20px;
+    border-top: 2px solid #00F0FF;
+    border-left: 2px solid #00F0FF;
+  }
+  .hud-panel::after {
+    content: '';
+    position: absolute;
+    bottom: 0; right: 0;
+    width: 20px; height: 20px;
+    border-bottom: 2px solid #00F0FF;
+    border-right: 2px solid #00F0FF;
+  }
+
+  /* Scroll Reveal Animations */
+  .reveal-up { 
+    opacity: 0; 
+    transform: translateY(60px); 
+    transition: all 1s cubic-bezier(0.19, 1, 0.22, 1); 
+  }
+  .reveal-up.active { 
+    opacity: 1; 
+    transform: translateY(0); 
+  }
+  
+  .reveal-right { 
+    opacity: 0; 
+    transform: translateX(-60px); 
+    transition: all 1s cubic-bezier(0.19, 1, 0.22, 1); 
+  }
+  .reveal-right.active { 
+    opacity: 1; 
+    transform: translateX(0); 
+  }
+
+  /* Glitch Text Effect */
+  .glitch-text {
+    position: relative;
+    display: inline-block;
+  }
+  .glitch-text::before, .glitch-text::after {
+    content: attr(data-text);
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: #020617;
+  }
+  .glitch-text::before {
+    left: 2px;
+    text-shadow: -1px 0 #00F0FF;
+    clip: rect(24px, 550px, 90px, 0);
+    animation: glitch-anim 3s infinite linear alternate-reverse;
+  }
+  .glitch-text::after {
+    left: -2px;
+    text-shadow: -1px 0 #FFB800;
+    clip: rect(85px, 550px, 140px, 0);
+    animation: glitch-anim 2.5s infinite linear alternate-reverse;
+  }
+
+  @keyframes glitch-anim {
+    0% { clip: rect(10px, 9999px, 86px, 0); }
+    20% { clip: rect(65px, 9999px, 12px, 0); }
+    40% { clip: rect(98px, 9999px, 34px, 0); }
+    60% { clip: rect(21px, 9999px, 78px, 0); }
+    80% { clip: rect(43px, 9999px, 56px, 0); }
+    100% { clip: rect(89px, 9999px, 23px, 0); }
+  }
+
+  /* Timeline Node */
+  .timeline-node {
+    width: 12px;
+    height: 12px;
+    background: #00F0FF;
+    box-shadow: 0 0 15px 5px rgba(0, 240, 255, 0.4);
+    border-radius: 50%;
+    position: relative;
+    z-index: 10;
+  }
+  .timeline-node::after {
+    content: '';
+    position: absolute;
+    top: 50%; left: 50%;
+    transform: translate(-50%, -50%);
+    width: 24px; height: 24px;
+    border: 1px solid #00F0FF;
+    border-radius: 50%;
+    animation: pulse 2s infinite;
+  }
+  @keyframes pulse {
+    0% { transform: translate(-50%, -50%) scale(1); opacity: 1; }
+    100% { transform: translate(-50%, -50%) scale(2.5); opacity: 0; }
+  }
+</style>
+</head>
+<body class="antialiased selection:bg-ar-cyan selection:text-ar-dark">
+
+<!-- Atmospheric Elements -->
+<div class="blueprint-grid"></div>
+<div class="scan-line"></div>
+<div id="ar-lens" class="hidden md:block"></div>
+
+<svg class="noise-overlay">
+  <filter id="noiseFilter">
+    <feTurbulence type="fractalNoise" baseFrequency="0.8" numOctaves="3" stitchTiles="stitch"/>
+    <feColorMatrix type="matrix" values="1 0 0 0 0, 0 1 0 0 0, 0 0 1 0 0, 0 0 0 0.4 0" />
+  </filter>
+  <rect width="100%" height="100%" filter="url(#noiseFilter)"/>
+</svg>
+
+<main class="relative z-10 container mx-auto px-6 py-12 md:py-24 max-w-6xl">
+
+  <!-- HEADER / HERO -->
+  <section class="min-h-[85vh] flex flex-col justify-center relative reveal-up">
+    <div class="absolute top-0 right-0 font-mono text-xs text-ar-cyan opacity-60 tracking-widest">
+      [ SYSTEM_ID: proj_30519117 ]
+      <br>[ DATE: June 29, 2025 ]
+    </div>
+    
+    <div class="mb-6 inline-flex items-center gap-3 font-mono text-ar-amber tracking-widest text-sm uppercase">
+      <span class="animate-pulse">●</span> Live Deployment Protocol
+    </div>
+
+    <h1 class="text-6xl md:text-8xl font-bold uppercase tracking-tighter mb-4 text-white glitch-text" data-text="HOMEase">
+      HOMEase
+    </h1>
+    <h2 class="text-2xl md:text-4xl text-ar-cyan font-light mb-8 max-w-3xl leading-snug">
+      AI Platform <span class="text-slate-500">//</span> Comprehensive Delivery Strategy
+    </h2>
+
+    <div class="p-6 hud-panel max-w-2xl border-l-4 border-l-ar-amber">
+      <p class="text-lg md:text-xl text-slate-300 leading-relaxed">
+        <strong class="text-white">Strategic Vision:</strong> Revolutionize aging-in-place home modifications through AR technology.
+      </p>
+    </div>
+
+    <div class="mt-16 flex flex-wrap gap-8 font-mono text-sm">
+      <div class="flex flex-col">
+        <span class="text-slate-500 uppercase">Target Market Launch</span>
+        <span class="text-2xl text-white">August 24, 2025</span>
+      </div>
+      <div class="flex flex-col">
+        <span class="text-slate-500 uppercase">Total Addressable Market</span>
+        <span class="text-2xl text-ar-amber">$161B</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- EXECUTIVE SUMMARY METRICS -->
+  <section class="py-20">
+    <div class="flex items-center gap-4 mb-12 reveal-up">
+      <div class="h-px w-12 bg-ar-cyan"></div>
+      <h3 class="text-2xl font-mono text-ar-cyan uppercase tracking-widest">Executive Delivery Summary</h3>
+      <div class="h-px flex-1 bg-slate-800"></div>
+    </div>
+
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+      <!-- Metric 1 -->
+      <div class="hud-panel p-6 reveal-up" style="transition-delay: 100ms;">
+        <div class="text-slate-400 font-mono text-xs mb-2">[01] MVP Launch</div>
+        <div class="text-3xl font-bold text-white mb-1">Aug 24, '25</div>
+        <div class="text-sm text-slate-400">Target Market Launch Date</div>
+      </div>
+      <!-- Metric 2 -->
+      <div class="hud-panel p-6 reveal-up" style="transition-delay: 200ms;">
+        <div class="text-slate-400 font-mono text-xs mb-2">[02] Initial Revenue</div>
+        <div class="text-3xl font-bold text-ar-amber mb-1">$1.2M</div>
+        <div class="text-sm text-slate-400">Target by end of 2025</div>
+      </div>
+      <!-- Metric 3 -->
+      <div class="hud-panel p-6 reveal-up" style="transition-delay: 300ms;">
+        <div class="text-slate-400 font-mono text-xs mb-2">[03] Lead Processing</div>
+        <div class="text-3xl font-bold text-white mb-1">2,500+</div>
+        <div class="text-sm text-slate-400">Validated leads / month</div>
+      </div>
+      <!-- Metric 4 -->
+      <div class="hud-panel p-6 reveal-up" style="transition-delay: 400ms;">
+        <div class="text-slate-400 font-mono text-xs mb-2">[04] Contractor Network</div>
+        <div class="text-3xl font-bold text-ar-cyan mb-1">50+</div>
+        <div class="text-sm text-slate-400">CAPS-certified pros</div>
+      </div>
+    </div>
+    <div class="mt-8 text-center md:text-right font-mono text-sm text-slate-500 reveal-up">
+      Geographic Focus: <span class="text-white">Texas</span> & <span class="text-white">Florida</span> Markets
+    </div>
+  </section>
+
+  <!-- LAUNCH READINESS -->
+  <section class="py-20">
+    <div class="flex items-center gap-4 mb-16 reveal-up">
+      <div class="h-px w-12 bg-ar-amber"></div>
+      <h3 class="text-2xl font-mono text-ar-amber uppercase tracking-widest">Phase 1: Readiness Criteria</h3>
+      <div class="h-px flex-1 bg-slate-800"></div>
+    </div>
+
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-12">
+      <!-- Technical -->
+      <div class="reveal-right">
+        <h4 class="text-xl text-white mb-6 flex items-center gap-3">
+          <svg class="w-5 h-5 text-ar-cyan" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="square" stroke-linejoin="miter" stroke-width="2" d="M9 3v2m6-2v2M9 19v2m6-2v2M5 9H3m2 6H3m18-6h-2m2 6h-2M7 19h10a2 2 0 002-2V7a2 2 0 00-2-2H7a2 2 0 00-2 2v10a2 2 0 002 2zM9 9h6v6H9V9z"></path></svg>
+          Technical Checklist
+        </h4>
+        <ul class="space-y-4 font-mono text-sm">
+          <li class="flex items-start gap-3">
+            <span class="text-ar-cyan">[✓]</span>
+            <div><strong class="text-white">AR Assessment Tool:</strong> iOS app with LiDAR scanning capability</div>
+          </li>
+          <li class="flex items-start gap-3">
+            <span class="text-ar-cyan">[✓]</span>
+            <div><strong class="text-white">Lead Validation Engine:</strong> Processing AR data to validated leads</div>
+          </li>
+          <li class="flex items-start gap-3">
+            <span class="text-ar-cyan">[✓]</span>
+            <div><strong class="text-white">Contractor Platform:</strong> Onboarding and lead distribution system</div>
+          </li>
+          <li class="flex items-start gap-3">
+            <span class="text-ar-cyan">[✓]</span>
+            <div><strong class="text-white">Payment Processing:</strong> $40+ per lead billing infrastructure</div>
+          </li>
+          <li class="flex items-start gap-3">
+            <span class="text-ar-cyan">[✓]</span>
+            <div><strong class="text-white">Compliance Framework:</strong> HIPAA/CCPA certification complete</div>
+          </li>
+          <li class="flex items-start gap-3">
+            <span class="text-ar-amber">[!]</span>
+            <div><strong class="text-ar-amber">Performance Benchmarks:</strong> &lt;30 second scans, ±2 inch accuracy</div>
+          </li>
+        </ul>
+      </div>
+
+      <!-- Market -->
+      <div class="reveal-right" style="transition-delay: 200ms;">
+        <h4 class="text-xl text-white mb-6 flex items-center gap-3">
+          <svg class="w-5 h-5 text-ar-amber" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="square" stroke-linejoin="miter" stroke-width="2" d="M21 13.255A23.931 23.931 0 0112 15c-3.183 0-6.22-.62-9-1.745M16 6V4a2 2 0 00-2-2h-4a2 2 0 00-2 2v2m4 6h.01M5 20h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path></svg>
+          Market Readiness
+        </h4>
+        <ul class="space-y-4 font-mono text-sm">
+          <li class="flex items-start gap-3">
+            <span class="text-ar-amber">[✓]</span>
+            <div><strong class="text-white">App Store Approval:</strong> iOS application live and downloadable</div>
+          </li>
+          <li class="flex items-start gap-3">
+            <span class="text-ar-amber">[✓]</span>
+            <div><strong class="text-white">Contractor Network:</strong> 50+ CAPS-certified contractors onboarded</div>
+          </li>
+          <li class="flex items-start gap-3">
+            <span class="text-ar-amber">[✓]</span>
+            <div><strong class="text-white">Geographic Coverage:</strong> Texas and Florida market penetration</div>
+          </li>
+          <li class="flex items-start gap-3">
+            <span class="text-ar-amber">[✓]</span>
+            <div><strong class="text-white">Customer Support:</strong> 24/7 support infrastructure operational</div>
+          </li>
+          <li class="flex items-start gap-3">
+            <span class="text-ar-amber">[✓]</span>
+            <div><strong class="text-white">Marketing Campaign:</strong> Digital marketing campaigns launched</div>
+          </li>
+          <li class="flex items-start gap-3">
+            <span class="text-ar-amber">[✓]</span>
+            <div><strong class="text-white">Legal Framework:</strong> Terms of service, privacy policy, agreements</div>
+          </li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <!-- LAUNCH STRATEGY TIMELINE -->
+  <section class="py-20 relative">
+    <div class="flex items-center gap-4 mb-16 reveal-up">
+      <div class="h-px w-12 bg-ar-cyan"></div>
+      <h3 class="text-2xl font-mono text-ar-cyan uppercase tracking-widest">Soft Launch + Regional Focus</h3>
+      <div class="h-px flex-1 bg-slate-800"></div>
+    </div>
+
+    <!-- Vertical Line -->
+    <div class="absolute left-[23px] md:left-[35px] top-[150px] bottom-0 w-px bg-slate-800">
+      <div class="w-full h-1/3 bg-gradient-to-b from-transparent via-ar-cyan to-transparent animate-[scan_3s_ease-in-out_infinite]"></div>
+    </div>
+
+    <div class="space-y-24">
+      <!-- Week 1-2 -->
+      <div class="relative pl-14 md:pl-24 reveal-up">
+        <div class="absolute left-4 md:left-[29px] top-2 timeline-node"></div>
+        <div class="mb-2 font-mono text-ar-cyan tracking-wider">Week 1–2 // Aug 24 – Sep 6, 2025</div>
+        <h4 class="text-3xl md:text-4xl font-bold text-white mb-6 uppercase">Beta Launch</h4>
+        
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+          <div class="hud-panel p-5">
+            <h5 class="text-ar-amber font-mono text-sm mb-3 border-b border-slate-700 pb-2">Target Metrics</h5>
+            <div class="text-2xl text-white mb-1">100</div><div class="text-xs text-slate-400 mb-3">Beta Users</div>
+            <div class="text-2xl text-white mb-1">10</div><div class="text-xs text-slate-400">Contractor Partners</div>
+          </div>
+          <div class="hud-panel p-5">
+            <h5 class="text-ar-amber font-mono text-sm mb-3 border-b border-slate-700 pb-2">User Acquisition</h5>
+            <ul class="text-sm text-slate-300 space-y-2">
+              <li>• Invite-only beta program</li>
+              <li>• Senior center partnerships (Austin, Miami)</li>
+              <li>• Adult children referral program</li>
+              <li>• Influencer partnerships</li>
+            </ul>
+          </div>
+          <div class="hud-panel p-5">
+            <h5 class="text-ar-amber font-mono text-sm mb-3 border-b border-slate-700 pb-2">Success KPIs</h5>
+            <ul class="text-sm text-slate-300 space-y-2">
+              <li>• >60% complete scan sessions</li>
+              <li>• >70% contractor conversion</li>
+              <li>• <5% crash rate, 4.5+ Rating</li>
+              <li>• <30s avg scan time</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+
+      <!-- Week 3-6 -->
+      <div class="relative pl-14 md:pl-24 reveal-up">
+        <div class="absolute left-4 md:left-[29px] top-2 timeline-node"></div>
+        <div class="mb-2 font-mono text-ar-cyan tracking-wider">Week 3–6 // Sep 7 – Oct 4, 2025</div>
+        <h4 class="text-3xl md:text-4xl font-bold text-white mb-6 uppercase">Regional Rollout</h4>
+        
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+          <div class="hud-panel p-5">
+            <h5 class="text-ar-amber font-mono text-sm mb-3 border-b border-slate-700 pb-2">Target Metrics</h5>
+            <div class="text-2xl text-white mb-1">1,000</div><div class="text-xs text-slate-400 mb-3">Active Users</div>
+            <div class="text-2xl text-white mb-1">50</div><div class="text-xs text-slate-400">Contractor Partners</div>
+          </div>
+          <div class="hud-panel p-5 col-span-1 md:col-span-2">
+            <h5 class="text-ar-amber font-mono text-sm mb-3 border-b border-slate-700 pb-2">Geographic Expansion & Marketing</h5>
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div>
+                <strong class="text-white text-sm block mb-1">Territories:</strong>
+                <p class="text-xs text-slate-300">
+                  TX: Austin, Houston, Dallas, San Antonio<br>
+                  FL: Miami, Tampa, Orlando, Jacksonville
+                </p>
+              </div>
+              <div>
+                <strong class="text-white text-sm block mb-1">Acceleration:</strong>
+                <p class="text-xs text-slate-300">
+                  FB Ads (59–72% senior active)<br>
+                  YouTube Demos (88% 55+ weekly)<br>
+                  Google Ads, AARP Partnerships
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Week 7-12 -->
+      <div class="relative pl-14 md:pl-24 reveal-up">
+        <div class="absolute left-4 md:left-[29px] top-2 timeline-node"></div>
+        <div class="mb-2 font-mono text-ar-cyan tracking-wider">Week 7–12 // Oct 5 – Nov 16, 2025</div>
+        <h4 class="text-3xl md:text-4xl font-bold text-white mb-6 uppercase">Market Validation</h4>
+        
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div class="hud-panel p-6">
+            <h5 class="text-ar-amber font-mono text-sm mb-4 border-b border-slate-700 pb-2">Revenue Realization (Q4 2025: $1.2M)</h5>
+            <div class="space-y-4">
+              <div class="flex justify-between items-center">
+                <span class="text-slate-400 text-sm">Month 1 (1,000 leads)</span>
+                <span class="font-mono text-ar-cyan">$40,000</span>
+              </div>
+              <div class="w-full bg-slate-800 h-1"><div class="bg-ar-cyan h-1" style="width: 10%"></div></div>
+              
+              <div class="flex justify-between items-center">
+                <span class="text-slate-400 text-sm">Month 2 (2,000 leads)</span>
+                <span class="font-mono text-ar-cyan">$80,000</span>
+              </div>
+              <div class="w-full bg-slate-800 h-1"><div class="bg-ar-cyan h-1" style="width: 40%"></div></div>
+              
+              <div class="flex justify-between items-center">
+                <span class="text-slate-400 text-sm">Month 3 (2,500 leads)</span>
+                <span class="font-mono text-ar-amber">$100,000</span>
+              </div>
+              <div class="w-full bg-slate-800 h-1"><div class="bg-ar-amber h-1" style="width: 100%"></div></div>
+            </div>
+          </div>
+          <div class="hud-panel p-6">
+            <h5 class="text-ar-amber font-mono text-sm mb-4 border-b border-slate-700 pb-2">Data Collection & Optimization</h5>
+            <ul class="text-sm text-slate-300 space-y-4">
+              <li class="flex items-center gap-3">
+                <div class="w-1.5 h-1.5 rounded-full bg-ar-cyan"></div>
+                Optimize lead conversion rates
+              </li>
+              <li class="flex items-center gap-3">
+                <div class="w-1.5 h-1.5 rounded-full bg-ar-cyan"></div>
+                Conduct contractor satisfaction surveys
+              </li>
+              <li class="flex items-center gap-3">
+                <div class="w-1.5 h-1.5 rounded-full bg-ar-cyan"></div>
+                Analyze user experience metrics
+              </li>
+              <li class="flex items-center gap-3">
+                <div class="w-1.5 h-1.5 rounded-full bg-ar-cyan"></div>
+                Study market demand patterns
+              </li>
+            </ul>
+            <div class="mt-6 pt-4 border-t border-slate-700">
+              <p class="font-mono text-xs text-slate-500 uppercase">Long-term trajectory: Scaling to 261,904 leads/month by 2030.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- FOOTER -->
+  <footer class="py-12 mt-20 border-t border-slate-800 text-center reveal-up">
+    <div class="font-mono text-xs text-slate-500 tracking-widest">
+      END OF PROTOCOL // HOMEASE DEL_STRAT_30519117 // 2025
+    </div>
+  </footer>
+
+</main>
+
+<script>
+  document.addEventListener('DOMContentLoaded', () => {
+    // Intersection Observer for scroll reveal animations
+    const observerOptions = {
+      root: null,
+      rootMargin: '0px',
+      threshold: 0.15
+    };
+
+    const observer = new IntersectionObserver((entries, observer) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          entry.target.classList.add('active');
+          // Optional: stop observing once revealed
+          // observer.unobserve(entry.target);
+        }
+      });
+    }, observerOptions);
+
+    document.querySelectorAll('.reveal-up, .reveal-right').forEach((el) => {
+      observer.observe(el);
+    });
+
+    // AR Lens Mouse Tracking
+    const lens = document.getElementById('ar-lens');
+    let mouseX = 0;
+    let mouseY = 0;
+    let lensX = 0;
+    let lensY = 0;
+
+    // Smooth tracking interpolation
+    function animate() {
+      lensX += (mouseX - lensX) * 0.15;
+      lensY += (mouseY - lensY) * 0.15;
+      lens.style.transform = `translate(${lensX}px, ${lensY}px)`;
+      requestAnimationFrame(animate);
+    }
+
+    if (window.matchMedia("(pointer: fine)").matches) {
+      document.addEventListener('mousemove', (e) => {
+        mouseX = e.clientX;
+        mouseY = e.clientY;
+      });
+      // Center initially
+      mouseX = window.innerWidth / 2;
+      mouseY = window.innerHeight / 2;
+      lensX = mouseX;
+      lensY = mouseY;
+      animate();
+    }
+  });
+</script>
+</body>
+</html>

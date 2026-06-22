@@ -1,0 +1,398 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Executive Strategy Brief</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body {
+            background-color: #050505;
+            color: #e0e0e0;
+        }
+
+        .crt-overlay {
+            background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.25) 50%), linear-gradient(90deg, rgba(255, 0, 0, 0.06), rgba(0, 255, 0, 0.02), rgba(0, 0, 255, 0.06));
+            background-size: 100% 2px, 3px 100%;
+            pointer-events: none;
+        }
+
+        .mask-gradient {
+            mask-image: linear-gradient(to left, rgba(0, 0, 0, 1) 0%, rgba(0, 0, 0, 0) 100%);
+            -webkit-mask-image: linear-gradient(to left, rgba(0, 0, 0, 1) 0%, rgba(0, 0, 0, 0) 100%);
+        }
+
+        .mask-radial {
+            mask-image: radial-gradient(circle, rgba(0, 0, 0, 1) 0%, rgba(0, 0, 0, 0) 70%);
+            -webkit-mask-image: radial-gradient(circle, rgba(0, 0, 0, 1) 0%, rgba(0, 0, 0, 0) 70%);
+        }
+
+        .observe {
+            opacity: 0;
+            transform: translateY(20px);
+            transition: opacity 0.8s ease-out, transform 0.8s ease-out;
+        }
+
+        .observe.visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        .tactical-border {
+            border: 1px solid rgba(255, 0, 0, 0.3);
+            position: relative;
+        }
+
+        .tactical-border::before,
+        .tactical-border::after {
+            content: '';
+            position: absolute;
+            width: 10px;
+            height: 10px;
+            border: 2px solid red;
+        }
+
+        .tactical-border::before {
+            top: -2px;
+            left: -2px;
+            border-right: none;
+            border-bottom: none;
+        }
+
+        .tactical-border::after {
+            bottom: -2px;
+            right: -2px;
+            border-left: none;
+            border-top: none;
+        }
+
+        .glitch-text {
+            position: relative;
+        }
+
+        .glitch-text::before,
+        .glitch-text::after {
+            content: attr(data-text);
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            opacity: 0.8;
+        }
+
+        .glitch-text::before {
+            left: 2px;
+            text-shadow: -1px 0 red;
+            clip-path: inset(10% 0 80% 0);
+            animation: glitch-anim-1 2s infinite linear alternate-reverse;
+        }
+
+        .glitch-text::after {
+            left: -2px;
+            text-shadow: -1px 0 blue;
+            clip-path: inset(80% 0 10% 0);
+            animation: glitch-anim-2 3s infinite linear alternate-reverse;
+        }
+
+        @keyframes glitch-anim-1 {
+            0% {
+                clip-path: inset(20% 0 80% 0);
+            }
+
+            20% {
+                clip-path: inset(60% 0 10% 0);
+            }
+
+            40% {
+                clip-path: inset(40% 0 50% 0);
+            }
+
+            60% {
+                clip-path: inset(80% 0 5% 0);
+            }
+
+            80% {
+                clip-path: inset(10% 0 70% 0);
+            }
+
+            100% {
+                clip-path: inset(30% 0 50% 0);
+            }
+        }
+
+        @keyframes glitch-anim-2 {
+            0% {
+                clip-path: inset(10% 0 60% 0);
+            }
+
+            20% {
+                clip-path: inset(30% 0 20% 0);
+            }
+
+            40% {
+                clip-path: inset(70% 0 10% 0);
+            }
+
+            60% {
+                clip-path: inset(20% 0 50% 0);
+            }
+
+            80% {
+                clip-path: inset(50% 0 30% 0);
+            }
+
+            100% {
+                clip-path: inset(5% 0 80% 0);
+            }
+        }
+    </style>
+</head>
+
+<body class="font-mono overflow-x-hidden selection:bg-red-900 selection:text-white"><svg class="hidden" width="0"
+        height="0">
+        <defs>
+            <filter id="glitch-mild">
+                <feTurbulence type="fractalNoise" baseFrequency="0.01 0.1" numOctaves="1" result="noise" />
+                <feColorMatrix type="matrix" values="1 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 1 -0.2" result="colorNoise" />
+                <feDisplacementMap in="SourceGraphic" in2="colorNoise" scale="5" xChannelSelector="R"
+                    yChannelSelector="G" />
+            </filter>
+            <filter id="heavy-noise">
+                <feTurbulence type="fractalNoise" baseFrequency="0.6" numOctaves="3" stitchTiles="stitch" />
+                <feColorMatrix type="matrix" values="1 0 0 0 0, 0 1 0 0 0, 0 0 1 0 0, 0 0 0 0.25 0" />
+            </filter>
+        </defs>
+    </svg>
+    <div class="fixed inset-0 pointer-events-none z-50 crt-overlay opacity-50 mix-blend-overlay"></div>
+    <div class="fixed inset-0 pointer-events-none z-0 mix-blend-overlay" style="filter:url(#heavy-noise);opacity:0.2;">
+    </div>
+    <main class="relative z-10 flex flex-col w-full pb-32">
+        <header class="relative min-h-screen flex flex-col justify-center p-8 md:p-16 border-b border-red-900/50">
+            <div class="absolute inset-0 z-0 opacity-10 bg-cover bg-center"
+                style="background-image:url('./images/us-iran-11.jpg');"></div>
+            <div
+                class="z-10 w-full max-w-5xl observe decode-text text-red-500 mb-4 tracking-widest text-xs font-bold uppercase">
+                Date: Mid-2026 // Prepared For: C-Suite / Executive Leadership</div>
+            <h1 class="z-10 text-5xl md:text-7xl font-bold uppercase leading-none observe pb-6 border-b border-red-500/30 text-white"
+                style="filter:url(#glitch-mild);">EXECUTIVE STRATEGY BRIEF:<br /><span
+                    class="text-red-600 block mt-4 text-3xl md:text-5xl">U.S.-Iran Crisis & The Post-Escalation
+                    Diplomatic Window</span></h1>
+            <p
+                class="z-10 mt-6 text-sm md:text-base text-gray-400 observe max-w-3xl leading-relaxed uppercase tracking-wide font-bold">
+                Subject: Multi-Theater Kinetic Escalation, June 2026 Memorandum of Understanding (MoU), and Strategic
+                Posture</p>
+        </header>
+        <section class="relative p-8 md:p-16 border-b border-red-900/50">
+            <div class="absolute right-0 top-0 w-full md:w-2/3 h-full opacity-20 grayscale mask-gradient pointer-events-none"
+                style="background-image:url('./images/us-iran-12.jpg');background-size:cover;background-position:center;">
+            </div>
+            <div class="relative z-10 max-w-5xl">
+                <h2 class="text-3xl md:text-4xl font-bold text-red-500 mb-8 flex items-center gap-4 observe"><span
+                        class="w-12 h-1 bg-red-500"></span> 1. HIGHEST-IMPACT INSIGHTS (BLUF)</h2>
+                <p class="text-xl md:text-2xl font-bold text-white mb-12 observe leading-relaxed">The geopolitical
+                    landscape involving the U.S., Iran, and the Middle East has fundamentally transformed from localized
+                    proxy friction to direct, multi-theater state-on-state warfare, culminating in a forced, fragile
+                    diplomatic holding pattern.</p>
+                <div class="space-y-8 text-sm md:text-base text-gray-300">
+                    <div class="tactical-border p-6 md:p-8 observe bg-black/60 backdrop-blur-sm"><strong
+                            class="text-red-400 block mb-2 text-lg">The 60-Day Ticking Clock:</strong> Following severe
+                        military clashes (Operation Epic Fury), the defunct JCPOA has been replaced by the June 17,
+                        2026, 14-Point MoU. Brokered by multilateral mediators, it imposes a strict 60-day window for a
+                        final status agreement on nuclear rollbacks and sanctions relief.</div>
+                    <div class="tactical-border p-6 md:p-8 observe bg-black/60 backdrop-blur-sm"><strong
+                            class="text-red-400 block mb-2 text-lg">Mutual Domestic Vulnerability is Driving
+                            Diplomacy:</strong> This pivot to diplomacy is not driven by mutual goodwill, but by
+                        domestic existential threats. The Trump administration is forced to the table by a ballooning
+                        $1.5T defense budget, high energy prices, congressional War Powers backlash, and the looming Nov
+                        2026 midterms. Simultaneously, Iran's new Supreme Leader, Mojtaba Khamenei, faces systemic
+                        economic collapse, 31-province protests, and a U.S. blockade that decimated oil exports to 200k
+                        bpd.</div>
+                    <div class="tactical-border p-6 md:p-8 observe bg-black/60 backdrop-blur-sm"><strong
+                            class="text-red-400 block mb-2 text-lg">The Assad Regime Collapse & Israeli Buffer
+                            Zones:</strong> The fall of the Syrian Assad regime has severed Iran's traditional land
+                        bridge. In response, Israel has shifted to a strategy of systemic degradation, holding 53%-64%
+                        of Gaza, occupying Syrian borderlands, and invading southern Lebanon to push Hezbollah north of
+                        the Litani River.</div>
+                    <div class="tactical-border p-6 md:p-8 observe bg-black/60 backdrop-blur-sm"><strong
+                            class="text-red-400 block mb-2 text-lg">Global Macroeconomic Blowback:</strong> Aided by
+                        Chinese refineries and a robust $7.8B crypto-evasion network, Iran engineered a massive closure
+                        of the Strait of Hormuz and armed Houthi rebels to choke the Red Sea, directly threatening
+                        global supply chains and energy markets.</div>
+                </div>
+            </div>
+        </section>
+        <section class="relative min-h-screen">
+            <div class="sticky top-0 h-screen w-full -z-10 flex flex-col md:flex-row">
+                <div class="w-full md:w-1/2 h-full bg-cover bg-center grayscale opacity-30 mix-blend-luminosity"
+                    style="background-image:url('./images/us-iran-13.jpg');"></div>
+                <div class="w-full md:w-1/2 h-full bg-cover bg-center grayscale opacity-30 mix-blend-luminosity"
+                    style="background-image:url('./images/us-iran-14.jpg');"></div>
+            </div>
+            <div
+                class="relative z-10 bg-black/80 backdrop-blur-md p-8 md:p-16 border-y border-red-900/50 mt-[-100vh] min-h-screen flex flex-col justify-center">
+                <h2 class="text-3xl md:text-4xl font-bold text-red-500 mb-12 flex items-center gap-4 observe"><span
+                        class="w-12 h-1 bg-red-500"></span> 2. CROSS-DOMAIN SYNTHESIS & STRATEGIC DYNAMICS</h2>
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+                    <div
+                        class="p-8 border border-gray-800 bg-black/70 observe hover:border-red-500/50 transition-colors duration-500 group">
+                        <h3 class="text-white font-bold mb-4 group-hover:text-red-400 text-lg">A. The Kinetic Reality
+                            vs. The Diplomatic Freeze</h3>
+                        <p class="text-sm text-gray-400 leading-relaxed">The region operates under a glaring dichotomy.
+                            On the ground, the IRGC-led "Axis of Resistance" is highly integrated via the Beirut Joint
+                            Operations Room, deploying precision-guided munitions (PGMs) and anti-ship ballistic
+                            missiles (ASBMs). Direct state-on-state ballistic missile exchanges between Israel and Iran,
+                            alongside the U.S.'s 900-strike "Operation Epic Fury" in Feb 2026, mark the peak of regional
+                            violence. Conversely, Washington and Tehran are simultaneously negotiating a conditional
+                            $25B asset-unfreeze in Bürgenstock to prevent total economic and political collapse.</p>
+                    </div>
+                    <div
+                        class="p-8 border border-gray-800 bg-black/70 observe hover:border-red-500/50 transition-colors duration-500 group">
+                        <h3 class="text-white font-bold mb-4 group-hover:text-red-400 text-lg">B. Economic Warfare and
+                            Asymmetric Countermeasures</h3>
+                        <p class="text-sm text-gray-400 leading-relaxed">The U.S. "Operation Economic Fury" successfully
+                            utilized physical naval blockades and OFAC sanctions to crash Iran's energy exports and
+                            seize $1B in digital assets. However, Iran successfully absorbed the shock by weaponizing
+                            global trade choke points (Strait of Hormuz, Bab el-Mandeb) and standing up a parallel,
+                            state-subsidized cryptocurrency network.</p>
+                    </div>
+                    <div
+                        class="p-8 border border-gray-800 bg-black/70 observe hover:border-red-500/50 transition-colors duration-500 group">
+                        <h3 class="text-white font-bold mb-4 group-hover:text-red-400 text-lg">C. Shifting Regional
+                            Footprints</h3>
+                        <p class="text-sm text-gray-400 leading-relaxed">The Axis of Resistance has lost its Syrian
+                            logistical hub, forcing Israel to rapidly seize geopolitical terrain (Mt. Hermon/Golan) to
+                            permanently dismantle the Levant land bridge. Meanwhile, under relentless proxy drone
+                            pressure (peaking in an April 2026 barrage), the U.S. is rapidly consolidating vulnerable
+                            outposts into heavily fortified bases in Jordan and western Iraq, aiming for a formal
+                            transition out of Iraq by September 2026.</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+        <section class="relative p-8 md:p-16">
+            <div class="absolute left-0 top-0 w-full h-full opacity-10 grayscale mask-radial pointer-events-none"
+                style="background-image:url('./images/us-iran-15.jpg');background-size:cover;background-attachment:fixed;">
+            </div>
+            <div class="relative z-10 max-w-5xl mx-auto">
+                <h2 class="text-3xl md:text-4xl font-bold text-red-500 mb-16 text-center observe tracking-widest">[ 3.
+                    KEY TENSIONS & CONTRADICTIONS ]</h2>
+                <div class="space-y-12">
+                    <div class="flex flex-col md:flex-row gap-6 items-start observe">
+                        <div class="md:w-1/3 md:text-right">
+                            <h4 class="text-white font-bold uppercase text-lg">The Negotiation Sequencing Trap</h4>
+                        </div>
+                        <div class="md:w-2/3 text-gray-400 text-base md:border-l border-red-900 md:pl-8">Iran demands
+                            frontloaded cash ($12B immediate release) to placate domestic riots before verifying nuclear
+                            reductions. The U.S. requires immediate IAEA verification of 60% HEU down-blending before
+                            providing sanctions relief.</div>
+                    </div>
+                    <div class="flex flex-col md:flex-row gap-6 items-start observe">
+                        <div class="md:w-1/3 md:text-right">
+                            <h4 class="text-white font-bold uppercase text-lg">Cost-Exchange Asymmetry in the Maritime
+                                Theater</h4>
+                        </div>
+                        <div class="md:w-2/3 text-gray-400 text-base md:border-l border-red-900 md:pl-8">The U.S. and
+                            allied navies (Operation Prosperity Guardian) are firing multi-million-dollar air defense
+                            interceptors to neutralize $20,000 Houthi and Iraqi militia drones. This dynamic is
+                            economically unsustainable and fuels the inflated U.S. defense budget.</div>
+                    </div>
+                    <div class="flex flex-col md:flex-row gap-6 items-start observe">
+                        <div class="md:w-1/3 md:text-right">
+                            <h4 class="text-white font-bold uppercase text-lg">IRGC Militarization vs. Pezeshkian's
+                                Pragmatism</h4>
+                        </div>
+                        <div class="md:w-2/3 text-gray-400 text-base md:border-l border-red-900 md:pl-8">Iran’s new
+                            Supreme Leader relies entirely on the IRGC deep state, requiring a posture of extreme
+                            military hostility toward the West. Yet, the pragmatic civilian government (President
+                            Pezeshkian) is pushing for diplomatic relief. The regime is attempting to bifurcate its
+                            strategy: executing tactical diplomacy for cash while maintaining strategic hostility via
+                            proxies.</div>
+                    </div>
+                    <div class="flex flex-col md:flex-row gap-6 items-start observe">
+                        <div class="md:w-1/3 md:text-right">
+                            <h4 class="text-white font-bold uppercase text-lg">Executive Action vs. Legislative Veto
+                            </h4>
+                        </div>
+                        <div class="md:w-2/3 text-gray-400 text-base md:border-l border-red-900 md:pl-8">The White
+                            House’s reliance on temporary Treasury waivers bypasses Congress in the short term. However,
+                            any permanent deal triggers the Iran Nuclear Agreement Review Act (INARA), guaranteeing a
+                            brutal constitutional showdown ahead of the U.S. midterms.</div>
+                    </div>
+                </div>
+            </div>
+        </section>
+        <section class="relative p-8 md:p-16 bg-red-950/10 border-t border-red-900/50 mt-16">
+            <div class="relative z-10 max-w-6xl mx-auto">
+                <h2 class="text-4xl md:text-5xl font-bold text-white mb-20 text-center glitch-text observe"
+                    data-text="4. PRIORITIZED NEXT STEPS">4. PRIORITIZED NEXT STEPS</h2>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-10">
+                    <div
+                        class="relative p-8 border border-red-900/50 bg-black/80 backdrop-blur-sm observe hover:bg-red-900/20 transition-all">
+                        <div class="absolute top-0 left-0 w-4 h-4 border-t-2 border-l-2 border-red-500"></div>
+                        <div class="absolute bottom-0 right-0 w-4 h-4 border-b-2 border-r-2 border-red-500"></div>
+                        <h3 class="text-red-400 font-bold mb-2 text-xl">1. Secure the 60-Day MoU "Freeze-for-Freeze"
+                        </h3>
+                        <p
+                            class="text-xs text-gray-500 mb-6 uppercase tracking-wider bg-gray-900 inline-block px-2 py-1 rounded">
+                            (Immediate, 0-30 Days)</p>
+                        <p class="text-sm text-gray-300 leading-relaxed"><span
+                                class="text-white font-bold uppercase text-xs tracking-widest block mb-1">Action:</span>
+                            Leverage backchannels (Oman, Qatar) to establish a staggered, escrow-based sequencing
+                            formula. Unlock an initial tranche of humanitarian/conditional assets strictly upon verified
+                            deployment of IAEA monitoring equipment at highly enriched uranium (HEU) sites.</p>
+                    </div>
+                    <div
+                        class="relative p-8 border border-red-900/50 bg-black/80 backdrop-blur-sm observe hover:bg-red-900/20 transition-all">
+                        <div class="absolute top-0 right-0 w-4 h-4 border-t-2 border-r-2 border-red-500"></div>
+                        <div class="absolute bottom-0 left-0 w-4 h-4 border-b-2 border-l-2 border-red-500"></div>
+                        <h3 class="text-red-400 font-bold mb-2 text-xl">2. Remediate Maritime Cost-Asymmetry</h3>
+                        <p
+                            class="text-xs text-gray-500 mb-6 uppercase tracking-wider bg-gray-900 inline-block px-2 py-1 rounded">
+                            (Short-Term, 30-90 Days)</p>
+                        <p class="text-sm text-gray-300 leading-relaxed"><span
+                                class="text-white font-bold uppercase text-xs tracking-widest block mb-1">Action:</span>
+                            Pivot naval strategy in the Red Sea and Strait of Hormuz from expensive defensive
+                            interception to targeted, asymmetric degradation of Houthi and IRGC coastal launch nodes and
+                            command vessels (e.g., Behshad equivalents). Accelerate deployment of directed-energy or
+                            low-cost kinetic interceptors.</p>
+                    </div>
+                    <div
+                        class="relative p-8 border border-red-900/50 bg-black/80 backdrop-blur-sm observe hover:bg-red-900/20 transition-all">
+                        <div class="absolute top-0 left-0 w-4 h-4 border-t-2 border-l-2 border-red-500"></div>
+                        <div class="absolute bottom-0 right-0 w-4 h-4 border-b-2 border-r-2 border-red-500"></div>
+                        <h3 class="text-red-400 font-bold mb-2 text-xl">3. Geopolitical Containment Post-Assad</h3>
+                        <p
+                            class="text-xs text-gray-500 mb-6 uppercase tracking-wider bg-gray-900 inline-block px-2 py-1 rounded">
+                            (Medium-Term, 3-6 Months)</p>
+                        <p class="text-sm text-gray-300 leading-relaxed"><span
+                                class="text-white font-bold uppercase text-xs tracking-widest block mb-1">Action:</span>
+                            Coordinate with Israel and regional Sunni partners to permanently secure the fragmented
+                            Syrian theater. Prevent IRGC Unit 190 from establishing new clandestine smuggling corridors
+                            through the power vacuum.</p>
+                    </div>
+                    <div
+                        class="relative p-8 border border-red-900/50 bg-black/80 backdrop-blur-sm observe hover:bg-red-900/20 transition-all">
+                        <div class="absolute top-0 right-0 w-4 h-4 border-t-2 border-r-2 border-red-500"></div>
+                        <div class="absolute bottom-0 left-0 w-4 h-4 border-b-2 border-l-2 border-red-500"></div>
+                        <h3 class="text-red-400 font-bold mb-2 text-xl">4. Domestic Political & Legislative Shielding
+                        </h3>
+                        <p
+                            class="text-xs text-gray-500 mb-6 uppercase tracking-wider bg-gray-900 inline-block px-2 py-1 rounded">
+                            (Ongoing)</p>
+                        <p class="text-sm text-gray-300 leading-relaxed"><span
+                                class="text-white font-bold uppercase text-xs tracking-widest block mb-1">Action:</span>
+                            Proactively brief the "Gang of Eight" and key Congressional leaders to navigate the INARA
+                            statutory review. Frame the MoU not as a treaty of normalization, but as an urgent, tactical
+                            containment measure necessary to stabilize domestic retail energy prices and reduce military
+                            expenditures ahead of the November elections.</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+    <script>document.addEventListener('DOMContentLoaded', () => { const observer = new IntersectionObserver((entries) => { entries.forEach(entry => { if (entry.isIntersecting) { entry.target.classList.add('visible'); if (entry.target.classList.contains('decode-text') && !entry.target.dataset.decoded) { decodeText(entry.target); entry.target.dataset.decoded = 'true'; } } }); }, { threshold: 0.1 }); document.querySelectorAll('.observe').forEach(el => observer.observe(el)); function decodeText(element) { const originalText = element.innerText; const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789@#$%&*'; let iterations = 0; const interval = setInterval(() => { element.innerText = originalText.split('').map((letter, index) => { if (index < iterations) { return originalText[index]; } return chars[Math.floor(Math.random() * chars.length)]; }).join(''); if (iterations >= originalText.length) { clearInterval(interval); } iterations += 1 / 2; }, 30); } });</script>
+</body>
+
+</html>

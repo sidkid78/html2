@@ -1,0 +1,617 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>HOMEase | AR Milestone Planning</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Syncopate:wght@400;700&display=swap');
+
+:root {
+  --cyan: #00f3ff;
+  --magenta: #ff003c;
+  --bg-dark: #02050a;
+  --panel-bg: rgba(2, 10, 20, 0.75);
+}
+
+body, html {
+  margin: 0;
+  padding: 0;
+  background-color: var(--bg-dark);
+  color: #a0c0d0;
+  font-family: 'Share Tech Mono', monospace;
+  overflow-x: hidden;
+  scroll-behavior: smooth;
+}
+
+/* SVG Filters & Textures */
+.bg-grid {
+  position: fixed;
+  top: 0; left: 0; width: 100vw; height: 100vh;
+  background-image: 
+    linear-gradient(rgba(0, 243, 255, 0.05) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(0, 243, 255, 0.05) 1px, transparent 1px);
+  background-size: 50px 50px;
+  background-attachment: fixed;
+  z-index: -2;
+}
+
+.noise-overlay {
+  position: fixed;
+  top: 0; left: 0; width: 100vw; height: 100vh;
+  pointer-events: none;
+  z-index: 50;
+  opacity: 0.15;
+  mix-blend-mode: overlay;
+}
+
+.hud-scanline {
+  position: fixed;
+  top: 0; left: 0; width: 100%; height: 2px;
+  background: var(--cyan);
+  box-shadow: 0 0 15px var(--cyan), 0 0 30px var(--cyan);
+  animation: scan 10s cubic-bezier(0.4, 0, 0.2, 1) infinite;
+  z-index: 100;
+  pointer-events: none;
+  mix-blend-mode: screen;
+}
+
+@keyframes scan {
+  0% { top: -10%; opacity: 0; }
+  5% { opacity: 1; }
+  95% { opacity: 1; }
+  100% { top: 110%; opacity: 0; }
+}
+
+/* Typography & Layout elements */
+h1, h2, h3, .syncopate {
+  font-family: 'Syncopate', sans-serif;
+  text-transform: uppercase;
+}
+
+.glass-panel {
+  background: var(--panel-bg);
+  border: 1px solid rgba(0, 243, 255, 0.2);
+  backdrop-filter: blur(8px);
+  box-shadow: inset 0 0 20px rgba(0, 243, 255, 0.05);
+  position: relative;
+  overflow: hidden;
+}
+
+.glass-panel::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; width: 100%; height: 100%;
+  background: linear-gradient(45deg, transparent 40%, rgba(0, 243, 255, 0.03) 50%, transparent 60%);
+  z-index: -1;
+}
+
+.text-glow { text-shadow: 0 0 8px rgba(0, 243, 255, 0.6); }
+.text-glow-magenta { text-shadow: 0 0 8px rgba(255, 0, 60, 0.8); color: var(--magenta); }
+
+.phase-bg-num {
+  position: absolute;
+  top: -5%;
+  right: -5%;
+  font-size: 25vw;
+  font-family: 'Syncopate', sans-serif;
+  font-weight: 700;
+  color: rgba(0, 243, 255, 0.02);
+  line-height: 0.8;
+  z-index: 0;
+  pointer-events: none;
+  mix-blend-mode: screen;
+  writing-mode: vertical-rl;
+}
+
+.li-dar-marker {
+  position: absolute;
+  width: 10px; height: 10px;
+  border: 1px solid var(--cyan);
+  background: rgba(0, 243, 255, 0.2);
+}
+.marker-tl { top: -5px; left: -5px; }
+.marker-tr { top: -5px; right: -5px; }
+.marker-bl { bottom: -5px; left: -5px; }
+.marker-br { bottom: -5px; right: -5px; }
+
+.reveal-node {
+  opacity: 0;
+  transform: translateY(30px) scale(0.98);
+  transition: all 0.8s cubic-bezier(0.16, 1, 0.3, 1);
+  filter: url(#glitch-filter);
+}
+.reveal-node.visible {
+  opacity: 1;
+  transform: translateY(0) scale(1);
+  filter: none;
+}
+
+ul {
+  list-style-type: none;
+  padding-left: 1.5rem;
+}
+ul li::before {
+  content: '►';
+  color: var(--cyan);
+  display: inline-block;
+  width: 1.5em;
+  margin-left: -1.5em;
+  font-size: 0.8em;
+}
+
+.critical-path-badge {
+  background: rgba(255, 0, 60, 0.1);
+  border: 1px solid var(--magenta);
+  color: var(--magenta);
+  padding: 0.2rem 0.5rem;
+  font-size: 0.75rem;
+  animation: pulse-magenta 2s infinite;
+}
+
+@keyframes pulse-magenta {
+  0% { box-shadow: 0 0 0 0 rgba(255, 0, 60, 0.4); }
+  70% { box-shadow: 0 0 0 5px rgba(255, 0, 60, 0); }
+  100% { box-shadow: 0 0 0 0 rgba(255, 0, 60, 0); }
+}
+</style>
+</head>
+<body class="antialiased">
+
+<!-- SVG Filters -->
+<svg class="hidden">
+  <defs>
+    <filter id="noise-filter">
+      <feTurbulence type="fractalNoise" baseFrequency="0.8" numOctaves="3" stitchTiles="stitch"/>
+      <feColorMatrix type="matrix" values="1 0 0 0 0, 0 1 0 0 0, 0 0 1 0 0, 0 0 0 0.1 0" />
+    </filter>
+    <filter id="glitch-filter">
+      <feTurbulence type="fractalNoise" baseFrequency="0.15 0.02" numOctaves="1" result="warp"/>
+      <feDisplacementMap in="SourceGraphic" in2="warp" scale="20" xChannelSelector="R" yChannelSelector="G" />
+    </filter>
+  </defs>
+</svg>
+
+<div class="noise-overlay" style="filter: url(#noise-filter);"></div>
+<div class="bg-grid"></div>
+<div class="hud-scanline"></div>
+
+<main class="max-w-7xl mx-auto px-4 sm:px-8 py-16 relative z-10">
+
+  <!-- HEADER -->
+  <header class="glass-panel p-8 mb-16 reveal-node border-l-4 border-l-[#00f3ff]">
+    <div class="li-dar-marker marker-tr"></div>
+    <div class="li-dar-marker marker-br"></div>
+    <h1 class="text-3xl md:text-5xl text-glow text-white mb-6 syncopate tracking-widest">
+      📋 HOMEase <span class="text-[#00f3ff]">|</span> AI Platform
+    </h1>
+    <h2 class="text-xl md:text-2xl text-[#00f3ff] mb-8">Detailed Milestone Planning</h2>
+    
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 text-sm">
+      <div class="border border-[#00f3ff]/30 p-4 bg-black/40">
+        <div class="text-gray-500 mb-1 text-xs">PROJECT ID</div>
+        <div class="text-white tracking-widest">proj_30519117</div>
+      </div>
+      <div class="border border-[#00f3ff]/30 p-4 bg-black/40">
+        <div class="text-gray-500 mb-1 text-xs">PLANNING DATE</div>
+        <div class="text-white">June 29, 2025</div>
+      </div>
+      <div class="border border-[#00f3ff]/30 p-4 bg-black/40">
+        <div class="text-gray-500 mb-1 text-xs">TOTAL DURATION</div>
+        <div class="text-white">55 days (8 weeks)</div>
+      </div>
+      <div class="border border-[#00f3ff]/30 p-4 bg-black/40 border-b-4 border-b-[#00f3ff]">
+        <div class="text-[#00f3ff] mb-1 text-xs">DELIVERY TARGET</div>
+        <div class="text-white text-glow">August 24, 2025</div>
+      </div>
+    </div>
+  </header>
+
+  <!-- EXEC SUMMARY -->
+  <section class="mb-20 grid grid-cols-1 lg:grid-cols-3 gap-8 reveal-node">
+    <div class="lg:col-span-1 glass-panel p-8">
+      <h3 class="text-2xl text-white mb-4 syncopate flex items-center gap-2">
+        <span class="text-[#00f3ff]">🎯</span> Exec Summary
+      </h3>
+      <p class="text-sm leading-relaxed text-gray-300">
+        The milestone plan outlines the development of an AR-driven lead generation platform targeting the $161B aging-in-place market. With <span class="text-white bg-red-900/30 px-1 border border-red-500/50">87.5% of tasks on the critical path</span>, precise execution is key to meeting the aggressive timeline.
+      </p>
+    </div>
+    <div class="lg:col-span-2 glass-panel p-8">
+      <h3 class="text-xl text-[#00f3ff] mb-6 syncopate">Key Success Metrics</h3>
+      <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
+        <div class="flex flex-col">
+          <span class="text-xs text-gray-500">MVP LAUNCH</span>
+          <span class="text-xl text-white">August 24, 2025</span>
+        </div>
+        <div class="flex flex-col">
+          <span class="text-xs text-gray-500">TARGET REVENUE</span>
+          <span class="text-xl text-white">$1.2M <span class="text-sm text-gray-400">by end of 2025</span></span>
+        </div>
+        <div class="flex flex-col">
+          <span class="text-xs text-gray-500">LEAD PROCESSING</span>
+          <span class="text-xl text-white">2,500+ <span class="text-sm text-gray-400">validated leads/month</span></span>
+        </div>
+        <div class="flex flex-col">
+          <span class="text-xs text-gray-500">CONTRACTOR NETWORK</span>
+          <span class="text-xl text-white">50+ <span class="text-sm text-gray-400">CAPS-certified pros</span></span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <h2 class="text-3xl text-center text-white mb-16 syncopate tracking-widest text-glow reveal-node">
+    📅 Phase-by-Phase Breakdown
+  </h2>
+
+  <div class="relative">
+    <!-- Central Timeline Spine -->
+    <div class="absolute left-[15px] md:left-1/2 top-0 bottom-0 w-[2px] bg-[#00f3ff]/20 hidden md:block"></div>
+
+    <!-- PHASE 1 -->
+    <section class="mb-24 relative reveal-node">
+      <div class="phase-bg-num text-right right-0">P1</div>
+      <div class="glass-panel p-6 border-t-2 border-[#00f3ff]">
+        <h3 class="text-2xl text-white mb-2 syncopate">Phase 1: Foundation & Requirements</h3>
+        <div class="text-[#00f3ff] mb-8">(Week 1)</div>
+
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 relative z-10">
+          <!-- M1.1 -->
+          <div class="bg-black/50 p-6 border-l border-[#00f3ff]/30 hover:border-[#00f3ff] transition-colors">
+            <h4 class="text-lg text-white mb-2">Milestone 1.1: Project Kickoff & Team Alignment</h4>
+            <div class="flex gap-4 text-xs mb-4">
+              <span class="text-green-400 border border-green-400 px-2 py-1">✅ COMPLETED</span>
+              <span class="text-gray-400 py-1">Date: June 29, 2025</span>
+            </div>
+            <div class="text-sm text-[#00f3ff] mb-2">Deliverables:</div>
+            <ul class="text-sm text-gray-300 space-y-2">
+              <li>Finalized project charter</li>
+              <li>Defined team roles and responsibilities</li>
+              <li>Initiated development environment setup</li>
+              <li>Established stakeholder communication</li>
+            </ul>
+          </div>
+
+          <!-- M1.2 -->
+          <div class="bg-black/50 p-6 border-l border-[#00f3ff]/30 hover:border-[#00f3ff] transition-colors">
+            <div class="flex justify-between items-start mb-2">
+              <h4 class="text-lg text-white">Milestone 1.2: Requirements Analysis Complete</h4>
+              <span class="critical-path-badge syncopate">CRITICAL PATH: YES</span>
+            </div>
+            <div class="grid grid-cols-2 gap-2 text-xs mb-6 text-gray-400 border-b border-[#00f3ff]/20 pb-4">
+              <div>Target: <span class="text-white">July 5, 2025</span></div>
+              <div>Duration: <span class="text-white">5 days</span></div>
+              <div class="col-span-2">Responsible: <span class="text-[#00f3ff]">Business Analyst</span></div>
+            </div>
+            
+            <div class="space-y-6">
+              <div>
+                <div class="text-sm text-[#00f3ff] mb-2">AR Platform Specific Requirements:</div>
+                <ul class="text-xs text-gray-300 space-y-1">
+                  <li>Mobile AR Application: LiDAR compatibility (iPhone 12 Pro+, iPad Pro)</li>
+                  <li>ARKit framework integration specifications</li>
+                  <li>Room scanning accuracy standards (±2 inches)</li>
+                  <li>Accessibility detection algorithms (ADA compliance)</li>
+                </ul>
+              </div>
+              <div>
+                <div class="text-sm text-[#00f3ff] mb-2">Senior-Friendly UX Requirements:</div>
+                <ul class="text-xs text-gray-300 space-y-1">
+                  <li>Minimum 18pt font support</li>
+                  <li>High contrast color schemes (4.5:1 ratio minimum)</li>
+                  <li>Simple gesture patterns (tap-only, no complex swipes)</li>
+                  <li>Voice command integration specifications</li>
+                  <li>Clear error handling and guidance flows</li>
+                </ul>
+              </div>
+              <div>
+                <div class="text-sm text-[#00f3ff] mb-2">Lead Validation Requirements:</div>
+                <ul class="text-xs text-gray-300 space-y-1">
+                  <li>AR scan data processing specifications</li>
+                  <li>Homeowner intent confirmation workflows</li>
+                  <li>Budget estimation algorithms</li>
+                  <li>Urgency scoring methodology</li>
+                  <li>Integration with the contractor matching system</li>
+                </ul>
+              </div>
+              <div class="bg-[#00f3ff]/5 p-3 border border-[#00f3ff]/20">
+                <div class="text-sm text-white mb-2">Deliverables & Acceptance:</div>
+                <ul class="text-xs text-gray-400 space-y-1">
+                  <li>Functional Requirements Doc (150+ reqs), AR Tech Specs, UX Guidelines, Compliance (HIPAA/CCPA), API Specs</li>
+                  <li>Stakeholder sign-off, Tech feasibility confirmed, Compliance validated, Performance SLAs defined</li>
+                </ul>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- PHASE 2 -->
+    <section class="mb-24 relative reveal-node">
+      <div class="phase-bg-num text-left left-0">P2</div>
+      <div class="glass-panel p-6 border-t-2 border-[#00f3ff]">
+        <h3 class="text-2xl text-white mb-2 syncopate">Phase 2: Architecture & Design</h3>
+        <div class="text-[#00f3ff] mb-8">(Weeks 2-3)</div>
+
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 relative z-10">
+          <!-- M2.1 -->
+          <div class="bg-black/50 p-6 border-l border-[#00f3ff]/30 hover:border-[#00f3ff] transition-colors">
+            <div class="flex justify-between items-start mb-2">
+              <h4 class="text-lg text-white">Milestone 2.1: System Architecture Complete</h4>
+              <span class="critical-path-badge syncopate">CRITICAL PATH: YES</span>
+            </div>
+            <div class="grid grid-cols-2 gap-2 text-xs mb-6 text-gray-400 border-b border-[#00f3ff]/20 pb-4">
+              <div>Target: <span class="text-white">July 13, 2025</span></div>
+              <div>Duration: <span class="text-white">8 days</span></div>
+              <div class="col-span-2">Responsible: <span class="text-[#00f3ff]">Solution Architect</span></div>
+            </div>
+
+            <div class="space-y-6">
+              <div>
+                <div class="text-sm text-[#00f3ff] mb-2">Microservices Architecture:</div>
+                <ul class="text-xs text-gray-300 space-y-1">
+                  <li>AR Processing Service: LiDAR data processing, room analysis</li>
+                  <li>Lead Validation Service: Intent verification, req extraction</li>
+                  <li>Contractor Matching Service: Algorithm-based partner matching</li>
+                  <li>Payment Processing Service: $40+ per lead billing system</li>
+                  <li>Notification & Analytics Services</li>
+                </ul>
+              </div>
+              <div>
+                <div class="text-sm text-[#00f3ff] mb-2">Cloud & Tech Stack:</div>
+                <ul class="text-xs text-gray-300 space-y-1">
+                  <li>Auto-scaling AWS infrastructure, CDN for AR models</li>
+                  <li>Frontend: React Native (iOS priority)</li>
+                  <li>AR Framework: ARKit (iOS), ARCore future</li>
+                  <li>Backend: Node.js/Express, PostgreSQL & MongoDB</li>
+                  <li>Payment: Stripe</li>
+                </ul>
+              </div>
+              <div class="bg-[#00f3ff]/5 p-3 border border-[#00f3ff]/20">
+                <div class="text-sm text-white mb-1">Deliverables:</div>
+                <div class="text-xs text-gray-400">Sys Arch Diagram, AR Data Flow, Microservices Doc, Security Arch, Scalability Plan (to 261K leads/mo), Tech Decisions.</div>
+              </div>
+            </div>
+          </div>
+
+          <!-- M2.2 -->
+          <div class="bg-black/50 p-6 border-l border-[#00f3ff]/30 hover:border-[#00f3ff] transition-colors">
+             <div class="flex justify-between items-start mb-2">
+              <h4 class="text-lg text-white">Milestone 2.2: Database Design Complete</h4>
+              <span class="critical-path-badge syncopate">CRITICAL PATH: YES</span>
+            </div>
+            <div class="grid grid-cols-2 gap-2 text-xs mb-6 text-gray-400 border-b border-[#00f3ff]/20 pb-4">
+              <div>Target: <span class="text-white">July 19, 2025</span></div>
+              <div>Duration: <span class="text-white">6 days</span></div>
+              <div class="col-span-2">Responsible: <span class="text-[#00f3ff]">Database Administrator</span></div>
+            </div>
+
+            <div class="space-y-6">
+              <div>
+                <div class="text-sm text-[#00f3ff] mb-2">Core Entities:</div>
+                <ul class="text-xs text-gray-300 space-y-1">
+                  <li>Homeowners (Profiles, preferences)</li>
+                  <li>AR Scans (3D models, measurements, issues)</li>
+                  <li>Contractors (CAPS certs, performance)</li>
+                  <li>Leads (Status, pricing, conversion)</li>
+                  <li>Projects (Modifications, timelines)</li>
+                </ul>
+              </div>
+              <div>
+                <div class="text-sm text-[#00f3ff] mb-2">Specialized Storage:</div>
+                <ul class="text-xs text-gray-300 space-y-1">
+                  <li>AR Data Storage: Large 3D scan files</li>
+                  <li>HIPAA Compliance: Encrypted at rest/transit</li>
+                  <li>Performance: Indexing for real-time matching</li>
+                  <li>Audit Trails: Complete history</li>
+                </ul>
+              </div>
+              <div class="bg-[#00f3ff]/5 p-3 border border-[#00f3ff]/20">
+                <div class="text-sm text-white mb-1">Deliverables:</div>
+                <div class="text-xs text-gray-400">ERDs, Schema Scripts, Migration Plans, Optimization Strategy, Backup/Recovery, HIPAA Docs.</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- PHASE 3 -->
+    <section class="mb-24 relative reveal-node">
+      <div class="phase-bg-num text-right right-0">P3</div>
+      <div class="glass-panel p-6 border-t-2 border-[#00f3ff]">
+        <h3 class="text-2xl text-white mb-2 syncopate">Phase 3: Core Development</h3>
+        <div class="text-[#00f3ff] mb-8">(Weeks 4-6)</div>
+
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 relative z-10">
+          <!-- M3.1 -->
+          <div class="bg-black/50 p-6 border-l border-gray-600 hover:border-[#00f3ff] transition-colors">
+            <div class="flex justify-between items-start mb-2">
+              <h4 class="text-lg text-white">Milestone 3.1: AR Assessment Tool MVP</h4>
+              <span class="text-xs text-gray-400 border border-gray-600 px-2 py-1">CRITICAL PATH: NO (9d float)</span>
+            </div>
+            <div class="grid grid-cols-2 gap-2 text-xs mb-6 text-gray-400 border-b border-[#00f3ff]/20 pb-4">
+              <div>Target: <span class="text-white">July 31, 2025</span></div>
+              <div>Duration: <span class="text-white">12 days</span></div>
+              <div class="col-span-2">Responsible: <span class="text-gray-300">Mobile Dev + UX Designer</span></div>
+            </div>
+
+            <div class="space-y-4">
+              <div>
+                <div class="text-sm text-[#00f3ff] mb-1">Room Scanning & Issue Detection:</div>
+                <ul class="text-xs text-gray-300 space-y-1">
+                  <li>LiDAR measurement (walls, doors, obstacles)</li>
+                  <li>Real-time accessibility & ADA compliance checking</li>
+                  <li>Grab bar placement & ramp requirements</li>
+                  <li>Lighting adequacy & fall hazard identification</li>
+                </ul>
+              </div>
+              <div>
+                <div class="text-sm text-[#00f3ff] mb-1">Senior-Friendly Interface:</div>
+                <ul class="text-xs text-gray-300 space-y-1">
+                  <li>Large buttons, voice-guided scanning</li>
+                  <li>Progress indicators & error recovery</li>
+                </ul>
+              </div>
+              <div class="bg-[#00f3ff]/5 p-3 border border-[#00f3ff]/20">
+                <div class="text-sm text-white mb-1">Deliverables:</div>
+                <div class="text-xs text-gray-400">iOS AR MVP, Scanning logic, App Store prep, User testing docs.</div>
+              </div>
+            </div>
+          </div>
+
+          <!-- M3.2 -->
+          <div class="bg-black/50 p-6 border-l border-[#00f3ff]/30 hover:border-[#00f3ff] transition-colors">
+            <div class="flex justify-between items-start mb-2">
+              <h4 class="text-lg text-white">Milestone 3.2: Backend Development Complete</h4>
+              <span class="critical-path-badge syncopate">CRITICAL PATH: YES</span>
+            </div>
+            <div class="grid grid-cols-2 gap-2 text-xs mb-6 text-gray-400 border-b border-[#00f3ff]/20 pb-4">
+              <div>Target: <span class="text-white">August 3, 2025</span></div>
+              <div>Duration: <span class="text-white">15 days</span></div>
+              <div class="col-span-2">Responsible: <span class="text-[#00f3ff]">Backend Developers (2)</span></div>
+            </div>
+
+            <div class="space-y-4">
+              <div>
+                <div class="text-sm text-[#00f3ff] mb-1">Lead Validation Engine:</div>
+                <ul class="text-xs text-gray-300 space-y-1">
+                  <li>AR scan data processing pipeline</li>
+                  <li>Intent verification & budget estimation</li>
+                  <li>Urgency scoring system</li>
+                </ul>
+              </div>
+              <div>
+                <div class="text-sm text-[#00f3ff] mb-1">Contractor Matching System:</div>
+                <ul class="text-xs text-gray-300 space-y-1">
+                  <li>CAPS verification, geo/specialization matching</li>
+                  <li>Performance ranking, real-time notification</li>
+                </ul>
+              </div>
+              <div>
+                <div class="text-sm text-[#00f3ff] mb-1">Payment Processing:</div>
+                <ul class="text-xs text-gray-300 space-y-1">
+                  <li>Per-lead billing ($40+), reporting, revenue tracking</li>
+                </ul>
+              </div>
+              <div class="bg-[#00f3ff]/5 p-3 border border-[#00f3ff]/20">
+                <div class="text-sm text-white mb-1">Deliverables:</div>
+                <div class="text-xs text-gray-400">REST API (30+ endpoints), Validation algorithms, Matching engine, Admin dashboard.</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- PHASE 4 -->
+    <section class="mb-24 relative reveal-node">
+      <div class="phase-bg-num text-left left-0">P4</div>
+      <div class="glass-panel p-6 border-t-2 border-[#00f3ff]">
+        <h3 class="text-2xl text-white mb-2 syncopate">Phase 4: Integration & Testing</h3>
+        <div class="text-[#00f3ff] mb-8">(Weeks 7-8)</div>
+
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 relative z-10">
+          <!-- M4.1 -->
+          <div class="bg-black/50 p-6 border-l border-[#00f3ff]/30 hover:border-[#00f3ff] transition-colors">
+            <div class="mb-4">
+              <h4 class="text-md text-white font-bold mb-1">4.1 API Integration</h4>
+              <span class="critical-path-badge syncopate text-[10px]">CRITICAL</span>
+            </div>
+            <div class="text-xs text-gray-400 mb-4">
+              Target: Aug 11 | Duration: 8d<br>
+              Resp: Full-Stack Dev
+            </div>
+            <div class="text-xs text-gray-300 space-y-2">
+              <div class="text-[#00f3ff]">Integration Points:</div>
+              <div>AR ↔ Lead validation</div>
+              <div>Matching ↔ Notification</div>
+              <div>Payment ↔ Dashboard</div>
+              <div>Analytics ↔ All services</div>
+            </div>
+          </div>
+
+          <!-- M4.2 -->
+          <div class="bg-black/50 p-6 border-l border-[#00f3ff]/30 hover:border-[#00f3ff] transition-colors">
+            <div class="mb-4">
+              <h4 class="text-md text-white font-bold mb-1">4.2 Comprehensive Testing</h4>
+              <span class="critical-path-badge syncopate text-[10px]">CRITICAL</span>
+            </div>
+            <div class="text-xs text-gray-400 mb-4">
+              Target: Aug 21 | Duration: 10d<br>
+              Resp: QA Engineer + Team
+            </div>
+            <div class="text-xs text-gray-300 space-y-2">
+              <div class="text-[#00f3ff]">Strategy:</div>
+              <div>AR testing (±2 inch accuracy, senior UAT)</div>
+              <div>Load testing (1000+ users, <30s scans)</div>
+              <div>Security (HIPAA, Pen-testing)</div>
+              <div class="pt-2 border-t border-gray-700">Deliverables: Test reports, Security audit, Readiness assessment</div>
+            </div>
+          </div>
+
+          <!-- M4.3 -->
+          <div class="bg-black/50 p-6 border-l border-[#00f3ff]/30 hover:border-[#00f3ff] transition-colors relative overflow-hidden">
+            <!-- Pulse overlay for final deployment -->
+            <div class="absolute inset-0 bg-[#00f3ff]/5 animate-pulse"></div>
+            <div class="relative z-10">
+              <div class="mb-4">
+                <h4 class="text-md text-white font-bold mb-1">4.3 Production Deployment</h4>
+                <span class="critical-path-badge syncopate text-[10px]">CRITICAL</span>
+              </div>
+              <div class="text-xs text-gray-400 mb-4">
+                Target: Aug 24 | Duration: 3d<br>
+                Resp: DevOps Engineer
+              </div>
+              <div class="text-xs text-gray-300 space-y-2">
+                <div class="text-[#00f3ff]">Activities:</div>
+                <div>Production env setup & DB seeding</div>
+                <div>SSL & Monitoring config</div>
+                <div>App Store submission</div>
+                <div>Contractor portal activation</div>
+                <div class="pt-2 border-t border-[#00f3ff]/30 text-white font-bold">
+                  Deliverables: LIVE Environment, Go-live announcement.
+                </div>
+              </div>
+            </div>
+          </div>
+
+        </div>
+      </div>
+    </section>
+  </div>
+
+</main>
+
+<script>
+  // Intersection Observer for scroll-triggered AR reveal effects
+  document.addEventListener('DOMContentLoaded', () => {
+    const nodes = document.querySelectorAll('.reveal-node');
+    
+    const observerOptions = {
+      root: null,
+      rootMargin: '0px',
+      threshold: 0.1
+    };
+
+    const observer = new IntersectionObserver((entries, observer) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          // Add slight delay based on document flow
+          setTimeout(() => {
+            entry.target.classList.add('visible');
+          }, 100);
+          observer.unobserve(entry.target);
+        }
+      });
+    }, observerOptions);
+
+    nodes.forEach(node => {
+      observer.observe(node);
+    });
+  });
+</script>
+</body>
+</html>

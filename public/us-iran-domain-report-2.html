@@ -1,0 +1,901 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>DOMINT REPORT: REGIONAL PROXY CONFLICTS</title>
+        <script src="https://cdn.tailwindcss.com"></script>
+        <style>
+                @import url('https://fonts.googleapis.com/css2?family=Share+Tech+Mono&display=swap');
+
+                :root {
+                        --phosphor: #00ff66;
+                        --phosphor-dim: #005522;
+                        --alert: #ff3300;
+                        --bg: #050505;
+                }
+
+                body {
+                        margin: 0;
+                        background-color: var(--bg);
+                        color: var(--phosphor);
+                        font-family: 'Share Tech Mono', monospace;
+                        overflow-x: hidden;
+                        scroll-behavior: smooth;
+                }
+
+                .crt-overlay {
+                        position: fixed;
+                        top: 0;
+                        left: 0;
+                        width: 100vw;
+                        height: 100vh;
+                        pointer-events: none;
+                        z-index: 9999;
+                        background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.25) 50%), linear-gradient(90deg, rgba(255, 0, 0, 0.06), rgba(0, 255, 0, 0.02), rgba(0, 0, 255, 0.06));
+                        background-size: 100% 3px, 6px 100%;
+                        opacity: 0.15;
+                }
+
+                .noise-bg {
+                        position: fixed;
+                        inset: 0;
+                        z-index: -1;
+                        opacity: 0.3;
+                        mix-blend-mode: overlay;
+                        background-image: url('./images/us-iran-mood-bg.png');
+                        background-size: cover;
+                        background-position: center;
+                        filter: contrast(150%) grayscale(100%);
+                }
+
+                .glitch {
+                        position: relative;
+                        display: inline-block;
+                }
+
+                .glitch::before,
+                .glitch::after {
+                        content: attr(data-text);
+                        position: absolute;
+                        top: 0;
+                        left: 0;
+                        opacity: 0.8;
+                }
+
+                .glitch::before {
+                        left: 2px;
+                        text-shadow: -2px 0 red;
+                        clip-path: inset(20% 0 80% 0);
+                        animation: glitch-anim 2s infinite linear alternate-reverse;
+                }
+
+                .glitch::after {
+                        left: -2px;
+                        text-shadow: -2px 0 blue;
+                        clip-path: inset(80% 0 20% 0);
+                        animation: glitch-anim-2 3s infinite linear alternate-reverse;
+                }
+
+                @keyframes glitch-anim {
+                        0% {
+                                clip-path: inset(20% 0 80% 0);
+                        }
+
+                        20% {
+                                clip-path: inset(60% 0 10% 0);
+                        }
+
+                        40% {
+                                clip-path: inset(40% 0 50% 0);
+                        }
+
+                        60% {
+                                clip-path: inset(80% 0 5% 0);
+                        }
+
+                        80% {
+                                clip-path: inset(10% 0 70% 0);
+                        }
+
+                        100% {
+                                clip-path: inset(30% 0 50% 0);
+                        }
+                }
+
+                @keyframes glitch-anim-2 {
+                        0% {
+                                clip-path: inset(10% 0 60% 0);
+                        }
+
+                        20% {
+                                clip-path: inset(30% 0 20% 0);
+                        }
+
+                        40% {
+                                clip-path: inset(70% 0 10% 0);
+                        }
+
+                        60% {
+                                clip-path: inset(20% 0 50% 0);
+                        }
+
+                        80% {
+                                clip-path: inset(90% 0 5% 0);
+                        }
+
+                        100% {
+                                clip-path: inset(40% 0 30% 0);
+                        }
+                }
+
+                .hud-border {
+                        border: 1px solid var(--phosphor-dim);
+                        position: relative;
+                        background: rgba(0, 20, 0, 0.4);
+                        backdrop-filter: blur(4px);
+                }
+
+                .hud-border::before {
+                        content: '';
+                        position: absolute;
+                        top: -1px;
+                        left: -1px;
+                        width: 10px;
+                        height: 10px;
+                        border-top: 2px solid var(--phosphor);
+                        border-left: 2px solid var(--phosphor);
+                }
+
+                .hud-border::after {
+                        content: '';
+                        position: absolute;
+                        bottom: -1px;
+                        right: -1px;
+                        width: 10px;
+                        height: 10px;
+                        border-bottom: 2px solid var(--phosphor);
+                        border-right: 2px solid var(--phosphor);
+                }
+
+                .image-tac {
+                        width: 100%;
+                        height: 100%;
+                        object-fit: cover;
+                        filter: grayscale(100%) sepia(100%) hue-rotate(80deg) contrast(150%) brightness(0.8);
+                        mix-blend-mode: luminosity;
+                }
+
+                .blink {
+                        animation: blinker 1s linear infinite;
+                }
+
+                @keyframes blinker {
+                        50% {
+                                opacity: 0;
+                        }
+                }
+
+                .table-grid {
+                        display: grid;
+                        grid-template-columns: 1fr 1fr 2fr;
+                        gap: 1px;
+                        background: var(--phosphor-dim);
+                }
+
+                .table-cell {
+                        background: #000;
+                        padding: 0.75rem;
+                        font-size: 0.875rem;
+                }
+
+                .asc-art {
+                        white-space: pre;
+                        font-size: 0.65rem;
+                        line-height: 1.1;
+                        overflow-x: auto;
+                        color: var(--phosphor);
+                }
+
+                @media (min-width: 768px) {
+                        .asc-art {
+                                font-size: 0.85rem;
+                        }
+                }
+
+                .redacted:hover {
+                        background-color: transparent;
+                        color: var(--phosphor);
+                        transition: all 0.2s ease;
+                }
+
+                .redacted {
+                        background-color: var(--phosphor);
+                        color: var(--phosphor);
+                }
+
+                .reveal-on-scroll {
+                        opacity: 0;
+                        transform: translateY(20px);
+                        transition: opacity 0.6s ease-out, transform 0.6s ease-out;
+                }
+
+                .reveal-on-scroll.is-visible {
+                        opacity: 1;
+                        transform: translateY(0);
+                }
+        </style>
+</head>
+
+<body class="text-green-500 selection:bg-green-500 selection:text-black"><svg class="hidden">
+                <filter id="noise">
+                        <feTurbulence type="fractalNoise" baseFrequency="0.8" numOctaves="3" stitchTiles="stitch" />
+                </filter>
+        </svg>
+        <div class="crt-overlay"></div>
+        <div class="noise-bg"></div>
+        <div
+                class="fixed top-4 right-4 z-50 flex items-center gap-2 border border-green-500/50 bg-black/80 px-3 py-1 text-xs">
+                <div class="w-2 h-2 rounded-full bg-red-600 blink"></div><span>SECURE UPLINK // REC</span>
+        </div>
+        <main class="max-w-6xl mx-auto p-4 md:p-8 relative z-10 space-y-16">
+                <header class="relative min-h-[60vh] flex flex-col justify-end pb-12 border-b-2 border-green-500/30">
+                        <div
+                                class="absolute inset-0 z-[-1] overflow-hidden opacity-40 mix-blend-screen mask-image: linear-gradient(to bottom, black, transparent);">
+                                <img src="./images/us-iran-(2).jpg" alt="Tactical Overlay"
+                                        class="w-full h-full object-cover filter contrast-125 sepia hue-rotate-180">
+                        </div>
+                        <p class="text-xs md:text-sm tracking-[0.2em] mb-4 opacity-70 uppercase">Domain Report //
+                                Classified Intelligence Directive</p>
+                        <h1 class="text-4xl md:text-6xl font-bold uppercase leading-tight mb-6 tracking-tighter glitch"
+                                data-text="Regional Proxy Conflicts and Military Escalations">Regional Proxy Conflicts
+                                and Military Escalations</h1>
+                        <div class="hud-border p-4 md:p-6 max-w-3xl">
+                                <p class="text-sm md:text-base leading-relaxed"><span
+                                                class="text-red-500 font-bold uppercase mr-2">Goal:</span>Investigate
+                                        the military dynamics and proxy conflicts in the Middle East involving Iran and
+                                        the United States. Your team must map out the actions of the Axis of Resistance
+                                        including Hezbollah, Hamas, the Houthis, and Iraqi/Syrian militias. Detail
+                                        recent military engagements, strikes on US bases, US retaliatory strikes, and
+                                        the operational involvement of regional allies like Israel. Focus strictly on
+                                        military actions, proxy movements, and regional security threats.</p>
+                                <p class="mt-4 text-xs opacity-70 border-t border-green-500/30 pt-4">An analytical
+                                        synthesis of the military dynamics, proxy networks, and kinetic engagements
+                                        involving the United States, Israel, and the Iranian-led "Axis of Resistance"
+                                        has been compiled and saved to the designated file. Below is the comprehensive,
+                                        high-confidence domain report, which has been saved to <span
+                                                class="text-red-400">domain_report.md</span>.</p>
+                        </div>
+                </header>
+                <section class="reveal-on-scroll space-y-6">
+                        <h2 class="text-2xl md:text-3xl font-bold border-l-4 border-green-500 pl-4 uppercase">Executive
+                                Summary: The Redefined Middle Eastern Security Landscape (2023–2026)</h2>
+                        <div
+                                class="grid md:grid-cols-2 gap-8 text-sm md:text-base leading-relaxed bg-black/60 p-6 border border-green-500/20">
+                                <p>Between 2023 and mid-2026, the Middle East underwent a profound transformation in
+                                        military dynamics, transitioning from localized proxy friction into a highly
+                                        integrated, multi-theater war. The "Axis of Resistance," directed and funded by
+                                        the Islamic Republic of Iran’s Quds Force (IRGC-QF), has consolidated its
+                                        command structures, upgraded its missile and uncrewed arsenals, and
+                                        operationalized new tactics across Levant land bridges and maritime choke
+                                        points.</p>
+                                <p>In response, the United States and Israel have shifted their military postures from
+                                        localized deterrence to systemic degradation. This shift is characterized by
+                                        massive, combined kinetic operations—most notably Operation Epic Fury in
+                                        February 2026—and the unilateral imposition of expansive geographical buffer
+                                        zones by Israeli ground forces.</p>
+                                <p class="md:col-span-2 border-t border-green-500/20 pt-4">Despite the geopolitical
+                                        shock of the Assad regime's collapse in Syria and intensive Western maritime
+                                        interdictions, the Axis of Resistance remains highly resilient. This resilience
+                                        is sustained through decentralized local production blueprints, robust illicit
+                                        financial networks exceeding $1 billion annually, and a strategic intent to link
+                                        global maritime transit security directly to Western and Israeli military
+                                        withdrawals.</p>
+                        </div>
+                </section>
+                <section class="reveal-on-scroll space-y-8">
+                        <h2 class="text-2xl md:text-3xl font-bold border-l-4 border-red-500 pl-4 text-red-500 uppercase glitch"
+                                data-text="I. The Axis of Resistance">I. The Axis of Resistance: Structure, Supply
+                                Chains, and Arsenals</h2>
+                        <p class="max-w-4xl text-sm md:text-base">At the core of Iran’s asymmetric doctrine is a highly
+                                organized network of state-sponsored and non-state proxies. Over the past three years,
+                                these groups have achieved unprecedented technological and logistical self-sufficiency.
+                        </p>
+                        <div class="hud-border overflow-hidden bg-black/80 p-4">
+                                <div class="asc-art text-green-400 opacity-90">
+                                        ┌────────────────────────┐
+                                        │ Supreme Leader │
+                                        │ (Mojtaba Khamenei) │
+                                        └───────────┬────────────┘
+                                        │
+                                        ┌───────────▼────────────┐
+                                        │ IRGC-QF Commander │
+                                        │ (Esmail Ghaani) │
+                                        └───────────┬────────────┘
+                                        │
+                                        ┌─────────────────┴─────────────────┐
+                                        ▼ ▼
+                                        ┌───────────────────────┐ ┌───────────────────────┐
+                                        │ Regional Corps │ │ Functional Units │
+                                        │ • Syria-Lebanon Corps │ │ • Corps 8000 (R&D) │
+                                        │ (Unit 18000) │ │ • Unit 190 (Smuggling)│
+                                        │ • Palestine Division │ │ • Unit 340 (Technical)│
+                                        │ • Yemen Command │ │ • Unit 400 (Special) │
+                                        │ • Iraq Command │ │ • Unit 840 (Asymmetric│
+                                        └───────────┬───────────┘ └───────────┬───────────┘
+                                        │ │
+                                        └─────────────────┬─────────────────┘
+                                        │
+                                        ▼
+                                        ┌─────────────────────────────┐
+                                        │ Beirut Joint Operations Room│
+                                        └──────────────┬──────────────┘
+                                        │
+                                        ┌────────────────────┼────────────────────┐
+                                        ▼ ▼ ▼
+                                        ┌─────────────────┐ ┌─────────────────┐ ┌─────────────────┐
+                                        │ Hezbollah │ │ Houthi Movement│ │ Iraqi/Syrian │
+                                        │ (Lebanon) │ │ (Yemen) │ │ Militias │
+                                        └─────────────────┘ └─────────────────┘ └─────────────────┘</div>
+                        </div>
+                        <div class="space-y-6">
+                                <div class="hud-border p-5">
+                                        <h3 class="text-xl font-bold mb-2 text-white">1. Command, Control, and
+                                                Coordination</h3>
+                                        <p class="text-sm leading-relaxed">The IRGC-QF maintains a highly structured
+                                                hierarchy to synchronize operations across multiple borders:</p>
+                                        <ul class="list-disc pl-5 mt-2 space-y-2 text-sm opacity-80">
+                                                <li><strong class="text-green-300">Supreme Leadership &
+                                                                Command:</strong> Under Supreme Leader Mojtaba Khamenei
+                                                        and IRGC-QF Commander Esmail Ghaani, the command operates
+                                                        through specialized geographic divisions. These include the
+                                                        Syria-Lebanon Corps (Unit 18000, formerly directed by Jawad
+                                                        Ghafari), the Palestine Division (led by Saeed Izadi), the Yemen
+                                                        Command (under Abdul Reza Shahlai), and the Iraq Command
+                                                        (Ramezan Base).</li>
+                                                <li><strong class="text-green-300">Functional Technical
+                                                                Support:</strong> Specialized units manage logistics and
+                                                        technical integration. Corps 8000 coordinates force build-up and
+                                                        R&D; Unit 190 manages international smuggling operations; and
+                                                        Unit 340 provides engineering blueprints and local manufacturing
+                                                        assistance.</li>
+                                                <li><strong class="text-green-300">Joint Operations:</strong> Real-time
+                                                        tactical integration and strategic alignment are managed
+                                                        directly through the Beirut Joint Operations Room, allowing for
+                                                        simultaneous multi-front escalations.</li>
+                                        </ul>
+                                </div>
+                                <div class="hud-border p-5">
+                                        <h3 class="text-xl font-bold mb-4 text-white">2. Tactical Proliferation and
+                                                Arsenal Composition</h3>
+                                        <p class="text-sm mb-4">The military capabilities of the primary Axis proxies
+                                                have advanced beyond simple unguided rocketry to precision-guided
+                                                munitions (PGMs) and deep-strike platforms:</p>
+                                        <div class="table-grid">
+                                                <div
+                                                        class="table-cell font-bold text-green-300 border-b border-green-500/50 uppercase">
+                                                        Proxy Group</div>
+                                                <div
+                                                        class="table-cell font-bold text-green-300 border-b border-green-500/50 uppercase">
+                                                        Primary Theaters</div>
+                                                <div
+                                                        class="table-cell font-bold text-green-300 border-b border-green-500/50 uppercase">
+                                                        Key Capabilities & Arsenals</div>
+                                                <div class="table-cell">Lebanese Hezbollah</div>
+                                                <div class="table-cell">Lebanon, Syria, Israel Northern Border</div>
+                                                <div class="table-cell opacity-80"><span
+                                                                class="text-red-400 font-bold">PGMs & SRBMs:</span>
+                                                        Zelzal-2 heavy rockets converted via suitcase-sized PGM kits to
+                                                        <10m CEP; Fateh-110/M-600 solid-fueled tactical SRBMs (250–350
+                                                                km range).<br><span
+                                                                        class="text-red-400 font-bold">UAVs:</span>
+                                                                Mirsad-1/2, Ababil-2T, Karrar, and Shahed
+                                                                platforms.<br><span class="text-red-400 font-bold">ASCMs
+                                                                        & Air Defense:</span> C-802 (Noor) and
+                                                                supersonic Yakhont ASCMs; Misagh MANPADS and Pantsir-S1
+                                                                (SA-22) tactical SAMs.</div>
+                                                <div class="table-cell">Ansar Allah (Houthis)</div>
+                                                <div class="table-cell">Red Sea, Gulf of Aden, Deep-Strike Israel</div>
+                                                <div class="table-cell opacity-80"><span
+                                                                class="text-red-400 font-bold">Maritime & Long-Range
+                                                                Strike:</span> Asef and Tankil Anti-Ship Ballistic
+                                                        Missiles (ASBMs); Toophan and Borkan MRBMs (up to 1,900 km
+                                                        range); Quds-2/3/4 Land-Attack Cruise Missiles (LACMs).<br><span
+                                                                class="text-red-400 font-bold">UAVs:</span> Wa'id-1/2
+                                                        (Shahed-136 variants) and Samad-series loitering munitions.
+                                                </div>
+                                                <div class="table-cell">Hamas & Palestinian Islamic Jihad</div>
+                                                <div class="table-cell">Gaza, West Bank</div>
+                                                <div class="table-cell opacity-80"><span
+                                                                class="text-red-400 font-bold">Asymmetric & Tunnel
+                                                                Warfare:</span> Local rocket systems (M-75, Ayyash-250)
+                                                        built with Iranian metallurgy blueprints; Shehab and Zouari
+                                                        loitering munitions; high-yield, armor-penetrating IEDs.</div>
+                                                <div class="table-cell">Iraqi & Syrian Militias</div>
+                                                <div class="table-cell">Iraq, Syria, Jordan Border</div>
+                                                <div class="table-cell opacity-80"><span
+                                                                class="text-red-400 font-bold">Tactical Strike:</span>
+                                                        Shahed-136 and low-acoustic-signature Shahed-101 UAVs; Falaq-1/2
+                                                        heavy Improvised Rocket Assisted Munitions (IRAMs); Ababil and
+                                                        Fateh-110 short-range ballistic missiles.</div>
+                                        </div>
+                                </div>
+                                <div class="grid md:grid-cols-2 gap-6">
+                                        <div class="hud-border p-5">
+                                                <h3 class="text-xl font-bold mb-2 text-white">3. Logistical Corridors
+                                                        and Financing</h3>
+                                                <ul class="list-none mt-2 space-y-4 text-sm opacity-80">
+                                                        <li><strong
+                                                                        class="text-green-300 border-b border-green-500/30 inline-block mb-1">The
+                                                                        Levant Expressway:</strong> Despite the collapse
+                                                                of the Syrian Assad regime and evolving political
+                                                                dynamics in Iraq, clandestine land transit routes remain
+                                                                functional. Key smuggling relies on the Sikak military
+                                                                crossing (controlled by Kata'ib Hezbollah) along the
+                                                                Iraq-Syria border, staging areas in Deir ez-Zor, and a
+                                                                3-kilometer underground tunnel network breaching the
+                                                                Syrian-Lebanese border to supply Hezbollah.</li>
+                                                        <li><strong
+                                                                        class="text-green-300 border-b border-green-500/30 inline-block mb-1">Maritime
+                                                                        and Air Supply Lines:</strong> Large cargo
+                                                                vessels departing from Iranian ports like Bandar Abbas
+                                                                conduct ship-to-ship (STS) transfers in the Arabian Sea
+                                                                to unflagged wooden dhows, which land on Yemen’s
+                                                                southern coast. Air transit via Mahan Air and Qeshm
+                                                                Fares Air to Damascus has dramatically declined due to
+                                                                ongoing regional disruptions.</li>
+                                                        <li><strong
+                                                                        class="text-green-300 border-b border-green-500/30 inline-block mb-1">Financing
+                                                                        Mechanisms:</strong> Axis operations are
+                                                                sustained by over $1 billion annually. This is funded
+                                                                via the Sa'id al-Jamal "Oil-for-Terror" ghost tanker
+                                                                fleet, the illicit siphoning of Iraq’s state-allocated
+                                                                Popular Mobilization Forces (PMF) budget (historically
+                                                                valued at $3.4B), and high-volume cryptocurrency
+                                                                channels utilizing Tether (USDT).</li>
+                                                </ul>
+                                        </div>
+                                        <div class="hud-border relative overflow-hidden group">
+                                                <div
+                                                        class="absolute inset-0 bg-green-500/20 mix-blend-overlay z-10 pointer-events-none group-hover:bg-transparent transition-all">
+                                                </div><img src="./images/us-iran-(1).jpg" alt="Logistical Corridors"
+                                                        class="w-full h-full object-cover filter grayscale contrast-125 sepia hue-rotate-90 group-hover:filter-none transition-all duration-700">
+                                                <div
+                                                        class="absolute bottom-0 left-0 w-full bg-black/80 p-2 text-xs border-t border-green-500/50">
+                                                        IMAGE_REF_001: CLANDESTINE SUPPLY OPERATIONS</div>
+                                        </div>
+                                </div>
+                        </div>
+                </section>
+                <section class="reveal-on-scroll space-y-8 mt-16 relative">
+                        <div
+                                class="absolute -left-[5vw] top-0 w-[110vw] h-full bg-black z-[-2] border-y border-red-500/30">
+                        </div>
+                        <h2
+                                class="text-2xl md:text-3xl font-bold border-l-4 border-orange-500 pl-4 text-orange-400 uppercase">
+                                II. U.S.-Iran Kinetic Escalation and Base Defenses (2023–2026)</h2>
+                        <p class="max-w-4xl text-sm md:text-base">Between late 2023 and mid-2026, the kinetic friction
+                                between U.S. forces stationed in the Central Command (CENTCOM) area of responsibility
+                                and Iranian-backed militias escalated from localized harassment to sustained,
+                                high-intensity engagements.</p>
+                        <div class="hud-border overflow-hidden bg-black/90 p-4 border-orange-500/50">
+                                <div class="asc-art text-orange-400 opacity-90">
+                                        Oct 2023 – Feb 2024 Jan 28, 2024 Feb 2, 2024 Feb 2026 Apr 1, 2026
+                                        ┌──────────────────┐ ┌─────────────┐ ┌─────────────┐ ┌─────────────┐
+                                        ┌─────────────┐
+                                        │ Proxy Surge │───>│ Tower 22 │──────>│ US Striking │─────>│ Op Epic │──────>│
+                                        Peak Attack │
+                                        │ >170 strikes on │ │ Attack │ │ Campaign │ │ Fury │ │ 41 claimed │
+                                        │ US installations │ │ (3 US Dead) │ │ (125 targets│ │ (900 joint │ │ strikes; │
+                                        │ │ │ │ │ hit) │ │ strikes) │ │ Camp Victoria│
+                                        └──────────────────┘ └─────────────┘ └─────────────┘ └─────────────┘
+                                        └─────────────┘</div>
+                        </div>
+                        <div class="grid md:grid-cols-2 gap-8">
+                                <div class="space-y-6">
+                                        <div class="hud-border p-5 border-orange-500/30">
+                                                <h3 class="text-xl font-bold mb-2 text-white">1. Chronology of Base
+                                                        Attacks</h3>
+                                                <ul
+                                                        class="list-square pl-5 mt-2 space-y-3 text-sm opacity-80 marker:text-orange-500">
+                                                        <li><strong class="text-orange-300">Initial Aggression Peak (Oct
+                                                                        2023 – Feb 2024):</strong> Iranian proxies
+                                                                launched more than 170 rocket, mortar, and one-way
+                                                                attack drone strikes against U.S. bases in Iraq and
+                                                                Syria.</li>
+                                                        <li><strong class="text-orange-300">The Tower 22 Incident
+                                                                        (January 28, 2024):</strong> A one-way attack
+                                                                drone struck the Tower 22 logistics support base in
+                                                                northeastern Jordan. The strike killed three U.S.
+                                                                service members and wounded dozens, crossing a critical
+                                                                red line and altering U.S. rules of engagement.</li>
+                                                        <li><strong class="text-orange-300">The 2026
+                                                                        Escalation:</strong> After a period of relative
+                                                                calm following the U.S. response to Tower 22, attacks
+                                                                surged dramatically in March and April 2026. This
+                                                                escalation peaked on April 1, 2026, when militias
+                                                                launched 41 claimed strikes in a single 24-hour period,
+                                                                targeting critical installations including Camp
+                                                                Victoria.</li>
+                                                </ul>
+                                        </div>
+                                        <div class="hud-border p-5 border-orange-500/30">
+                                                <h3 class="text-xl font-bold mb-2 text-white">3. Force Protection and
+                                                        Strategic Realignment</h3>
+                                                <p class="text-sm mb-2">Faced with persistent, low-cost drone threats,
+                                                        the U.S. military took several steps to protect its personnel:
+                                                </p>
+                                                <ul
+                                                        class="list-square pl-5 space-y-2 text-sm opacity-80 marker:text-orange-500">
+                                                        <li><strong class="text-orange-300">Outpost
+                                                                        Consolidation:</strong> Vulnerable and exposed
+                                                                forward operating locations, such as the Hemo base in
+                                                                northeastern Syria, were abandoned. Forces were
+                                                                redeployed to highly fortified installations in Jordan
+                                                                and western Iraq.</li>
+                                                        <li><strong class="text-orange-300">Strategic Withdrawal
+                                                                        Negotiations:</strong> High-intensity proxy
+                                                                strikes accelerated bilateral negotiations between
+                                                                Washington and Baghdad. The parties agreed to transition
+                                                                the U.S.-led coalition's military presence in Iraq,
+                                                                targeting a formal transition/withdrawal by September
+                                                                2026.</li>
+                                                </ul>
+                                        </div>
+                                </div>
+                                <div class="hud-border relative p-5 border-orange-500/30 flex flex-col justify-between">
+                                        <h3 class="text-xl font-bold mb-4 text-white z-10 relative">2. U.S. Retaliatory
+                                                Operations</h3>
+                                        <div class="absolute inset-0 z-0 opacity-30"><img src="./images/us-iran-(1).jpg"
+                                                        alt="Airstrikes"
+                                                        class="w-full h-full object-cover filter contrast-150 grayscale mix-blend-luminosity">
+                                        </div>
+                                        <div
+                                                class="relative z-10 space-y-4 text-sm opacity-90 drop-shadow-md bg-black/60 p-4 border-l border-orange-500">
+                                                <p><strong
+                                                                class="text-orange-400 text-lg uppercase tracking-wider block mb-1">Immediate
+                                                                Post-Tower 22 Action:</strong> On February 2, 2024, the
+                                                        U.S. military executed a massive wave of retaliatory strikes,
+                                                        deploying strategic bombers to hit 85 targets across seven
+                                                        locations in Iraq and Syria, focusing on IRGC-QF command nodes
+                                                        and weapons depots. This was paired with the high-profile
+                                                        precision assassination of Kata'ib Hezbollah leaders in Baghdad.
+                                                </p>
+                                                <p><strong class="text-red-500 text-lg uppercase tracking-wider block mb-1 glitch"
+                                                                data-text="Operation Epic Fury">Operation Epic Fury
+                                                                (February 28, 2026):</strong> Confronted by renewed
+                                                        proxy attacks, the U.S. and Israeli forces launched Operation
+                                                        Epic Fury, a massive combined campaign. Over a 12-hour window,
+                                                        coalition forces conducted 900 joint precision strikes targeting
+                                                        direct Iranian military infrastructure, nuclear sites, and
+                                                        command hubs inside Iran and throughout proxy-held territory.
+                                                </p>
+                                        </div>
+                                </div>
+                        </div>
+                </section>
+                <section class="reveal-on-scroll space-y-8 mt-16">
+                        <h2
+                                class="text-2xl md:text-3xl font-bold border-l-4 border-blue-500 pl-4 text-blue-400 uppercase">
+                                III. Maritime Warfare in the Red Sea and Gulf of Aden</h2>
+                        <p class="max-w-4xl text-sm md:text-base">The Bab el-Mandeb Strait and the Red Sea emerged as a
+                                volatile front, with the Houthi movement establishing a formidable asymmetric blockade
+                                on international shipping.</p>
+                        <div class="grid md:grid-cols-12 gap-6">
+                                <div class="md:col-span-7 space-y-6">
+                                        <div class="hud-border overflow-hidden bg-black/90 p-4 border-blue-500/50">
+                                                <div class="asc-art text-blue-400 opacity-90">
+                                                        HEAVY MARITIME FRICTION
+                                                        ┌─────────────────────────────────────┐
+                                                        ▼ ▼
+                                                        ┌───────────────────────┐ ┌───────────────────────┐
+                                                        │ Houthi Strike Assets │ │ Western Responses │
+                                                        │ • ASBMs (Asef, Tankil)│ │ • Op Prosperity │
+                                                        │ • ASCMs (Quds Z-0) │ VS. │ Guardian (Defense) │
+                                                        │ • Al-Qari'ah Submers. │ │ • Op Rough Rider │
+                                                        │ • Drone Swarms │ │ (1,100+ Air Strikes)│
+                                                        └───────────────────────┘ └───────────────────────┘
+                                                        │ │
+                                                        └──────────────────┬──────────────────┘
+                                                        │
+                                                        ▼
+                                                        ┌───────────────────────┐
+                                                        │ Status: Mid-2026 │
+                                                        │ Ceasefires collapsed; │
+                                                        │ Joint Houthi-IRGC │
+                                                        │ Security Belt active. │
+                                                        └───────────────────────┘</div>
+                                        </div>
+                                        <div class="hud-border p-5 border-blue-500/30">
+                                                <h3 class="text-xl font-bold mb-2 text-white">1. Houthi Naval
+                                                        Interdiction Tactics</h3>
+                                                <p class="text-sm mb-2">The Houthis are the first military force in the
+                                                        world to successfully employ Anti-Ship Ballistic Missiles
+                                                        (ASBMs) in active combat. Guided by Iranian surveillance vessels
+                                                        (such as the Behshad) and coastal radar networks, Houthi forces
+                                                        used several distinct tactics:</p>
+                                                <ul
+                                                        class="list-square pl-5 space-y-2 text-sm opacity-80 marker:text-blue-500">
+                                                        <li><strong class="text-blue-300">Layered Swarm
+                                                                        Assaults:</strong> Combining low-cost, one-way
+                                                                attack drones (Samad-3, Wa'id-2) with anti-ship cruise
+                                                                missiles (Al-Mandab 2, Quds Z-0) to saturate ship
+                                                                self-defense systems.</li>
+                                                        <li><strong class="text-blue-300">Asymmetric Surface and
+                                                                        Subsurface Threats:</strong> Deploying
+                                                                explosive-laden Uncrewed Surface Vessels (USVs)
+                                                                disguised as local fishing skiffs, alongside the
+                                                                Al-Qari'ah Autonomous Underwater Vehicle (AUV) to target
+                                                                commercial ship hulls.</li>
+                                                        <li><strong class="text-blue-300">Heliborne Boardings:</strong>
+                                                                Conducting high-risk helicopter air assaults on targeted
+                                                                merchant vessels in international shipping lanes.</li>
+                                                </ul>
+                                        </div>
+                                        <div class="hud-border p-5 border-blue-500/30">
+                                                <h3 class="text-xl font-bold mb-2 text-white">3. Diplomatic Interludes
+                                                        and the 2026 Outlook</h3>
+                                                <p class="text-sm opacity-80">While an Oman-brokered diplomatic
+                                                        agreement led to temporary ceasefires in May and October 2025,
+                                                        the calm did not last. By June 2026, geopolitical conditions
+                                                        deteriorated. The Houthis, working under a joint IRGC-Houthi
+                                                        security belt initiative, resumed maritime strikes,
+                                                        demonstrating that the threat to global sea lines of
+                                                        communication remains active.</p>
+                                        </div>
+                                </div>
+                                <div class="md:col-span-5 space-y-6 flex flex-col">
+                                        <div
+                                                class="hud-border relative flex-1 min-h-[250px] overflow-hidden group border-blue-500/50">
+                                                <div class="absolute inset-0 bg-blue-900/40 mix-blend-multiply z-10">
+                                                </div><img src="./images/us-iran-(3).jpg" alt="Maritime Swarm"
+                                                        class="w-full h-full object-cover filter contrast-125 sepia hue-rotate-180 brightness-75 group-hover:scale-105 transition-transform duration-1000">
+                                                <div
+                                                        class="absolute bottom-0 left-0 w-full bg-black/80 p-2 text-xs border-t border-blue-500/50 z-20">
+                                                        IMAGE_REF_003: USV SWARM TACTICS</div>
+                                        </div>
+                                        <div class="hud-border p-5 border-blue-500/30 bg-[#001122]">
+                                                <h3 class="text-xl font-bold mb-2 text-white">2. Allied Naval Coalitions
+                                                        and Defensive Asymmetries</h3>
+                                                <p class="text-sm mb-2">The international response, while robust, faced
+                                                        severe financial and operational challenges:</p>
+                                                <ul
+                                                        class="list-square pl-5 space-y-3 text-sm opacity-90 marker:text-blue-400">
+                                                        <li><strong class="text-blue-200">Operation Prosperity
+                                                                        Guardian:</strong> Under Combined Task Force 153
+                                                                (CTF-153), multinational warships successfully
+                                                                intercepted hundreds of incoming threats. However, this
+                                                                defense exposed a severe cost asymmetry, requiring
+                                                                warships to fire multimillion-dollar air defense
+                                                                missiles (such as the Aster 15/30 and SM-2) to
+                                                                neutralize Houthi drones costing less than $20,000.</li>
+                                                        <li><strong class="text-blue-200">Offensive Air
+                                                                        Campaigns:</strong> To degrade Houthi launch
+                                                                sites, radar installations, and storage bunkers, the
+                                                                U.S. and UK executed Operation Poseidon Archer and the
+                                                                high-intensity Operation Rough Rider in early 2025,
+                                                                which launched over 1,100 airstrikes against Houthi
+                                                                installations.</li>
+                                                </ul>
+                                        </div>
+                                        <div class="hud-border relative h-[150px] overflow-hidden border-blue-500/50">
+                                                <img src="./images/us-iran-(5).jpg" alt="Naval Defense"
+                                                        class="w-full h-full object-cover filter grayscale contrast-150 hue-rotate-[220deg] brightness-110 mix-blend-screen">
+                                        </div>
+                                </div>
+                        </div>
+                </section>
+                <section class="reveal-on-scroll space-y-8 mt-16 relative">
+                        <div
+                                class="absolute -right-[5vw] top-0 w-[110vw] h-full bg-[#110500] z-[-2] border-y border-red-800/50">
+                        </div>
+                        <h2 class="text-2xl md:text-3xl font-bold border-l-4 border-red-600 pl-4 text-red-500 uppercase glitch"
+                                data-text="IV. Israel’s Multi-Front Engagements">IV. Israel’s Multi-Front Engagements
+                                and Buffer Zone Strategy</h2>
+                        <p class="max-w-4xl text-sm md:text-base text-red-100">Faced with a multi-front war on its
+                                borders, Israel shifted from localized containment to a strategy of systemic
+                                degradation, carving out buffer zones to isolate and dismantle hostile forces.</p>
+                        <div class="hud-border overflow-hidden bg-black/90 p-4 border-red-600/50">
+                                <div class="asc-art text-red-500 opacity-90">
+                                        ISRAELI BUFFER ZONES
+                                        ┌──────────────────────────────────────────────┐
+                                        │ • Southern Front: 53%-64% Military Control │
+                                        │ • Northern Front: Cleared to Litani River │
+                                        │ • Eastern Front: Occupation of Syrian Border │
+                                        └──────────────────────┬───────────────────────┘
+                                        │
+                                        ▼
+                                        KINETIC ESCALATION
+                                        ┌──────────────────────────────────────────────┐
+                                        │ • Target: Decapitation (Ali Musa Daqduq) │
+                                        │ • Target: Syrian Land Bridge Remediation │
+                                        │ • Target: Strategic Strikes on Iranian Core │
+                                        └──────────────────────────────────────────────┘</div>
+                        </div>
+                        <div class="grid md:grid-cols-2 gap-6">
+                                <div class="space-y-6">
+                                        <div class="hud-border p-5 border-red-600/40 bg-black/60">
+                                                <h3 class="text-xl font-bold mb-2 text-white">1. The Gaza Strip and
+                                                        Southern Front</h3>
+                                                <p class="text-sm opacity-90">Following the collapse of ceasefires,
+                                                        Israel established an active security perimeter in Gaza.</p>
+                                                <ul class="list-none pl-0 mt-3 space-y-3 text-sm opacity-80">
+                                                        <li><strong
+                                                                        class="text-red-400 block mb-1 uppercase tracking-widest text-xs border-b border-red-600/30">Buffer
+                                                                        Zone and Territorial Hold:</strong> As of
+                                                                mid-2026, the Israel Defense Forces (IDF) maintain
+                                                                direct military control over 53% to 64% of the Gaza
+                                                                Strip. This includes permanent military fortifications
+                                                                along the Philadelphi Route and the Netzarim Corridor,
+                                                                creating physical buffer zones designed to prevent Hamas
+                                                                from regrouping.</li>
+                                                        <li><strong
+                                                                        class="text-red-400 block mb-1 uppercase tracking-widest text-xs border-b border-red-600/30">Stalled
+                                                                        Diplomatic Track:</strong> Hostilities remain
+                                                                frozen. Hamas’s refusal to accept disarmament clauses,
+                                                                combined with Israel's insistence on maintaining
+                                                                open-ended security access, has stalled cease-fire and
+                                                                hostage-release negotiations.</li>
+                                                </ul>
+                                        </div>
+                                        <div class="hud-border p-5 border-red-600/40 bg-black/60">
+                                                <h3 class="text-xl font-bold mb-2 text-white">3. Direct Israel-Iran
+                                                        Kinetic Exchanges</h3>
+                                                <p class="text-sm opacity-90 mb-2">In early 2026, the proxy conflict
+                                                        broke out into direct, state-on-state warfare:</p>
+                                                <ul class="list-none pl-0 mt-2 space-y-3 text-sm opacity-80">
+                                                        <li><strong
+                                                                        class="text-red-400 block mb-1 uppercase tracking-widest text-xs border-b border-red-600/30">Airstrikes
+                                                                        on Iran's Core:</strong> Israeli and U.S.
+                                                                aircraft carried out extensive, coordinated strikes
+                                                                against military bases and nuclear research facilities
+                                                                inside Iran.</li>
+                                                        <li><strong
+                                                                        class="text-red-400 block mb-1 uppercase tracking-widest text-xs border-b border-red-600/30">Iranian
+                                                                        Retaliation:</strong> Tehran responded by
+                                                                launching waves of medium-range ballistic missiles,
+                                                                targeting Israeli defense sites and population centers.
+                                                                This exchange marked a major escalation, demonstrating
+                                                                that both sides are now willing to strike each other's
+                                                                home territories directly.</li>
+                                                </ul>
+                                        </div>
+                                </div>
+                                <div class="space-y-6">
+                                        <div
+                                                class="hud-border relative h-[250px] overflow-hidden border-red-600/50 group">
+                                                <div
+                                                        class="absolute inset-0 bg-red-900/30 mix-blend-color z-10 pointer-events-none group-hover:opacity-0 transition-opacity">
+                                                </div><img src="./images/us-iran-(4).jpg" alt="Tanks Buffer Zone"
+                                                        class="w-full h-full object-cover filter contrast-125 saturate-50 group-hover:scale-105 transition-transform duration-700">
+                                                <div
+                                                        class="absolute bottom-0 right-0 bg-red-600 text-black px-3 py-1 text-xs font-bold z-20">
+                                                        NORTHERN FRONT DEPLOYMENT</div>
+                                        </div>
+                                        <div class="hud-border p-5 border-red-600/40 bg-black/60">
+                                                <h3 class="text-xl font-bold mb-2 text-white">2. The Northern Front and
+                                                        the Invasion of Lebanon</h3>
+                                                <ul class="list-none pl-0 mt-2 space-y-3 text-sm opacity-80">
+                                                        <li><strong
+                                                                        class="text-red-400 block mb-1 uppercase tracking-widest text-xs border-b border-red-600/30">Ground
+                                                                        Campaign (March 2026):</strong> Following
+                                                                intensive exchanges of rocket and artillery fire, Israel
+                                                                launched a major ground invasion of southern Lebanon on
+                                                                March 16, 2026. The stated objective is to push
+                                                                Hezbollah forces north of the Litani River and establish
+                                                                a permanent, 1,000-square-kilometer security buffer
+                                                                zone.</li>
+                                                        <li><strong
+                                                                        class="text-red-400 block mb-1 uppercase tracking-widest text-xs border-b border-red-600/30">Targeted
+                                                                        Decapitation:</strong> Alongside ground
+                                                                operations, Israel conducted a high-yield air campaign
+                                                                against Hezbollah's leadership. This culminated in the
+                                                                mid-June 2026 elimination of Radwan Force Commander Ali
+                                                                Musa Daqduq in Beirut.</li>
+                                                </ul>
+                                        </div>
+                                        <div class="hud-border p-5 border-red-600/40 bg-black/60">
+                                                <h3 class="text-xl font-bold mb-2 text-white">4. Post-Assad Syria and
+                                                        Eastern Border Protection</h3>
+                                                <ul class="list-none pl-0 mt-2 space-y-3 text-sm opacity-80">
+                                                        <li><strong
+                                                                        class="text-red-400 block mb-1 uppercase tracking-widest text-xs border-b border-red-600/30">Fragmentation
+                                                                        of the Axis Land Bridge:</strong> The fall of
+                                                                the Assad regime in Syria removed a critical logistical
+                                                                hub for the Axis of Resistance.</li>
+                                                        <li><strong
+                                                                        class="text-red-400 block mb-1 uppercase tracking-widest text-xs border-b border-red-600/30">Israeli
+                                                                        Preventive Strikes and Border
+                                                                        Operations:</strong> To prevent Hezbollah and
+                                                                remaining IRGC units from seizing abandoned military
+                                                                assets, Israel intensified its air campaign inside
+                                                                Syria. The IDF seized key terrain along the Mt. Hermon
+                                                                and Golan Heights border regions, effectively blocking
+                                                                efforts to rebuild the land bridge to Lebanon.</li>
+                                                </ul>
+                                        </div>
+                                </div>
+                        </div>
+                </section>
+                <section class="reveal-on-scroll mt-16 pb-20">
+                        <h2
+                                class="text-xl md:text-2xl font-bold border-t-2 border-b-2 border-white/50 py-2 text-center text-white uppercase tracking-widest mb-8 bg-white/5">
+                                V. Verification and Confidence Assessment</h2>
+                        <p class="text-center text-sm md:text-base opacity-80 max-w-3xl mx-auto mb-8">This report is
+                                compiled with a high level of confidence, synthesizing operational intelligence,
+                                tactical chronologies, and structural data collected through June 2026.</p>
+                        <div class="grid md:grid-cols-2 gap-4">
+                                <div class="hud-border p-4 bg-green-900/10 border-green-500/30 flex items-start gap-3">
+                                        <div
+                                                class="w-8 h-8 rounded border border-green-500 flex items-center justify-center shrink-0 font-bold text-lg">
+                                                A</div>
+                                        <div>
+                                                <h4 class="font-bold text-white mb-1 uppercase text-sm">Weaponry &
+                                                        Logistics: <span class="text-green-400">High Confidence</span>
+                                                </h4>
+                                                <p class="text-xs opacity-70">Detailed weapon specifications (e.g.,
+                                                        Zelzal-2 precision modifications, Asef/Tankil ASBM deployments)
+                                                        and named IRGC unit designations (Unit 190, Unit 340) are
+                                                        verified by multiple defense intelligence sources.</p>
+                                        </div>
+                                </div>
+                                <div class="hud-border p-4 bg-green-900/10 border-green-500/30 flex items-start gap-3">
+                                        <div
+                                                class="w-8 h-8 rounded border border-green-500 flex items-center justify-center shrink-0 font-bold text-lg">
+                                                B</div>
+                                        <div>
+                                                <h4 class="font-bold text-white mb-1 uppercase text-sm">Financial and
+                                                        Trade Flows: <span class="text-green-400">High Confidence</span>
+                                                </h4>
+                                                <p class="text-xs opacity-70">Financial data regarding the Sa'id
+                                                        al-Jamal network and state-siphoned funds are well-documented
+                                                        through international treasury sanctions and blockchain ledger
+                                                        analysis.</p>
+                                        </div>
+                                </div>
+                                <div class="hud-border p-4 bg-green-900/10 border-green-500/30 flex items-start gap-3">
+                                        <div
+                                                class="w-8 h-8 rounded border border-green-500 flex items-center justify-center shrink-0 font-bold text-lg">
+                                                C</div>
+                                        <div>
+                                                <h4 class="font-bold text-white mb-1 uppercase text-sm">Tactical
+                                                        Chronology (2024–2026): <span class="text-green-400">High
+                                                                Confidence</span></h4>
+                                                <p class="text-xs opacity-70">The timing of key military
+                                                        events—including the January 2024 Tower 22 strike, the March
+                                                        2026 ground invasion of Lebanon, and the April 2026 proxy base
+                                                        strikes—is supported by official military briefings and
+                                                        open-source intelligence.</p>
+                                        </div>
+                                </div>
+                                <div
+                                        class="hud-border p-4 bg-yellow-900/10 border-yellow-500/30 flex items-start gap-3">
+                                        <div
+                                                class="w-8 h-8 rounded border border-yellow-500 flex items-center justify-center shrink-0 font-bold text-yellow-500 text-lg">
+                                                D</div>
+                                        <div>
+                                                <h4 class="font-bold text-white mb-1 uppercase text-sm">Syrian Political
+                                                        Status: <span class="text-yellow-500">Medium Confidence</span>
+                                                </h4>
+                                                <p class="text-xs opacity-70">While the collapse of the Assad regime is
+                                                        a confirmed geopolitical shift, the long-term alignment of
+                                                        successor factions in Syria and their vulnerability to covert
+                                                        Iranian infiltration remain highly fluid.</p>
+                                        </div>
+                                </div>
+                        </div>
+                        <div class="mt-12 text-center border border-dashed border-green-500/50 p-4">
+                                <p class="text-xs md:text-sm text-green-400 opacity-60">The comprehensive domain report
+                                        has been compiled and saved to the designated file <code
+                                                class="bg-black px-2 py-1 text-green-300">domain_report.md</code> in the
+                                        current working directory.</p>
+                                <div class="mt-4 text-xs font-bold tracking-widest text-green-600">END OF TRANSMISSION
+                                </div>
+                        </div>
+                </section>
+        </main>
+        <script>document.addEventListener("DOMContentLoaded", () => { const t = new IntersectionObserver((e => { e.forEach(e => { e.isIntersecting && (e.target.classList.add("is-visible"), t.unobserve(e.target)) }) }), { threshold: .1 }); document.querySelectorAll(".reveal-on-scroll").forEach(e => t.observe(e)) });</script>
+</body>
+
+</html>
