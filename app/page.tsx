@@ -236,6 +236,33 @@ const hubs = [
     color: "from-red-600 to-rose-700",
     border: "hover:border-red-500/50",
     shadow: "hover:shadow-[0_0_40px_-10px_rgba(239,68,68,0.2)]"
+  },
+  {
+    title: "Macroeconomic Health Report",
+    description: "Domain report on growth, inflation, labor markets, and the macroeconomic indicators shaping the 2026 economic outlook.",
+    href: "/economy-report-1.html",
+    icon: "📈",
+    color: "from-emerald-600 to-green-700",
+    border: "hover:border-emerald-500/50",
+    shadow: "hover:shadow-[0_0_40px_-10px_rgba(16,185,129,0.2)]"
+  },
+  {
+    title: "The Divide: Wealth Gap Analysis",
+    description: "Domain report dissecting income inequality, wealth concentration, and the structural forces widening the economic divide.",
+    href: "/economy-report-2.html",
+    icon: "⚖️",
+    color: "from-amber-600 to-orange-600",
+    border: "hover:border-amber-500/50",
+    shadow: "hover:shadow-[0_0_40px_-10px_rgba(245,158,11,0.2)]"
+  },
+  {
+    title: "Economic Executive Strategy Brief",
+    description: "C-suite synthesis of macroeconomic risk and the wealth divide: highest-impact insights, tensions, and prioritized next steps for mid-2026.",
+    href: "/economic-brief.html",
+    icon: "📋",
+    color: "from-indigo-600 to-purple-700",
+    border: "hover:border-indigo-500/50",
+    shadow: "hover:shadow-[0_0_40px_-10px_rgba(79,70,229,0.2)]"
   }
 ];
 
