@@ -1,0 +1,397 @@
+<!DOCTYPE html>
+<html lang='en'>
+
+<head>
+    <meta charset='UTF-8'>
+    <meta name='viewport' content='width=device-width, initial-scale=1.0'>
+    <title>EXECUTIVE STRATEGY BRIEF: Mid-2026</title>
+    <script src='https://cdn.tailwindcss.com'></script>
+    <style>
+        body {
+            margin: 0;
+            background-color: #020617;
+            color: #f8fafc;
+            font-family: ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            overflow: hidden;
+        }
+
+        .carousel {
+            display: flex;
+            width: 100vw;
+            height: 100vh;
+            overflow-x: auto;
+            scroll-snap-type: x mandatory;
+            scrollbar-width: none;
+            scroll-behavior: smooth;
+        }
+
+        .carousel::-webkit-scrollbar {
+            display: none;
+        }
+
+        .slide {
+            flex: 0 0 100vw;
+            height: 100vh;
+            scroll-snap-align: start;
+            position: relative;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+
+        .bg-img {
+            position: absolute;
+            inset: 0;
+            width: 100vw;
+            height: 100vh;
+            object-fit: cover;
+            z-index: 0;
+            opacity: 0.35;
+            filter: contrast(1.3) saturate(0.2);
+            mix-blend-mode: luminosity;
+            transition: transform 10s ease-out;
+        }
+
+        .slide.in-view .bg-img {
+            transform: scale(1.05);
+        }
+
+        .content {
+            position: relative;
+            z-index: 10;
+            padding: 2rem 4rem;
+            max-width: 80rem;
+            margin: 0 auto;
+            width: 100%;
+            display: flex;
+            flex-direction: column;
+            gap: 1.5rem;
+            opacity: 0;
+            transform: translateY(30px);
+            transition: all 1s cubic-bezier(0.16, 1, 0.3, 1) 0.2s;
+        }
+
+        .slide.in-view .content {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        .glass-panel {
+            background: rgba(2, 6, 23, 0.65);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            padding: 2.5rem;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+        }
+
+        .glass-panel-red {
+            border-left: 4px solid #ef4444;
+        }
+
+        .glass-panel-cyan {
+            border-left: 4px solid #06b6d4;
+        }
+
+        .glass-panel-gold {
+            border-left: 4px solid #f59e0b;
+        }
+
+        h1,
+        h2,
+        h3 {
+            font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, 'Liberation Mono', 'Courier New', monospace;
+            text-transform: uppercase;
+            letter-spacing: -0.05em;
+        }
+
+        .noise-overlay {
+            position: fixed;
+            inset: 0;
+            z-index: 50;
+            pointer-events: none;
+            opacity: 0.06;
+            background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E");
+        }
+
+        .progress-bar {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            height: 4px;
+            background: #ef4444;
+            z-index: 60;
+            transition: width 0.3s ease;
+        }
+
+        .glitch {
+            position: relative;
+        }
+
+        .glitch::before,
+        .glitch::after {
+            content: attr(data-text);
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            opacity: 0.8;
+        }
+
+        .glitch::before {
+            left: 2px;
+            text-shadow: -2px 0 #ef4444;
+            clip: rect(24px, 550px, 90px, 0);
+            animation: glitch-anim-2 3s infinite linear alternate-reverse;
+        }
+
+        .glitch::after {
+            left: -2px;
+            text-shadow: -2px 0 #06b6d4;
+            clip: rect(85px, 550px, 140px, 0);
+            animation: glitch-anim 2.5s infinite linear alternate-reverse;
+        }
+
+        @keyframes glitch-anim {
+            0% {
+                clip: rect(10px, 9999px, 83px, 0);
+            }
+
+            20% {
+                clip: rect(65px, 9999px, 12px, 0);
+            }
+
+            40% {
+                clip: rect(110px, 9999px, 54px, 0);
+            }
+
+            60% {
+                clip: rect(32px, 9999px, 98px, 0);
+            }
+
+            80% {
+                clip: rect(87px, 9999px, 23px, 0);
+            }
+
+            100% {
+                clip: rect(45px, 9999px, 76px, 0);
+            }
+        }
+
+        @keyframes glitch-anim-2 {
+            0% {
+                clip: rect(65px, 9999px, 100px, 0);
+            }
+
+            20% {
+                clip: rect(3px, 9999px, 54px, 0);
+            }
+
+            40% {
+                clip: rect(89px, 9999px, 12px, 0);
+            }
+
+            60% {
+                clip: rect(22px, 9999px, 87px, 0);
+            }
+
+            80% {
+                clip: rect(54px, 9999px, 34px, 0);
+            }
+
+            100% {
+                clip: rect(12px, 9999px, 78px, 0);
+            }
+        }
+
+        .text-highlight-red {
+            color: #fca5a5;
+            background: rgba(239, 68, 68, 0.1);
+            padding: 0 0.25rem;
+        }
+
+        .text-highlight-cyan {
+            color: #67e8f9;
+            background: rgba(6, 182, 212, 0.1);
+            padding: 0 0.25rem;
+        }
+
+        .grid-bg {
+            background-size: 40px 40px;
+            background-image: linear-gradient(to right, rgba(255, 255, 255, 0.03) 1px, transparent 1px), linear-gradient(to bottom, rgba(255, 255, 255, 0.03) 1px, transparent 1px);
+        }
+    </style>
+</head>
+
+<body class='grid-bg'>
+    <div class='noise-overlay'></div>
+    <header
+        class='fixed top-6 left-6 z-50 font-mono text-xs tracking-widest text-slate-500 uppercase flex items-center gap-4'>
+        <div class='w-2 h-2 rounded-full bg-red-500 animate-pulse'></div><span>SYS.OP.2026 // CLASSIFIED MACRO
+            BRIEFING</span>
+    </header>
+    <div class='fixed bottom-6 right-6 z-50 font-mono text-xs tracking-widest text-slate-500'>SWIPE / SCROLL TO NAVIGATE
+        &#x2192;</div>
+    <div class='progress-bar' id='progress'></div>
+    <main class='carousel' id='deck'>
+        <section class='slide' id='slide-1'><img src='./images/econ-(11).jpg' alt='Data Pyramid Breaking' class='bg-img'
+                style='opacity: 0.5; filter: contrast(1.5) grayscale(0.2) hue-rotate(15deg); mix-blend-mode: overlay;'>
+            <div class='content items-start'>
+                <div class='glass-panel glass-panel-gold max-w-4xl'>
+                    <h2 class='text-sm text-amber-500 mb-4 tracking-widest'>Document Alpha-01</h2>
+                    <h1 class='text-5xl md:text-7xl font-bold text-white leading-tight glitch mb-6'
+                        data-text='EXECUTIVE STRATEGY BRIEF'>EXECUTIVE STRATEGY BRIEF:</h1>
+                    <p class='text-2xl md:text-3xl font-mono text-slate-300 tracking-tight'>U.S. Macroeconomic Health &
+                        Wealth Stratification (Mid-2026)</p>
+                </div>
+            </div>
+        </section>
+        <section class='slide' id='slide-2'><img src='./images/econ-(12).jpg' alt='Fed Chair with Burning Oil' class='bg-img'
+                style='object-position: right;'>
+            <div class='content'>
+                <div class='glass-panel glass-panel-red max-w-5xl'>
+                    <h2 class='text-3xl md:text-4xl text-white mb-6 flex items-center gap-4'><span
+                            class='text-red-500'>1.</span> High-Impact Insights: The Dual Economy</h2>
+                    <p class='text-lg text-slate-300 mb-6 leading-relaxed'>The U.S. economy in mid-2026 is avoiding
+                        recession through a highly concentrated, top-heavy expansion. Aggregate metrics project a robust
+                        3.0% GDP growth in Q2, but this masks severe structural fragility.</p>
+                    <div class='grid grid-cols-1 md:grid-cols-3 gap-6 mt-8'>
+                        <div class='border border-slate-800 p-5 bg-slate-900/50'>
+                            <h3 class='text-red-400 mb-3'>Top-Down Economic Engine:</h3>
+                            <p class='text-sm text-slate-400 leading-relaxed'>Growth is being driven almost entirely by
+                                an 8.7% surge in non-residential corporate investment (the AI technology buildout) and
+                                insulated spending from the wealthiest households.</p>
+                        </div>
+                        <div class='border border-slate-800 p-5 bg-slate-900/50'>
+                            <h3 class='text-red-400 mb-3'>Extreme Wealth Concentration:</h3>
+                            <p class='text-sm text-slate-400 leading-relaxed'>Total U.S. household net worth has reached
+                                $174.01 trillion, but the <span class='text-highlight-red'>Top 10% control 67.9%</span>
+                                of this wealth. The Bottom 50% (roughly 66 million households) hold a negligible 2.5%,
+                                locking them out of compounding asset growth.</p>
+                        </div>
+                        <div class='border border-slate-800 p-5 bg-slate-900/50'>
+                            <h3 class='text-red-400 mb-3'>The Return of Inflation & A Hawkish Fed:</h3>
+                            <p class='text-sm text-slate-400 leading-relaxed'>Driven by a Middle East geopolitical shock
+                                pushing oil past <span class='text-highlight-red'>$126/barrel</span>, CPI has surged to
+                                4.2%. In response, newly appointed Federal Reserve Chair Kevin Warsh has initiated a
+                                hardline "Inflation First" pivot, with markets pricing an 85% probability of rate hikes
+                                by year-end, threatening to crush already-strained lower-tier liquidity.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+        <section class='slide' id='slide-3'><img src='./images/econ-(13).jpg' alt='Wealth Split Screen' class='bg-img'
+                style='opacity: 0.6; mix-blend-mode: normal;'>
+            <div class='absolute inset-0 bg-gradient-to-t from-slate-950 via-transparent to-slate-950 z-0'></div>
+            <div class='content justify-end pb-24'>
+                <div class='w-full max-w-7xl mx-auto'>
+                    <h2
+                        class='text-2xl md:text-3xl text-white mb-8 bg-slate-950/80 inline-block p-4 border-l-4 border-white'>
+                        2. Cross-Domain Synthesis: The Macro Reality of the Wealth Gap</h2>
+                    <p class='text-lg text-slate-200 mb-8 max-w-3xl bg-slate-950/80 p-4'>The macroeconomic data
+                        perfectly mirrors the systemic inequality of the U.S. wealth gap. The current "K-shaped"
+                        consumer divergence is the operational symptom of a 40-year structural shift:</p>
+                    <div class='grid grid-cols-1 md:grid-cols-2 gap-8'>
+                        <div class='glass-panel !bg-slate-950/80 border-t-4 border-t-emerald-500 !border-l-0'>
+                            <h3 class='text-emerald-400 mb-4 text-xl'>The Upper Tier (Insulated Consumers):</h3>
+                            <p class='text-sm text-slate-300 leading-relaxed'>Strong nominal retail sales (+6.9% YoY)
+                                are sustained by the upper class. Because the Top 10% hold the vast majority of
+                                corporate equities (comprising 36% of their portfolios), they are effectively insulated
+                                from inflation through asset appreciation and yield, enabling continued high-end
+                                consumption.</p>
+                        </div>
+                        <div class='glass-panel !bg-slate-950/80 border-t-4 border-t-red-600 !border-l-0'>
+                            <h3 class='text-red-500 mb-4 text-xl'>The Lower-to-Middle Tier (Strained Consumers):</h3>
+                            <p class='text-sm text-slate-300 leading-relaxed'>The bottom 50% rely entirely on labor
+                                income, which is currently shrinking in real terms (-0.7% real wage growth YoY).
+                                Burdened by $4.30/gallon gasoline and historically high wealth-entry barriers, this
+                                demographic is rapidly exhausting its purchasing power. The productivity-pay divergence
+                                has eliminated their investable surplus, leaving them highly vulnerable to the Fed's
+                                imminent tightening cycle.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+        <section class='slide' id='slide-4'><img src='./images/econ-(14).jpg' alt='Tech Boom vs Labor Slack' class='bg-img'
+                style='filter: contrast(1.4) sepia(1) hue-rotate(180deg) saturate(2); opacity: 0.3;'>
+            <div class='content'>
+                <div class='glass-panel glass-panel-cyan max-w-5xl'>
+                    <h2 class='text-3xl md:text-4xl text-white mb-8 flex items-center gap-4'><span
+                            class='text-cyan-500'>3.</span> Strategic Tensions & Contradictions</h2>
+                    <div class='space-y-6'>
+                        <div class='flex flex-col md:flex-row gap-6 items-start'>
+                            <div class='md:w-1/3 font-mono text-cyan-400 pt-1 border-t border-cyan-900'>Fed Policy vs.
+                                Exogenous Inflation:</div>
+                            <div class='md:w-2/3 text-slate-300 text-sm leading-relaxed'>The "Warsh Fed" is deploying
+                                demand-side tools (interest rate hikes) to combat supply-side inflation (geopolitical
+                                energy shocks). This contradiction will punish capital-starved consumers and
+                                capital-intensive sectors (real estate, manufacturing) while failing to resolve the
+                                underlying energy supply constraints.</div>
+                        </div>
+                        <div class='flex flex-col md:flex-row gap-6 items-start'>
+                            <div class='md:w-1/3 font-mono text-cyan-400 pt-1 border-t border-cyan-900'>Headline GDP vs.
+                                Household Reality:</div>
+                            <div class='md:w-2/3 text-slate-300 text-sm leading-relaxed'>Q2 GDP tracking at <span
+                                    class='text-highlight-cyan'>3.0%</span> contradicts the reality of the middle class,
+                                whose aggregate wealth share has steadily hollowed out to 29.6%.</div>
+                        </div>
+                        <div class='flex flex-col md:flex-row gap-6 items-start'>
+                            <div class='md:w-1/3 font-mono text-cyan-400 pt-1 border-t border-cyan-900'>Tech Boom vs.
+                                Labor Slack:</div>
+                            <div class='md:w-2/3 text-slate-300 text-sm leading-relaxed'>The massive AI CapEx boom is
+                                not translating to broad-based economic prosperity. Hiring is highly concentrated in
+                                low-wage sectors (73.4% of new jobs are in leisure/hospitality and local government),
+                                labor participation is stagnant at 61.8%, and long-term unemployment is
+                                accumulating—indicating that capital investments are displacing or bypassing
+                                middle-class job creation.</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+        <section class='slide' id='slide-5'><img src='[User Image 5]' alt='Executive Planning' class='bg-img'
+                style='opacity: 0.4;'>
+            <div class='content items-end text-right'>
+                <div class='glass-panel glass-panel-gold max-w-4xl text-left'>
+                    <h2 class='text-3xl md:text-4xl text-white mb-8 flex items-center gap-4'><span
+                            class='text-amber-500'>4.</span> Prioritized Next Steps for the C-Suite</h2>
+                    <ul class='space-y-6 text-sm text-slate-300'>
+                        <li
+                            class='pl-6 relative before:absolute before:left-0 before:top-1.5 before:w-2 before:h-2 before:bg-amber-500 before:rotate-45'>
+                            <strong class='text-amber-400 font-mono text-base block mb-1'>Realign Consumer Targeting &
+                                Revenue Models:</strong> Pivot product and marketing strategies toward the insulated Top
+                            20%. Brace for severe demand destruction in mass-market and lower-tier segments as negative
+                            real wages and high borrowing costs force budget capitulation.</li>
+                        <li
+                            class='pl-6 relative before:absolute before:left-0 before:top-1.5 before:w-2 before:h-2 before:bg-amber-500 before:rotate-45'>
+                            <strong class='text-amber-400 font-mono text-base block mb-1'>Front-Load Capital & Debt
+                                Strategies:</strong> Secure long-term financing immediately. The Fed's shift to a
+                            hawkish regime practically guarantees a higher-for-longer rate environment through
+                            2026/2027. Reduce exposure to floating-rate debt before Q3.</li>
+                        <li
+                            class='pl-6 relative before:absolute before:left-0 before:top-1.5 before:w-2 before:h-2 before:bg-amber-500 before:rotate-45'>
+                            <strong class='text-amber-400 font-mono text-base block mb-1'>Hedge Supply Chain Energy
+                                Exposure:</strong> With Brent crude >$126/bbl fundamentally driving inflation,
+                            operational margins face immediate risk. Accelerate logistics redesigns to minimize
+                            petroleum-heavy transit and lock in energy hedges for the next 12–18 months.</li>
+                        <li
+                            class='pl-6 relative before:absolute before:left-0 before:top-1.5 before:w-2 before:h-2 before:bg-amber-500 before:rotate-45'>
+                            <strong class='text-amber-400 font-mono text-base block mb-1'>Accelerate AI/Automation
+                                Integration:</strong> Continue aggressive CapEx in automation. With labor leverage
+                            diminishing but wage floors remaining sticky, capitalizing on the productivity-pay
+                            divergence through AI will be the primary driver of margin expansion. However, prepare PR
+                            and regulatory strategies to navigate increasing social backlash against corporate wealth
+                            concentration.</li>
+                    </ul>
+                </div>
+            </div>
+        </section>
+    </main>
+    <script>const deck = document.getElementById('deck'); const slides = document.querySelectorAll('.slide'); const progressBar = document.getElementById('progress'); const observerOptions = { root: deck, rootMargin: '0px', threshold: 0.5 }; const observer = new IntersectionObserver((entries) => { entries.forEach(entry => { if (entry.isIntersecting) { entry.target.classList.add('in-view'); const index = Array.from(slides).indexOf(entry.target); const progress = ((index + 1) / slides.length) * 100; progressBar.style.width = progress + '%'; } }); }, observerOptions); slides.forEach(slide => { observer.observe(slide); }); setTimeout(() => { slides[0].classList.add('in-view'); progressBar.style.width = (1 / slides.length) * 100 + '%'; }, 100); deck.addEventListener('wheel', (e) => { if (e.deltaY !== 0) { e.preventDefault(); deck.scrollBy({ left: e.deltaY > 0 ? window.innerWidth : -window.innerWidth, behavior: 'smooth' }); } }, { passive: false });</script>
+</body>
+
+</html>

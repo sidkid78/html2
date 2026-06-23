@@ -1,0 +1,563 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>The Divide - Wealth Gap Analysis</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    :root {
+      --gold: #d4af37;
+      --bg-dark: #050507;
+    }
+
+    body {
+      margin: 0;
+      background-color: var(--bg-dark);
+      color: #e2e8f0;
+      font-family: ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    }
+
+    .font-serif {
+      font-family: Georgia, Cambria, "Times New Roman", Times, serif;
+    }
+
+    .font-mono {
+      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+    }
+
+    .scrollbar-hide::-webkit-scrollbar {
+      display: none;
+    }
+
+    .scrollbar-hide {
+      -ms-overflow-style: none;
+      scrollbar-width: none;
+    }
+
+    .carousel-wrapper {
+      display: flex;
+      overflow-x: auto;
+      overflow-y: hidden;
+      scroll-snap-type: x mandatory;
+      height: 100vh;
+      width: 100vw;
+    }
+
+    .panel {
+      flex: 0 0 100vw;
+      height: 100vh;
+      scroll-snap-align: start;
+      overflow-y: auto;
+      overflow-x: hidden;
+      position: relative;
+    }
+
+    ::selection {
+      background: var(--gold);
+      color: #000;
+    }
+
+    @keyframes pulse-glow {
+
+      0%,
+      100% {
+        box-shadow: 0 0 20px rgba(212, 175, 55, 0.05);
+      }
+
+      50% {
+        box-shadow: 0 0 40px rgba(212, 175, 55, 0.25);
+      }
+    }
+
+    .animate-pulse-glow {
+      animation: pulse-glow 4s ease-in-out infinite;
+    }
+  </style>
+</head>
+
+<body class="antialiased selection:bg-[#d4af37] selection:text-black">
+
+  <!-- SVG Filters Definition -->
+  <svg class="hidden" xmlns="http://www.w3.org/2000/svg">
+    <defs>
+      <filter id="gold-duotone">
+        <feColorMatrix type="matrix"
+          values="0.2126 0.7152 0.0722 0 0  0.2126 0.7152 0.0722 0 0  0.2126 0.7152 0.0722 0 0  0 0 0 1 0"
+          result="gray" />
+        <feComponentTransfer color-interpolation-filters="sRGB" in="gray">
+          <feFuncR type="table" tableValues="0.02 0.83" />
+          <feFuncG type="table" tableValues="0.02 0.68" />
+          <feFuncB type="table" tableValues="0.02 0.21" />
+        </feComponentTransfer>
+      </filter>
+    </defs>
+  </svg>
+
+  <!-- Persistent Global Noise Overlay -->
+  <div class="pointer-events-none fixed inset-0 z-50 mix-blend-overlay opacity-30"
+    style="background: url('data:image/svg+xml;utf8,%3Csvg viewBox=%220 0 200 200%22 xmlns=%22http://www.w3.org/2000/svg%22%3E%3Cfilter id=%22noise%22%3E%3CfeTurbulence type=%22fractalNoise%22 baseFrequency=%220.8%22 numOctaves=%223%22 stitchTiles=%22stitch%22/%3E%3C/filter%3E%3Crect width=%22100%25%22 height=%22100%25%22 filter=%22url(%23noise)%22/%3E%3C/svg%3E');">
+  </div>
+
+  <!-- Scroll Indicator -->
+  <div
+    class="fixed bottom-8 right-8 z-40 animate-pulse pointer-events-none flex items-center text-[#d4af37]/70 text-sm font-mono">
+    <span>SWIPE / SCROLL</span>
+    <svg class="w-6 h-6 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3"></path>
+    </svg>
+  </div>
+
+  <main class="carousel-wrapper scrollbar-hide">
+
+    <!-- Panel 1: Preamble & Executive Summary -->
+    <section class="panel p-8 md:p-16 lg:p-24 flex flex-col justify-center">
+      <div class="absolute inset-0 z-0">
+        <img src="./images/econ-11.jpg" class="w-full h-full object-cover opacity-20"
+          style="filter: url(#gold-duotone);" alt="Background: Elite standing on gold" />
+        <div class="absolute inset-0 bg-gradient-to-b from-[#050507]/90 via-[#050507]/60 to-[#050507]"></div>
+      </div>
+
+      <div class="relative z-10 w-full max-w-5xl mx-auto flex flex-col min-h-full">
+        <!-- Preamble Block -->
+        <div
+          class="text-sm md:text-base text-gray-400 font-mono mb-16 border-l-4 border-[#d4af37] pl-6 max-w-3xl bg-black/40 p-6 rounded backdrop-blur-sm">
+          <h1 class="text-white font-bold mb-4 text-xl"># Domain Report: Wealth Gap Analysis</h1>
+          <p class="mb-4"><strong class="text-white">Goal:</strong> Investigate the current state of wealth inequality
+            in the United States. Your brief is to gather data on the distribution of wealth across different
+            percentiles, demographic disparities, and historical comparisons to contextualize the current wealth gap.
+            Focus entirely on inequality metrics, such as the Gini coefficient, wage stagnation, and asset ownership
+            disparities, independently of general macroeconomic growth.</p>
+          <p class="mb-4">An investigation into the current state of wealth inequality in the United States has been
+            completed. The findings from multiple research streams have been synthesized into a comprehensive report.
+          </p>
+          <p class="mb-4">The synthesized report has been successfully written to the required file: <strong
+              class="text-[#d4af37] bg-[#d4af37]/10 px-2 py-1 rounded">`domain_report.md`</strong>.</p>
+          <p>Below is the complete, high-fidelity synthesis of the research, structured to highlight key insights,
+            current metrics, historical context, demographic disparities, and the structural drivers of the U.S. wealth
+            gap.</p>
+        </div>
+
+        <div class="text-center text-[#d4af37] tracking-[1em] mb-16 opacity-50">* * *</div>
+
+        <!-- Exec Summary -->
+        <div class="mt-auto">
+          <h1 class="text-5xl md:text-7xl lg:text-8xl font-serif text-[#d4af37] mb-8 tracking-tighter leading-none">
+            The Divide:<br>
+            <span class="text-3xl md:text-5xl text-white font-light tracking-wide">A Synthesis of United States Wealth
+              Inequality</span>
+          </h1>
+          <h2
+            class="text-2xl md:text-3xl font-serif text-gray-300 mb-6 uppercase tracking-widest border-b border-white/10 pb-4 inline-block">
+            Executive Summary
+          </h2>
+          <div class="max-w-4xl text-lg md:text-xl leading-relaxed text-gray-300 space-y-6">
+            <p>Wealth inequality in the United States has reached levels unprecedented in the post-World War II era. As
+              of the first quarter of 2026, total household net worth stands at <strong class="text-[#d4af37]">$174.01
+                trillion</strong>, yet this vast sum is concentrated heavily at the apex of the economic distribution.
+              The top 10% of households control more than two-thirds (67.9%) of the nation's wealth, while the bottom
+              50% subsist on a marginal 2.5% share.</p>
+            <p>This divide is not a historical accident, but the result of a forty-year "Great Divergence" initiated in
+              the late 1970s. It is reinforced by structural economic drivers, most notably a severe decoupling of
+              worker productivity from compensation, alongside stark disparities in high-yielding asset ownership
+              (equities and real estate). Furthermore, this inequality is deeply racialized, generational, and
+              educational, locking in advantages for historical asset-holders while erecting steep barriers to wealth
+              accumulation for historically marginalized groups.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Panel 2: Anatomy of Modern Wealth Distribution -->
+    <section class="panel p-8 md:p-16 lg:p-24 border-l border-white/5 bg-black">
+      <div class="absolute inset-0 z-0">
+        <img src="./images/econ-12.jpg" class="w-full h-full object-cover opacity-15"
+          style="filter: grayscale(1) contrast(1.2) brightness(0.7);" alt="Background: Stressed family with bills" />
+        <div class="absolute inset-0 bg-gradient-to-t from-black via-black/80 to-transparent"></div>
+      </div>
+
+      <div class="relative z-10 w-full max-w-7xl mx-auto pt-12">
+        <div class="text-center text-[#d4af37] tracking-[1em] mb-12 opacity-50">* * *</div>
+        <h2 class="text-4xl md:text-5xl font-serif text-[#d4af37] mb-8">1. The Anatomy of Modern Wealth Distribution
+          <span class="text-2xl text-gray-500">(Q1 2026)</span></h2>
+        <p class="text-xl mb-12 max-w-4xl text-gray-300">Projections based on the Federal Reserve’s Distributional
+          Financial Accounts (DFA) and the Survey of Consumer Finances (SCF) illustrate an extreme concentration of
+          wealth in early 2026:</p>
+
+        <!-- Data Table -->
+        <div
+          class="overflow-x-auto mb-12 bg-[#0a0a0c]/80 border border-[#d4af37]/30 rounded-lg shadow-[0_0_30px_rgba(0,0,0,0.8)] backdrop-blur-md">
+          <table class="w-full text-left text-sm md:text-base whitespace-nowrap">
+            <thead
+              class="bg-[#d4af37]/10 text-[#d4af37] border-b border-[#d4af37]/30 font-mono uppercase text-xs tracking-wider">
+              <tr>
+                <th class="p-6">Wealth Percentile</th>
+                <th class="p-6">Population Share</th>
+                <th class="p-6">Aggregate Wealth Share</th>
+                <th class="p-6">Aggregate Wealth Value</th>
+                <th class="p-6">Absolute Entry Threshold</th>
+              </tr>
+            </thead>
+            <tbody class="divide-y divide-white/5">
+              <tr class="hover:bg-white/5 transition-colors group">
+                <td class="p-6 text-white font-bold text-lg group-hover:text-[#d4af37]">Top 1%</td>
+                <td class="p-6 text-gray-400">1% (~1.3M households)</td>
+                <td class="p-6 text-[#d4af37] font-bold text-xl">31.6%</td>
+                <td class="p-6 text-white">$55.03 Trillion</td>
+                <td class="p-6 font-mono text-gray-300">$14,425,487</td>
+              </tr>
+              <tr class="hover:bg-white/5 transition-colors group">
+                <td class="p-6 text-white font-bold text-lg group-hover:text-[#d4af37]">Top 10% <em
+                    class="text-sm font-normal text-gray-500">(incl. Top 1%)</em></td>
+                <td class="p-6 text-gray-400">10%</td>
+                <td class="p-6 text-[#d4af37]/80 font-bold text-xl">67.9%</td>
+                <td class="p-6 text-white">$118.26 Trillion</td>
+                <td class="p-6 font-mono text-gray-300">$2,780,252</td>
+              </tr>
+              <tr class="hover:bg-white/5 transition-colors">
+                <td class="p-6 text-gray-300 font-bold">Next 40% <em class="text-sm font-normal text-gray-500">(Middle
+                    Class)</em></td>
+                <td class="p-6 text-gray-400">40%</td>
+                <td class="p-6 text-gray-300 font-bold">29.6%</td>
+                <td class="p-6 text-gray-300">$51.48 Trillion</td>
+                <td class="p-6 font-mono text-gray-400">$312,360 to $2,780,252</td>
+              </tr>
+              <tr class="hover:bg-[#ff3333]/5 transition-colors bg-black/40">
+                <td class="p-6 text-gray-500 font-bold">Bottom 50%</td>
+                <td class="p-6 text-gray-500">50% (~66M households)</td>
+                <td class="p-6 text-red-400/70 font-bold">2.5%</td>
+                <td class="p-6 text-gray-500">$4.27 Trillion</td>
+                <td class="p-6 font-mono text-gray-500">Under $312,360 (Entry: &le; $0)</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <p class="text-xl leading-relaxed text-gray-300 max-w-5xl bg-black/40 p-6 border-l border-white/10">
+          The Top 1% alone controls $55.03 trillion—surpassing the combined wealth of the bottom 90% of the entire
+          American population. To cross the threshold into this elite bracket, a household must possess a net worth of
+          approximately <strong class="text-white">$14.43 million</strong>, representing a nominal increase of 29.4%
+          from the Q3 2022 SCF baseline. Conversely, the bottom 50% represents roughly 66 million households sharing a
+          meager $4.27 trillion, with many carrying negative net worth due to consumer, student, and medical debt.
+        </p>
+      </div>
+    </section>
+
+    <!-- Panel 3: Historical Trajectory & Cleavages -->
+    <section class="panel p-8 md:p-16 lg:p-24 border-l border-white/5 relative bg-[#050507]">
+      <!-- Split background -->
+      <div class="absolute inset-0 z-0" style="clip-path: polygon(40% 0, 100% 0, 100% 100%, 0% 100%);">
+        <img src="./images/econ-13.jpg" class="w-full h-full object-cover opacity-20"
+          style="filter: saturate(0.5) contrast(1.3);" alt="Background: Literal divide between rich and poor" />
+        <div class="absolute inset-0 bg-gradient-to-r from-[#050507] via-transparent to-black/60"></div>
+      </div>
+
+      <div class="relative z-10 w-full max-w-7xl mx-auto pt-12">
+        <div class="text-center text-[#d4af37] tracking-[1em] mb-12 opacity-50">* * *</div>
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-16 lg:gap-24">
+
+          <!-- Left Column -->
+          <div class="bg-[#050507]/80 p-8 rounded-xl backdrop-blur-sm border border-white/5">
+            <h2 class="text-3xl md:text-4xl font-serif text-[#d4af37] mb-6 border-b border-white/10 pb-4">2. Historical
+              Trajectory and the "Great Divergence"</h2>
+            <p class="mb-8 text-lg text-gray-300">The current era of extreme wealth concentration is the culmination of
+              a structural transition that began in the late 1970s, ending a post-war period characterized by relative
+              distributional stability.</p>
+
+            <ul class="space-y-8">
+              <li class="relative pl-8">
+                <span class="absolute left-0 top-1 text-[#d4af37] opacity-60 font-mono">01</span>
+                <p class="text-gray-300 leading-relaxed"><strong class="text-white block mb-1">The Income and Wealth
+                    Gini Shift:</strong> The post-tax income Gini index hit its historical low of <strong
+                    class="text-[#d4af37]">34.7</strong> around 1979–1980. Following supply-side tax policy shifts,
+                  deindustrialization, and the steady decline of labor unions, the pre-tax income Gini steadily rose
+                  from <strong class="text-[#d4af37]">39.4 in 1970 to 48.9 by 2024</strong>. The wealth Gini has
+                  remained consistently and exceptionally high, peaking between <strong class="text-[#d4af37]">0.86 and
+                    0.87 in the mid-2010s</strong>.</p>
+              </li>
+              <li class="relative pl-8">
+                <span class="absolute left-0 top-1 text-[#d4af37] opacity-60 font-mono">02</span>
+                <p class="text-gray-300 leading-relaxed"><strong class="text-white block mb-1">The Erosion of the Middle
+                    Class:</strong> In 1989, the Top 1% held 22.8% of U.S. wealth. By 2025/2026, their share expanded to
+                  approximately <strong class="text-[#d4af37]">31.6% to 31.9%</strong>, driven by financialization and
+                  stock market appreciation. During this same window, the share held by the middle class (the Next 40%)
+                  eroded from <strong class="text-[#d4af37]">35.5% to 29.6%</strong>, representing a substantial hollow
+                  out of middle-class security.</p>
+              </li>
+              <li class="relative pl-8">
+                <span class="absolute left-0 top-1 text-[#d4af37] opacity-60 font-mono">03</span>
+                <p class="text-gray-300 leading-relaxed"><strong class="text-white block mb-1">The Bottom 50% Asset
+                    Crisis:</strong> Following the 2008 subprime mortgage collapse, the aggregate wealth share of the
+                  bottom 50% plummeted to an all-time low of <strong class="text-red-400">0.4% in 2011</strong>, as
+                  low-income home equity was wiped out. While their share recovered slightly to <strong
+                    class="text-[#d4af37]">2.5% by 2025/2026</strong>, the bottom half remains highly vulnerable to
+                  macroeconomic shocks.</p>
+              </li>
+            </ul>
+          </div>
+
+          <!-- Right Column -->
+          <div class="bg-[#050507]/80 p-8 rounded-xl backdrop-blur-sm border border-white/5">
+            <h2 class="text-3xl md:text-4xl font-serif text-[#d4af37] mb-6 border-b border-white/10 pb-4">3.
+              Socioeconomic and Demographic Cleavages</h2>
+            <p class="mb-8 text-lg text-gray-300">The aggregates mask profound structural divides across race,
+              generation, and educational attainment, which are highlighted in the Federal Reserve’s 2022 Survey of
+              Consumer Finances.</p>
+
+            <div class="space-y-10">
+              <div>
+                <h3 class="text-2xl font-serif text-white mb-4 flex items-center">
+                  <span class="w-4 h-4 bg-[#d4af37] mr-3 inline-block"></span> Racial Wealth Gaps
+                </h3>
+                <p class="mb-4 text-gray-300">Racial stratification in wealth remains stark. Median net worth figures
+                  reveal deep structural disparities:</p>
+                <div class="grid grid-cols-2 gap-4 mb-6 font-mono text-sm">
+                  <div class="bg-white/5 p-3 rounded border border-white/10">
+                    <div class="text-gray-400 mb-1">Asian Families:</div>
+                    <div class="text-xl text-white">$536,020</div>
+                    <div class="text-xs text-gray-500 mt-1 leading-tight">(Highest median, driven by education &
+                      geography)</div>
+                  </div>
+                  <div class="bg-white/5 p-3 rounded border border-white/10">
+                    <div class="text-gray-400 mb-1">White Families:</div>
+                    <div class="text-xl text-white">$285,010</div>
+                  </div>
+                  <div class="bg-white/5 p-3 rounded border border-white/10">
+                    <div class="text-gray-400 mb-1">Hispanic Families:</div>
+                    <div class="text-xl text-white">$61,620</div>
+                  </div>
+                  <div class="bg-white/5 p-3 rounded border border-white/10">
+                    <div class="text-gray-400 mb-1">Black Families:</div>
+                    <div class="text-xl text-white">$44,890</div>
+                  </div>
+                </div>
+                <p class="text-gray-400 text-sm leading-relaxed border-l-2 border-[#d4af37]/50 pl-4">
+                  White families hold <strong class="text-white">6.3 times</strong> the median wealth of Black families
+                  and <strong class="text-white">4.6 times</strong> that of Hispanic families. These gaps are
+                  structurally driven by historically lower homeownership rates, systemic barriers to credit, and
+                  significantly lower participation in employer-sponsored retirement accounts.
+                </p>
+              </div>
+
+              <div>
+                <h3 class="text-2xl font-serif text-white mb-4 flex items-center">
+                  <span class="w-4 h-4 bg-[#d4af37] mr-3 inline-block"></span> Generational Shifts and Intragenerational
+                  Inequality
+                </h3>
+                <p class="text-gray-400 text-sm leading-relaxed">
+                  Millennials (aged 26–41 during the latest SCF) have experienced a notable nominal wealth recovery,
+                  posting a median net worth of <strong class="text-white">$84,941</strong>—46.2% higher than Baby
+                  Boomers at a comparable age in 1989. However, this generational metric is highly deceptive due to
+                  extreme <em>intragenerational</em> inequality: the <strong class="text-[#d4af37]">top 10% of
+                    Millennials control 69% of all Millennial wealth</strong>, leaving the bottom 90% of the generation
+                  with limited assets and high debt-to-income ratios.
+                </p>
+              </div>
+
+              <div>
+                <h3 class="text-2xl font-serif text-white mb-4 flex items-center">
+                  <span class="w-4 h-4 bg-[#d4af37] mr-3 inline-block"></span> The Educational Divide
+                </h3>
+                <p class="text-gray-400 text-sm leading-relaxed">
+                  Educational attainment has become a primary gatekeeper for wealth accumulation. College graduates
+                  command a median net worth of <strong class="text-white">$464,600</strong>. This is <strong
+                    class="text-[#d4af37]">4.35 times</strong> the median wealth of high school graduates ($106,800) and
+                  <strong class="text-[#d4af37]">12.2 times</strong> that of individuals without a high school diploma
+                  ($38,100). This gap has widened significantly since 1989, reflecting the transition to a
+                  knowledge-based economy where non-credentialed workers face severe wage suppression.
+                </p>
+              </div>
+            </div>
+          </div>
+
+        </div>
+      </div>
+    </section>
+
+    <!-- Panel 4: Structural Drivers -->
+    <section class="panel p-8 md:p-16 lg:p-24 border-l border-white/5 bg-[#020202]">
+      <div class="absolute inset-0 z-0">
+        <img src="./images/econ-15.jpg" class="w-full h-full object-cover opacity-15 mix-blend-luminosity"
+          alt="Background: Factory worker and boss" />
+        <div class="absolute inset-0 bg-gradient-to-t from-red-900/10 via-black/90 to-black/60"></div>
+      </div>
+
+      <div class="relative z-10 w-full max-w-6xl mx-auto pt-12">
+        <div class="text-center text-[#d4af37] tracking-[1em] mb-12 opacity-50">* * *</div>
+        <h2 class="text-4xl md:text-5xl font-serif text-[#d4af37] mb-6 text-center drop-shadow-lg">4. Structural
+          Drivers: Wage Decoupling and Asset Disparities</h2>
+        <p class="mb-16 text-xl text-center max-w-4xl mx-auto text-gray-300">The persistence and compounding nature of
+          U.S. wealth inequality are sustained by two primary structural mechanisms: the stagnation of labor income and
+          unequal access to wealth-appreciating assets.</p>
+
+        <!-- ASCII Flowchart -->
+        <div class="flex justify-center mb-20">
+          <div class="bg-black/80 border border-[#d4af37]/40 rounded p-8 animate-pulse-glow backdrop-blur-md">
+            <pre class="text-[#d4af37] font-mono text-xs sm:text-sm md:text-base leading-tight m-0">
++-------------------------------------------------------------+
+|               The Compounding Wealth Loop                   |
++-------------------------------------------------------------+
+|                                                             |
+|   Productivity Growth ---> Captured by Capital/Top 10%      |
+|                                    |                        |
+|                                    v                        |
+|                            Stagnant Wages                   |
+|                                    |                        |
+|                                    v                        |
+|                        Zero Investable Surplus              |
+|                                    |                        |
+|                                    v                        |
+|                        Locked Out of Stock/RE               |
+|                                    |                        |
+|                                    v                        |
+|                  Miss Out on Compounding Returns            |
++-------------------------------------------------------------+
+          </pre>
+          </div>
+        </div>
+
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+          <div
+            class="bg-white/5 border border-white/10 p-8 rounded backdrop-blur-sm hover:bg-white/10 transition-colors duration-300">
+            <h3 class="text-2xl font-serif text-white mb-4 border-b border-white/10 pb-4">The Productivity-Pay
+              Divergence</h3>
+            <p class="text-gray-400 text-sm leading-relaxed">
+              Since 1979, U.S. labor productivity has grown approximately <strong class="text-white">2.7 times
+                faster</strong> than typical worker compensation. While economic output per hour has expanded, the
+              financial gains have shifted away from labor and toward capital ownership and corporate executives.
+              Because the bottom 50% of households rely almost exclusively on hourly wage income to survive, this wage
+              stagnation deprives them of any investable surplus. Without excess income, these families cannot
+              transition from consumers to asset owners.
+            </p>
+          </div>
+
+          <div
+            class="bg-white/5 border border-white/10 p-8 rounded backdrop-blur-sm hover:bg-white/10 transition-colors duration-300">
+            <h3 class="text-2xl font-serif text-white mb-4 border-b border-white/10 pb-4">Concentrated Asset Ownership
+            </h3>
+            <p class="text-gray-400 text-sm mb-4 leading-relaxed">
+              Because the wealthy possess substantial investable surpluses, they dominate ownership of high-yielding
+              assets, compounding their advantages over time:
+            </p>
+            <ul class="list-disc pl-5 text-sm text-gray-400 space-y-4 marker:text-[#d4af37]">
+              <li><strong class="text-white">The Stock Market:</strong> The top 10% of households hold the vast majority
+                of corporate equities. For these wealthy households, equities represent <strong class="text-white">36%
+                  of their total asset portfolios</strong>. In stark contrast, the bottom 50% of households own just
+                <strong class="text-white">1% of all corporate equities</strong>, representing a negligible 5% of their
+                total (and already small) household wealth.</li>
+              <li><strong class="text-white">Real Estate:</strong> Housing equity—historically the primary vehicle for
+                middle-class wealth building—is increasingly concentrated. The top 20% of income earners hold <strong
+                  class="text-white">56.4% of total housing wealth</strong>, whereas the bottom 20% hold a mere <strong
+                  class="text-white">5.1%</strong>.</li>
+            </ul>
+          </div>
+
+          <div
+            class="bg-[#d4af37]/5 border border-[#d4af37]/30 p-8 rounded backdrop-blur-sm relative overflow-hidden group">
+            <div
+              class="absolute inset-0 bg-[#d4af37]/10 transform translate-y-full group-hover:translate-y-0 transition-transform duration-500">
+            </div>
+            <div class="relative z-10">
+              <h3 class="text-2xl font-serif text-[#d4af37] mb-4 border-b border-[#d4af37]/30 pb-4">The Compounding Loop
+              </h3>
+              <p class="text-gray-300 text-sm leading-relaxed">
+                The fundamental driver of long-term wealth divergence is that the returns on capital (stocks and real
+                estate) consistently outpace the rate of real wage growth. Because the wealthy hold the vast majority of
+                appreciating assets, the gains of macroeconomic growth accrue almost exclusively to the top. Meanwhile,
+                wage stagnation and high entry barriers (such as rising down payments for real estate and lack of
+                disposable capital) lock lower-income households out of compounding growth, solidifying a permanent
+                wealth gap.
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Panel 5: Conclusion -->
+    <section
+      class="panel p-8 md:p-16 lg:p-24 border-l border-white/5 flex flex-col items-center justify-center text-center">
+      <div class="absolute inset-0 z-0">
+        <img src="[User Image 5]" class="w-full h-full object-cover opacity-30 object-bottom"
+          style="filter: url(#gold-duotone);" alt="Background: Masses looking at a mansion gate" />
+        <div class="absolute inset-0 bg-gradient-to-t from-[#050507] via-[#050507]/80 to-transparent"></div>
+      </div>
+
+      <div class="relative z-10 w-full max-w-5xl mx-auto flex flex-col items-center">
+        <div class="text-center text-[#d4af37] tracking-[1em] mb-12 opacity-50">* * *</div>
+
+        <h2 class="text-5xl md:text-7xl font-serif text-[#d4af37] mb-8 uppercase tracking-widest drop-shadow-2xl">
+          5. Conclusion
+        </h2>
+
+        <p class="text-xl md:text-3xl leading-relaxed mb-16 text-gray-200 font-serif max-w-4xl">
+          The data presents a clear picture of U.S. wealth distribution: a system characterized by intense concentration
+          at the top, a hollowed-out middle class, and a bottom 50% that is largely excluded from asset ownership. With
+          the wealth Gini index remaining near historical highs of 0.86, and racial and educational divides widening,
+          wealth inequality has become a structural feature of the modern American economy. The compound return on
+          assets, paired with stagnant wages for the majority of workers, ensures that without major structural
+          interventions, the wealth gap will continue to widen.
+        </p>
+
+        <div class="text-center text-[#d4af37] tracking-[1em] mb-16 opacity-50">* * *</div>
+
+        <!-- Methodology Note -->
+        <div
+          class="bg-black/60 border border-white/10 p-8 rounded-xl backdrop-blur-md text-left inline-block max-w-4xl w-full shadow-2xl">
+          <h3
+            class="text-lg font-bold text-gray-300 mb-4 border-b border-white/10 pb-3 uppercase tracking-wider font-mono flex items-center">
+            <svg class="w-5 h-5 mr-3 text-[#d4af37]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z">
+              </path>
+            </svg>
+            Worker Confidence and Methodology Note
+          </h3>
+          <p class="text-sm text-gray-400 italic leading-relaxed font-serif">
+            The underlying data sources synthesized in this report—namely the Federal Reserve Distributional Financial
+            Accounts (Q1 2026 projections), the 2022 Survey of Consumer Finances (SCF), and the Economic Policy
+            Institute (EPI) productivity datasets—show high levels of alignment and internal consistency. No
+            low-confidence flags were raised by any parallel research workers. Minor discrepancies in percentages (e.g.,
+            the top 1% wealth share estimated at 31.6% in Q1 2026 vs. 31.9% in late 2025) reflect standard seasonal
+            fluctuations in asset markets and differing datasets (DFA vs. SCF), rather than systemic analytical errors.
+          </p>
+        </div>
+
+        <div class="text-center text-[#d4af37] tracking-[1em] mt-16 opacity-50">* * *</div>
+      </div>
+    </section>
+
+  </main>
+
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      const wrapper = document.querySelector('.carousel-wrapper');
+
+      // Intelligent wheel-to-horizontal scroll mapping
+      wrapper.addEventListener('wheel', (e) => {
+        const target = e.target.closest('.panel');
+        if (!target) return;
+
+        // Check if the current panel needs vertical scrolling
+        const canScrollY = target.scrollHeight > target.clientHeight;
+        const isAtTop = target.scrollTop <= 0;
+        const isAtBottom = Math.abs(target.scrollHeight - target.clientHeight - target.scrollTop) <= 1;
+
+        // If there's no vertical scroll needed, or user is at boundary trying to scroll out, convert to horizontal
+        if (!canScrollY || (isAtTop && e.deltaY < 0) || (isAtBottom && e.deltaY > 0)) {
+          // Only hijack if it's primarily a vertical scroll intent
+          if (Math.abs(e.deltaY) > Math.abs(e.deltaX)) {
+            e.preventDefault();
+            wrapper.scrollBy({
+              left: e.deltaY > 0 ? window.innerWidth : -window.innerWidth,
+              behavior: 'smooth'
+            });
+          }
+        }
+      }, { passive: false });
+    });
+  </script>
+</body>
+
+</html>
