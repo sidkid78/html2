@@ -1,0 +1,360 @@
+<!DOCTYPE html>
+<html lang='en'>
+
+<head>
+    <meta charset='UTF-8'>
+    <meta name='viewport' content='width=device-width, initial-scale=1.0'>
+    <title>Risk Assessment: EdgeCraft RevOps</title>
+    <script src='https://cdn.tailwindcss.com'></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Space+Mono:ital,wght@0,400;0,700;1,400;1,700&display=swap');
+
+        body {
+            font-family: 'Space Mono', monospace;
+            background-color: #050000;
+            color: #ff3333;
+            overflow-x: hidden;
+        }
+
+        .noise-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            pointer-events: none;
+            z-index: 50;
+            opacity: 0.15;
+            filter: url(#noise);
+        }
+
+        .scanline {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 10px;
+            background: rgba(255, 0, 0, 0.3);
+            opacity: 0.4;
+            pointer-events: none;
+            z-index: 40;
+            animation: scan 6s linear infinite;
+            box-shadow: 0 0 20px rgba(255, 0, 0, 0.5);
+        }
+
+        @keyframes scan {
+            0% {
+                transform: translateY(-10vh);
+            }
+
+            100% {
+                transform: translateY(110vh);
+            }
+        }
+
+        .glitch-text {
+            text-shadow: 2px 0 0 rgba(255, 0, 0, 0.8), -2px 0 0 rgba(0, 255, 255, 0.8);
+            animation: glitch-anim 3s infinite;
+        }
+
+        @keyframes glitch-anim {
+            0% {
+                text-shadow: 2px 0 0 rgba(255, 0, 0, 0.8), -2px 0 0 rgba(0, 255, 255, 0.8);
+            }
+
+            20% {
+                text-shadow: -2px 0 0 rgba(255, 0, 0, 0.8), 2px 0 0 rgba(0, 255, 255, 0.8);
+            }
+
+            21% {
+                text-shadow: 0px 0 0 rgba(255, 0, 0, 0.8), 0px 0 0 rgba(0, 255, 255, 0.8);
+            }
+
+            100% {
+                text-shadow: 0px 0 0 rgba(255, 0, 0, 0.8), 0px 0 0 rgba(0, 255, 255, 0.8);
+            }
+        }
+
+        .panel {
+            border: 1px solid #330000;
+            background: linear-gradient(135deg, rgba(20, 0, 0, 0.8) 0%, rgba(5, 0, 0, 0.9) 100%);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .panel::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 2px;
+            background: #ff0000;
+            transform: scaleX(0);
+            transform-origin: left;
+            animation: draw-line 2s cubic-bezier(0.86, 0, 0.07, 1) forwards;
+        }
+
+        @keyframes draw-line {
+            to {
+                transform: scaleX(1);
+            }
+        }
+
+        .matrix-cell {
+            border: 1px solid #440000;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 0.5rem;
+            text-align: center;
+            font-size: 0.75rem;
+            transition: all 0.3s ease;
+        }
+
+        .matrix-cell.active-high {
+            background: rgba(255, 0, 0, 0.2);
+            border-color: #ff0000;
+            box-shadow: inset 0 0 10px rgba(255, 0, 0, 0.5);
+            animation: pulse 2s infinite;
+        }
+
+        .matrix-cell.active-med {
+            background: rgba(255, 165, 0, 0.2);
+            border-color: #ffa500;
+        }
+
+        @keyframes pulse {
+            0% {
+                opacity: 0.8;
+            }
+
+            50% {
+                opacity: 1;
+                box-shadow: inset 0 0 20px rgba(255, 0, 0, 0.8);
+            }
+
+            100% {
+                opacity: 0.8;
+            }
+        }
+
+        .marquee {
+            display: flex;
+            white-space: nowrap;
+            overflow: hidden;
+        }
+
+        .marquee-content {
+            animation: marquee 20s linear infinite;
+        }
+
+        @keyframes marquee {
+            0% {
+                transform: translateX(0);
+            }
+
+            100% {
+                transform: translateX(-50%);
+            }
+        }
+
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: #050000;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: #330000;
+        }
+    </style>
+</head>
+
+<body class='min-h-screen w-full flex flex-col p-4 md:p-8 gap-6'><svg class='hidden'>
+        <defs>
+            <filter id='noise'>
+                <feTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch' />
+                <feColorMatrix type='matrix' values='1 0 0 0 0, 0 0.2 0 0 0, 0 0 0 0 0, 0 0 0 1 0' />
+            </filter>
+        </defs>
+    </svg>
+    <div class='noise-overlay'></div>
+    <div class='scanline'></div>
+    <header
+        class='panel p-6 border-l-4 border-l-red-600 flex flex-col md:flex-row justify-between items-start md:items-end z-10'>
+        <div class='flex flex-col'>
+            <p class='text-xs text-red-800 tracking-widest uppercase mb-2'>System Alert // Threat Diagnostic</p>
+            <h1 class='text-3xl md:text-5xl font-bold glitch-text uppercase tracking-tighter'>⚠️ Risk Assessment
+                Complete:<br /><span class='text-white mix-blend-exclusion'>EdgeCraft RevOps</span></h1>
+        </div>
+        <div class='mt-4 md:mt-0 text-right'>
+            <div class='text-sm text-red-500/70'>Assessment Scope</div>
+            <div class='text-lg font-bold text-red-400'>Comprehensive Project Risk Scan</div>
+        </div>
+    </header>
+    <main class='flex-1 grid grid-cols-1 md:grid-cols-12 gap-6 z-10'>
+        <div class='md:col-span-4 flex flex-col gap-6'>
+            <section class='panel p-6'>
+                <h2 class='text-xs uppercase tracking-widest text-red-700 mb-4 border-b border-red-900 pb-2'>Core
+                    Metrics</h2>
+                <div class='flex justify-between items-end mb-4'>
+                    <div><span class='text-sm text-red-500/70'>Total Risks Identified</span><br /><span
+                            class='text-5xl font-bold text-red-500'>4</span></div>
+                    <div><span class='text-sm text-red-500/70'>Overall Level</span><br /><span
+                            class='text-3xl font-bold text-yellow-500 animate-pulse'>MEDIUM</span></div>
+                </div>
+                <div class='space-y-3 mt-6'>
+                    <h3 class='text-xs uppercase text-red-700'>Risk Categories</h3>
+                    <div class='w-full'>
+                        <div class='flex justify-between text-xs mb-1'><span>Technical</span><span>2 Risks</span></div>
+                        <div class='h-2 w-full bg-red-950 rounded-full overflow-hidden'>
+                            <div class='h-full bg-red-600 w-1/2'></div>
+                        </div>
+                    </div>
+                    <div class='w-full'>
+                        <div class='flex justify-between text-xs mb-1'><span>Resource</span><span>1 Risk</span></div>
+                        <div class='h-2 w-full bg-red-950 rounded-full overflow-hidden'>
+                            <div class='h-full bg-yellow-500 w-1/4'></div>
+                        </div>
+                    </div>
+                    <div class='w-full'>
+                        <div class='flex justify-between text-xs mb-1'><span>Schedule</span><span>1 Risk</span></div>
+                        <div class='h-2 w-full bg-red-950 rounded-full overflow-hidden'>
+                            <div class='h-full bg-yellow-500 w-1/4'></div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+            <section class='panel p-6'>
+                <h2 class='text-xs uppercase tracking-widest text-red-700 mb-4 border-b border-red-900 pb-2'>Risk Matrix
+                </h2>
+                <div class='grid grid-cols-4 gap-1 h-48'>
+                    <div class='col-span-1 flex flex-col justify-between text-[10px] text-red-500/50 uppercase pb-6'>
+                        <span>High</span><span>Med</span><span>Low</span></div>
+                    <div class='col-span-3 grid grid-cols-3 grid-rows-3 gap-1 relative'>
+                        <div class='matrix-cell active-high'>1<br />Risk</div>
+                        <div class='matrix-cell'>0</div>
+                        <div class='matrix-cell'>0</div>
+                        <div class='matrix-cell active-high'>1<br />Risk</div>
+                        <div class='matrix-cell active-med'>2<br />Risks</div>
+                        <div class='matrix-cell'>0</div>
+                        <div class='matrix-cell'>0</div>
+                        <div class='matrix-cell'>0</div>
+                        <div class='matrix-cell'>0</div>
+                        <div
+                            class='absolute -bottom-5 left-0 w-full flex justify-between text-[10px] text-red-500/50 uppercase px-4'>
+                            <span>High</span><span>Med</span><span>Low</span></div>
+                        <div class='absolute -bottom-9 left-0 w-full text-center text-[10px] text-red-500/50 uppercase'>
+                            Impact &rarr;</div>
+                        <div class='absolute -left-10 top-1/2 -rotate-90 text-[10px] text-red-500/50 uppercase'>&larr;
+                            Prob</div>
+                    </div>
+                </div>
+            </section>
+        </div>
+        <div class='md:col-span-8 flex flex-col gap-6'>
+            <section class='panel p-6 border-l-4 border-red-600 bg-red-900/10'>
+                <h2 class='text-xs uppercase tracking-widest text-red-500 mb-6 flex items-center gap-2'><span
+                        class='h-2 w-2 rounded-full bg-red-600 animate-ping'></span> High Priority Risks</h2>
+                <div class='space-y-6'>
+                    <div class='border border-red-900/50 p-4 relative overflow-hidden group'>
+                        <div class='absolute top-0 left-0 w-1 h-full bg-red-600'></div>
+                        <h3 class='text-xl font-bold text-white mb-2 flex items-center gap-2'>🔴 Integration Complexity
+                        </h3>
+                        <p class='text-sm text-red-300 mb-3'>High risk of failure when integrating with legacy systems
+                            or distributed components.</p>
+                        <div class='flex gap-4 text-xs font-bold uppercase tracking-wider'><span
+                                class='bg-red-950 text-red-500 px-2 py-1 rounded'>Impact: High</span><span
+                                class='bg-red-950 text-red-500 px-2 py-1 rounded'>Probability: High</span></div>
+                    </div>
+                    <div class='border border-yellow-900/50 p-4 relative overflow-hidden'>
+                        <div class='absolute top-0 left-0 w-1 h-full bg-yellow-600'></div>
+                        <h3 class='text-xl font-bold text-white mb-2 flex items-center gap-2'>🔴 Data Quality
+                            Insufficiency</h3>
+                        <p class='text-sm text-red-300 mb-3'>Input data may not meet the quality or volume required for
+                            model training.</p>
+                        <div class='flex gap-4 text-xs font-bold uppercase tracking-wider'><span
+                                class='bg-red-950 text-red-500 px-2 py-1 rounded'>Impact: High</span><span
+                                class='bg-yellow-950 text-yellow-500 px-2 py-1 rounded'>Probability: Medium</span></div>
+                    </div>
+                </div>
+            </section>
+            <div class='grid grid-cols-1 md:grid-cols-2 gap-6'>
+                <section class='panel p-6'>
+                    <h2 class='text-xs uppercase tracking-widest text-red-700 mb-4 border-b border-red-900 pb-2'>
+                        Mitigation Plan</h2>
+                    <div class='space-y-4 text-sm'>
+                        <div class='bg-black/40 p-3 border border-red-900/30'>
+                            <div class='text-red-400 font-bold mb-1'>RISK-001</div>
+                            <ul class='list-disc list-inside text-red-300/80 text-xs space-y-1'>
+                                <li>Prevention: Conduct immediate Architecture Spike and PoC</li>
+                                <li>Mitigation: Allocate emergency budget/resources</li>
+                            </ul>
+                        </div>
+                        <div class='bg-black/40 p-3 border border-red-900/30'>
+                            <div class='text-red-400 font-bold mb-1'>RISK-002</div>
+                            <ul class='list-disc list-inside text-red-300/80 text-xs space-y-1'>
+                                <li>Prevention: Perform data profiling in Week 1</li>
+                                <li>Mitigation: Allocate emergency budget/resources</li>
+                            </ul>
+                        </div>
+                        <div class='bg-black/40 p-3 border border-red-900/30'>
+                            <div class='text-red-400 font-bold mb-1'>RISK-003</div>
+                            <ul class='list-disc list-inside text-red-300/80 text-xs space-y-1'>
+                                <li>Prevention: Schedule 1-week training buffer</li>
+                                <li>Mitigation: Allocate emergency budget/resources</li>
+                            </ul>
+                        </div>
+                    </div>
+                </section>
+                <div class='flex flex-col gap-6'>
+                    <section class='panel p-6 flex-1'>
+                        <h2 class='text-xs uppercase tracking-widest text-red-700 mb-4 border-b border-red-900 pb-2'>
+                            Monitoring Plan</h2>
+                        <ul class='text-sm text-red-300/90 space-y-3 font-mono'>
+                            <li class='flex items-start gap-2'><span class='text-red-600'>&gt;</span> Weekly risk review
+                                meetings</li>
+                            <li class='flex items-start gap-2'><span class='text-red-600'>&gt;</span> Automated
+                                indicator tracking (e.g., Velocity deviation)</li>
+                            <li class='flex items-start gap-2'><span class='text-red-600'>&gt;</span> Stakeholder risk
+                                reporting</li>
+                            <li class='flex items-start gap-2'><span class='text-red-600'>&gt;</span> Mitigation
+                                progress tracking</li>
+                        </ul>
+                    </section>
+                    <section class='panel p-6 bg-red-950/20'>
+                        <h2 class='text-xs uppercase tracking-widest text-red-700 mb-4 border-b border-red-900 pb-2'>
+                            Actionable Commands</h2>
+                        <div class='space-y-3 text-xs'>
+                            <div class='p-2 bg-black/60 border border-red-900/50 font-mono text-gray-400 break-words'>
+                                <span class='text-green-500'>$</span> Use <span
+                                    class='text-white'>`track-progress`</span> tool to monitor risk indicators</div>
+                            <div class='p-2 bg-black/60 border border-red-900/50 font-mono text-gray-400 break-words'>
+                                <span class='text-green-500'>$</span> Run <span
+                                    class='text-white'>`/project-management/progress-review proj_1a3f5ab8`</span> for
+                                regular risk updates</div>
+                            <div class='p-2 bg-black/60 border border-red-900/50 font-mono text-gray-400 break-words'>
+                                <span class='text-green-500'>$</span> Consider <span
+                                    class='text-white'>`/project-management/resource-optimization proj_1a3f5ab8`</span>
+                                to address resource risks</div>
+                        </div>
+                    </section>
+                </div>
+            </div>
+        </div>
+    </main>
+    <footer class='panel p-3 z-10 marquee border-t border-red-900/50 bg-black'>
+        <div class='marquee-content text-red-600 text-xs font-bold tracking-widest uppercase flex gap-8'><span>Risk
+                Assessment Complete ✅</span><span>EdgeCraft RevOps Diagnostic Finished</span><span>Awaiting Command
+                Input</span><span>Risk Assessment Complete ✅</span><span>EdgeCraft RevOps Diagnostic
+                Finished</span><span>Awaiting Command Input</span><span>Risk Assessment Complete ✅</span><span>EdgeCraft
+                RevOps Diagnostic Finished</span><span>Awaiting Command Input</span></div>
+    </footer>
+    <script> document.querySelectorAll('.panel').forEach(panel => { panel.addEventListener('mouseover', () => { panel.style.borderColor = 'rgba(255,0,0,0.8)'; panel.style.boxShadow = '0 0 15px rgba(255,0,0,0.2)'; }); panel.addEventListener('mouseout', () => { panel.style.borderColor = ''; panel.style.boxShadow = ''; }); }); setInterval(() => { const glitchTexts = document.querySelectorAll('.glitch-text'); glitchTexts.forEach(el => { el.style.animation = 'none'; void el.offsetWidth; el.style.animation = 'glitch-anim 0.3s infinite'; setTimeout(() => { el.style.animation = ''; }, 300); }); }, 5000); </script>
+</body>
+
+</html>

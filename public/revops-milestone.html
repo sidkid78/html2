@@ -1,0 +1,474 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>EdgeCraft RevOps - Milestone Dashboard</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        html,
+        body {
+            margin: 0;
+            padding: 0;
+            background-color: #050505;
+            background-image: radial-gradient(circle at 50% 50%, #111 0%, #000 100%);
+            background-attachment: fixed;
+            color: #e0e0e0;
+            font-family: 'Courier New', Courier, monospace;
+            overflow-x: hidden;
+            scroll-behavior: smooth;
+        }
+
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: #000;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: #333;
+        }
+
+        .scanline {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 10px;
+            background: rgba(0, 255, 255, 0.1);
+            box-shadow: 0 0 10px rgba(0, 255, 255, 0.2);
+            animation: scan 5s linear infinite;
+            z-index: 9999;
+            pointer-events: none;
+        }
+
+        @keyframes scan {
+            0% {
+                top: -10px;
+            }
+
+            100% {
+                top: 100vh;
+            }
+        }
+
+        .distort-hover:hover {
+            filter: url(#distort);
+            transition: filter 0.3s ease;
+        }
+
+        .text-glow-green {
+            text-shadow: 0 0 15px rgba(34, 197, 94, 0.7);
+        }
+
+        .text-glow-red {
+            text-shadow: 0 0 15px rgba(239, 68, 68, 0.7);
+        }
+
+        .text-glow-yellow {
+            text-shadow: 0 0 15px rgba(234, 179, 8, 0.7);
+        }
+    </style>
+</head>
+
+<body class="antialiased selection:bg-cyan-500 selection:text-black">
+    <div class="scanline"></div><svg width="0" height="0" class="hidden">
+        <filter id="distort">
+            <feTurbulence type="fractalNoise" baseFrequency="0.05" numOctaves="2" result="noise" />
+            <feDisplacementMap in="SourceGraphic" in2="noise" scale="15" xChannelSelector="R" yChannelSelector="G" />
+        </filter>
+    </svg>
+    <div id="crt-overlay" class="pointer-events-none fixed inset-0 z-50 mix-blend-overlay opacity-20"><svg width="100%"
+            height="100%">
+            <filter id="noise">
+                <feTurbulence type="fractalNoise" baseFrequency="0.8" numOctaves="3" stitchTiles="stitch" />
+                <feColorMatrix type="matrix" values="1 0 0 0 0, 0 1 0 0 0, 0 0 1 0 0, 0 0 0 0 0" />
+            </filter>
+            <rect width="100%" height="100%" filter="url(#noise)" />
+        </svg></div>
+    <header
+        class="relative min-h-screen flex flex-col items-center justify-center overflow-hidden border-b border-white/10 p-8">
+        <div class="absolute inset-0 flex items-center justify-center opacity-[0.03] pointer-events-none">
+            <h1 class="text-[15vw] font-bold text-white whitespace-nowrap tracking-tighter">REVOPS</h1>
+        </div>
+        <div class="z-10 flex flex-col items-center">
+            <div
+                class="inline-block border border-cyan-500/30 bg-cyan-500/10 px-4 py-1 text-cyan-400 text-xs tracking-widest uppercase mb-6 rounded-full">
+                Project Initialization</div>
+            <h2
+                class="text-5xl md:text-7xl font-black text-transparent bg-clip-text bg-gradient-to-r from-white to-gray-500 mb-2 distort-hover cursor-default">
+                EDGECRAFT</h2>
+            <h2
+                class="text-4xl md:text-6xl font-black text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 to-blue-600 mb-12 distort-hover cursor-default">
+                REVOPS</h2>
+            <div
+                class="grid grid-cols-2 gap-4 text-left border border-white/10 bg-black/50 p-6 backdrop-blur-sm rounded-lg w-full max-w-lg shadow-[0_0_30px_rgba(0,255,255,0.05)]">
+                <div class="flex flex-col"><span class="text-gray-500 text-xs uppercase tracking-wider mb-1">Project
+                        ID</span><span class="text-white font-mono">proj_1a3f5ab8</span></div>
+                <div class="flex flex-col"><span class="text-gray-500 text-xs uppercase tracking-wider mb-1">Total
+                        Milestones</span><span class="text-white font-mono">8 Sequences</span></div>
+                <div class="flex flex-col col-span-2 mt-2 pt-4 border-t border-white/10"><span
+                        class="text-gray-500 text-xs uppercase tracking-wider mb-1">Planned Duration</span><span
+                        class="text-cyan-400 font-mono text-xl">14.1 weeks <span class="text-xs text-gray-500">(inc.
+                            buffers)</span></span></div>
+            </div>
+        </div>
+        <div
+            class="absolute bottom-10 left-1/2 transform -translate-x-1/2 animate-bounce flex flex-col items-center opacity-50">
+            <span class="text-xs text-gray-500 font-mono tracking-widest mb-2">SCROLL TO INITIATE</span><svg
+                class="w-6 h-6 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 14l-7 7m0 0l-7-7m7 7V3">
+                </path>
+            </svg></div>
+    </header>
+    <section class="relative py-32 bg-transparent px-4 md:px-0">
+        <div class="max-w-6xl mx-auto">
+            <div class="text-center mb-24">
+                <h3 class="text-3xl md:text-5xl font-black text-white tracking-tight">MILESTONE SEQUENCE</h3>
+                <p class="text-gray-500 mt-4 font-mono">Tracking critical path execution...</p>
+            </div>
+            <div class="relative">
+                <div
+                    class="absolute left-4 md:left-1/2 top-0 bottom-0 w-px bg-gradient-to-b from-transparent via-gray-700 to-transparent">
+                </div>
+                <div
+                    class="timeline-node opacity-0 translate-y-10 transition-all duration-700 ease-out flex flex-col md:flex-row items-start md:items-center w-full mb-20 relative">
+                    <div class="hidden md:block w-1/2 pr-12 text-right">
+                        <h4 class="text-2xl font-bold text-green-400 text-glow-green uppercase tracking-wide">
+                            Requirements Finalization</h4>
+                        <div class="text-sm text-gray-400 font-mono mt-2">Jun 23, 2026 &rarr; Jul 2, 2026 (1.2w)</div>
+                    </div>
+                    <div
+                        class="absolute left-4 md:left-1/2 transform -translate-x-1/2 w-4 h-4 rounded-full bg-green-500 shadow-[0_0_15px_#22c55e] z-10 flex items-center justify-center">
+                        <div class="w-8 h-8 absolute rounded-full border border-green-500 animate-ping opacity-50">
+                        </div>
+                    </div>
+                    <div class="md:w-1/2 pl-12 md:pl-12 text-left w-full ml-4 md:ml-0">
+                        <div class="md:hidden mb-2">
+                            <h4 class="text-xl font-bold text-green-400 text-glow-green uppercase tracking-wide">
+                                Requirements Finalization</h4>
+                            <div class="text-xs text-gray-400 font-mono mt-1">Jun 23, 2026 &rarr; Jul 2, 2026 (1.2w)
+                            </div>
+                        </div>
+                        <div
+                            class="bg-white/5 border border-white/10 p-5 rounded backdrop-blur-md hover:bg-white/10 transition duration-300 relative overflow-hidden group">
+                            <div class="absolute top-0 left-0 w-1 h-full bg-green-500"></div>
+                            <p class="font-mono text-sm text-gray-300 mb-2">Effort: <span class="text-white">10%</span>
+                            </p>
+                            <p class="font-mono text-sm text-gray-300 mb-2">Deliverables: <span
+                                    class="text-cyan-300">Project Charter, Requirement Specs</span></p>
+                            <p class="font-mono text-sm text-gray-300">Success: <span class="text-green-300">Stakeholder
+                                    Approval</span></p>
+                        </div>
+                    </div>
+                </div>
+                <div
+                    class="timeline-node opacity-0 translate-y-10 transition-all duration-700 ease-out flex flex-col md:flex-row-reverse items-start md:items-center w-full mb-20 relative">
+                    <div class="hidden md:block w-1/2 pl-12 text-left">
+                        <h4 class="text-2xl font-bold text-red-500 text-glow-red uppercase tracking-wide">System
+                            Architecture Design</h4>
+                        <div class="text-sm text-gray-400 font-mono mt-2">Jul 2, 2026 &rarr; Jul 18, 2026 (2.2w)</div>
+                    </div>
+                    <div
+                        class="absolute left-4 md:left-1/2 transform -translate-x-1/2 w-4 h-4 rounded-full bg-red-500 shadow-[0_0_15px_#ef4444] z-10 flex items-center justify-center">
+                        <div class="w-8 h-8 absolute rounded-full border border-red-500 animate-ping opacity-50"></div>
+                    </div>
+                    <div class="md:w-1/2 pl-12 md:pr-12 md:pl-0 text-left md:text-right w-full ml-4 md:ml-0">
+                        <div class="md:hidden mb-2">
+                            <h4 class="text-xl font-bold text-red-500 text-glow-red uppercase tracking-wide">System
+                                Architecture Design</h4>
+                            <div class="text-xs text-gray-400 font-mono mt-1">Jul 2, 2026 &rarr; Jul 18, 2026 (2.2w)
+                            </div>
+                        </div>
+                        <div
+                            class="bg-red-950/20 border border-red-500/30 p-5 rounded backdrop-blur-md hover:bg-red-950/40 transition duration-300 relative overflow-hidden group">
+                            <div class="absolute top-0 right-0 w-1 h-full bg-red-500"></div>
+                            <p class="font-mono text-sm text-gray-300 mb-2">Effort: <span class="text-white">15%</span>
+                            </p>
+                            <p class="font-mono text-sm text-gray-300 mb-2">Deliverables: <span
+                                    class="text-cyan-300">Project Charter, Requirement Specs</span></p>
+                            <p class="font-mono text-sm text-gray-300 mb-2">Success: <span
+                                    class="text-green-300">Stakeholder Approval</span></p>
+                            <p class="font-mono text-xs text-red-400 flex items-center md:justify-end"><span
+                                    class="mr-2">&#9888;&#65039;</span> Buffer included for risk management</p>
+                        </div>
+                    </div>
+                </div>
+                <div
+                    class="timeline-node opacity-0 translate-y-10 transition-all duration-700 ease-out flex flex-col md:flex-row items-start md:items-center w-full mb-20 relative">
+                    <div class="hidden md:block w-1/2 pr-12 text-right">
+                        <h4 class="text-2xl font-bold text-green-400 text-glow-green uppercase tracking-wide">Dev
+                            Environment Setup</h4>
+                        <div class="text-sm text-gray-400 font-mono mt-2">Jul 18, 2026 &rarr; Jul 25, 2026 (1w)</div>
+                    </div>
+                    <div
+                        class="absolute left-4 md:left-1/2 transform -translate-x-1/2 w-4 h-4 rounded-full bg-green-500 shadow-[0_0_15px_#22c55e] z-10 flex items-center justify-center">
+                        <div class="w-8 h-8 absolute rounded-full border border-green-500 animate-ping opacity-50">
+                        </div>
+                    </div>
+                    <div class="md:w-1/2 pl-12 md:pl-12 text-left w-full ml-4 md:ml-0">
+                        <div class="md:hidden mb-2">
+                            <h4 class="text-xl font-bold text-green-400 text-glow-green uppercase tracking-wide">Dev
+                                Environment Setup</h4>
+                            <div class="text-xs text-gray-400 font-mono mt-1">Jul 18, 2026 &rarr; Jul 25, 2026 (1w)
+                            </div>
+                        </div>
+                        <div
+                            class="bg-white/5 border border-white/10 p-5 rounded backdrop-blur-md hover:bg-white/10 transition duration-300 relative overflow-hidden group">
+                            <div class="absolute top-0 left-0 w-1 h-full bg-green-500"></div>
+                            <p class="font-mono text-sm text-gray-300 mb-2">Effort: <span class="text-white">5%</span>
+                            </p>
+                            <p class="font-mono text-sm text-gray-300 mb-2">Deliverables: <span
+                                    class="text-cyan-300">Env Config, Access Rights</span></p>
+                            <p class="font-mono text-sm text-gray-300">Success: <span class="text-green-300">Stakeholder
+                                    Approval</span></p>
+                        </div>
+                    </div>
+                </div>
+                <div
+                    class="timeline-node opacity-0 translate-y-10 transition-all duration-700 ease-out flex flex-col md:flex-row-reverse items-start md:items-center w-full mb-20 relative">
+                    <div class="hidden md:block w-1/2 pl-12 text-left">
+                        <h4 class="text-2xl font-bold text-red-500 text-glow-red uppercase tracking-wide">Core Backend
+                            Development</h4>
+                        <div class="text-sm text-gray-400 font-mono mt-2">Jul 25, 2026 &rarr; Aug 25, 2026 (4.3w)</div>
+                    </div>
+                    <div
+                        class="absolute left-4 md:left-1/2 transform -translate-x-1/2 w-4 h-4 rounded-full bg-red-500 shadow-[0_0_15px_#ef4444] z-10 flex items-center justify-center">
+                        <div class="w-8 h-8 absolute rounded-full border border-red-500 animate-ping opacity-50"></div>
+                    </div>
+                    <div class="md:w-1/2 pl-12 md:pr-12 md:pl-0 text-left md:text-right w-full ml-4 md:ml-0">
+                        <div class="md:hidden mb-2">
+                            <h4 class="text-xl font-bold text-red-500 text-glow-red uppercase tracking-wide">Core
+                                Backend Development</h4>
+                            <div class="text-xs text-gray-400 font-mono mt-1">Jul 25, 2026 &rarr; Aug 25, 2026 (4.3w)
+                            </div>
+                        </div>
+                        <div
+                            class="bg-red-950/20 border border-red-500/30 p-5 rounded backdrop-blur-md hover:bg-red-950/40 transition duration-300 relative overflow-hidden group">
+                            <div class="absolute top-0 right-0 w-1 h-full bg-red-500"></div>
+                            <p class="font-mono text-sm text-gray-300 mb-2">Effort: <span class="text-white">30%</span>
+                            </p>
+                            <p class="font-mono text-sm text-gray-300 mb-2">Deliverables: <span
+                                    class="text-cyan-300">Source Code, Unit Tests, API Docs</span></p>
+                            <p class="font-mono text-sm text-gray-300 mb-2">Success: <span
+                                    class="text-green-300">Stakeholder Approval</span></p>
+                            <p class="font-mono text-xs text-red-400 flex items-center md:justify-end"><span
+                                    class="mr-2">&#9888;&#65039;</span> Buffer included for risk management</p>
+                        </div>
+                    </div>
+                </div>
+                <div
+                    class="timeline-node opacity-0 translate-y-10 transition-all duration-700 ease-out flex flex-col md:flex-row items-start md:items-center w-full mb-20 relative">
+                    <div class="hidden md:block w-1/2 pr-12 text-right">
+                        <h4 class="text-2xl font-bold text-yellow-500 text-glow-yellow uppercase tracking-wide">Frontend
+                            Development</h4>
+                        <div class="text-sm text-gray-400 font-mono mt-2">Aug 10, 2026 &rarr; Aug 31, 2026 (3w)</div>
+                    </div>
+                    <div
+                        class="absolute left-4 md:left-1/2 transform -translate-x-1/2 w-4 h-4 rounded-full bg-yellow-500 shadow-[0_0_15px_#eab308] z-10 flex items-center justify-center">
+                        <div class="w-8 h-8 absolute rounded-full border border-yellow-500 animate-ping opacity-50">
+                        </div>
+                    </div>
+                    <div class="md:w-1/2 pl-12 md:pl-12 text-left w-full ml-4 md:ml-0">
+                        <div class="md:hidden mb-2">
+                            <h4 class="text-xl font-bold text-yellow-500 text-glow-yellow uppercase tracking-wide">
+                                Frontend Development</h4>
+                            <div class="text-xs text-gray-400 font-mono mt-1">Aug 10, 2026 &rarr; Aug 31, 2026 (3w)
+                            </div>
+                        </div>
+                        <div
+                            class="bg-yellow-950/20 border border-yellow-500/30 p-5 rounded backdrop-blur-md hover:bg-yellow-950/40 transition duration-300 relative overflow-hidden group">
+                            <div class="absolute top-0 left-0 w-1 h-full bg-yellow-500"></div>
+                            <p class="font-mono text-sm text-gray-300 mb-2">Effort: <span class="text-white">20%</span>
+                            </p>
+                            <p class="font-mono text-sm text-gray-300 mb-2">Deliverables: <span
+                                    class="text-cyan-300">Source Code, Unit Tests, API Docs</span></p>
+                            <p class="font-mono text-sm text-gray-300">Success: <span class="text-green-300">Stakeholder
+                                    Approval</span></p>
+                        </div>
+                    </div>
+                </div>
+                <div
+                    class="timeline-node opacity-0 translate-y-10 transition-all duration-700 ease-out flex flex-col md:flex-row-reverse items-start md:items-center w-full mb-20 relative">
+                    <div class="hidden md:block w-1/2 pl-12 text-left">
+                        <h4 class="text-2xl font-bold text-red-500 text-glow-red uppercase tracking-wide">Integration
+                            &amp; Testing</h4>
+                        <div class="text-sm text-gray-400 font-mono mt-2">Aug 31, 2026 &rarr; Sep 16, 2026 (2.2w)</div>
+                    </div>
+                    <div
+                        class="absolute left-4 md:left-1/2 transform -translate-x-1/2 w-4 h-4 rounded-full bg-red-500 shadow-[0_0_15px_#ef4444] z-10 flex items-center justify-center">
+                        <div class="w-8 h-8 absolute rounded-full border border-red-500 animate-ping opacity-50"></div>
+                    </div>
+                    <div class="md:w-1/2 pl-12 md:pr-12 md:pl-0 text-left md:text-right w-full ml-4 md:ml-0">
+                        <div class="md:hidden mb-2">
+                            <h4 class="text-xl font-bold text-red-500 text-glow-red uppercase tracking-wide">Integration
+                                &amp; Testing</h4>
+                            <div class="text-xs text-gray-400 font-mono mt-1">Aug 31, 2026 &rarr; Sep 16, 2026 (2.2w)
+                            </div>
+                        </div>
+                        <div
+                            class="bg-red-950/20 border border-red-500/30 p-5 rounded backdrop-blur-md hover:bg-red-950/40 transition duration-300 relative overflow-hidden group">
+                            <div class="absolute top-0 right-0 w-1 h-full bg-red-500"></div>
+                            <p class="font-mono text-sm text-gray-300 mb-2">Effort: <span class="text-white">15%</span>
+                            </p>
+                            <p class="font-mono text-sm text-gray-300 mb-2">Deliverables: <span
+                                    class="text-cyan-300">Test Plan, Bug Report, Sign-off</span></p>
+                            <p class="font-mono text-sm text-gray-300 mb-2">Success: <span class="text-green-300">Zero
+                                    critical bugs</span></p>
+                            <p class="font-mono text-xs text-red-400 flex items-center md:justify-end"><span
+                                    class="mr-2">&#9888;&#65039;</span> Buffer included for risk management</p>
+                        </div>
+                    </div>
+                </div>
+                <div
+                    class="timeline-node opacity-0 translate-y-10 transition-all duration-700 ease-out flex flex-col md:flex-row items-start md:items-center w-full mb-20 relative">
+                    <div class="hidden md:block w-1/2 pr-12 text-right">
+                        <h4 class="text-2xl font-bold text-green-400 text-glow-green uppercase tracking-wide">User
+                            Acceptance Testing</h4>
+                        <div class="text-sm text-gray-400 font-mono mt-2">Sep 16, 2026 &rarr; Sep 23, 2026 (1w)</div>
+                    </div>
+                    <div
+                        class="absolute left-4 md:left-1/2 transform -translate-x-1/2 w-4 h-4 rounded-full bg-green-500 shadow-[0_0_15px_#22c55e] z-10 flex items-center justify-center">
+                        <div class="w-8 h-8 absolute rounded-full border border-green-500 animate-ping opacity-50">
+                        </div>
+                    </div>
+                    <div class="md:w-1/2 pl-12 md:pl-12 text-left w-full ml-4 md:ml-0">
+                        <div class="md:hidden mb-2">
+                            <h4 class="text-xl font-bold text-green-400 text-glow-green uppercase tracking-wide">User
+                                Acceptance Testing</h4>
+                            <div class="text-xs text-gray-400 font-mono mt-1">Sep 16, 2026 &rarr; Sep 23, 2026 (1w)
+                            </div>
+                        </div>
+                        <div
+                            class="bg-white/5 border border-white/10 p-5 rounded backdrop-blur-md hover:bg-white/10 transition duration-300 relative overflow-hidden group">
+                            <div class="absolute top-0 left-0 w-1 h-full bg-green-500"></div>
+                            <p class="font-mono text-sm text-gray-300 mb-2">Effort: <span class="text-white">5%</span>
+                            </p>
+                            <p class="font-mono text-sm text-gray-300 mb-2">Deliverables: <span
+                                    class="text-cyan-300">Test Plan, Bug Report, Sign-off</span></p>
+                            <p class="font-mono text-sm text-gray-300">Success: <span class="text-green-300">Zero
+                                    critical bugs</span></p>
+                        </div>
+                    </div>
+                </div>
+                <div
+                    class="timeline-node opacity-0 translate-y-10 transition-all duration-700 ease-out flex flex-col md:flex-row-reverse items-start md:items-center w-full mb-20 relative">
+                    <div class="hidden md:block w-1/2 pl-12 text-left">
+                        <h4 class="text-2xl font-bold text-yellow-500 text-glow-yellow uppercase tracking-wide">
+                            Production Deployment</h4>
+                        <div class="text-sm text-gray-400 font-mono mt-2">Sep 23, 2026 &rarr; Sep 30, 2026 (1w)</div>
+                    </div>
+                    <div
+                        class="absolute left-4 md:left-1/2 transform -translate-x-1/2 w-4 h-4 rounded-full bg-yellow-500 shadow-[0_0_15px_#eab308] z-10 flex items-center justify-center">
+                        <div class="w-8 h-8 absolute rounded-full border border-yellow-500 animate-ping opacity-50">
+                        </div>
+                    </div>
+                    <div class="md:w-1/2 pl-12 md:pr-12 md:pl-0 text-left md:text-right w-full ml-4 md:ml-0">
+                        <div class="md:hidden mb-2">
+                            <h4 class="text-xl font-bold text-yellow-500 text-glow-yellow uppercase tracking-wide">
+                                Production Deployment</h4>
+                            <div class="text-xs text-gray-400 font-mono mt-1">Sep 23, 2026 &rarr; Sep 30, 2026 (1w)
+                            </div>
+                        </div>
+                        <div
+                            class="bg-yellow-950/20 border border-yellow-500/30 p-5 rounded backdrop-blur-md hover:bg-yellow-950/40 transition duration-300 relative overflow-hidden group">
+                            <div class="absolute top-0 right-0 w-1 h-full bg-yellow-500"></div>
+                            <p class="font-mono text-sm text-gray-300 mb-2">Effort: <span class="text-white">5%</span>
+                            </p>
+                            <p class="font-mono text-sm text-gray-300 mb-2">Deliverables: <span
+                                    class="text-cyan-300">Release Notes, Production Build</span></p>
+                            <p class="font-mono text-sm text-gray-300 mb-2">Success: <span
+                                    class="text-green-300">Stakeholder Approval</span></p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+    <section class="py-32 bg-gradient-to-b from-transparent to-[#0a0a0a] px-4 md:px-8 border-t border-white/5">
+        <div class="max-w-7xl mx-auto">
+            <h3 class="text-3xl md:text-5xl font-black text-white tracking-tight mb-16 text-center">SYSTEM DIAGNOSTICS
+            </h3>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                <div class="space-y-8">
+                    <div
+                        class="border border-white/10 bg-white/5 p-8 rounded-xl relative overflow-hidden group hover:bg-white/10 transition-all">
+                        <div class="absolute -right-10 -top-10 w-40 h-40 bg-purple-500/10 rounded-full blur-3xl"></div>
+                        <h4 class="text-xl font-bold text-white mb-6 flex items-center"><span
+                                class="text-purple-500 mr-3">⚡</span> Critical Path Analysis</h4>
+                        <ul class="space-y-4 font-mono text-sm text-gray-400">
+                            <li class="flex justify-between border-b border-white/5 pb-2"><span>Critical Path
+                                    Duration</span> <span class="text-white">14.1 Weeks</span></li>
+                            <li class="flex justify-between border-b border-white/5 pb-2"><span>Total Project
+                                    Duration</span> <span class="text-white">14.1 Weeks</span></li>
+                            <li class="text-purple-300 mt-4 text-xs">🎯 Buffer Analysis: Buffers added to high-risk
+                                architecture and integration phases.</li>
+                        </ul>
+                    </div>
+                    <div
+                        class="border border-white/10 bg-white/5 p-8 rounded-xl relative overflow-hidden group hover:bg-white/10 transition-all">
+                        <div class="absolute -left-10 -bottom-10 w-40 h-40 bg-blue-500/10 rounded-full blur-3xl"></div>
+                        <h4 class="text-xl font-bold text-white mb-6 flex items-center"><span
+                                class="text-blue-500 mr-3">🔗</span> Dependency Map</h4>
+                        <ul class="space-y-4 font-mono text-sm text-gray-400">
+                            <li class="flex justify-between border-b border-white/5 pb-2"><span>Sequential
+                                    Dependencies</span> <span class="text-white text-xl">7</span></li>
+                            <li class="text-blue-300 mt-4 text-xs flex items-start"><span class="mr-2">⚡</span> Parallel
+                                Opportunities: Frontend Development overlaps with Core Backend</li>
+                        </ul>
+                    </div>
+                </div>
+                <div class="space-y-8">
+                    <div
+                        class="border border-white/10 bg-white/5 p-8 rounded-xl relative overflow-hidden group hover:bg-white/10 transition-all">
+                        <div class="absolute -right-10 -bottom-10 w-40 h-40 bg-cyan-500/10 rounded-full blur-3xl"></div>
+                        <h4 class="text-xl font-bold text-white mb-6 flex items-center"><span
+                                class="text-cyan-500 mr-3">🛠️</span> Resource Requirements</h4>
+                        <div class="font-mono text-sm text-gray-400 mb-6">
+                            <div class="flex justify-between border-b border-white/5 pb-2 mb-4"><span>Peak Effort</span>
+                                <span class="text-cyan-400 font-bold">Core Backend (30%)</span></div><span
+                                class="text-white block mb-2">Skills Needed:</span>
+                            <div class="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs">
+                                <div class="bg-black/50 px-3 py-2 rounded">Planning: <br><span class="text-cyan-300">Biz
+                                        Analysis, Sys Arch</span></div>
+                                <div class="bg-black/50 px-3 py-2 rounded">Development: <br><span
+                                        class="text-cyan-300">Backend/Frontend Eng</span></div>
+                                <div class="bg-black/50 px-3 py-2 rounded">Testing: <br><span class="text-cyan-300">QA
+                                        Automation</span></div>
+                                <div class="bg-black/50 px-3 py-2 rounded">Deployment: <br><span
+                                        class="text-cyan-300">DevOps</span></div>
+                            </div>
+                        </div>
+                    </div>
+                    <div
+                        class="border border-red-500/30 bg-red-950/20 p-8 rounded-xl relative overflow-hidden group hover:bg-red-950/40 transition-all">
+                        <div class="absolute top-0 right-0 w-2 h-full bg-red-500"></div>
+                        <div class="absolute -left-10 -top-10 w-40 h-40 bg-red-500/10 rounded-full blur-3xl"></div>
+                        <h4 class="text-xl font-bold text-white mb-6 flex items-center"><span
+                                class="text-red-500 mr-3">&#9888;&#65039;</span> Risk &amp; Recommended Actions</h4>
+                        <div class="font-mono text-sm text-gray-400">
+                            <p class="text-red-400 mb-4 border-b border-red-500/20 pb-4">Critical Path contains High
+                                Risk technical items.</p>
+                            <ul class="space-y-3 text-xs">
+                                <li class="flex items-start"><span class="text-red-500 mr-2">▶</span> Review detailed
+                                    architecture before Development start</li>
+                                <li class="flex items-start"><span class="text-red-500 mr-2">▶</span> Setup JIRA/Linear
+                                    board matching these milestones</li>
+                                <li class="flex items-start"><span class="text-red-500 mr-2">▶</span> Schedule weekly
+                                    syncs for Critical Path items</li>
+                                <li class="flex items-start"><span class="text-red-500 mr-2">▶</span> Assign QA lead by
+                                    Core Backend Development</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+    <script>document.addEventListener('DOMContentLoaded', () => { const nodes = document.querySelectorAll('.timeline-node'); const observer = new IntersectionObserver(entries => { entries.forEach(entry => { if (entry.isIntersecting) { entry.target.classList.remove('opacity-0', 'translate-y-10'); entry.target.classList.add('opacity-100', 'translate-y-0'); } }); }, { threshold: 0.1, rootMargin: '0px 0px -50px 0px' }); nodes.forEach(n => observer.observe(n)); });</script>
+</body>
+
+</html>

@@ -1,0 +1,483 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Blocker Identification Report</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Space+Mono:ital,wght@0,400;0,700;1,400&display=swap');
+    
+    :root {
+      --red: #ff3333;
+      --yellow: #ffcc00;
+      --bg: #050505;
+    }
+    
+    body {
+      background-color: var(--bg);
+      color: var(--red);
+      font-family: 'Space Mono', monospace;
+      margin: 0;
+      overflow: hidden;
+    }
+
+    /* HUD scanline effect */
+    .scanline {
+      width: 100%;
+      height: 10px;
+      background: rgba(255, 51, 51, 0.1);
+      position: fixed;
+      top: 0;
+      left: 0;
+      z-index: 9999;
+      animation: scanline 6s linear infinite;
+      pointer-events: none;
+    }
+    @keyframes scanline {
+      0% { transform: translateY(-10vh); }
+      100% { transform: translateY(110vh); }
+    }
+
+    /* Glitch text effect */
+    .glitch-text {
+      position: relative;
+      display: inline-block;
+    }
+    .glitch-text::before, .glitch-text::after {
+      content: attr(data-text);
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: var(--bg);
+    }
+    .glitch-text::before {
+      left: 2px;
+      text-shadow: -1px 0 red;
+      clip: rect(24px, 550px, 90px, 0);
+      animation: glitch-anim 3s infinite linear alternate-reverse;
+    }
+    .glitch-text::after {
+      left: -2px;
+      text-shadow: -1px 0 blue;
+      clip: rect(85px, 550px, 140px, 0);
+      animation: glitch-anim 2.5s infinite linear alternate-reverse;
+    }
+    @keyframes glitch-anim {
+      0% { clip: rect(10px, 9999px, 44px, 0); }
+      5% { clip: rect(62px, 9999px, 88px, 0); }
+      10% { clip: rect(2px, 9999px, 90px, 0); }
+      15% { clip: rect(100px, 9999px, 32px, 0); }
+      20% { clip: rect(81px, 9999px, 100px, 0); }
+      25% { clip: rect(11px, 9999px, 83px, 0); }
+      30% { clip: rect(38px, 9999px, 92px, 0); }
+      35% { clip: rect(50px, 9999px, 55px, 0); }
+      40% { clip: rect(98px, 9999px, 40px, 0); }
+      45% { clip: rect(20px, 9999px, 70px, 0); }
+      50% { clip: rect(70px, 9999px, 20px, 0); }
+      55% { clip: rect(30px, 9999px, 80px, 0); }
+      60% { clip: rect(90px, 9999px, 10px, 0); }
+      65% { clip: rect(40px, 9999px, 60px, 0); }
+      70% { clip: rect(60px, 9999px, 40px, 0); }
+      75% { clip: rect(80px, 9999px, 30px, 0); }
+      80% { clip: rect(10px, 9999px, 90px, 0); }
+      85% { clip: rect(50px, 9999px, 50px, 0); }
+      90% { clip: rect(90px, 9999px, 10px, 0); }
+      95% { clip: rect(20px, 9999px, 80px, 0); }
+      100% { clip: rect(70px, 9999px, 20px, 0); }
+    }
+
+    /* High-end grain overlay via SVG */
+    .noise-overlay {
+      position: fixed;
+      top: 0; left: 0; width: 100vw; height: 100vh;
+      pointer-events: none;
+      z-index: 9998;
+      opacity: 0.25;
+      background: url('data:image/svg+xml,%3Csvg viewBox=%220 0 200 200%22 xmlns=%22http://www.w3.org/2000/svg%22%3E%3Cfilter id=%22noiseFilter%22%3E%3CfeTurbulence type=%22fractalNoise%22 baseFrequency=%220.8%22 numOctaves=%223%22 stitchTiles=%22stitch%22/%3E%3C/filter%3E%3Crect width=%22100%25%22 height=%22100%25%22 filter=%22url(%23noiseFilter)%22/%3E%3C/svg%3E');
+      mix-blend-mode: overlay;
+    }
+
+    /* Depth vignette */
+    .vignette {
+      position: fixed;
+      top: 0; left: 0; width: 100vw; height: 100vh;
+      box-shadow: inset 0 0 200px rgba(0,0,0,0.95);
+      pointer-events: none;
+      z-index: 9997;
+    }
+
+    /* Sci-fi corner brackets */
+    .hud-border {
+      border: 1px solid rgba(255, 51, 51, 0.2);
+      position: relative;
+      background: rgba(0, 0, 0, 0.6);
+      backdrop-filter: blur(4px);
+    }
+    .hud-border::before, .hud-border::after {
+      content: '';
+      position: absolute;
+      width: 12px; height: 12px;
+      border: 2px solid var(--red);
+    }
+    .hud-border::before { top: -2px; left: -2px; border-right: none; border-bottom: none; }
+    .hud-border::after { bottom: -2px; right: -2px; border-left: none; border-top: none; }
+    
+    /* Reel Snap Scrolling */
+    .snap-container {
+      height: 100vh;
+      width: 100vw;
+      overflow-y: scroll;
+      overflow-x: hidden;
+      scroll-snap-type: y mandatory;
+      scroll-behavior: smooth;
+    }
+    .snap-section {
+      scroll-snap-align: start;
+      min-height: 100vh;
+      padding: 2rem;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      position: relative;
+    }
+
+    .blink { animation: blink 1s step-end infinite; }
+    @keyframes blink { 50% { opacity: 0; } }
+
+    /* Structural grid background */
+    .grid-bg {
+      background-image: linear-gradient(rgba(255, 51, 51, 0.05) 1px, transparent 1px),
+                        linear-gradient(90deg, rgba(255, 51, 51, 0.05) 1px, transparent 1px);
+      background-size: 50px 50px;
+      background-position: center center;
+    }
+    
+    .filter-glitch { filter: url(#svg-glitch); }
+    
+    /* Custom Scrollbar */
+    ::-webkit-scrollbar {
+      width: 6px;
+    }
+    ::-webkit-scrollbar-track {
+      background: #000; 
+    }
+    ::-webkit-scrollbar-thumb {
+      background: #330000; 
+      border: 1px solid var(--red);
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Compositing Layers -->
+  <div class="noise-overlay"></div>
+  <div class="vignette"></div>
+  <div class="scanline"></div>
+  
+  <!-- Advanced SVG Filter -->
+  <svg style="width:0;height:0;position:absolute;">
+    <filter id="svg-glitch">
+      <feTurbulence type="fractalNoise" baseFrequency="0.05 0.9" numOctaves="1" result="noise" />
+      <feColorMatrix type="matrix" values="1 0 0 0 0  0 0 0 0 0  0 0 0 0 0  0 0 0 1 0" in="noise" result="coloredNoise" />
+      <feDisplacementMap in="SourceGraphic" in2="coloredNoise" scale="8" xChannelSelector="R" yChannelSelector="G" />
+    </filter>
+  </svg>
+
+  <!-- Main Reel Container -->
+  <div class="snap-container grid-bg">
+    
+    <!-- ================= SECTION 1: HEADER ================= -->
+    <section class="snap-section items-center justify-center text-center">
+      <div class="absolute inset-0 flex items-center justify-center opacity-5 pointer-events-none text-[25vw] font-bold leading-none tracking-tighter filter-glitch text-red-700">
+        WARN
+      </div>
+      <div class="z-10 hud-border p-8 md:p-12 max-w-5xl w-full">
+        <h1 class="text-4xl md:text-6xl font-bold mb-4 glitch-text text-red-500 uppercase tracking-widest" data-text="🚧 Blocker Identification Report">
+          🚧 Blocker Identification Report
+        </h1>
+        <h2 class="text-xl md:text-3xl text-red-400 mb-10 tracking-[0.3em] uppercase opacity-80">
+          EdgeCraft RevOps
+        </h2>
+        
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6 text-lg border-t border-red-900 pt-8">
+          <div class="flex flex-col items-center">
+            <span class="text-xs text-red-700 uppercase tracking-[0.2em] mb-2">Scan Date</span>
+            <span class="font-bold text-2xl text-red-200">6/23/2026</span>
+          </div>
+          <div class="flex flex-col items-center border-y md:border-y-0 md:border-x border-red-900 py-4 md:py-0">
+            <span class="text-xs text-red-700 uppercase tracking-[0.2em] mb-2">Total Blockers</span>
+            <span class="font-bold text-4xl text-red-100">6</span>
+          </div>
+          <div class="flex flex-col items-center">
+            <span class="text-xs text-red-700 uppercase tracking-[0.2em] mb-2">Risk Level</span>
+            <span class="font-bold text-3xl text-red-500 animate-pulse uppercase border border-red-500 px-4 py-1 bg-red-900 bg-opacity-20">
+              High
+            </span>
+          </div>
+        </div>
+      </div>
+      <div class="absolute bottom-10 left-1/2 transform -translate-x-1/2 text-xs text-red-700 tracking-widest blink">
+        [ SCROLL TO INITIALIZE ]
+      </div>
+    </section>
+
+    <!-- ================= SECTION 2: IDENTIFIED BLOCKERS ================= -->
+    <section class="snap-section justify-start pt-24 max-w-7xl mx-auto w-full">
+      <h2 class="text-3xl md:text-4xl font-bold mb-10 border-b border-red-900 pb-4 inline-flex items-center gap-4 uppercase tracking-widest">
+        <span class="blink text-red-500">🛑</span> Identified Blockers
+      </h2>
+      
+      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 overflow-y-auto pr-2 pb-12 style-scroll" style="max-height: 70vh;">
+        
+        <div class="hud-border p-5 bg-black flex flex-col hover:bg-red-950 transition-colors duration-300 group">
+          <div class="flex items-start gap-3 mb-3 border-b border-red-900 pb-3">
+            <span class="text-xl mt-1">🟡</span>
+            <span class="font-bold text-yellow-400 text-sm uppercase leading-tight">High-Risk Critical Phase: Core Backend Development</span>
+          </div>
+          <p class="text-sm text-gray-400 mb-6 flex-grow leading-relaxed">Phase "Core Backend Development" has high complexity and occupies >25% of effort. Any slippage here stops downstream work.</p>
+          <div class="text-xs text-red-500 uppercase border-t border-red-900 pt-3 bg-red-900 bg-opacity-10 p-2 group-hover:bg-opacity-30">
+            <span class="text-red-700 block mb-1">Impact</span> Direct critical path delay
+          </div>
+        </div>
+
+        <div class="hud-border p-5 bg-black flex flex-col hover:bg-red-950 transition-colors duration-300 group">
+          <div class="flex items-start gap-3 mb-3 border-b border-red-900 pb-3">
+            <span class="text-xl mt-1 blink">🔴</span>
+            <span class="font-bold text-red-500 text-sm uppercase leading-tight">Missing Critical Role: Data Engineer/Scientist</span>
+          </div>
+          <p class="text-sm text-gray-400 mb-6 flex-grow leading-relaxed">Role identified as necessary but not assigned in initial stakeholder map.</p>
+          <div class="text-xs text-red-500 uppercase border-t border-red-900 pt-3 bg-red-900 bg-opacity-10 p-2 group-hover:bg-opacity-30">
+            <span class="text-red-700 block mb-1">Impact</span> Blocked decision making or execution
+          </div>
+        </div>
+
+        <div class="hud-border p-5 bg-black flex flex-col hover:bg-red-950 transition-colors duration-300 group">
+          <div class="flex items-start gap-3 mb-3 border-b border-red-900 pb-3">
+            <span class="text-xl mt-1 blink">🔴</span>
+            <span class="font-bold text-red-500 text-sm uppercase leading-tight">Missing Critical Role: Product Owner/Business Lead</span>
+          </div>
+          <p class="text-sm text-gray-400 mb-6 flex-grow leading-relaxed">Role identified as necessary but not assigned in initial stakeholder map.</p>
+          <div class="text-xs text-red-500 uppercase border-t border-red-900 pt-3 bg-red-900 bg-opacity-10 p-2 group-hover:bg-opacity-30">
+            <span class="text-red-700 block mb-1">Impact</span> Blocked decision making or execution
+          </div>
+        </div>
+
+        <div class="hud-border p-5 bg-black flex flex-col hover:bg-red-950 transition-colors duration-300 group">
+          <div class="flex items-start gap-3 mb-3 border-b border-red-900 pb-3">
+            <span class="text-xl mt-1 blink">🔴</span>
+            <span class="font-bold text-red-500 text-sm uppercase leading-tight">Critical Risk Active: Integration Complexity</span>
+          </div>
+          <p class="text-sm text-gray-400 mb-6 flex-grow leading-relaxed">High risk of failure when integrating with legacy systems or distributed components.</p>
+          <div class="text-xs text-red-500 uppercase border-t border-red-900 pt-3 bg-red-900 bg-opacity-10 p-2 group-hover:bg-opacity-30">
+            <span class="text-red-700 block mb-1">Impact</span> High probability of project derailment
+          </div>
+        </div>
+
+        <div class="hud-border p-5 bg-black flex flex-col hover:bg-red-950 transition-colors duration-300 group">
+          <div class="flex items-start gap-3 mb-3 border-b border-red-900 pb-3">
+            <span class="text-xl mt-1 blink">🔴</span>
+            <span class="font-bold text-red-500 text-sm uppercase leading-tight">Critical Risk Active: Data Quality Insufficiency</span>
+          </div>
+          <p class="text-sm text-gray-400 mb-6 flex-grow leading-relaxed">Input data may not meet the quality or volume required for model training.</p>
+          <div class="text-xs text-red-500 uppercase border-t border-red-900 pt-3 bg-red-900 bg-opacity-10 p-2 group-hover:bg-opacity-30">
+            <span class="text-red-700 block mb-1">Impact</span> High probability of project derailment
+          </div>
+        </div>
+
+        <div class="hud-border p-5 bg-black flex flex-col hover:bg-red-950 transition-colors duration-300 group">
+          <div class="flex items-start gap-3 mb-3 border-b border-red-900 pb-3">
+            <span class="text-xl mt-1">🟡</span>
+            <span class="font-bold text-yellow-400 text-sm uppercase leading-tight">High Technical Complexity</span>
+          </div>
+          <p class="text-sm text-gray-400 mb-6 flex-grow leading-relaxed">Complex scope suggests hidden technical debt or integration challenges.</p>
+          <div class="text-xs text-red-500 uppercase border-t border-red-900 pt-3 bg-red-900 bg-opacity-10 p-2 group-hover:bg-opacity-30">
+            <span class="text-red-700 block mb-1">Impact</span> Velocity slowdown expected in Development phase
+          </div>
+        </div>
+
+      </div>
+    </section>
+
+    <!-- ================= SECTION 3: IMPACT ANALYSIS ================= -->
+    <section class="snap-section relative items-center justify-center">
+      <!-- Glitchy diagonal band -->
+      <div class="absolute w-[150vw] h-48 bg-red-900 opacity-20 -rotate-12 top-1/3 mix-blend-screen filter-glitch pointer-events-none"></div>
+      
+      <div class="z-10 w-full max-w-6xl">
+        <h2 class="text-4xl md:text-5xl font-bold mb-16 text-center tracking-widest uppercase">
+          <span class="glitch-text text-white" data-text="💥 Impact Analysis">💥 Impact Analysis</span>
+        </h2>
+        
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+          
+          <div class="flex flex-col items-center justify-center p-10 border border-red-900 bg-black relative overflow-hidden group">
+            <div class="absolute inset-0 bg-red-900 opacity-0 group-hover:opacity-10 transition-opacity"></div>
+            <span class="text-sm text-red-600 uppercase mb-6 tracking-[0.2em] text-center">Critical Path Affected</span>
+            <span class="text-6xl md:text-8xl font-bold text-red-800 group-hover:text-red-500 transition-colors duration-500">NO</span>
+          </div>
+          
+          <div class="flex flex-col items-center justify-center p-10 border border-red-500 bg-red-950 relative overflow-hidden group shadow-[0_0_40px_rgba(255,51,51,0.3)] z-10 scale-105">
+            <div class="absolute inset-0 bg-red-600 opacity-10 animate-pulse"></div>
+            <span class="text-sm text-red-300 uppercase mb-6 tracking-[0.2em] text-center z-10">Est. Delay</span>
+            <div class="flex items-baseline gap-3 z-10">
+              <span class="text-7xl md:text-9xl font-bold text-white glitch-text" data-text="8">8</span>
+              <span class="text-2xl text-red-300 uppercase tracking-widest">days</span>
+            </div>
+          </div>
+          
+          <div class="flex flex-col items-start justify-center p-10 border border-red-900 bg-black">
+            <span class="text-sm text-red-600 uppercase mb-8 tracking-[0.2em]">Severity Breakdown</span>
+            <div class="w-full space-y-6">
+              <div>
+                <div class="flex justify-between text-sm mb-2 font-bold"><span class="text-red-500 uppercase">High</span><span class="text-white">4</span></div>
+                <div class="h-3 w-full bg-red-950 relative overflow-hidden">
+                  <div class="h-full bg-red-500 w-4/6 shadow-[0_0_15px_#ff3333] relative">
+                     <div class="absolute top-0 right-0 w-2 h-full bg-white animate-pulse"></div>
+                  </div>
+                </div>
+              </div>
+              <div>
+                <div class="flex justify-between text-sm mb-2 font-bold"><span class="text-yellow-500 uppercase">Med</span><span class="text-white">2</span></div>
+                <div class="h-3 w-full bg-red-950">
+                  <div class="h-full bg-yellow-500 w-2/6"></div>
+                </div>
+              </div>
+              <div>
+                <div class="flex justify-between text-sm mb-2 font-bold"><span class="text-green-600 uppercase">Low</span><span class="text-gray-600">0</span></div>
+                <div class="h-3 w-full bg-red-950">
+                  <div class="h-full bg-green-600 w-0"></div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+        </div>
+      </div>
+    </section>
+
+    <!-- ================= SECTION 4: RESOLUTION STRATEGIES ================= -->
+    <section class="snap-section max-w-6xl mx-auto w-full pt-12">
+      <div class="flex items-center gap-6 mb-12">
+        <h2 class="text-3xl md:text-4xl font-bold bg-red-900 text-black px-6 py-3 uppercase tracking-widest inline-block">
+          🛠️ Resolution Strategies
+        </h2>
+        <div class="flex-grow h-px bg-red-900"></div>
+      </div>
+      
+      <div class="space-y-10">
+        
+        <div class="hud-border p-8 bg-black border-l-4 border-l-yellow-400 hover:border-l-yellow-300 transition-all">
+          <h3 class="text-xl font-bold text-yellow-400 mb-6 uppercase tracking-wider">
+            <span class="text-gray-600 mr-2">[BLK-001]</span> High-Risk Critical Phase: Core Backend Development
+          </h3>
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div class="bg-red-950 bg-opacity-20 p-4 border border-red-900">
+              <span class="text-xs text-red-500 uppercase tracking-widest block mb-2">⚡ Immediate Action</span>
+              <span class="text-gray-200 text-lg">Conduct deep-dive workshop, Clarify acceptance criteria</span>
+            </div>
+            <div class="bg-red-950 bg-opacity-20 p-4 border border-red-900">
+              <span class="text-xs text-red-500 uppercase tracking-widest block mb-2">📅 Short-term Strategy</span>
+              <span class="text-gray-200 text-lg">Break down milestone into smaller chunks, Add buffer sprint</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="hud-border p-8 bg-black border-l-4 border-l-red-500 hover:border-l-red-400 transition-all">
+          <h3 class="text-xl font-bold text-red-500 mb-6 uppercase tracking-wider">
+            <span class="text-gray-600 mr-2">[BLK-002]</span> Missing Critical Role: Data Engineer/Scientist
+          </h3>
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div class="bg-red-950 bg-opacity-20 p-4 border border-red-900">
+              <span class="text-xs text-red-500 uppercase tracking-widest block mb-2">⚡ Immediate Action</span>
+              <span class="text-gray-200 text-lg">Audit workload distribution, Prioritize backlog items</span>
+            </div>
+            <div class="bg-red-950 bg-opacity-20 p-4 border border-red-900">
+              <span class="text-xs text-red-500 uppercase tracking-widest block mb-2">📅 Short-term Strategy</span>
+              <span class="text-gray-200 text-lg">Hire contractor/freelancer, Descope non-critical features</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="hud-border p-8 bg-black border-l-4 border-l-red-500 hover:border-l-red-400 transition-all">
+          <h3 class="text-xl font-bold text-red-500 mb-6 uppercase tracking-wider">
+            <span class="text-gray-600 mr-2">[BLK-003]</span> Missing Critical Role: Product Owner/Business Lead
+          </h3>
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div class="bg-red-950 bg-opacity-20 p-4 border border-red-900">
+              <span class="text-xs text-red-500 uppercase tracking-widest block mb-2">⚡ Immediate Action</span>
+              <span class="text-gray-200 text-lg">Audit workload distribution, Prioritize backlog items</span>
+            </div>
+            <div class="bg-red-950 bg-opacity-20 p-4 border border-red-900">
+              <span class="text-xs text-red-500 uppercase tracking-widest block mb-2">📅 Short-term Strategy</span>
+              <span class="text-gray-200 text-lg">Hire contractor/freelancer, Descope non-critical features</span>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </section>
+
+    <!-- ================= SECTION 5: RECOMMENDATIONS ================= -->
+    <section class="snap-section relative items-center justify-center overflow-hidden">
+      <!-- Warning pulse bg -->
+      <div class="absolute inset-0 bg-red-600 opacity-5 animate-[pulse_2s_ease-in-out_infinite] mix-blend-screen pointer-events-none"></div>
+      <div class="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSI4IiBoZWlnaHQ9IjgiPgo8cmVjdCB3aWR0aD0iOCIgaGVpZ2h0PSI4IiBmaWxsPSIjZmZmIiBmaWxsLW9wYWNpdHk9IjAuMDUiLz4KPC9zdmc+')] opacity-20"></div>
+      
+      <div class="hud-border border-red-500 p-8 md:p-16 max-w-5xl w-full bg-black relative z-10 shadow-[0_0_80px_rgba(255,0,0,0.2)]">
+        <h2 class="text-3xl md:text-5xl font-bold mb-10 text-white uppercase tracking-[0.3em] border-b-2 border-red-600 pb-6 text-center">
+          Recommendations
+        </h2>
+        
+        <ul class="space-y-8 text-lg md:text-2xl">
+          <li class="flex items-start gap-6 p-4 bg-red-900 bg-opacity-20 border border-red-900">
+            <span class="mt-1 text-3xl blink filter drop-shadow-[0_0_10px_#ff0000]">🔴</span>
+            <span class="text-red-100 font-bold tracking-wide">Resolve 4 high-severity blockers immediately to prevent timeline slip.</span>
+          </li>
+          <li class="flex items-start gap-6 p-4">
+            <span class="mt-1 text-3xl grayscale opacity-70">👥</span>
+            <span class="text-gray-400">Resource constraints detected. Review allocation plan.</span>
+          </li>
+          <li class="flex items-start gap-6 p-4">
+            <span class="mt-1 text-3xl grayscale opacity-70">🛠️</span>
+            <span class="text-gray-400">Technical risks are high. Consider an early PoC phase.</span>
+          </li>
+        </ul>
+        
+        <div class="mt-16 pt-8 border-t border-red-900 flex justify-between items-center opacity-50">
+          <p class="text-xs text-red-500 font-mono">SYS.REQ.09842</p>
+          <p class="text-sm text-red-500 uppercase tracking-[0.5em] font-bold">>>> END OF REPORT <<<</p>
+          <p class="text-xs text-red-500 font-mono">TERM.00</p>
+        </div>
+      </div>
+    </section>
+
+  </div>
+
+  <script>
+    // Interactive vignette depth
+    document.addEventListener('mousemove', (e) => {
+      const vignette = document.querySelector('.vignette');
+      if(vignette) {
+        const x = (e.clientX / window.innerWidth - 0.5) * 30;
+        const y = (e.clientY / window.innerHeight - 0.5) * 30;
+        vignette.style.transform = `translate(${x}px, ${y}px) scale(1.05)`;
+      }
+    });
+    
+    // Random heavy glitch interjection
+    setInterval(() => {
+      const texts = document.querySelectorAll('.glitch-text');
+      texts.forEach(t => {
+        const originalDuration = t.style.animationDuration || '3s';
+        t.style.animationDuration = (Math.random() * 0.2 + 0.1) + 's';
+        setTimeout(() => {
+          t.style.animationDuration = '3s';
+        }, 300);
+      });
+    }, 4500);
+  </script>
+</body>
+</html>

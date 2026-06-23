@@ -1,0 +1,251 @@
+<!DOCTYPE html>
+<html lang='en'>
+
+<head>
+    <meta charset='UTF-8'>
+    <meta name='viewport' content='width=device-width, initial-scale=1.0'>
+    <script src='https://cdn.tailwindcss.com'></script>
+    <style>
+        @keyframes spin-slow {
+            100% {
+                transform: translate(-50%, -50%) rotate(360deg);
+            }
+        }
+
+        @keyframes spin-reverse {
+            100% {
+                transform: translate(-50%, -50%) rotate(-360deg);
+            }
+        }
+
+        @keyframes scan-line {
+            0% {
+                top: -10%;
+                opacity: 0;
+            }
+
+            10% {
+                opacity: 1;
+            }
+
+            90% {
+                opacity: 1;
+            }
+
+            100% {
+                top: 110%;
+                opacity: 0;
+            }
+        }
+
+        @keyframes shimmer {
+            0% {
+                background-position: 200% 0;
+            }
+
+            100% {
+                background-position: -200% 0;
+            }
+        }
+
+        @keyframes pulse-glow {
+
+            0%,
+            100% {
+                opacity: 0.5;
+                filter: drop-shadow(0 0 10px rgba(239, 68, 68, 0.5));
+            }
+
+            50% {
+                opacity: 1;
+                filter: drop-shadow(0 0 25px rgba(239, 68, 68, 1));
+            }
+        }
+
+        @keyframes glitch-anim {
+            0% {
+                transform: translate(0);
+            }
+
+            20% {
+                transform: translate(-2px, 1px);
+            }
+
+            40% {
+                transform: translate(-1px, -1px);
+            }
+
+            60% {
+                transform: translate(2px, 1px);
+            }
+
+            80% {
+                transform: translate(1px, -2px);
+            }
+
+            100% {
+                transform: translate(0);
+            }
+        }
+
+        .glitch-text:hover {
+            animation: glitch-anim 0.3s infinite;
+        }
+
+        .radar-ring {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            border-radius: 50%;
+            border: 1px solid rgba(6, 182, 212, 0.2);
+        }
+
+        .hud-line {
+            position: absolute;
+            background: rgba(255, 255, 255, 0.1);
+        }
+    </style>
+</head>
+
+<body
+    class='bg-[#030305] text-white font-mono overflow-hidden h-screen w-screen selection:bg-cyan-500 selection:text-black m-0 p-0'>
+    <svg class='hidden'>
+        <filter id='glitch-filter'>
+            <feTurbulence type='fractalNoise' baseFrequency='0.05 0.9' numOctaves='3' result='noise' />
+            <feColorMatrix type='matrix' values='1 0 0 0 0  0 1 0 0 0  0 0 1 0 0  0 0 0 4 -1' in='noise'
+                result='coloredNoise' />
+            <feDisplacementMap in='SourceGraphic' in2='coloredNoise' scale='8' xChannelSelector='R'
+                yChannelSelector='G' />
+        </filter>
+        <filter id='noise'>
+            <feTurbulence type='fractalNoise' baseFrequency='0.7' numOctaves='4' stitchTiles='stitch' />
+            <feColorMatrix type='matrix' values='1 0 0 0 0, 0 1 0 0 0, 0 0 1 0 0, 0 0 0 0.4 0' />
+        </filter>
+    </svg>
+    <div class='pointer-events-none absolute inset-0 z-50 mix-blend-overlay opacity-30'><svg width='100%' height='100%'>
+            <rect width='100%' height='100%' filter='url(#noise)' />
+        </svg></div>
+    <div
+        class='pointer-events-none absolute inset-0 z-40 bg-[linear-gradient(to_bottom,transparent_0%,rgba(6,182,212,0.15)_50%,transparent_100%)] h-[5px] w-full animate-[scan-line_6s_linear_infinite] shadow-[0_0_20px_rgba(6,182,212,0.4)]'>
+    </div>
+    <div
+        class='absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-full text-center pointer-events-none opacity-[0.02] mix-blend-screen z-0'>
+        <h1 class='text-[18vw] font-black leading-none uppercase tracking-tighter'>Broadcast</h1>
+    </div>
+    <div class='relative z-10 w-full h-full flex flex-col justify-between p-6 md:p-12 box-border'>
+        <header class='flex justify-between items-start w-full relative z-20'>
+            <div class='flex flex-col gap-2'>
+                <h1
+                    class='text-4xl md:text-6xl font-bold uppercase tracking-widest text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 to-blue-600 drop-shadow-[0_0_15px_rgba(6,182,212,0.5)] leading-tight'>
+                    Send<br />Notifications</h1>
+                <p
+                    class='text-[10px] md:text-xs text-cyan-200/70 uppercase tracking-[0.3em] max-w-sm border-l-2 border-cyan-500/50 pl-3 mt-2'>
+                    Keep stakeholders informed with automated updates.</p>
+            </div>
+            <div class='hidden md:flex flex-col items-end gap-1 opacity-60 mt-2'>
+                <div class='w-16 h-[1px] bg-cyan-500'></div>
+                <div class='w-8 h-[1px] bg-cyan-500'></div>
+                <div class='w-24 h-[1px] bg-cyan-500'></div>
+                <div class='text-[9px] text-cyan-400 tracking-[0.4em] mt-2 font-bold'>SYS.OP.409 // TRANSMISSION</div>
+            </div>
+        </header>
+        <main class='flex-1 flex flex-col md:flex-row justify-between items-center w-full my-8 relative z-10'>
+            <div id='radar-core'
+                class='absolute top-1/2 left-1/2 w-[300px] h-[300px] md:w-[600px] md:h-[600px] pointer-events-none flex items-center justify-center mix-blend-screen opacity-50 transition-transform duration-100 ease-out z-0'>
+                <div
+                    class='radar-ring w-[100%] h-[100%] border-cyan-900/30 animate-[spin-slow_20s_linear_infinite] border-dashed'>
+                </div>
+                <div class='radar-ring w-[70%] h-[70%] border-cyan-700/40 animate-[spin-reverse_15s_linear_infinite]'>
+                </div>
+                <div class='radar-ring w-[40%] h-[40%] border-cyan-500/50 shadow-[0_0_50px_rgba(6,182,212,0.15)]'></div>
+                <div
+                    class='absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-2 h-2 bg-cyan-400 rounded-full shadow-[0_0_20px_cyan] animate-ping'>
+                </div>
+            </div>
+            <div
+                class='flex flex-col gap-6 z-10 relative backdrop-blur-md bg-black/40 p-6 md:p-8 border border-cyan-500/10 rounded-sm hover:border-cyan-500/40 transition-all duration-500 group shadow-[0_0_30px_rgba(0,0,0,0.8)]'>
+                <h2
+                    class='text-[10px] text-cyan-500 tracking-[0.5em] uppercase font-bold border-b border-cyan-500/30 pb-3 flex items-center gap-2'>
+                    <span class='w-1 h-1 bg-cyan-500'></span> Notification Type</h2>
+                <ul class='flex flex-col gap-5 mt-2'>
+                    <li class='flex items-center gap-4 cursor-pointer group/item'><span
+                            class='w-1.5 h-1.5 bg-green-500 rounded-sm shadow-[0_0_10px_#22c55e] group-hover/item:scale-150 transition-transform'></span><span
+                            class='text-sm tracking-widest text-neutral-400 group-hover/item:text-green-400 transition-colors uppercase'>Status
+                            Update</span></li>
+                    <li class='flex items-center gap-4 cursor-pointer group/item'><span
+                            class='w-1.5 h-1.5 bg-blue-500 rounded-sm shadow-[0_0_10px_#3b82f6] group-hover/item:scale-150 transition-transform'></span><span
+                            class='text-sm tracking-widest text-neutral-400 group-hover/item:text-blue-400 transition-colors uppercase'>Milestone</span>
+                    </li>
+                    <li class='flex items-center gap-4 cursor-pointer group/item glitch-text'
+                        style='filter: url(#glitch-filter)'><span
+                            class='w-1.5 h-1.5 bg-red-500 rounded-sm shadow-[0_0_15px_#ef4444] animate-[pulse-glow_2s_infinite]'></span><span
+                            class='text-sm tracking-widest text-red-500 font-bold uppercase'>Risk Alert</span></li>
+                    <li class='flex items-center gap-4 cursor-pointer group/item'><span
+                            class='w-1.5 h-1.5 bg-fuchsia-500 rounded-sm shadow-[0_0_10px_#d946ef] group-hover/item:scale-150 transition-transform'></span><span
+                            class='text-sm tracking-widest text-neutral-400 group-hover/item:text-fuchsia-400 transition-colors uppercase'>Custom</span>
+                    </li>
+                </ul>
+            </div>
+            <div
+                class='flex flex-col gap-6 z-10 relative backdrop-blur-md bg-black/40 p-6 md:p-8 border border-fuchsia-500/10 rounded-sm hover:border-fuchsia-500/40 transition-all duration-500 group text-right mt-8 md:mt-0 shadow-[0_0_30px_rgba(0,0,0,0.8)]'>
+                <h2
+                    class='text-[10px] text-fuchsia-500 tracking-[0.5em] uppercase font-bold border-b border-fuchsia-500/30 pb-3 flex items-center justify-end gap-2'>
+                    Recipients <span class='w-1 h-1 bg-fuchsia-500'></span></h2>
+                <ul class='flex flex-col gap-5 mt-2 items-end'>
+                    <li class='flex items-center gap-4 cursor-pointer group/item'><span
+                            class='text-sm tracking-widest text-neutral-400 group-hover/item:text-fuchsia-300 transition-colors uppercase'>Decision
+                            Makers</span><span
+                            class='w-1.5 h-1.5 border border-fuchsia-500 group-hover/item:rotate-45 transition-transform'></span>
+                    </li>
+                    <li class='flex items-center gap-4 cursor-pointer group/item'><span
+                            class='text-sm tracking-widest text-neutral-400 group-hover/item:text-fuchsia-300 transition-colors uppercase'>Technical</span><span
+                            class='w-1.5 h-1.5 border border-fuchsia-500 group-hover/item:rotate-45 transition-transform'></span>
+                    </li>
+                    <li class='flex items-center gap-4 cursor-pointer group/item'><span
+                            class='text-sm tracking-widest text-neutral-400 group-hover/item:text-fuchsia-300 transition-colors uppercase'>Business</span><span
+                            class='w-1.5 h-1.5 border border-fuchsia-500 group-hover/item:rotate-45 transition-transform'></span>
+                    </li>
+                    <li class='flex items-center gap-4 cursor-pointer group/item'><span
+                            class='text-sm tracking-widest text-fuchsia-400 font-bold shadow-[0_0_15px_rgba(217,70,239,0.3)] bg-fuchsia-500/10 px-3 py-1 border border-fuchsia-500/50 uppercase'>All</span><span
+                            class='w-1.5 h-1.5 bg-fuchsia-500 shadow-[0_0_10px_#d946ef] rotate-45'></span></li>
+                </ul>
+            </div>
+        </main>
+        <footer
+            class='flex flex-col md:flex-row justify-between items-end gap-8 w-full z-20 border-t border-cyan-900/50 pt-6 relative bg-black/20 backdrop-blur-sm p-4'>
+            <div class='absolute -top-[1px] left-0 w-full h-[1px] overflow-hidden'>
+                <div class='w-1/4 h-full bg-cyan-400/80 shadow-[0_0_10px_cyan] animate-[move_4s_ease-in-out_infinite]'>
+                </div>
+            </div>
+            <div class='flex flex-col gap-4 w-full md:w-1/2'>
+                <p class='text-[9px] text-neutral-500 tracking-[0.2em] uppercase max-w-lg'>Selected groups will be
+                    resolved to individual emails from the stakeholder map.</p>
+                <div
+                    class='relative w-full border border-cyan-900/50 bg-[#050508] p-3 flex flex-col group hover:border-cyan-500/50 transition-colors cursor-text'>
+                    <span class='text-[8px] text-cyan-600 tracking-widest uppercase mb-1 flex items-center gap-2'><svg
+                            class='w-3 h-3' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2'>
+                            <path d='M12 20h9M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z' />
+                        </svg> Additional Note (Optional)</span><span
+                        class='text-xs text-neutral-400 tracking-wider font-sans mt-1 group-hover:text-neutral-300 transition-colors'>Add
+                        specific details, context, or instructions...</span><span
+                        class='absolute bottom-0 left-0 h-[1px] bg-cyan-500 w-0 group-hover:w-full transition-all duration-700 ease-in-out shadow-[0_0_5px_cyan]'></span><span
+                        class='absolute top-2 right-2 w-1.5 h-1.5 bg-cyan-500/20 rounded-full animate-pulse'></span>
+                </div>
+            </div>
+            <div class='flex items-center gap-6 self-end md:self-stretch pb-2 md:pb-0'><button
+                    class='text-[10px] tracking-[0.3em] text-neutral-500 hover:text-red-400 uppercase transition-colors relative group py-2'>Cancel<span
+                        class='absolute bottom-0 left-0 w-full h-[1px] bg-red-500/50 scale-x-0 group-hover:scale-x-100 transition-transform origin-right duration-300'></span></button><button
+                    class='px-8 py-4 bg-cyan-950/40 border border-cyan-500/80 text-cyan-400 text-xs tracking-[0.4em] uppercase font-bold relative overflow-hidden group hover:bg-cyan-400 hover:text-black transition-all duration-500 shadow-[0_0_20px_rgba(6,182,212,0.15)] hover:shadow-[0_0_40px_rgba(6,182,212,0.6)]'><span
+                        class='absolute inset-0 w-full h-full bg-[linear-gradient(45deg,transparent_25%,rgba(255,255,255,0.2)_50%,transparent_75%)] bg-[length:250%_250%,100%_100%] animate-[shimmer_2.5s_infinite] mix-blend-overlay'></span><span
+                        class='relative z-10 flex items-center gap-3 whitespace-nowrap'>Send Notification<svg
+                            class='w-4 h-4 fill-current transform group-hover:translate-x-1 group-hover:-translate-y-1 transition-transform'
+                            viewBox='0 0 24 24'>
+                            <path d='M2.01 21L23 12 2.01 3 2 10l15 2-15 2z' />
+                        </svg></span></button></div>
+        </footer>
+    </div>
+    <script>document.addEventListener("mousemove", (e) => { const r = document.getElementById("radar-core"); if (!r) return; const x = (e.clientX / window.innerWidth - 0.5) * 40; const y = (e.clientY / window.innerHeight - 0.5) * 40; r.style.transform = `translate(calc(-50% + ${x}px), calc(-50% + ${y}px))` });</script>
+</body>
+
+</html>

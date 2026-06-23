@@ -1,0 +1,360 @@
+<!DOCTYPE html>
+<html lang='en'>
+
+<head>
+    <meta charset='UTF-8'>
+    <meta name='viewport' content='width=device-width, initial-scale=1.0'>
+    <title>EdgeCraft RevOps</title>
+    <script src='https://cdn.tailwindcss.com'></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Share+Tech+Mono&display=swap');
+
+        body {
+            font-family: 'Share Tech Mono', monospace;
+            background-color: #020617;
+            color: #e2e8f0;
+            overflow: hidden;
+        }
+
+        ::-webkit-scrollbar {
+            display: none;
+        }
+
+        .scanline {
+            position: fixed;
+            inset: 0;
+            background: linear-gradient(to bottom, transparent 50%, rgba(0, 255, 255, 0.05) 51%);
+            background-size: 100% 4px;
+            pointer-events: none;
+            z-index: 50;
+        }
+
+        .crt-flicker {
+            animation: flicker 0.15s infinite;
+            pointer-events: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(2, 6, 23, 0.05);
+            z-index: 40;
+        }
+
+        @keyframes flicker {
+            0% {
+                opacity: 0.95;
+            }
+
+            100% {
+                opacity: 1;
+            }
+        }
+
+        .glass-panel {
+            background: rgba(6, 182, 212, 0.03);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(6, 182, 212, 0.2);
+            box-shadow: inset 0 0 20px rgba(6, 182, 212, 0.05), 0 0 15px rgba(0, 0, 0, 0.5);
+        }
+
+        .text-glow-cyan {
+            text-shadow: 0 0 8px rgba(6, 182, 212, 0.8);
+        }
+
+        .text-glow-magenta {
+            text-shadow: 0 0 8px rgba(217, 70, 239, 0.8);
+        }
+
+        .carousel-track {
+            transition: transform 0.8s cubic-bezier(0.77, 0, 0.175, 1);
+        }
+
+        .hud-corner {
+            position: absolute;
+            width: 10px;
+            height: 10px;
+            border: 2px solid #06b6d4;
+        }
+
+        .tl {
+            top: -1px;
+            left: -1px;
+            border-right: none;
+            border-bottom: none;
+        }
+
+        .tr {
+            top: -1px;
+            right: -1px;
+            border-left: none;
+            border-bottom: none;
+        }
+
+        .bl {
+            bottom: -1px;
+            left: -1px;
+            border-right: none;
+            border-top: none;
+        }
+
+        .br {
+            bottom: -1px;
+            right: -1px;
+            border-left: none;
+            border-top: none;
+        }
+
+        .noise-bg {
+            position: absolute;
+            inset: 0;
+            opacity: 0.15;
+            mix-blend-mode: overlay;
+            z-index: -1;
+        }
+
+        svg text {
+            user-select: none;
+        }
+    </style>
+</head>
+
+<body class='text-sm md:text-base relative'>
+    <div class='scanline'></div>
+    <div class='crt-flicker'></div><svg class='fixed inset-0 w-full h-full pointer-events-none z-0 opacity-20'>
+        <filter id='noise'>
+            <feTurbulence type='fractalNoise' baseFrequency='0.7' numOctaves='3' stitchTiles='stitch' />
+        </filter>
+        <rect width='100%' height='100%' filter='url(#noise)' />
+    </svg>
+    <div
+        class='fixed top-6 left-6 z-50 flex gap-2 items-center text-cyan-400 tracking-widest text-xs uppercase opacity-70'>
+        <div class='w-2 h-2 bg-cyan-400 animate-pulse'></div> SYS.OP.REV // TERMINAL_ACTIVE
+    </div>
+    <div class='fixed bottom-6 left-0 right-0 z-50 flex justify-center gap-4'>
+        <div class='ind w-12 h-1 bg-cyan-400 transition-opacity duration-300 opacity-100'></div>
+        <div class='ind w-12 h-1 bg-cyan-400 transition-opacity duration-300 opacity-30'></div>
+        <div class='ind w-12 h-1 bg-cyan-400 transition-opacity duration-300 opacity-30'></div>
+        <div class='ind w-12 h-1 bg-cyan-400 transition-opacity duration-300 opacity-30'></div>
+        <div class='ind w-12 h-1 bg-cyan-400 transition-opacity duration-300 opacity-30'></div>
+    </div>
+    <div id='track' class='flex w-[500vw] h-screen carousel-track z-10 relative'>
+        <div class='w-screen h-screen flex-shrink-0 flex items-center justify-center p-8'>
+            <div class='glass-panel p-10 md:p-16 max-w-4xl w-full relative group'>
+                <div class='hud-corner tl'></div>
+                <div class='hud-corner tr'></div>
+                <div class='hud-corner bl'></div>
+                <div class='hud-corner br'></div>
+                <h1 class='text-4xl md:text-6xl text-cyan-400 mb-6 font-bold text-glow-cyan uppercase tracking-tighter'>
+                    👥 **Resource Optimization Complete: EdgeCraft RevOps**</h1>
+                <div class='space-y-4 text-xl'>
+                    <p class='flex items-center gap-4'><span class='text-fuchsia-500'>[STATUS]</span> <span
+                            class='text-slate-300'>**Optimization Focus:** Balanced</span></p>
+                    <p class='flex items-center gap-4'><span class='text-fuchsia-500'>[PARAMS]</span> <span
+                            class='text-slate-300'>**Team Structure Optimized:** 5 roles identified</span></p>
+                </div>
+                <div
+                    class='absolute right-10 bottom-10 opacity-10 text-9xl font-black pointer-events-none text-cyan-400'>
+                    01</div>
+            </div>
+        </div>
+        <div class='w-screen h-screen flex-shrink-0 flex items-center justify-center p-8'>
+            <div class='w-full max-w-7xl'>
+                <h2 class='text-3xl text-cyan-400 mb-8 text-glow-cyan border-b border-cyan-900 pb-2 inline-block'>
+                    **Optimal Team Structure:**</h2>
+                <div class='grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6'>
+                    <div class='glass-panel p-6 relative'>
+                        <div class='hud-corner tl'></div>
+                        <div class='hud-corner br'></div>
+                        <h3 class='text-xl text-fuchsia-400 font-bold mb-4'>- **Project Manager** (x1)</h3>
+                        <ul class='space-y-2 text-slate-300'>
+                            <li>> Utilization: 85%</li>
+                            <li>> Skills: Management, Leadership, Stakeholder Mgmt</li>
+                            <li class='text-emerald-400'>> Weekly Cost: $2,500</li>
+                        </ul>
+                    </div>
+                    <div class='glass-panel p-6 relative'>
+                        <div class='hud-corner tl'></div>
+                        <div class='hud-corner br'></div>
+                        <h3 class='text-xl text-fuchsia-400 font-bold mb-4'>- **Tech Lead** (x1)</h3>
+                        <ul class='space-y-2 text-slate-300'>
+                            <li>> Utilization: 85%</li>
+                            <li>> Skills: Architecture, Leadership, Backend</li>
+                            <li class='text-emerald-400'>> Weekly Cost: $3,000</li>
+                        </ul>
+                    </div>
+                    <div class='glass-panel p-6 relative'>
+                        <div class='hud-corner tl'></div>
+                        <div class='hud-corner br'></div>
+                        <h3 class='text-xl text-fuchsia-400 font-bold mb-4'>- **QA Engineer** (x1)</h3>
+                        <ul class='space-y-2 text-slate-300'>
+                            <li>> Utilization: 85%</li>
+                            <li>> Skills: Testing, Automation, Quality Control</li>
+                            <li class='text-emerald-400'>> Weekly Cost: $2,000</li>
+                        </ul>
+                    </div>
+                    <div class='glass-panel p-6 relative'>
+                        <div class='hud-corner tl'></div>
+                        <div class='hud-corner br'></div>
+                        <h3 class='text-xl text-fuchsia-400 font-bold mb-4'>- **Senior Dev** (x2)</h3>
+                        <ul class='space-y-2 text-slate-300'>
+                            <li>> Utilization: 85%</li>
+                            <li>> Skills: Full Stack, Database, System Design</li>
+                            <li class='text-emerald-400'>> Weekly Cost: $2,500</li>
+                        </ul>
+                    </div>
+                    <div class='glass-panel p-6 relative'>
+                        <div class='hud-corner tl'></div>
+                        <div class='hud-corner br'></div>
+                        <h3 class='text-xl text-fuchsia-400 font-bold mb-4'>- **Developer** (x2)</h3>
+                        <ul class='space-y-2 text-slate-300'>
+                            <li>> Utilization: 85%</li>
+                            <li>> Skills: Frontend, Backend, Integration</li>
+                            <li class='text-emerald-400'>> Weekly Cost: $2,200</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class='w-screen h-screen flex-shrink-0 flex items-center justify-center p-8'>
+            <div class='w-full max-w-7xl'>
+                <h2 class='text-3xl text-cyan-400 mb-8 text-glow-cyan border-b border-cyan-900 pb-2'>**Resource
+                    Allocation Plan:**</h2>
+                <div class='grid grid-cols-2 md:grid-cols-4 gap-4 h-[60vh] overflow-y-auto pr-4'
+                    style='scrollbar-width: thin; scrollbar-color: #06b6d4 transparent;'>
+                    <div class='glass-panel p-4 flex flex-col justify-between'>
+                        <div class='text-xs text-cyan-600 mb-2'>Weeks 0-2</div>
+                        <h4 class='text-lg text-white mb-2'>- **Requirements Finalization**</h4>
+                        <p class='text-sm text-slate-400'>Assigned: Project Manager (x1), Tech Lead (x1), Senior Dev
+                            (x2)</p>
+                        <div class='mt-4 pt-2 border-t border-cyan-900/50 text-fuchsia-400 text-sm'>Focus: Project
+                            Charter, Requirement Specs</div>
+                    </div>
+                    <div class='glass-panel p-4 flex flex-col justify-between'>
+                        <div class='text-xs text-cyan-600 mb-2'>Weeks 2-4</div>
+                        <h4 class='text-lg text-white mb-2'>- **System Architecture Design**</h4>
+                        <p class='text-sm text-slate-400'>Assigned: Project Manager (x1), Tech Lead (x1), Senior Dev
+                            (x2)</p>
+                        <div class='mt-4 pt-2 border-t border-cyan-900/50 text-fuchsia-400 text-sm'>Focus: Project
+                            Charter, Requirement Specs</div>
+                    </div>
+                    <div class='glass-panel p-4 flex flex-col justify-between'>
+                        <div class='text-xs text-cyan-600 mb-2'>Weeks 4-5</div>
+                        <h4 class='text-lg text-white mb-2'>- **Dev Environment Setup**</h4>
+                        <p class='text-sm text-slate-400'>Assigned: Project Manager (x1), Tech Lead (x1)</p>
+                        <div class='mt-4 pt-2 border-t border-cyan-900/50 text-fuchsia-400 text-sm'>Focus: Env Config,
+                            Access Rights</div>
+                    </div>
+                    <div class='glass-panel p-4 flex flex-col justify-between'>
+                        <div class='text-xs text-cyan-600 mb-2'>Weeks 5-9</div>
+                        <h4 class='text-lg text-white mb-2'>- **Core Backend Development**</h4>
+                        <p class='text-sm text-slate-400'>Assigned: Project Manager (x1), Tech Lead (x1), Senior Dev
+                            (x2), Developer (x2)</p>
+                        <div class='mt-4 pt-2 border-t border-cyan-900/50 text-fuchsia-400 text-sm'>Focus: Source Code,
+                            Unit Tests</div>
+                    </div>
+                    <div class='glass-panel p-4 flex flex-col justify-between'>
+                        <div class='text-xs text-cyan-600 mb-2'>Weeks 7-10</div>
+                        <h4 class='text-lg text-white mb-2'>- **Frontend Development**</h4>
+                        <p class='text-sm text-slate-400'>Assigned: Project Manager (x1), Tech Lead (x1), Senior Dev
+                            (x2), Developer (x2)</p>
+                        <div class='mt-4 pt-2 border-t border-cyan-900/50 text-fuchsia-400 text-sm'>Focus: Source Code,
+                            Unit Tests</div>
+                    </div>
+                    <div class='glass-panel p-4 flex flex-col justify-between'>
+                        <div class='text-xs text-cyan-600 mb-2'>Weeks 10-13</div>
+                        <h4 class='text-lg text-white mb-2'>- **Integration & Testing**</h4>
+                        <p class='text-sm text-slate-400'>Assigned: Project Manager (x1), QA Engineer (x1), Senior Dev
+                            (x1), Developer (x1)</p>
+                        <div class='mt-4 pt-2 border-t border-cyan-900/50 text-fuchsia-400 text-sm'>Focus: Test Plan,
+                            Bug Report</div>
+                    </div>
+                    <div class='glass-panel p-4 flex flex-col justify-between'>
+                        <div class='text-xs text-cyan-600 mb-2'>Weeks 13-14</div>
+                        <h4 class='text-lg text-white mb-2'>- **User Acceptance Testing**</h4>
+                        <p class='text-sm text-slate-400'>Assigned: Project Manager (x1), QA Engineer (x1), Senior Dev
+                            (x1), Developer (x1)</p>
+                        <div class='mt-4 pt-2 border-t border-cyan-900/50 text-fuchsia-400 text-sm'>Focus: Test Plan,
+                            Bug Report</div>
+                    </div>
+                    <div class='glass-panel p-4 flex flex-col justify-between'>
+                        <div class='text-xs text-cyan-600 mb-2'>Weeks 14-15</div>
+                        <h4 class='text-lg text-white mb-2'>- **Production Deployment**</h4>
+                        <p class='text-sm text-slate-400'>Assigned: Project Manager (x1), Tech Lead (x1)</p>
+                        <div class='mt-4 pt-2 border-t border-cyan-900/50 text-fuchsia-400 text-sm'>Focus: Release
+                            Notes, Production Build</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class='w-screen h-screen flex-shrink-0 flex items-center justify-center p-8'>
+            <div class='w-full max-w-5xl grid grid-cols-1 md:grid-cols-2 gap-12'>
+                <div class='glass-panel p-10 relative'>
+                    <div class='hud-corner tl'></div>
+                    <div class='hud-corner tr'></div>
+                    <div class='hud-corner bl'></div>
+                    <div class='hud-corner br'></div>
+                    <h2 class='text-2xl text-cyan-400 mb-6 border-b border-cyan-900 pb-2'>**Capacity Analysis:**</h2>
+                    <ul class='space-y-6'>
+                        <li>
+                            <div class='text-sm text-slate-400 mb-1'>📊 Average Utilization:</div>
+                            <div class='text-5xl text-white text-glow-cyan'>79%</div>
+                        </li>
+                        <li>
+                            <div class='text-sm text-slate-400 mb-1'>⚡ Peak Utilization:</div>
+                            <div class='text-4xl text-fuchsia-400'>85%</div>
+                        </li>
+                        <li>
+                            <div class='text-sm text-slate-400 mb-1'>📉 Minimum Utilization:</div>
+                            <div class='text-3xl text-cyan-600'>75%</div>
+                        </li>
+                    </ul>
+                </div>
+                <div class='glass-panel p-10 relative'>
+                    <div class='hud-corner tl'></div>
+                    <div class='hud-corner tr'></div>
+                    <div class='hud-corner bl'></div>
+                    <div class='hud-corner br'></div>
+                    <h2 class='text-2xl text-cyan-400 mb-6 border-b border-cyan-900 pb-2'>**Cost Analysis:**</h2>
+                    <ul class='space-y-8'>
+                        <li>
+                            <div class='text-sm text-slate-400 mb-1'>💰 Total Project Cost:</div>
+                            <div
+                                class='text-6xl text-emerald-400 font-bold drop-shadow-[0_0_15px_rgba(52,211,153,0.5)]'>
+                                $194,100</div>
+                        </li>
+                        <li>
+                            <div class='text-sm text-slate-400 mb-1'>💵 Weekly Burn Rate:</div>
+                            <div class='text-4xl text-emerald-600'>$13,766</div>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+        <div class='w-screen h-screen flex-shrink-0 flex items-center justify-center p-8'>
+            <div class='w-full max-w-4xl space-y-8'>
+                <div class='glass-panel p-8 border-l-4 border-l-fuchsia-500'>
+                    <h2 class='text-xl text-fuchsia-400 mb-4'>**Optimization Opportunities:**</h2>
+                    <p class='text-slate-200 mb-2'>- [Priority Med] **Balance**: Maintained standard 1:3 QA/Dev ratio.
+                    </p>
+                    <p class='text-cyan-300 bg-cyan-900/20 p-3 rounded'>💡 Recommendation: Use the assigned Tech Lead to
+                        refine task breakdown.</p>
+                </div>
+                <div class='glass-panel p-8 border-l-4 border-l-yellow-500'>
+                    <h2 class='text-xl text-yellow-400 mb-4'>**Risk Assessment:**</h2>
+                    <p class='text-slate-200'>- Standard resource contention risks</p>
+                </div>
+                <div class='glass-panel p-8 bg-black/50 border border-slate-800'>
+                    <h2 class='text-xl text-emerald-400 mb-4'>**Next Steps:**</h2>
+                    <div class='font-mono text-sm space-y-3 text-slate-300'>
+                        <p>root@edgecraft:~$ <span class='text-emerald-300'>• Use `assign-tasks` tool to implement
+                                resource assignments</span></p>
+                        <p>root@edgecraft:~$ <span class='text-emerald-300'>• Run
+                                `/project-management/delivery-planning`</span><span
+                                class='inline-block w-2 h-4 bg-emerald-400 animate-pulse ml-1 align-middle'></span></p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <script>const track = document.getElementById('track'); const inds = document.querySelectorAll('.ind'); let cur = 0; let scrollLock = false; const maxSlide = 4; function update(idx) { if (idx < 0) idx = 0; if (idx > maxSlide) idx = maxSlide; cur = idx; track.style.transform = `translateX(-${cur * 100}vw)`; inds.forEach((el, i) => { el.style.opacity = (i === cur) ? '1' : '0.3'; }); } window.addEventListener('wheel', (e) => { if (scrollLock) return; scrollLock = true; if (e.deltaY > 50) update(cur + 1); else if (e.deltaY < -50) update(cur - 1); setTimeout(() => scrollLock = false, 800); }, { passive: true }); let touchStartX = 0; let touchEndX = 0; window.addEventListener('touchstart', e => { touchStartX = e.changedTouches[0].screenX; }, { passive: true }); window.addEventListener('touchend', e => { touchEndX = e.changedTouches[0].screenX; if (touchStartX - touchEndX > 50) update(cur + 1); if (touchEndX - touchStartX > 50) update(cur - 1); }, { passive: true });</script>
+</body>
+
+</html>

@@ -218,6 +218,24 @@ const hubs = [
     color: "from-blue-600 to-cyan-700",
     border: "hover:border-blue-500/50",
     shadow: "hover:shadow-[0_0_40px_-10px_rgba(59,130,246,0.2)]"
+  },
+  {
+    title: "EdgeCraft RevOps Workflow",
+    description: "Agentic project-management pipeline showcase: kickoff, timeline, milestones, blockers, risk, optimization, and stakeholder broadcast across 8 live artifacts.",
+    href: "/revops-index.html",
+    icon: "🛰️",
+    color: "from-emerald-500 to-teal-600",
+    border: "hover:border-emerald-400/50",
+    shadow: "hover:shadow-[0_0_40px_-10px_rgba(16,185,129,0.3)]"
+  },
+  {
+    title: "US–Iran Intelligence Directory",
+    description: "Consolidated 2026 crisis package: political & economic relations, regional proxy conflicts, and the executive strategy brief.",
+    href: "/us-iran-intel.html",
+    icon: "🛡️",
+    color: "from-red-600 to-rose-700",
+    border: "hover:border-red-500/50",
+    shadow: "hover:shadow-[0_0_40px_-10px_rgba(239,68,68,0.2)]"
   }
 ];
 
