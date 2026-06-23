@@ -1,0 +1,274 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>EdgeCraft RevOps // Agentic PM Workflow</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Share+Tech+Mono&display=swap');
+
+        :root {
+            --accent: #0fa;
+            --bg: #020502;
+        }
+
+        body {
+            margin: 0;
+            background-color: var(--bg);
+            font-family: 'Share Tech Mono', monospace;
+            color: #0fa;
+            overflow-x: hidden;
+        }
+
+        ::-webkit-scrollbar { width: 6px; }
+        ::-webkit-scrollbar-track { background: #020502; }
+        ::-webkit-scrollbar-thumb { background: #0fa; }
+
+        .crt::before {
+            content: " ";
+            position: fixed;
+            inset: 0;
+            background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.25) 50%), linear-gradient(90deg, rgba(255, 0, 0, 0.06), rgba(0, 255, 0, 0.02), rgba(0, 0, 255, 0.06));
+            z-index: 50;
+            background-size: 100% 2px, 3px 100%;
+            pointer-events: none;
+        }
+
+        .scanline {
+            width: 100%;
+            height: 120px;
+            background: linear-gradient(0deg, rgba(0, 255, 170, 0) 0%, rgba(0, 255, 170, 0.08) 50%, rgba(0, 255, 170, 0) 100%);
+            position: fixed;
+            top: 0;
+            left: 0;
+            z-index: 49;
+            animation: scan 9s linear infinite;
+            pointer-events: none;
+        }
+
+        @keyframes scan {
+            0% { transform: translateY(-120px); }
+            100% { transform: translateY(100vh); }
+        }
+
+        .text-glow { text-shadow: 0 0 5px rgba(0, 255, 170, 0.6), 0 0 10px rgba(0, 255, 170, 0.3); }
+        .border-glow { box-shadow: inset 0 0 20px rgba(0, 255, 170, 0.08), 0 0 10px rgba(0, 255, 170, 0.15); }
+
+        .glitch { position: relative; }
+        .glitch::before,
+        .glitch::after {
+            content: attr(data-text);
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: var(--bg);
+        }
+        .glitch::before {
+            left: 2px;
+            text-shadow: -1px 0 red;
+            clip: rect(24px, 550px, 90px, 0);
+            animation: glitch-anim-2 3s infinite linear alternate-reverse;
+        }
+        .glitch::after {
+            left: -2px;
+            text-shadow: -1px 0 blue;
+            clip: rect(85px, 550px, 140px, 0);
+            animation: glitch-anim 2.5s infinite linear alternate-reverse;
+        }
+        @keyframes glitch-anim {
+            0% { clip: rect(22px, 9999px, 11px, 0); }
+            20% { clip: rect(84px, 9999px, 91px, 0); }
+            40% { clip: rect(6px, 9999px, 12px, 0); }
+            60% { clip: rect(33px, 9999px, 28px, 0); }
+            80% { clip: rect(92px, 9999px, 82px, 0); }
+            100% { clip: rect(54px, 9999px, 23px, 0); }
+        }
+        @keyframes glitch-anim-2 {
+            0% { clip: rect(65px, 9999px, 100px, 0); }
+            20% { clip: rect(3px, 9999px, 86px, 0); }
+            40% { clip: rect(14px, 9999px, 12px, 0); }
+            60% { clip: rect(88px, 9999px, 42px, 0); }
+            80% { clip: rect(5px, 9999px, 3px, 0); }
+            100% { clip: rect(15px, 9999px, 66px, 0); }
+        }
+
+        .node {
+            position: relative;
+            opacity: 0;
+            transform: translateY(24px);
+            transition: opacity 0.6s ease-out, transform 0.6s ease-out, border-color 0.3s, box-shadow 0.3s, background-color 0.3s;
+        }
+        .node.visible { opacity: 1; transform: translateY(0); }
+        .node:hover {
+            border-color: var(--accent);
+            background-color: rgba(0, 255, 170, 0.04);
+            box-shadow: inset 0 0 24px rgba(0, 255, 170, 0.1), 0 0 16px rgba(0, 255, 170, 0.2);
+            transform: translateY(-4px);
+        }
+        .node:hover .arrow { transform: translateX(4px); opacity: 1; }
+        .node:hover .step-num { color: #0fa; }
+        .arrow { transition: transform 0.3s, opacity 0.3s; opacity: 0.4; }
+        .step-num { transition: color 0.3s; }
+    </style>
+</head>
+
+<body class="crt">
+    <div class="scanline"></div>
+    <svg class="fixed inset-0 w-full h-full pointer-events-none opacity-[0.15] z-0">
+        <filter id="noise">
+            <feTurbulence type="fractalNoise" baseFrequency="0.8" numOctaves="4" stitchTiles="stitch" />
+            <feColorMatrix type="matrix" values="1 0 0 0 0, 0 1 0 0 0, 0 0 1 0 0, 0 0 0 0.5 0" />
+        </filter>
+        <rect width="100%" height="100%" filter="url(#noise)" />
+    </svg>
+
+    <div class="relative z-10 max-w-7xl mx-auto px-4 md:px-8 py-12 md:py-20">
+
+        <!-- Header -->
+        <header class="border border-[#0fa]/30 border-glow bg-black/60 backdrop-blur-sm p-6 md:p-10 mb-10 uppercase tracking-wider">
+            <div class="flex justify-between items-center text-xs text-[#0fa]/60 mb-6 border-b border-[#0fa]/20 pb-3">
+                <span class="flex items-center gap-2"><span class="w-2 h-2 bg-[#0fa] rounded-full animate-ping inline-block"></span> System Matrix // Online</span>
+                <span>AGENT_BUILD: v2.6</span>
+            </div>
+            <p class="text-[#0fa]/70 text-sm mb-3">// Agentic Project-Management Workflow</p>
+            <h1 class="text-3xl md:text-6xl font-bold text-white text-glow glitch" data-text="EdgeCraft RevOps">EdgeCraft RevOps</h1>
+            <p class="text-sm md:text-base text-[#0fa]/70 mt-5 max-w-3xl normal-case tracking-normal leading-relaxed">
+                An autonomous PM agent that drives a project end-to-end &mdash; from kickoff to stakeholder broadcast.
+                Each node below is a live artifact the agent generates as it tracks timeline, surfaces blockers and risk,
+                proposes optimizations, and dispatches status notifications.
+            </p>
+            <div class="flex flex-wrap gap-x-8 gap-y-2 text-xs text-[#0fa]/60 mt-6">
+                <span>PROJECT: <span class="text-white">proj_1a3f5ab8</span></span>
+                <span>STATUS: <span class="text-emerald-300 text-glow">On Track</span></span>
+                <span>ARTIFACTS: <span class="text-white">08</span></span>
+            </div>
+        </header>
+
+        <div class="flex items-center gap-4 mb-8 uppercase tracking-[0.25em] text-xs text-[#0fa]/50">
+            <div class="h-px bg-[#0fa]/20 flex-grow"></div>
+            <span>Workflow Pipeline</span>
+            <div class="h-px bg-[#0fa]/20 flex-grow"></div>
+        </div>
+
+        <!-- Workflow grid -->
+        <main class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
+
+            <!-- 01 Kickoff -->
+            <a href="revops-kickoff.html" class="node border border-[#0fa]/30 bg-black/50 p-6 flex flex-col">
+                <div class="flex justify-between items-start mb-4">
+                    <span class="step-num text-3xl font-bold text-[#0fa]/40">01</span>
+                    <span class="text-[10px] text-[#0fa]/50 uppercase border border-[#0fa]/20 px-2 py-0.5">INIT</span>
+                </div>
+                <h2 class="text-lg font-bold text-white uppercase tracking-wide mb-2">Project Kickoff</h2>
+                <p class="text-xs text-[#0fa]/60 leading-relaxed flex-grow normal-case">Secure initialization: scope locked, team onboarded, requirements ingested by the agent.</p>
+                <span class="arrow text-[#0fa] text-right mt-4">ACCESS &rarr;</span>
+            </a>
+
+            <!-- 02 Timeline -->
+            <a href="revops-timeline.html" class="node border border-[#0fa]/30 bg-black/50 p-6 flex flex-col">
+                <div class="flex justify-between items-start mb-4">
+                    <span class="step-num text-3xl font-bold text-[#0fa]/40">02</span>
+                    <span class="text-[10px] text-[#0fa]/50 uppercase border border-[#0fa]/20 px-2 py-0.5">PLAN</span>
+                </div>
+                <h2 class="text-lg font-bold text-white uppercase tracking-wide mb-2">Timeline</h2>
+                <p class="text-xs text-[#0fa]/60 leading-relaxed flex-grow normal-case">Phased schedule with dependencies and critical-path mapping across the delivery lifecycle.</p>
+                <span class="arrow text-[#0fa] text-right mt-4">ACCESS &rarr;</span>
+            </a>
+
+            <!-- 03 Milestone -->
+            <a href="revops-milestone.html" class="node border border-[#0fa]/30 bg-black/50 p-6 flex flex-col">
+                <div class="flex justify-between items-start mb-4">
+                    <span class="step-num text-3xl font-bold text-[#0fa]/40">03</span>
+                    <span class="text-[10px] text-[#0fa]/50 uppercase border border-[#0fa]/20 px-2 py-0.5">TRACK</span>
+                </div>
+                <h2 class="text-lg font-bold text-white uppercase tracking-wide mb-2">Milestone Dashboard</h2>
+                <p class="text-xs text-[#0fa]/60 leading-relaxed flex-grow normal-case">Real-time completion metrics, milestone burn-down, and progress telemetry.</p>
+                <span class="arrow text-[#0fa] text-right mt-4">ACCESS &rarr;</span>
+            </a>
+
+            <!-- 04 Blocker -->
+            <a href="revops-blocker.html" class="node border border-[#0fa]/30 bg-black/50 p-6 flex flex-col">
+                <div class="flex justify-between items-start mb-4">
+                    <span class="step-num text-3xl font-bold text-[#0fa]/40">04</span>
+                    <span class="text-[10px] text-amber-400/70 uppercase border border-amber-400/20 px-2 py-0.5">DETECT</span>
+                </div>
+                <h2 class="text-lg font-bold text-white uppercase tracking-wide mb-2">Blocker Report</h2>
+                <p class="text-xs text-[#0fa]/60 leading-relaxed flex-grow normal-case">Automated identification of impediments, ownership, and escalation paths.</p>
+                <span class="arrow text-[#0fa] text-right mt-4">ACCESS &rarr;</span>
+            </a>
+
+            <!-- 05 Risk -->
+            <a href="revops-risk.html" class="node border border-[#0fa]/30 bg-black/50 p-6 flex flex-col">
+                <div class="flex justify-between items-start mb-4">
+                    <span class="step-num text-3xl font-bold text-[#0fa]/40">05</span>
+                    <span class="text-[10px] text-red-400/70 uppercase border border-red-400/20 px-2 py-0.5">ASSESS</span>
+                </div>
+                <h2 class="text-lg font-bold text-white uppercase tracking-wide mb-2">Risk Assessment</h2>
+                <p class="text-xs text-[#0fa]/60 leading-relaxed flex-grow normal-case">Probability/impact scoring with mitigation strategies surfaced by the agent.</p>
+                <span class="arrow text-[#0fa] text-right mt-4">ACCESS &rarr;</span>
+            </a>
+
+            <!-- 06 Optimization -->
+            <a href="revops-optimization.html" class="node border border-[#0fa]/30 bg-black/50 p-6 flex flex-col">
+                <div class="flex justify-between items-start mb-4">
+                    <span class="step-num text-3xl font-bold text-[#0fa]/40">06</span>
+                    <span class="text-[10px] text-[#0fa]/50 uppercase border border-[#0fa]/20 px-2 py-0.5">OPTIMIZE</span>
+                </div>
+                <h2 class="text-lg font-bold text-white uppercase tracking-wide mb-2">Optimization</h2>
+                <p class="text-xs text-[#0fa]/60 leading-relaxed flex-grow normal-case">Resource reallocation and throughput recommendations to keep delivery on track.</p>
+                <span class="arrow text-[#0fa] text-right mt-4">ACCESS &rarr;</span>
+            </a>
+
+            <!-- 07 Notifications -->
+            <a href="revops-notifications.html" class="node border border-[#0fa]/30 bg-black/50 p-6 flex flex-col">
+                <div class="flex justify-between items-start mb-4">
+                    <span class="step-num text-3xl font-bold text-[#0fa]/40">07</span>
+                    <span class="text-[10px] text-cyan-400/70 uppercase border border-cyan-400/20 px-2 py-0.5">COMPOSE</span>
+                </div>
+                <h2 class="text-lg font-bold text-white uppercase tracking-wide mb-2">Notification Broadcast</h2>
+                <p class="text-xs text-[#0fa]/60 leading-relaxed flex-grow normal-case">Agent drafts stakeholder status updates and selects recipients for dispatch.</p>
+                <span class="arrow text-[#0fa] text-right mt-4">ACCESS &rarr;</span>
+            </a>
+
+            <!-- 08 Sent -->
+            <a href="revops-sent.html" class="node border border-[#0fa]/30 bg-black/50 p-6 flex flex-col">
+                <div class="flex justify-between items-start mb-4">
+                    <span class="step-num text-3xl font-bold text-[#0fa]/40">08</span>
+                    <span class="text-[10px] text-emerald-300/80 uppercase border border-emerald-400/20 px-2 py-0.5">DELIVERED</span>
+                </div>
+                <h2 class="text-lg font-bold text-white uppercase tracking-wide mb-2">Notifications Sent</h2>
+                <p class="text-xs text-[#0fa]/60 leading-relaxed flex-grow normal-case">Delivery log confirming dispatched updates with per-recipient status.</p>
+                <span class="arrow text-[#0fa] text-right mt-4">ACCESS &rarr;</span>
+            </a>
+
+        </main>
+
+        <footer class="mt-12 border-t border-[#0fa]/20 pt-6 flex flex-col md:flex-row justify-between items-center gap-3 text-[10px] text-[#0fa]/40 uppercase tracking-widest">
+            <p>EdgeCraft RevOps // Agentic Workflow Showcase</p>
+            <p>END OF MANIFEST // <span id="timestamp"></span></p>
+        </footer>
+    </div>
+
+    <script>
+        document.getElementById('timestamp').innerText = new Date().toISOString();
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach((entry, i) => {
+                if (entry.isIntersecting) {
+                    entry.target.style.transitionDelay = (entry.target.dataset.delay || '0ms');
+                    entry.target.classList.add('visible');
+                    observer.unobserve(entry.target);
+                }
+            });
+        }, { threshold: 0.1 });
+        document.querySelectorAll('.node').forEach((el, i) => {
+            el.dataset.delay = (i * 70) + 'ms';
+            observer.observe(el);
+        });
+    </script>
+</body>
+
+</html>
