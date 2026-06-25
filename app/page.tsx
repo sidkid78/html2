@@ -263,6 +263,15 @@ const hubs = [
     color: "from-indigo-600 to-purple-700",
     border: "hover:border-indigo-500/50",
     shadow: "hover:shadow-[0_0_40px_-10px_rgba(79,70,229,0.2)]"
+  },
+  {
+    title: "The Bulldog Crisis",
+    description: "A fight for their next breath. Investigating the genetic betrayal of the modern bulldog and the frontline rescues saving them.",
+    href: "/bulldog.html",
+    icon: "🐕",
+    color: "from-red-800 to-red-950",
+    border: "hover:border-red-600/50",
+    shadow: "hover:shadow-[0_0_40px_-10px_rgba(220,38,38,0.3)]"
   }
 ];
 
